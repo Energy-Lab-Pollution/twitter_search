@@ -1,4 +1,4 @@
-from twitter_search import run
+from twitter_search.twitter_search import run
 from argparse import ArgumentParser
 
 
