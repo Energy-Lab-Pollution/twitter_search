@@ -1,4 +1,5 @@
 from twitter_search.config_utils import util
+from pathlib import Path
 
 def search_tweets(client, query, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS):
     return client.search_recent_tweets(query=query, max_results=MAX_RESULTS,
@@ -11,7 +12,9 @@ def get_users_from_tweets(tweets):
 
 def search_users(query,location):
     try:
-        
+        output_dir = (Path(__file__).parent.parent.parent / 
+                  "data/raw_data")
+        output_file = output_dir / f"{location}_users.json"
         client = util.client_creator()
         print("Client initiated")
         print("Now searching for tweets")
@@ -23,7 +26,8 @@ def search_users(query,location):
         search_tweets_result = search_tweets(client, query, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS)
         total_users = get_users_from_tweets(search_tweets_result)
         total_users_dict = util.user_dictmaker(total_users)
-        util.json_maker(f"GRCT/data/raw_data/{location}_users.json", total_users_dict)
+        
+        util.json_maker(output_file, total_users_dict)
         print("Total number of users:", len(total_users))
 
     except Exception as e:
