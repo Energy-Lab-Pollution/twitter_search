@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "twitter-search"
+version = "0.1.0"
+description = "A project to get, clean and analyze users from twitter"
+authors = ["praveen Chandar Devarajan <praveenc@uchicago.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pandas = "^2.2.0"
+tweepy = "^4.14.0"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
