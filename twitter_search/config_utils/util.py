@@ -9,6 +9,8 @@ def load_json(file_path):
         data = json.load(json_file)
     return data
 
+LIST_FIELDS = ["id", "name", "description"]
+
 
 def user_dictmaker(user_list):
     dict_list = [] 
@@ -20,15 +22,22 @@ def user_dictmaker(user_list):
         dict_list.append(values)
     return dict_list
 
-
-def list_dictmaker(lists):
+def list_dictmaker(incoming_datastruct):
     dict_list = []
-    for lst in lists:
-        values = {'id': lst['id'], 'name': lst['name'],
-                  'created_at': lst['created_at'], 'description': lst['description'],
-                  'follower_count': lst['follower_count'], 'member_count': lst['member_count'],
-                  'private': lst['private'], 'owner_id': lst['owner_id']}
-        dict_list.append(values)
+    for userid, lsts in incoming_datastruct.items():
+        for lst in lsts:
+            values = {
+                'user_id': userid,
+                'list_id': lst['id'],
+                'name': lst['name'],
+                'created_at': lst['created_at'],
+                'description': lst['description'],
+                'follower_count': lst['follower_count'],
+                'member_count': lst['member_count'],
+                'private': lst['private'],
+                'owner_id': lst['owner_id']
+            }
+            dict_list.append(values)
     return dict_list
 
 def client_creator():
@@ -46,10 +55,11 @@ def client_creator():
         access_token_secret=access_token_secret
     )
 
-def json_maker(file_path, data_to_append):
 
-    with open(file_path, "w") as f:
+def json_maker(file_path, data_to_append):
+    with open(file_path, "a") as f:
         json.dump(data_to_append, f, indent=1)
+        f.write('\n')  
 
 
 def excel_maker(dict_list, file_path):
