@@ -1,26 +1,36 @@
-import pandas as pd
+from pathlib import Path
 from twitter_search.config_utils import util
+import time
 
-
-def get_users_fromlists(client, list, k = None):
-    final = []
+def get_users_fromlists(client, lists_data, output_file, k=None):
+    unique = set()
     count = 0
     if k is None:
-        k = len(list) - 1
-    for item in list[:k]:
+        k = len(lists_data) - 1
+    for item in lists_data[:k]:
         try:
-            users = client.get_list_members(id = item.id, max_results= 50, user_fields=user_fields)
+            list_id = item.get('list_id')
+            if list_id is not None and list_id not in unique:
+                unique.add(list_id)
+                users = client.get_list_members(id=list_id, max_results=50,\
+                                                 user_fields=util.USER_FIELDS)
+                print(users)
+                user_dicts = util.user_dictmaker(users.data)
+                util.json_maker(output_file, user_dicts)
         except Exception as e:
-            print(f"Error fetching users for list {item.id}: {e}")
-            continue  
-        print("count:\n",count)
+            print(f"Error fetching users for list {item.get('list_id')}: {e}")
+            continue
         count += 1
-        final += users
         if count > 24:
-            time.sleep(900)
+            print("You have to wait for 15 mins")
+            i = 1
+            while i <= 3:
+                time.sleep(300)
+                print(f"{i} * 5 minutes done out of 15")
+                i += 1
             count = 0
+        time.sleep(1)
 
-    return final
 
 
 def get_users(location):
@@ -29,18 +39,14 @@ def get_users(location):
             "data/raw_data")
         input_file = dir / f"{location}_lists.json"
         output_file = dir / f"{location}_totalusers.json"
-
-        lists_data = util.load_json(input_file)  
+        #loan
+        print("till here")
+        lists_data = util.load_json(input_file)
+        #print(lists_data,'here you go')  
         client = util.client_creator()
-        get_users_fromlists(client, lists_data)
-        user_dict_list = util.user_dictmaker(lists_data)
-        util.json_maker(f"GRCT/data/raw_data/{location}_master_users.json", user_dict_list)
-        
-        excel_path = f"GRCT/data/raw_data/{location}_uncleaned.xlsx" 
-        util.excel_maker(user_dict_list, excel_path)
+        print("client created")
+        isolated_lists = util.flatten_and_remove_empty(lists_data)
+        get_users_fromlists(client, isolated_lists, output_file)
 
     except Exception as e:
         print(f"An error occurred: {e}")
-
-if __name__ == "__main__":
-    main()

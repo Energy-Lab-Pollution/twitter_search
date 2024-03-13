@@ -11,7 +11,8 @@ def getlists_fromusers(client, users_list, output_file, k=None):
     for user in users_list[:k]:
         try:
             response_user_list = client.get_list_memberships(
-                id=user['user_id'], list_fields=util.LIST_FIELDS, max_results=50)
+                id=user['user_id'], list_fields = util.LIST_FIELDS, \
+                    max_results=50)
             only_lists = isolate_lists(response_user_list)
             print({user['user_id']: only_lists})
             # Append data to the JSON file for each user

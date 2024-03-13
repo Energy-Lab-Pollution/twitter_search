@@ -10,7 +10,7 @@ def load_json(file_path):
     return data
 
 LIST_FIELDS = ["id", "name", "description"]
-
+USER_FIELDS = ["created_at", 'description', 'entities', 'id', 'location', 'most_recent_tweet_id','name','pinned_tweet_id','profile_image_url','protected','public_metrics','url','username']
 
 def user_dictmaker(user_list):
     dict_list = [] 
@@ -55,12 +55,32 @@ def client_creator():
         access_token_secret=access_token_secret
     )
 
+def flatten_and_remove_empty(input_list):
+    """
+    Flatten a list of lists into a single list and remove any empty lists within it.
+    
+    Args:
+        input_list (list): The list of lists to be flattened and cleaned.
+        
+    Returns:
+        list: The flattened list with empty lists removed.
+    """
+    return [item for sublist in input_list for item in sublist if sublist]
+
 
 def json_maker(file_path, data_to_append):
-    with open(file_path, "a") as f:
-        json.dump(data_to_append, f, indent=1)
-        f.write('\n')  
+    try:
+        with open(file_path, "r") as f:
+            existing_data = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        existing_data = []
 
+    # Append the new data to the existing list
+    existing_data.append(data_to_append)
+
+    # Write the updated list of dictionaries back to the file
+    with open(file_path, "w") as f:
+        json.dump(existing_data, f, indent=1)
 
 def excel_maker(dict_list, file_path):
     df = pd.DataFrame(dict_list)
