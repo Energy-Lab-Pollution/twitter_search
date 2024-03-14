@@ -6,7 +6,19 @@ from twitter_search.config_utils import constants, util
 
 def get_users_fromlists(client, lists_data, output_file, k=None):
     """
-    This function takes a list of lists and returns the users that are a part of them.
+    This function takes a list of lists and returns the users that
+    are a part of them.
+
+    Parameters
+    ----------
+    client : _type_
+        _description_
+    lists_data : _type_
+        _description_
+    output_file : _type_
+        _description_
+    k : _type_, optional
+        _description_, by default None
     """
     unique = set()
     count = 0
@@ -29,16 +41,19 @@ def get_users_fromlists(client, lists_data, output_file, k=None):
         count += 1
         if count > constants.COUNT_THRESHOLD:
             print("You have to wait for 15 mins")
-            i = 1
-            while i <= 3:
+            time_block = 1
+            while time_block <= 3:
                 time.sleep(constants.SLEEP_TIME)
-                print(f"{i} * 5 minutes done out of 15")
-                i += 1
+                print(f"{time_block} * 5 minutes done out of 15")
+                time_block += 1
             count = 0
         time.sleep(1)
 
 
 def get_users(x, location):
+    """
+    TODO: Add docstring
+    """
     try:
         dir = Path(__file__).parent.parent.parent / "data/raw_data"
         input_file = dir / f"{location}_lists.json"
