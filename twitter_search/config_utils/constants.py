@@ -2,6 +2,25 @@
 This script contains constants used across the project.
 """
 
+# CONSTANTS FOR THE UTIL SCRIPT
+
+LIST_FIELDS = ["id", "name", "description"]
+USER_FIELDS = [
+    "created_at",
+    "description",
+    "entities",
+    "id",
+    "location",
+    "most_recent_tweet_id",
+    "name",
+    "pinned_tweet_id",
+    "profile_image_url",
+    "protected",
+    "public_metrics",
+    "url",
+    "username",
+]
+
 # CONSTANTS FOR SEARCH USERS SCRIPT
 MAX_RESULTS = 50
 EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
