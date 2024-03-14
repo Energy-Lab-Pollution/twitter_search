@@ -12,11 +12,51 @@ PUNC =""
 for char in PUNCTUATIONS:
     PUNC += char
 
-ACTIVIST_KEYWORDS = ["activist", "advocate", "campaigner", "crusader", "protester", "reformer", "champion", "fighter", "supporter", "defender", "militant", "social justice", "human rights", "equality", "protest", "demonstration", "advocacy", "grassroots", "change", "activism", "solidarity", "freedom", "empowerment", "justice", "civil rights",'activism','rights']
-POLITICS_KEYWORDS = ["politics", "political", "government", "policy", "election", "democracy", "governance", "legislation", "politician", "party", "candidate", "voting", "public office", "campaign", "administration", "constituency", "parliament", "congress", "senate", "diplomacy", "public policy", "lawmaker", "civic", "political science", "political party", 'opposition','congress']
-MEDIA_KEYWORDS = ["media", "journalism", "news", "reporting", "press", "broadcast", "communication", "journalist", "reporter", "editor", "publisher", "newsroom", "coverage", "broadcasting", "newscast", "information", "current affairs", "headline", "correspondent", "media outlet", "coverage", "editorial", "media industry", "press release"]
-ORGANIZATION_KEYWORDS = ["official", "company", "organization", "corporation", 'collective', 'group', 'association', 'enterprise', 'foundation', 'institute', 'team', 'society', 'union', 'network', 'coalition', 'syndicate', 'consortium', 'firm', 'club', 'guild', 'committee', 'bureau', 'agency', 'cooperative', 'office', 'sector', 'service', 'branch', 'division', 'subsidiary', 'affiliate', 'nonprofit', 'charity', 'NGO', 'non-governmental organization', 'advocacy', 'humanitarian', 'volunteer', 'philanthropy', 'community', 'society', 'coalition', 'alliance', 'initiative', 'campaign', 'movement', 'project', 'network', 'consortium', 'union', 'association', 'cooperative', 'collective', 'group', 'committee', 'team', 'council', 'partnership', 'collaborative', 'forum', 'guild', 'federation', 'civic', 'public service', 'social impact', 'sustainable', 'environmental', 'social responsibility', 'community service', 'global', 'international', 'worldwide', 'multinational', 'transnational', 'globalized']
-GOVERNMENT_KEYWORDS = ["government", 'govt', 'gov', 'public sector', 'office of', "public administration", "public service", "public policy", "civil service", "governmental", "state", "federal", "local government", "administration", "governance", "public affairs", "regulation", "authority", "bureaucracy", "policy-making", "public office", "official", "public servant", "civil servant", "legislation", "executive", "legislative", "judicial", "government agency", "public institution",'government', 'govt', 'gov', 'public sector', 'office of']
+ACTIVIST_KEYWORDS = [
+    "activist", "advocate", "campaigner", "crusader", "protester", "reformer", "champion", 
+    "fighter", "supporter", "defender", "militant", "social justice", "human rights", "equality", 
+    "protest", "demonstration", "advocacy", "grassroots", "change", "activism", "solidarity", "freedom", 
+    "empowerment", "justice", "civil rights", "rights", "equality", "liberty", "justice", "fairness"
+]
+POLITICS_KEYWORDS = [
+    "politics", "political", "government", "policy", "election", "democracy", "governance", "legislation", 
+    "politician", "party", "candidate", "voting", "public office", "campaign", "administration", 
+    "constituency", "parliament", "congress", "senate", "diplomacy", "public policy", "lawmaker", 
+    "civic", "political science", "political party", "opposition", "congress", "administration", 
+    "governance", "public affairs", "legislation", "policy-making", "executive", "legislative", "judicial"
+]
+MEDIA_KEYWORDS = [
+    "media", "journalism", "news", "reporting", "press", "broadcast", "communication", "journalist", 
+    "reporter", "editor", "publisher", "newsroom", "coverage", "broadcasting", "newscast", "information", 
+    "current affairs", "headline", "correspondent", "media outlet", "coverage", "editorial", "press release", 
+    "journalism", "media industry", "reporting", "newsroom", "headline", "current events", "broadcast"
+]
+ORGANIZATION_KEYWORDS = [
+    "official", "company", "organization", "corporation", 'collective', 'group', 'association', 'enterprise', 
+    'foundation', 'institute', 'team', 'society', 'union', 'network', 'coalition', 'syndicate', 'consortium', 
+    'firm', 'club', 'guild', 'committee', 'bureau', 'agency', 'cooperative', 'office', 'sector', 'service', 
+    'branch', 'division', 'subsidiary', 'affiliate', 'nonprofit', 'charity', 'NGO', 'non-governmental organization', 
+    'advocacy', 'humanitarian', 'volunteer', 'philanthropy', 'community', 'society', 'coalition', 'alliance', 
+    'initiative', 'campaign', 'movement', 'project', 'network', 'consortium', 'union', 'association', 'cooperative', 
+    'collective', 'group', 'committee', 'team', 'council', 'partnership', 'collaborative', 'forum', 'guild', 
+    'federation', 'civic', 'public service', 'social impact', 'sustainable', 'environmental', 'social responsibility', 
+    'community service', 'global', 'international', 'worldwide', 'multinational', 'transnational', 'globalized', 
+    'organization', 'corporation', 'business', 'enterprise', 'agency', 'firm', 'institute', 'association', 'group', 
+    'foundation', 'committee', 'nonprofit', 'charity', 'NGO', 'collective', 'coalition', 'alliance', 'initiative', 
+    'movement', 'network', 'union', 'team', 'council', 'partnership', 'collaborative', 'forum', 'service', 
+    'community', 'sector'
+]
+GOVERNMENT_KEYWORDS = [
+    "government", 'govt', 'gov', 'public sector', 'office of', "public administration", "public service", 
+    "public policy", "civil service", "governmental", "state", "federal", "local government", "administration", 
+    "governance", "public affairs", "regulation", "authority", "bureaucracy", "policy-making", "public office", 
+    "official", "public servant", "civil servant", "legislation", "executive", "legislative", "judicial", 
+    "government agency", "public institution", 'government', 'govt', 'gov', 'public sector', 'office of', 
+    'administration', 'regulation', 'authority', 'bureaucracy', 'policy-making', 'public office', 'legislation', 
+    'executive', 'legislative', 'judicial', 'government agency', 'institution', 'public service', 'public sector', 
+    'civil service', 'local government', 'federal government', 'state government', 'public administration', 
+    'governmental', 'administration', 'president', 'prime minister', 'parliament'
+]
 
 CATEGORIES = {
         "Activist": ACTIVIST_KEYWORDS,
@@ -90,13 +130,12 @@ INDEX_IGNORE = (
 #     return users
 
 
-
 def tokenize(users):
     translator = Translator()
     count = 0
     for user in users:
+        print("user count",count)
         count += 1
-        print("count",count)
         # Translate non-English descriptions to English
         if 'description' in user:
             try:
@@ -123,12 +162,19 @@ def tokenize(users):
                     print(f"Error processing {key} for user: {e}")
 
         user_token = user.get("token", "")
+        max_matches = 0
+        matched_category = None
         for category, keywords in CATEGORIES.items():
-            if any(keyword.lower() in user_token for keyword in keywords):
-                user['category'] = category
-                break 
+            num_matches = sum(keyword.lower() in user_token for keyword in keywords)
+            if num_matches > max_matches:
+                max_matches = num_matches
+                matched_category = category
+
+        if max_matches > 0:
+            user['category'] = matched_category
         else:
-            user['category'] = "Uncategorized" 
+            user['category'] = "Uncategorized"
+
 
     return users
 
