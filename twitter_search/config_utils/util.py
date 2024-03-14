@@ -12,6 +12,20 @@ def load_json(file_path):
 LIST_FIELDS = ["id", "name", "description"]
 USER_FIELDS = ["created_at", 'description', 'entities', 'id', 'location', 'most_recent_tweet_id','name','pinned_tweet_id','profile_image_url','protected','public_metrics','url','username']
 
+def list_filter_keywords(all_lists, location):
+    filtered_lists = set()
+    keywords = {f"{keyword.lower()} {location.lower()}" for keyword in ["journalists", "journalism", "news", "politics", "ngo", "pollution", "air", "health", "swatchh", "clean", "climate", "energy", "environment", "activist"]} | {keyword.lower() for keyword in ["journalists", "journalism", "news", "politics", "ngo", "pollution", "air", "health", "swatchh", "clean", "climate", "energy", "environment", "activist"]}
+    
+    for lst in all_lists:
+        list_name_lower = lst['name'].lower()
+        list_description_lower = lst.get('description', '').lower()  # Handle missing descriptions
+        
+        # Check if any keyword intersects with the lowercase name/description
+        if any(keyword in list_name_lower or keyword in list_description_lower for keyword in keywords):
+            filtered_lists.add(lst['list_id'])
+    
+    return list(filtered_lists)
+
 def user_dictmaker(user_list):
     dict_list = [] 
     for user in user_list:
