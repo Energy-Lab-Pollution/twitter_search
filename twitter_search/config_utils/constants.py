@@ -2,6 +2,53 @@
 This script contains constants used across the project.
 """
 
+# CONSTANTS FOR SEARCH USERS SCRIPT
+MAX_RESULTS = 50
+EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
+TWEET_FIELDS = [
+    "attachments",
+    "author_id",
+    "context_annotations",
+    "conversation_id",
+    "created_at",
+    "edit_controls",
+    "entities",
+    "geo",
+    "id",
+    "in_reply_to_user_id",
+    "lang",
+    "public_metrics",
+    "possibly_sensitive",
+    "referenced_tweets",
+    "reply_settings",
+    "source",
+    "text",
+    "withheld",
+]
+USER_FIELDS = [
+    "created_at",
+    "description",
+    "entities",
+    "id",
+    "location",
+    "most_recent_tweet_id",
+    "name",
+    "pinned_tweet_id",
+    "profile_image_url",
+    "protected",
+    "public_metrics",
+    "url",
+    "username",
+]
+
+
+# THRESHOLDS FOR GETTING LISTS
+COUNT_THRESHOLD = 24
+SLEEP_TIME = 300
+
+
+# KEYWORD CONSTANTS
+
 # Creating punctuations to be removed
 PUNCTUATIONS = ["!" "," "." "," '"' "?" ":"]
 PUNC = ""

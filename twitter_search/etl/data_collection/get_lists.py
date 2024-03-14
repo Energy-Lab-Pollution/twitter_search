@@ -1,7 +1,7 @@
 import time
 from pathlib import Path
 
-from twitter_search.config_utils import util
+from twitter_search.config_utils import constants, util
 
 
 def getlists_fromusers(client, users_list, output_file, k=None):
@@ -35,11 +35,11 @@ def getlists_fromusers(client, users_list, output_file, k=None):
         except Exception as e:
             print(f"Incomplete, currently at user {count}. Error: {e}")
         count += 1
-        if count > 24:
+        if count > constants.COUNT_THRESHOLD:
             print("You have to wait for 15 mins")
             i = 1
             while i <= 3:
-                time.sleep(300)
+                time.sleep(constants.SLEEP_TIME)
                 print(f"{i} * 5 minutes done out of 15")
                 i += 1
             count = 0
@@ -56,7 +56,8 @@ def isolate_lists(uncleaned_list):
             if sublist[0].id:
                 if sublist not in isolated_lists:
                     isolated_lists += sublist
-        except:
+        except Exception as e:
+            print(f"Error in isolate_lists: {e}")
             continue
     return isolated_lists
 
