@@ -38,8 +38,11 @@ ACTIVIST_KEYWORDS = [
     "empowerment",
     "justice",
     "civil rights",
-    "activism",
     "rights",
+    "equality",
+    "liberty",
+    "justice",
+    "fairness",
 ]
 POLITICS_KEYWORDS = [
     "politics",
@@ -69,6 +72,14 @@ POLITICS_KEYWORDS = [
     "political party",
     "opposition",
     "congress",
+    "administration",
+    "governance",
+    "public affairs",
+    "legislation",
+    "policy-making",
+    "executive",
+    "legislative",
+    "judicial",
 ]
 MEDIA_KEYWORDS = [
     "media",
@@ -93,8 +104,14 @@ MEDIA_KEYWORDS = [
     "media outlet",
     "coverage",
     "editorial",
-    "media industry",
     "press release",
+    "journalism",
+    "media industry",
+    "reporting",
+    "newsroom",
+    "headline",
+    "current events",
+    "broadcast",
 ]
 ORGANIZATION_KEYWORDS = [
     "official",
@@ -172,6 +189,35 @@ ORGANIZATION_KEYWORDS = [
     "multinational",
     "transnational",
     "globalized",
+    "organization",
+    "corporation",
+    "business",
+    "enterprise",
+    "agency",
+    "firm",
+    "institute",
+    "association",
+    "group",
+    "foundation",
+    "committee",
+    "nonprofit",
+    "charity",
+    "NGO",
+    "collective",
+    "coalition",
+    "alliance",
+    "initiative",
+    "movement",
+    "network",
+    "union",
+    "team",
+    "council",
+    "partnership",
+    "collaborative",
+    "forum",
+    "service",
+    "community",
+    "sector",
 ]
 GOVERNMENT_KEYWORDS = [
     "government",
@@ -209,6 +255,30 @@ GOVERNMENT_KEYWORDS = [
     "gov",
     "public sector",
     "office of",
+    "administration",
+    "regulation",
+    "authority",
+    "bureaucracy",
+    "policy-making",
+    "public office",
+    "legislation",
+    "executive",
+    "legislative",
+    "judicial",
+    "government agency",
+    "institution",
+    "public service",
+    "public sector",
+    "civil service",
+    "local government",
+    "federal government",
+    "state government",
+    "public administration",
+    "governmental",
+    "administration",
+    "president",
+    "prime minister",
+    "parliament",
 ]
 
 CATEGORIES = {
@@ -250,44 +320,12 @@ INDEX_IGNORE = (
 )
 
 
-# def is_english(text):
-#     # Function to check if the text is in English
-#     try:
-#         return text.encode(encoding='utf-8').decode('ascii')
-#     except UnicodeDecodeError:
-#         return False
-
-# def batch_translate_to_english(users, batch_size=10):
-#     translator = Translator()
-
-#     for i in range(0, len(users), batch_size):
-#         batch = users[i:i+batch_size]
-
-#         for user in batch:
-#             for key, value in user.items():
-#                 if key in ["name", "location", "description"] and value:
-#                     try:
-#                         # Detect the language of the text
-#                         detected_language = detect(value)
-
-#                         # Check if the detected language is not English
-#                         if detected_language != 'en':
-#                             translation = translator.translate(value, dest='en')
-#                             user[key] = translation.text
-
-#                     except Exception as e:
-#                         print(f"Error translating {key}: {e}")
-#                         continue
-
-#     return users
-
-
 def tokenize(users):
     translator = Translator()
     count = 0
     for user in users:
+        print("user count", count)
         count += 1
-        print("count", count)
         # Translate non-English descriptions to English
         if "description" in user:
             try:
@@ -316,17 +354,23 @@ def tokenize(users):
                     print(f"Error processing {key} for user: {e}")
 
         user_token = user.get("token", "")
+        max_matches = 0
+        matched_category = None
         for category, keywords in CATEGORIES.items():
-            if any(keyword.lower() in user_token for keyword in keywords):
-                user["category"] = category
-                break
+            num_matches = sum(keyword.lower() in user_token for keyword in keywords)
+            if num_matches > max_matches:
+                max_matches = num_matches
+                matched_category = category
+
+        if max_matches > 0:
+            user["category"] = matched_category
         else:
             user["category"] = "Uncategorized"
 
     return users
 
 
-def clean(location):
+def clean(x, location):
     """
     This function loads the parks.json file and writes a new file
     named normalized_parks.json that contains a normalized version
@@ -341,4 +385,5 @@ def clean(location):
     input = util.load_json(input_file)
     user_list = util.flatten_and_remove_empty(input)
     cleaned = tokenize(user_list)
-    util.json_maker(output_file, cleaned)
+
+    return x
