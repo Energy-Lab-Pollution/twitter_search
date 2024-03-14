@@ -14,7 +14,6 @@ def getlists_fromusers(client, users_list, output_file, k=None):
                 id=user['user_id'], list_fields = util.LIST_FIELDS, \
                     max_results=50)
             only_lists = isolate_lists(response_user_list)
-            print({user['user_id']: only_lists})
             # Append data to the JSON file for each user
             list_entries = util.list_dictmaker({user['user_id']: only_lists})
             util.json_maker(output_file, list_entries)
@@ -43,7 +42,7 @@ def isolate_lists(uncleaned_list):
             continue
     return isolated_lists
 
-def get_lists(location):
+def get_lists(x, location):
     try:
         dir = (Path(__file__).parent.parent.parent / 
             "data/raw_data")
@@ -52,12 +51,13 @@ def get_lists(location):
 
         client = util.client_creator()
         users_list = util.load_json(input_file)
-        print("Now obtaining lists that the users are a part of",users_list)
-        getlists_fromusers(client, users_list, output_file)
+        isolated_lists = util.flatten_and_remove_empty(users_list)
+        print("Now obtaining lists that the users are a part of",isolated_lists)
+        getlists_fromusers(client, isolated_lists, output_file)
         #cleaned_lists = isolate_lists(all_lists)
         #list_dicts = util.list_dictmaker(all_lists)
 
         #util.json_maker_lists(output_file,list_dicts)
-
+        return x
     except Exception as e:
         print(f"An error occurred: {e}")

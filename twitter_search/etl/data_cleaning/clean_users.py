@@ -97,39 +97,6 @@ INDEX_IGNORE = (
 )
 
 
-
-# def is_english(text):
-#     # Function to check if the text is in English
-#     try:
-#         return text.encode(encoding='utf-8').decode('ascii')
-#     except UnicodeDecodeError:
-#         return False
-
-# def batch_translate_to_english(users, batch_size=10):
-#     translator = Translator()
-
-#     for i in range(0, len(users), batch_size):
-#         batch = users[i:i+batch_size]
-
-#         for user in batch:
-#             for key, value in user.items():
-#                 if key in ["name", "location", "description"] and value:
-#                     try:
-#                         # Detect the language of the text
-#                         detected_language = detect(value)
-
-#                         # Check if the detected language is not English
-#                         if detected_language != 'en':
-#                             translation = translator.translate(value, dest='en')
-#                             user[key] = translation.text
-
-#                     except Exception as e:
-#                         print(f"Error translating {key}: {e}")
-#                         continue
-
-#     return users
-
-
 def tokenize(users):
     translator = Translator()
     count = 0
@@ -179,7 +146,7 @@ def tokenize(users):
     return users
 
 
-def clean(location):
+def clean(x, location):
     """
     This function loads the parks.json file and writes a new file
     named normalized_parks.json that contains a normalized version
@@ -197,3 +164,5 @@ def clean(location):
     user_list = util.flatten_and_remove_empty(input)
     cleaned = tokenize(user_list)
     util.json_maker(output_file,cleaned)
+    
+    return x

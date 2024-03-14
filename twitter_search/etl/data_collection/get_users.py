@@ -15,7 +15,6 @@ def get_users_fromlists(client, lists_data, output_file, k=None):
                 unique.add(list_id)
                 users = client.get_list_members(id=list_id, max_results=50,\
                                                  user_fields=util.USER_FIELDS)
-                print(users)
                 user_dicts = util.user_dictmaker(users.data)
                 util.json_maker(output_file, user_dicts)
         except Exception as e:
@@ -34,7 +33,7 @@ def get_users_fromlists(client, lists_data, output_file, k=None):
 
 
 
-def get_users(location):
+def get_users(x, location):
     try:
         dir = (Path(__file__).parent.parent.parent / 
             "data/raw_data")
@@ -50,6 +49,7 @@ def get_users(location):
         filtered_lists = util.list_filter_keywords(isolated_lists,location)
         print(len(filtered_lists))
         get_users_fromlists(client, filtered_lists, output_file)
-
+        
+        return x
     except Exception as e:
         print(f"An error occurred: {e}")
