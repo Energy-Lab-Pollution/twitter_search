@@ -25,12 +25,14 @@ def get_users_fromlists(client, lists_data, output_file, k=None):
             print("You have to wait for 15 mins")
             i = 1
             while i <= 3:
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 time.sleep(300)
-                print(f"{i} * 5 minutes done out of 15")
+                print(f"{current_time} - {i * 5} minutes done out of 15")
                 i += 1
             count = 0
         time.sleep(1)
-
+        #TODO
+        #client = util.client_creator()
 
 
 def get_users(x, location):
@@ -49,7 +51,7 @@ def get_users(x, location):
         filtered_lists = util.list_filter_keywords(isolated_lists,location)
         print(len(filtered_lists))
         get_users_fromlists(client, filtered_lists, output_file)
-        
+
         return x
     except Exception as e:
         print(f"An error occurred: {e}")

@@ -1,6 +1,7 @@
 import time
 from twitter_search.config_utils import util
 from pathlib import Path
+from datetime import datetime
 
 
 
@@ -24,12 +25,14 @@ def getlists_fromusers(client, users_list, output_file, k=None):
             print("You have to wait for 15 mins")
             i = 1
             while i <= 3:
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 time.sleep(300)
-                print(f"{i} * 5 minutes done out of 15")
+                print(f"{current_time} - {i * 5} minutes done out of 15")
                 i += 1
             count = 0
         time.sleep(1)
-
+        #TODO
+        #client = util.client_creator()
 
 def isolate_lists(uncleaned_list):
     isolated_lists = []
