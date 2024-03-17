@@ -51,7 +51,7 @@ class UserSearcher:
         """
         return tweets.includes["users"]
 
-    def search_users(self, query, location):
+    def search_users(self):
         """
         Search for users on Twitter based on a query and location.
 
@@ -65,13 +65,13 @@ class UserSearcher:
 
         try:
             output_dir = Path(__file__).parent.parent.parent / "data/raw_data"
-            output_file = output_dir / f"{location}_users.json"
+            output_file = output_dir / f"{self.location}_users.json"
             client = util.client_creator()
             print("Client initiated")
             print("Now searching for tweets")
             search_tweets_result = self.search_tweets(
                 client,
-                query,
+                self.query,
                 constants.MAX_RESULTS,
                 constants.EXPANSIONS,
                 constants.TWEET_FIELDS,
