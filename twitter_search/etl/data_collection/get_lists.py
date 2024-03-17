@@ -6,7 +6,7 @@ from twitter_search.config_utils import util
 from twitter_search.config_utils.constants import MAX_RESULTS
 
 
-class ListParser:
+class ListGetter:
     """
     This class is in charge of parsing all of the lists of the twitter users
     """

@@ -3,7 +3,9 @@
 Author : praveenc@uchicago.edu/mahara1995@gmail.com
 """
 
-from twitter_search.etl.data_collection import search_users, get_lists, get_users
+from twitter_search.etl.data_collection.get_users import UserGetter
+from twitter_search.etl.data_collection.get_lists import ListGetter
+from twitter_search.etl.data_collection import search_users
 from twitter_search.etl.data_cleaning import clean_users
 
 
@@ -25,9 +27,16 @@ def run_search_twitter(query, location):
         ValueError: If any of the input arguments are invalid.
     """
 
+    # TODO: What are those 'x', 'y', 'z', 'a' variables?
+
     x = search_users.search_users(query, location)
-    y = get_lists.get_lists(x, location)
-    z = get_users.get_users(y, location)
+
+    list_getter = UserGetter(x, location)
+    y = list_getter.get_lists(x, location)
+
+    user_getter = ListGetter(y, location)
+    z = user_getter.get_users(y, location)
+
     a = clean_users.clean(z, location)
     print(a)
     # TODO
