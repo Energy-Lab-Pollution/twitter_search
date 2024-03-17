@@ -5,7 +5,7 @@ Author : praveenc@uchicago.edu/mahara1995@gmail.com
 
 from twitter_search.etl.data_collection.get_users import UserGetter
 from twitter_search.etl.data_collection.get_lists import ListGetter
-from twitter_search.etl.data_collection import search_users
+from twitter_search.etl.data_collection.search_users import UserSearcher
 from twitter_search.etl.data_cleaning import clean_users
 
 
@@ -29,7 +29,8 @@ def run_search_twitter(query, location):
 
     # TODO: What are those 'x', 'y', 'z', 'a' variables?
 
-    x = search_users.search_users(query, location)
+    user_searcher = UserSearcher(query, location)
+    x = user_searcher.search_users(query, location)
 
     # Defince instance of the user getter class
     list_getter = UserGetter(x, location)
