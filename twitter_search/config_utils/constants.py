@@ -21,7 +21,8 @@ USER_FIELDS = [
     "username",
 ]
 
-# CONSTANTS FOR SEARCH USERS SCRIPT
+# CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
+
 MAX_RESULTS = 50
 EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
 TWEET_FIELDS = [

@@ -1,7 +1,9 @@
 import time
-from pathlib import Path
 from datetime import datetime
-from twitter_search.config_utils import constants, util
+from pathlib import Path
+
+from twitter_search.config_utils import util
+from twitter_search.config_utils.constants import MAX_RESULTS
 
 
 class ListParser:
@@ -9,8 +11,11 @@ class ListParser:
     This class is in charge of parsing all of the lists of the twitter users
     """
 
-    def __init__(self):
-        pass
+    MAX_RESULTS = MAX_RESULTS
+
+    def __init__(self, x, location):
+        self.x = x
+        self.location = location
 
     def getlists_fromusers(self, client, users_list, output_file, k=None):
         if k is None:
@@ -19,7 +24,9 @@ class ListParser:
         for user in users_list[:k]:
             try:
                 response_user_list = client.get_list_memberships(
-                    id=user["user_id"], list_fields=util.LIST_FIELDS, max_results=50
+                    id=user["user_id"],
+                    list_fields=util.LIST_FIELDS,
+                    max_results=self.MAX_RESULTS,
                 )
                 only_lists = self.isolate_lists(response_user_list)
                 # Append data to the JSON file for each user
@@ -53,26 +60,26 @@ class ListParser:
                 continue
         return isolated_lists
 
-    def get_lists(self, x, location):
+    def get_lists(self):
         """
         Reads lists of users from a JSON file, parses them
         and returns them.
         """
         try:
             dir = Path(__file__).parent.parent.parent / "data/raw_data"
-            output_file = dir / f"{location}_lists.json"
-            input_file = dir / f"{location}_users.json"
+            output_file = dir / f"{self.location}_lists.json"
+            input_file = dir / f"{self.location}_users.json"
 
             client = util.client_creator()
             users_list = util.load_json(input_file)
             isolated_lists = util.flatten_and_remove_empty(users_list)
-            print("Now obtaining lists that the users are a part of", isolated_lists)
+            print("Now obtaining lists that the users are a part of: ", isolated_lists)
             self.getlists_fromusers(client, isolated_lists, output_file)
             # cleaned_lists = isolate_lists(all_lists)
             # list_dicts = util.list_dictmaker(all_lists)
 
             # util.json_maker_lists(output_file,list_dicts)
-            return x
+            return self.x
 
         except Exception as e:
             print(f"An error occurred: {e}")
