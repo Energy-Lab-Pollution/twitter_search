@@ -1,75 +1,48 @@
 import time
 from pathlib import Path
+from datetime import datetime
 
-from twitter_search.config_utils import constants, util
+
+def getlists_fromusers(client, users_list, output_file, k=None):
+    if k is None:
+        k = len(users_list) - 1
+    count = 0
+    for user in users_list[:k]:
+        try:
+            response_user_list = client.get_list_memberships(
+                id=user["user_id"], list_fields=util.LIST_FIELDS, max_results=50
+            )
+            only_lists = isolate_lists(response_user_list)
+            # Append data to the JSON file for each user
+            list_entries = util.list_dictmaker({user["user_id"]: only_lists})
+            util.json_maker(output_file, list_entries)
+        except Exception as e:
+            print(f"Incomplete, currently at user {count}. Error: {e}")
+        count += 1
+        if count > 24:
+            print("You have to wait for 15 mins")
+            i = 1
+            while i <= 3:
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                time.sleep(300)
+                print(f"{current_time} - {i * 5} minutes done out of 15")
+                i += 1
+            count = 0
+        time.sleep(1)
+        # TODO
+        # client = util.client_creator()
 
 
-class ListParser:
-    """
-    This class is in charge of parsing all of the twitter lists that the users
-    are a part of.
-    """
-
-    def __init__(self):
-        pass
-
-    def getlists_fromusers(self, client, users_list, output_file, k=None):
-        """
-        This function takes a list of users and returns the lists that they
-        are a part of.
-
-        Parameters
-        ----------
-        client : _type_
-            _description_
-        users_list : _type_
-            _description_
-        output_file : _type_
-            _description_
-        k : _type_, optional
-            _description_, by default None
-
-        """
-        if k is None:
-            k = len(users_list) - 1
-        count = 0
-        for user in users_list[:k]:
-            try:
-                response_user_list = client.get_list_memberships(
-                    id=user["user_id"], list_fields=util.LIST_FIELDS, max_results=50
-                )
-                only_lists = self.isolate_lists(response_user_list)
-                # Append data to the JSON file for each user
-                list_entries = util.list_dictmaker({user["user_id"]: only_lists})
-                util.json_maker(output_file, list_entries)
-            except Exception as e:
-                print(f"Incomplete, currently at user {count}. Error: {e}")
-            count += 1
-            if count > constants.COUNT_THRESHOLD:
-                print("You have to wait for 15 mins")
-                i = 1
-                while i <= 3:
-                    time.sleep(constants.SLEEP_TIME)
-                    print(f"{i} * 5 minutes done out of 15")
-                    i += 1
-                count = 0
-            time.sleep(1)
-
-    def isolate_lists(self, uncleaned_list):
-        """
-        TODO: Add docstring here
-        """
-        isolated_lists = []
-        for sublist in uncleaned_list:
-            try:
-                if sublist[0].id:
-                    if sublist not in isolated_lists:
-                        isolated_lists += sublist
-            except Exception as e:
-                print(f"Error in isolate_lists: {e}")
-                continue
-
-        return isolated_lists
+def isolate_lists(uncleaned_list):
+    isolated_lists = []
+    for sublist in uncleaned_list:
+        try:
+            if sublist[0].id:
+                if sublist not in isolated_lists:
+                    isolated_lists += sublist
+        except:
+            continue
+    return isolated_lists
 
     def get_lists(self, x, location):
         """
