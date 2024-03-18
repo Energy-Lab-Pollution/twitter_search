@@ -1,3 +1,7 @@
+"""
+Main function to run the Twitter search and data collection process.
+"""
+
 from twitter_search.etl import run_search_twitter
 import sys
 from argparse import ArgumentParser
@@ -12,7 +16,7 @@ def build_query(location):
 
 
 def lets_getit(location):
-    print("here")
+    print("Building query...")
     # Build the query based on args.location
     query = build_query(location)
     print(query)
@@ -41,5 +45,5 @@ def main():
         else:
             location = args.location
             lets_getit(location)
-    except:
-        print("error")
+    except Exception as e:
+        print(f"Error running process: {e}")
