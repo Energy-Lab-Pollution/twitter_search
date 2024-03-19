@@ -63,6 +63,9 @@ class ListGetter:
             # client = util.client_creator()
 
     def isolate_lists(self, uncleaned_list):
+        """
+        TODO: Add docstring
+        """
         isolated_lists = []
         for sublist in uncleaned_list:
             try:
