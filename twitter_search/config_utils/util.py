@@ -4,8 +4,8 @@ import os
 import pandas as pd
 import tweepy
 
-from twitter_search.config_utils import config
-from twitter_search.config_utils.constants
+# from config_utils import config
+
 
 def load_json(file_path):
     with open(file_path, "r") as json_file:

@@ -2,7 +2,7 @@
 Main function to run the Twitter search and data collection process.
 """
 
-from twitter_search.etl import run_search_twitter
+from etl import run_search_twitter
 from argparse import ArgumentParser
 
 
@@ -21,7 +21,7 @@ def main():
                         based on location and algorithm."
     )
     parser.add_argument(
-        "-location",
+        "location",
         type=str,
         help="Specify the\
                             location (city) for Twitter user search.",

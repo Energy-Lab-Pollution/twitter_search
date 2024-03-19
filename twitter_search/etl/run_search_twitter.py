@@ -3,10 +3,10 @@
 Author : praveenc@uchicago.edu/mahara1995@gmail.com
 """
 
-from twitter_search.etl.data_collection.get_users import UserGetter
-from twitter_search.etl.data_collection.get_lists import ListGetter
-from twitter_search.etl.data_collection.search_users import UserSearcher
-from twitter_search.etl.data_cleaning import clean_users
+from etl.data_collection.get_users import UserGetter
+from etl.data_collection.get_lists import ListGetter
+from etl.data_collection.search_users import UserSearcher
+from etl.data_cleaning import clean_users
 
 
 def run_search_twitter(query, location):

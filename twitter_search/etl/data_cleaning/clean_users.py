@@ -4,8 +4,8 @@ import spacy
 from langdetect import detect
 from googletrans import Translator
 from pathlib import Path
-from twitter_search.config_utils import util
-from twitter_search.config_utils import constants
+from config_utils import util
+from config_utils import constants
 
 
 def tokenize(users):

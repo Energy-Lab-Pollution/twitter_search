@@ -2,8 +2,8 @@ import time
 from pathlib import Path
 from datetime import datetime
 
-from twitter_search.config_utils import util
-from twitter_search.config_utils.constants import MAX_RESULTS
+from config_utils import util
+from config_utils.constants import MAX_RESULTS
 
 
 class UserGetter:
