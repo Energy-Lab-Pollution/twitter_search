@@ -30,15 +30,15 @@ def run_search_twitter(query, location):
     # TODO: What are those 'x', 'y', 'z', 'a' variables?
 
     user_searcher = UserSearcher(query, location)
-    x = user_searcher.search_users(query, location)
+    user_searcher.search_users(query, location)
 
     # Defince instance of the user getter class
-    list_getter = UserGetter(x, location)
-    y = list_getter.get_lists(x, location)
+    list_getter = ListGetter(location)
+    list_getter.get_lists(location)
 
     # Define instance of list getter class
-    user_getter = ListGetter(y, location)
-    z = user_getter.get_users(y, location)
+    user_getter = UserGetter(location)
+    user_getter.get_users(location)
 
     a = clean_users.clean(z, location)
     print(a)

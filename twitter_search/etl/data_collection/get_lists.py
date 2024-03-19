@@ -79,7 +79,6 @@ class ListGetter:
             # list_dicts = util.list_dictmaker(all_lists)
 
             # util.json_maker_lists(output_file,list_dicts)
-            return self.x
 
         except Exception as e:
             print(f"An error occurred: {e}")

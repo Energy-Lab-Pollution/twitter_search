@@ -13,8 +13,7 @@ class UserGetter:
 
     MAX_RESULTS = MAX_RESULTS
 
-    def __init__(self, x, location):
-        self.x = x
+    def __init__(self, location):
         self.location = location
 
     def get_users_fromlists(self, client, lists_data, output_file, k=None):
@@ -66,6 +65,5 @@ class UserGetter:
             print(len(filtered_lists))
             self.get_users_fromlists(client, filtered_lists, output_file)
 
-            return self.x
         except Exception as e:
             print(f"An error occurred: {e}")

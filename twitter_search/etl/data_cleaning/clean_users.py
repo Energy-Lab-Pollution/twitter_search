@@ -79,4 +79,5 @@ def clean(x, location):
     user_list = util.flatten_and_remove_empty(input)
     cleaned = tokenize(user_list)
 
-    return x
+    # Write the cleaned data to a new file
+    util.json_maker(output_file, cleaned)

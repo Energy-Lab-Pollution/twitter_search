@@ -44,7 +44,8 @@ class UserSearcher:
         Extract users from the tweet search result.
 
         Args:
-            tweets (dict): The search result containing tweets and associated users.
+            tweets (dict): The search result containing tweets and associated
+            users.
 
         Returns:
             list: List of user objects.
@@ -82,6 +83,5 @@ class UserSearcher:
             util.json_maker(output_file, total_users_dict)
             print("Total number of users:", len(total_users))
 
-            return "done"
         except Exception as e:
             print(f"An error occurred: {e}")
