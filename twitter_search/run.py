@@ -24,26 +24,22 @@ def lets_getit(location):
 
 
 def main():
-    try:
-        parser = ArgumentParser(
-            description="Get users from Twitter \
-                                based on location and algorithm."
-        )
-        parser.add_argument(
-            "--location",
-            type=str,
-            help="Specify the\
-                             location (city) for Twitter user search.",
-        )
-        # parser.add_argument("--algorithm", type=int, choices=[1, 2], \
-        # help="Specify the algorithm (1 or 2).")
-        args = parser.parse_args()
 
-        if not args.location:
-            print("Please provide both --location and --algorithm arguments.")
-            return
-        else:
-            location = args.location
-            lets_getit(location)
+    parser = ArgumentParser(
+        description="Get users from Twitter \
+                        based on location and algorithm."
+    )
+    parser.add_argument(
+        "-location",
+        type=str,
+        help="Specify the\
+                            location (city) for Twitter user search.",
+    )
+    # parser.add_argument("--algorithm", type=int, choices=[1, 2], \
+    # help="Specify the algorithm (1 or 2).")
+    args = parser.parse_args()
+    try:
+        location = args.location
+        lets_getit(location)
     except Exception as e:
         print(f"Error running process: {e}")
