@@ -18,6 +18,20 @@ class ListGetter:
         self.location = location
 
     def getlists_fromusers(self, client, users_list, output_file, k=None):
+        """
+        Get lists from users.
+
+        Parameters
+        ----------
+        client : tweepy.Client
+            An authenticated Twitter API client.
+        users_list : _type_
+            _description_
+        output_file : _type_
+            _description_
+        k : _type_, optional
+            _description_, by default None
+        """
         if k is None:
             k = len(users_list) - 1
         count = 0

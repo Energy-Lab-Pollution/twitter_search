@@ -63,7 +63,7 @@ def tokenize(users):
     return users
 
 
-def clean(x, location):
+def clean(location):
     """
     This function loads the parks.json file and writes a new file
     named normalized_parks.json that contains a normalized version

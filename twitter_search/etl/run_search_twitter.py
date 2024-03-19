@@ -27,21 +27,21 @@ def run_search_twitter(query, location):
         ValueError: If any of the input arguments are invalid.
     """
 
-    # TODO: What are those 'x', 'y', 'z', 'a' variables?
-
+    print("Searching for Twitter users...")
     user_searcher = UserSearcher(query, location)
     user_searcher.search_users(query, location)
 
+    print("Retrieving lists and users...")
     # Defince instance of the user getter class
     list_getter = ListGetter(location)
     list_getter.get_lists(location)
 
-    # Define instance of list getter class
+    print("Retrieving users from lists...")
     user_getter = UserGetter(location)
     user_getter.get_users(location)
 
-    a = clean_users.clean(z, location)
-    print(a)
+    print("Cleaning user data...")
+    clean_users.clean(location)
     # TODO
     # analyze users
     # learning method to classify users
