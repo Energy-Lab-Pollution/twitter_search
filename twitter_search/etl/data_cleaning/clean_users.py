@@ -4,8 +4,8 @@ import spacy
 from langdetect import detect
 from googletrans import Translator
 from pathlib import Path
-from twitter_search.config_utils import util
-from twitter_search.config_utils import constants
+from config_utils import util
+from config_utils import constants
 
 
 def tokenize(users):
@@ -63,7 +63,7 @@ def tokenize(users):
     return users
 
 
-def clean(x, location):
+def clean(location):
     """
     This function loads the parks.json file and writes a new file
     named normalized_parks.json that contains a normalized version
@@ -79,4 +79,5 @@ def clean(x, location):
     user_list = util.flatten_and_remove_empty(input)
     cleaned = tokenize(user_list)
 
-    return x
+    # Write the cleaned data to a new file
+    util.json_maker(output_file, cleaned)
