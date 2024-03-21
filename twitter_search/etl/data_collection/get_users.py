@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 
 from config_utils import util
-from config_utils.constants import MAX_RESULTS, COUNT_THRESHOLD
+from config_utils.constants import MAX_RESULTS, COUNT_THRESHOLD, SLEEP_TIME
 
 
 class UserGetter:
@@ -13,6 +13,7 @@ class UserGetter:
 
     MAX_RESULTS = MAX_RESULTS
     COUNT_THRESHOLD = COUNT_THRESHOLD
+    SLEEP_TIME = SLEEP_TIME
 
     def __init__(self, location):
         self.location = location
@@ -39,12 +40,12 @@ class UserGetter:
             count += 1
             if count > self.COUNT_THRESHOLD:
                 print("You have to wait for 15 mins")
-                i = 1
-                while i <= 3:
+                time_block = 1
+                while time_block <= 3:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    time.sleep(300)
-                    print(f"{current_time} - {i * 5} minutes done out of 15")
-                    i += 1
+                    time.sleep(self.SLEEP_TIME)
+                    print(f"{current_time} - {time_block * 5} minutes done out of 15")
+                    time_block += 1
                 count = 0
             time.sleep(1)
             # TODO

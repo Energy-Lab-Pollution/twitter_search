@@ -50,12 +50,12 @@ class ListGetter:
             count += 1
             if count > self.COUNT_THRESHOLD:
                 print("You have to wait for 15 mins")
-                i = 1
-                while i <= 3:
+                time_block = 1
+                while time_block <= 3:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     time.sleep(300)
-                    print(f"{current_time} - {i * 5} minutes done out of 15")
-                    i += 1
+                    print(f"{current_time} - {time_block * 5} minutes done out of 15")
+                    time_block += 1
                 count = 0
             time.sleep(1)
             # TODO
