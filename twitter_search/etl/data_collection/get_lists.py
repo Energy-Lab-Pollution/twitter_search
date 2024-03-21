@@ -13,8 +13,7 @@ class ListGetter:
 
     MAX_RESULTS = MAX_RESULTS
 
-    def __init__(self, x, location):
-        self.x = x
+    def __init__(self, location):
         self.location = location
 
     def getlists_fromusers(self, client, users_list, output_file, k=None):
@@ -36,18 +35,17 @@ class ListGetter:
             k = len(users_list) - 1
         count = 0
         for user in users_list[:k]:
-            try:
-                response_user_list = client.get_list_memberships(
-                    id=user["user_id"],
-                    list_fields=util.LIST_FIELDS,
-                    max_results=self.MAX_RESULTS,
-                )
-                only_lists = self.isolate_lists(response_user_list)
-                # Append data to the JSON file for each user
-                list_entries = util.list_dictmaker({user["user_id"]: only_lists})
-                util.json_maker(output_file, list_entries)
-            except Exception as e:
-                print(f"Incomplete, currently at user {count}. Error: {e}")
+            response_user_list = client.get_list_memberships(
+                id=user["user_id"],
+                list_fields=util.LIST_FIELDS,
+                max_results=self.MAX_RESULTS,
+            )
+            only_lists = self.isolate_lists(response_user_list)
+            # Append data to the JSON file for each user
+            list_entries = util.list_dictmaker({user["user_id"]: only_lists})
+            util.json_maker(output_file, list_entries)
+            # except Exception as e:
+            #     print(f"Incomplete, currently at user {count}. Error: {e}")
             count += 1
             if count > 24:
                 print("You have to wait for 15 mins")
@@ -68,13 +66,11 @@ class ListGetter:
         """
         isolated_lists = []
         for sublist in uncleaned_list:
-            try:
-                if sublist[0].id:
-                    if sublist not in isolated_lists:
-                        isolated_lists += sublist
-            except Exception as e:
-                print(f"Error: {e}")
-                continue
+            if sublist[0].id:
+                print(sublist[0].id)
+                if sublist not in isolated_lists:
+                    isolated_lists += sublist
+
         return isolated_lists
 
     def get_lists(self):

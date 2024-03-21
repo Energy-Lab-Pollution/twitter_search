@@ -3,8 +3,7 @@ import os
 
 import pandas as pd
 import tweepy
-
-# from config_utils import config
+from config_utils import config
 
 
 def load_json(file_path):

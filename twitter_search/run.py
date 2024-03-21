@@ -29,13 +29,9 @@ def main():
     # parser.add_argument("--algorithm", type=int, choices=[1, 2], \
     # help="Specify the algorithm (1 or 2).")
     args = parser.parse_args()
-    try:
-        location = args.location
-        print("Building query...")
-        # Build the query based on args.location
-        query = build_query(location)
-        print(query)
-        run_search_twitter.run_search_twitter(query, location)
-
-    except Exception as e:
-        print(f"Error running process: {e}")
+    location = args.location
+    print("Building query...")
+    # Build the query based on args.location
+    query = build_query(location)
+    print(query)
+    run_search_twitter.run_search_twitter(query, location)

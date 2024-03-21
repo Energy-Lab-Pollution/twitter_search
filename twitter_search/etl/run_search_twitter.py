@@ -28,17 +28,17 @@ def run_search_twitter(query, location):
     """
 
     print("Searching for Twitter users...")
-    user_searcher = UserSearcher(query, location)
-    user_searcher.search_users(query, location)
+    # user_searcher = UserSearcher(query, location)
+    # user_searcher.search_users()
 
     print("Retrieving lists and users...")
     # Defince instance of the user getter class
     list_getter = ListGetter(location)
-    list_getter.get_lists(location)
+    list_getter.get_lists()
 
     print("Retrieving users from lists...")
     user_getter = UserGetter(location)
-    user_getter.get_users(location)
+    user_getter.get_users()
 
     print("Cleaning user data...")
     clean_users.clean(location)
