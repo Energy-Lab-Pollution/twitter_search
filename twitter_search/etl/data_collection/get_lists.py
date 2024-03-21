@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from config_utils import util
-from config_utils.constants import MAX_RESULTS
+from config_utils.constants import MAX_RESULTS, COUNT_THRESHOLD
 
 
 class ListGetter:
@@ -12,6 +12,7 @@ class ListGetter:
     """
 
     MAX_RESULTS = MAX_RESULTS
+    COUNT_THRESHOLD = COUNT_THRESHOLD
 
     def __init__(self, location):
         self.location = location
@@ -47,7 +48,7 @@ class ListGetter:
             # except Exception as e:
             #     print(f"Incomplete, currently at user {count}. Error: {e}")
             count += 1
-            if count > 24:
+            if count > self.COUNT_THRESHOLD:
                 print("You have to wait for 15 mins")
                 i = 1
                 while i <= 3:

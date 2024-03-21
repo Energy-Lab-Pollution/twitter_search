@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime
 
 from config_utils import util
-from config_utils.constants import MAX_RESULTS
+from config_utils.constants import MAX_RESULTS, COUNT_THRESHOLD
 
 
 class UserGetter:
@@ -12,6 +12,7 @@ class UserGetter:
     """
 
     MAX_RESULTS = MAX_RESULTS
+    COUNT_THRESHOLD = COUNT_THRESHOLD
 
     def __init__(self, location):
         self.location = location
@@ -36,7 +37,7 @@ class UserGetter:
                 print(f"Error fetching users for list {item}: {e}")
                 continue
             count += 1
-            if count > 24:
+            if count > self.COUNT_THRESHOLD:
                 print("You have to wait for 15 mins")
                 i = 1
                 while i <= 3:
