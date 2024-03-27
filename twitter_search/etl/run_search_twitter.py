@@ -6,7 +6,7 @@ Author : praveenc@uchicago.edu/mahara1995@gmail.com
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.search_users import UserSearcher
-from etl.data_cleaning import clean_users
+from etl.data_cleaning.clean_users import UserCleaner
 
 
 def run_search_twitter(query, location):
@@ -41,7 +41,9 @@ def run_search_twitter(query, location):
     user_getter.get_users()
 
     print("Cleaning user data...")
-    clean_users.clean(location)
+    user_cleaner = UserCleaner()
+    user_cleaner.clean(location)
+
     # TODO
     # analyze users
     # learning method to classify users

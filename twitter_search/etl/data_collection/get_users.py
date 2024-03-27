@@ -19,6 +19,21 @@ class UserGetter:
         self.location = location
 
     def get_users_fromlists(self, client, lists_data, output_file, k=None):
+        """
+
+        Getting users from lists
+
+        Parameters
+        ----------
+        client : TweePy API object
+            Client to access Twitter API
+        lists_data : _type_
+            _description_
+        output_file : _type_
+            _description_
+        k : int, optional
+            _description_, by default None
+        """
         unique = set()
         count = 0
         if k is None:
@@ -30,7 +45,9 @@ class UserGetter:
                 if list_id is not None and list_id not in unique:
                     unique.add(list_id)
                     users = client.get_list_members(
-                        id=list_id, max_results=50, user_fields=util.USER_FIELDS
+                        id=list_id,
+                        max_results=self.MAX_RESULTS,
+                        user_fields=util.USER_FIELDS,
                     )
                     user_dicts = util.user_dictmaker(users.data)
                     util.json_maker(output_file, user_dicts)
