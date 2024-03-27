@@ -1,11 +1,8 @@
-import json
-from googletrans import Translator
-import spacy
-from langdetect import detect
-from googletrans import Translator
 from pathlib import Path
-from config_utils import util
-from config_utils import constants
+
+from config_utils import constants, util
+from googletrans import Translator
+from langdetect import detect
 
 
 class UserCleaner:

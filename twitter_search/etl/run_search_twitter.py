@@ -40,9 +40,10 @@ def run_search_twitter(query, location):
     user_getter = UserGetter(location)
     user_getter.get_users()
 
-    # print("Cleaning user data...")
+    print("Cleaning user data...")
     user_cleaner = UserCleaner()
     user_cleaner.clean(location)
+
     # TODO
     # analyze users
     # learning method to classify users
