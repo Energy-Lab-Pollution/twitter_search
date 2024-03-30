@@ -17,7 +17,7 @@ class UserSearcher:
         query is generated based on the location.
         search_tweets_result: Placeholder for storing search results.
         total_users: Placeholder for storing total number of users found.
-        client: Placeholder for storing client information.
+        client: tweepy client
     """
 
     def __init__(self,  location, query = None):
@@ -28,8 +28,9 @@ class UserSearcher:
         self.location = location
         self.search_tweets_result = None
         self.total_users = None
-        self.client = util.client_creator()
-        print("Client initiated")
+        self.twitter_client = util.client_creator()
+        self.gmaps_client = util.gmaps_client()
+        print("Clients initiated")
 
     def query_builder(self,location):
 
@@ -55,7 +56,7 @@ class UserSearcher:
         Returns:
             dict: The search result containing tweets and associated users.
         """
-        self.search_tweets_result = self.client.search_recent_tweets(
+        self.search_tweets_result = self.twitter_client.search_recent_tweets(
             query = self.query,
             max_results = MAX_RESULTS,
             expansions = EXPANSIONS,
@@ -99,10 +100,46 @@ class UserSearcher:
                 constants.USER_FIELDS,
             )
             self.total_users = self.get_users_from_tweets(self.search_tweets_result)
+            self.total_users_dict = util.user_dictmaker(self.total_users)
 
         except Exception as e:
             print(f"An error occurred: {e}")
 
+    def process_tweets_for_users(self):
+        """
+        Adds tweets to each user's dictionary.
+
+        Args:
+            data: Response data containing tweets and users.
+
+        Returns:
+            None
+        """
+        for tweet in self.search_tweets_result.data:
+            author_id = tweet.get('author_id', None)
+            if author_id:
+                for user in self.total_users_dict:
+                    if user['user_id'] == author_id:
+                        user['tweets'].append(tweet['text'])   
+
+    # def get_coordinates(location):
+    #     if location is None:
+    #         return None,None
+    #     try:
+    #         # Geocode the location using Google Maps Geocoding API
+    #         geocode_result = gmaps_client.geocode(location)
+            
+    #         # Check if any results were returned
+    #         if geocode_result:
+    #             lat = geocode_result[0]['geometry']['location']['lat']
+    #             lng = geocode_result[0]['geometry']['location']['lng']
+    #             return lat, lng
+    #         else:
+    #             return None, None
+    #     except Exception as e:
+    #         print(f"Error geocoding location '{location}': {e}")
+    #         return None, None
+    
     def store_users(self):
         """
         convert the user list to a json and store it.
@@ -114,7 +151,6 @@ class UserSearcher:
             None
         """
         output_dir = Path(__file__).parent.parent.parent / "data/raw_data"
-        output_file = output_dir / f"{self.location}_users.json"
-        total_users_dict = util.user_dictmaker(self.total_users)
-        util.json_maker(output_file, total_users_dict)
+        output_file = output_dir / f"{self.location}_users_test.json"
+        util.json_maker(output_file, self.total_users_dict)
         print("Total number of users:", len(self.total_users))
