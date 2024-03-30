@@ -12,6 +12,7 @@ class UserSearcher:
     def __init__(self, query, location):
         self.query = query
         self.location = location
+        self.result = None
 
     def search_tweets(
         self, client, query, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS
@@ -70,7 +71,7 @@ class UserSearcher:
             client = util.client_creator()
             print("Client initiated")
             print("Now searching for tweets")
-            search_tweets_result = self.search_tweets(
+            self.search_tweets_result = self.search_tweets(
                 client,
                 self.query,
                 constants.MAX_RESULTS,
@@ -78,7 +79,7 @@ class UserSearcher:
                 constants.TWEET_FIELDS,
                 constants.USER_FIELDS,
             )
-            total_users = self.get_users_from_tweets(search_tweets_result)
+            total_users = self.get_users_from_tweets(self.search_tweets_result)
             total_users_dict = util.user_dictmaker(total_users)
             util.json_maker(output_file, total_users_dict)
             print("Total number of users:", len(total_users))
