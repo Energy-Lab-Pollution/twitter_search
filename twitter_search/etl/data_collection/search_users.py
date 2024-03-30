@@ -1,21 +1,45 @@
 """
 Module for searching users on Twitter based on a query and location.
 
-Author : praveenc@uchicago.edu/mahara1995@gmail.com
+Author : Praveen Chandar and Federico Molina
 """
 
 from config_utils import util, constants
 from pathlib import Path
 
-
 class UserSearcher:
-    def __init__(self, query, location):
-        self.query = query
+    """
+    A class for searching users based on location and optional query.
+
+    Attributes:
+        location (str): The location for which users are being searched.
+        query (str): The optional query string. If not provided, a default 
+        query is generated based on the location.
+        search_tweets_result: Placeholder for storing search results.
+        total_users: Placeholder for storing total number of users found.
+        client: Placeholder for storing client information.
+    """
+
+    def __init__(self,  location, query = None):
+        if query is None:
+            self.query = self.query_builder(location)
+        else:
+            self.query = query
         self.location = location
         self.search_tweets_result = None
+        self.total_users = None
+        self.client = util.client_creator()
+        print("Client initiated")
+
+    def query_builder(self,location):
+
+        return f"(air pollution {location} OR {location} air OR {location} \
+            pollution OR {location} public health OR bad air {location} OR \
+            {location} asthma OR {location} polluted OR pollution control board) \
+            (#pollution OR #environment OR #cleanair OR #airquality) -is:retweet"
 
     def search_tweets(
-        self, client, query, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS
+        self, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS
     ):
         """
         Search for recent tweets based on a query.
@@ -31,13 +55,14 @@ class UserSearcher:
         Returns:
             dict: The search result containing tweets and associated users.
         """
-        return client.search_recent_tweets(
-            query=query,
-            max_results=MAX_RESULTS,
-            expansions=EXPANSIONS,
-            tweet_fields=TWEET_FIELDS,
-            user_fields=USER_FIELDS,
+        self.search_tweets_result = self.client.search_recent_tweets(
+            query = self.query,
+            max_results = MAX_RESULTS,
+            expansions = EXPANSIONS,
+            tweet_fields = TWEET_FIELDS,
+            user_fields = USER_FIELDS,
         )
+        return self.search_tweets_result
 
     @staticmethod
     def get_users_from_tweets(tweets):
@@ -65,24 +90,31 @@ class UserSearcher:
             None
         """
 
-        try:
-            output_dir = Path(__file__).parent.parent.parent / "data/raw_data"
-            output_file = output_dir / f"{self.location}_users.json"
-            client = util.client_creator()
-            print("Client initiated")
+        try: 
             print("Now searching for tweets")
-            self.search_tweets_result = self.search_tweets(
-                client,
-                self.query,
+            self.search_tweets(
                 constants.MAX_RESULTS,
                 constants.EXPANSIONS,
                 constants.TWEET_FIELDS,
                 constants.USER_FIELDS,
             )
-            total_users = self.get_users_from_tweets(self.search_tweets_result)
-            total_users_dict = util.user_dictmaker(total_users)
-            util.json_maker(output_file, total_users_dict)
-            print("Total number of users:", len(total_users))
+            self.total_users = self.get_users_from_tweets(self.search_tweets_result)
 
         except Exception as e:
             print(f"An error occurred: {e}")
+
+    def store_users(self):
+        """
+        convert the user list to a json and store it.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+        output_dir = Path(__file__).parent.parent.parent / "data/raw_data"
+        output_file = output_dir / f"{self.location}_users.json"
+        total_users_dict = util.user_dictmaker(self.total_users)
+        util.json_maker(output_file, total_users_dict)
+        print("Total number of users:", len(self.total_users))
