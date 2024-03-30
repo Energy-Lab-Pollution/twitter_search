@@ -12,7 +12,7 @@ class UserSearcher:
     def __init__(self, query, location):
         self.query = query
         self.location = location
-        self.result = None
+        self.search_tweets_result = None
 
     def search_tweets(
         self, client, query, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS
