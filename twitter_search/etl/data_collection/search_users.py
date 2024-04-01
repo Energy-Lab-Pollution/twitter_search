@@ -105,6 +105,24 @@ class UserSearcher:
         except Exception as e:
             print(f"An error occurred: {e}")
 
+    def get_coordinates(self,location):
+        if location is None:
+            return (None,None)
+        try:
+            # Geocode the location using Google Maps Geocoding API
+            geocode_result = self.gmaps_client.geocode(location)
+            
+            # Check if any results were returned
+            if geocode_result:
+                lat = geocode_result[0]['geometry']['location']['lat']
+                lng = geocode_result[0]['geometry']['location']['lng']
+                return (lat,lng)
+            else:
+                return (None,None)
+        except Exception as e:
+            print(f"Error geocoding location '{location}': {e}")
+            return (None,None)
+        
     def process_tweets_for_users(self):
         """
         Adds tweets to each user's dictionary.
@@ -119,27 +137,11 @@ class UserSearcher:
             author_id = tweet.get('author_id', None)
             if author_id:
                 for user in self.total_users_dict:
+                    user['geo_location'] = self.get_coordinates(user['location'])
                     if user['user_id'] == author_id:
                         user['tweets'].append(tweet['text'])   
 
-    # def get_coordinates(location):
-    #     if location is None:
-    #         return None,None
-    #     try:
-    #         # Geocode the location using Google Maps Geocoding API
-    #         geocode_result = gmaps_client.geocode(location)
-            
-    #         # Check if any results were returned
-    #         if geocode_result:
-    #             lat = geocode_result[0]['geometry']['location']['lat']
-    #             lng = geocode_result[0]['geometry']['location']['lng']
-    #             return lat, lng
-    #         else:
-    #             return None, None
-    #     except Exception as e:
-    #         print(f"Error geocoding location '{location}': {e}")
-    #         return None, None
-    
+
     def store_users(self):
         """
         convert the user list to a json and store it.
@@ -154,3 +156,8 @@ class UserSearcher:
         output_file = output_dir / f"{self.location}_users_test.json"
         util.json_maker(output_file, self.total_users_dict)
         print("Total number of users:", len(self.total_users))
+
+    def run_search_all(self):
+        self.search_users()
+        self.process_tweets_for_users()
+        self.store_users()
