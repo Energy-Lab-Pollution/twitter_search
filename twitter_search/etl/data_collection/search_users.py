@@ -4,7 +4,7 @@ Module for searching users on Twitter based on a query and location.
 Author : Praveen Chandar and Federico Molina
 """
 
-from config_utils import util, constants
+from twitter_search.config_utils import util, constants
 from pathlib import Path
 
 class UserSearcher:

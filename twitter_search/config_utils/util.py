@@ -3,7 +3,7 @@ import os
 import googlemaps
 import pandas as pd
 import tweepy
-from config_utils import config
+from twitter_search.config_utils import config
 
 
 def load_json(file_path):
