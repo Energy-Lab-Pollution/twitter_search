@@ -2,10 +2,8 @@ from pathlib import Path
 import geopandas as gpd
 from shapely.geometry import Point
 from transformers import pipeline
-import sys
-sys.path.append('/path/to/Users/Desktop/twitter_search/twitter_search/config_utils')
-from config_utils import util
-# from constants import SOME_CONSTANT
+from twitter_search.config_utils import util
+from twitter_search.config_utils import constants
 
 class UserFilter:
     def __init__(self, location):
@@ -13,7 +11,7 @@ class UserFilter:
         self.relevant_labels = constants.RELEVANT_LABELS
 
     def load_and_preprocess_data(self):
-        data_dir = Path(__file__).parent.parent.parent / "data/raw_data"
+        data_dir = Path(__file__).parent.parent.parent.parent / "twitter_search/data/raw_data"
         input_file = data_dir / f"{self.location}_users.json"
         try:
             users_list = util.load_json(input_file)
