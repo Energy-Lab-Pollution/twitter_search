@@ -203,6 +203,11 @@ def json_maker(file_path, data_to_append):
     # Append the new data to the existing list
     existing_data.append(data_to_append)
 
+    # Check if the file path exists
+    if not os.path.exists(os.path.dirname(file_path)):
+        os.makedirs(os.path.dirname(file_path))
+        print("Created directory:", os.path.dirname(file_path))
+
     # Write the updated list of dictionaries back to the file
     with open(file_path, "w") as f:
         json.dump(existing_data, f, indent=1)
