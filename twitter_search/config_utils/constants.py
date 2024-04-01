@@ -21,7 +21,47 @@ USER_FIELDS = [
     "username",
 ]
 
+
+
+RELEVANT_LABELS = ["pollution", "environment", "public health", "climate"]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
+# Dictionary mapping Indian state capitals to their respective states
+STATE_CAPITALS = {
+    'Port Blair': 'Andaman and Nicobar Islands',
+    'Hyderabad': ['Andhra Pradesh', 'Telangana'],
+    'Itanagar': 'Arunachal Pradesh',
+    'Dispur': 'Assam',
+    'Patna': 'Bihar',
+    'Chandigarh': ['Chandigarh', 'Punjab', 'Haryana'],
+    'Raipur': 'Chhattisgarh',
+    'Silvassa': 'Dadra and Nagar Haveli',
+    'Daman': 'Daman and Diu',
+    'Delhi': ['Uttar Pradesh', 'Delhi', 'Haryana', 'Rajasthan'],
+    'Panaji': 'Goa',
+    'Gandhinagar': 'Gujarat',
+    'Shimla': 'Himachal Pradesh',
+    'Srinagar': ['Jammu and Kashmir', 'Ladakh'],
+    'Ranchi': 'Jharkhand',
+    'Bengaluru': 'Karnataka',
+    'Thiruvananthapuram': 'Kerala',
+    'Leh': 'Ladakh',
+    'Kavaratti': 'Lakshadweep',
+    'Bhopal': 'Madhya Pradesh',
+    'Mumbai': 'Maharashtra',
+    'Imphal': 'Manipur',
+    'Shillong': 'Meghalaya',
+    'Aizawl': 'Mizoram',
+    'Kohima': 'Nagaland',
+    'Bhubaneswar': 'Odisha',
+    'Puducherry': 'Puducherry',
+    'Jaipur': 'Rajasthan',
+    'Gangtok': 'Sikkim',
+    'Chennai': 'Tamil Nadu',
+    'Agartala': 'Tripura',
+    'Lucknow': 'Uttar Pradesh',
+    'Dehradun': 'Uttarakhand',
+    'Kolkata': 'West Bengal'
+}
 
 MAX_RESULTS = 10
 EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
