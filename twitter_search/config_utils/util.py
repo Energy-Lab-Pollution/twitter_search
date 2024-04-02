@@ -3,7 +3,7 @@ import os
 import googlemaps
 import pandas as pd
 import tweepy
-from twitter_search.config_utils import config
+from config_utils import config
 
 
 def load_json(file_path):
@@ -110,11 +110,14 @@ def user_dictmaker(user_list):
             "location": user["location"],
             "name": user["name"],
             "url": user["url"],
-            "tweets":[]
+            "tweets":[],
+            "geo_code":[]
         }
         values.update(user["public_metrics"])
         dict_list.append(values)
     return dict_list
+
+
 
 
 def list_dictmaker(incoming_datastruct):

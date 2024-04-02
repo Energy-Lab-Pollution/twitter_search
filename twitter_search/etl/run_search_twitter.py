@@ -6,6 +6,7 @@ Author : praveenc@uchicago.edu/mahara1995@gmail.com
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.search_users import UserSearcher
+from twitter_filtering.users_filtering.users import UserFilter
 from etl.data_cleaning import clean_users
 
 
@@ -31,17 +32,23 @@ def run_search_twitter(query, location):
     # user_searcher = UserSearcher(location,query)
     # user_searcher.run_search_all()
 
+    #user_filter = UserFilter(location)
+    #user_filter.run_filtering()
+
     print("Retrieving lists and users...")
     # Defince instance of the user getter class
-    list_getter = ListGetter(location)
-    list_getter.get_lists()
+    #list_getter = ListGetter(location)
+    #list_getter.get_lists()
 
     print("Retrieving users from lists...")
     user_getter = UserGetter(location)
-    user_getter.get_users()
+    path = user_getter.get_users()
+
+    user_filter = UserFilter(location,path)
+    user_filter.run_filtering()
 
     print("Cleaning user data...")
-    clean_users.clean(location)
+    #clean_users.clean(location)
     # TODO
     # analyze users
     # learning method to classify users

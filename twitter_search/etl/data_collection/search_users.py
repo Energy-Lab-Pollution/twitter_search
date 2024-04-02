@@ -4,7 +4,7 @@ Module for searching users on Twitter based on a query and location.
 Author : Praveen Chandar and Federico Molina
 """
 
-from twitter_search.config_utils import util, constants
+from config_utils import util, constants
 from pathlib import Path
 
 class UserSearcher:
@@ -137,10 +137,12 @@ class UserSearcher:
             author_id = tweet.get('author_id', None)
             if author_id:
                 for user in self.total_users_dict:
-                    user['geo_location'] = self.get_coordinates(user['location'])
                     if user['user_id'] == author_id:
-                        user['tweets'].append(tweet['text'])   
+                        user['tweets'].append(tweet['text']) 
 
+    def geo_coder(self):
+        for user in self.total_users_dict:
+            user['geo_location'] = self.get_coordinates(user['location'])
 
     def store_users(self):
         """

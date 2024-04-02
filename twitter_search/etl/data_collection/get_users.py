@@ -17,6 +17,7 @@ class UserGetter:
 
     def __init__(self, location):
         self.location = location
+        self.gmaps_client = util.gmaps_client()
 
     def get_users_fromlists(self, client, lists_data, output_file, k=None):
         unique = set()
@@ -30,9 +31,11 @@ class UserGetter:
                 if list_id is not None and list_id not in unique:
                     unique.add(list_id)
                     users = client.get_list_members(
-                        id=list_id, max_results=50, user_fields=util.USER_FIELDS
+                        id=list_id, max_results= 99, user_fields=util.USER_FIELDS
                     )
                     user_dicts = util.user_dictmaker(users.data)
+                    for user in user_dicts:
+                        user['geo_location'] = self.get_coordinates(user['location'])
                     util.json_maker(output_file, user_dicts)
             except Exception as e:
                 print(f"Error fetching users for list {item}: {e}")
@@ -51,11 +54,29 @@ class UserGetter:
             # TODO
             # client = util.client_creator()
 
+    def get_coordinates(self,bio_location):
+        if bio_location is None:
+            return (None,None)
+        try:
+            # Geocode the location using Google Maps Geocoding API
+            geocode_result = self.gmaps_client.geocode(bio_location)
+            
+            # Check if any results were returned
+            if geocode_result:
+                lat = geocode_result[0]['geometry']['location']['lat']
+                lng = geocode_result[0]['geometry']['location']['lng']
+                return (lat,lng)
+            else:
+                return (None,None)
+        except Exception as e:
+            print(f"Error geocoding location '{bio_location}': {e}")
+            return (None,None)
+        
     def get_users(self):
         try:
             dir = Path(__file__).parent.parent.parent / "data/raw_data"
             input_file = dir / f"{self.location}_lists.json"
-            output_file = dir / f"{self.location}_totalusers.json"
+            output_file = dir / f"{self.location}_totalusers_apr2_test2.json"
             print("till here")
             lists_data = util.load_json(input_file)
             print(lists_data[:10], "here you go")
@@ -66,6 +87,6 @@ class UserGetter:
             filtered_lists = util.list_filter_keywords(isolated_lists, self.location)
             print(len(filtered_lists))
             self.get_users_fromlists(client, filtered_lists, output_file)
-
+            return output_file
         except Exception as e:
             print(f"An error occurred: {e}")
