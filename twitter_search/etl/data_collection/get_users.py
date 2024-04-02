@@ -15,11 +15,13 @@ class UserGetter:
     COUNT_THRESHOLD = COUNT_THRESHOLD
     SLEEP_TIME = SLEEP_TIME
 
-    def __init__(self, location):
+    def __init__(self, location, input_file, output_file):
         self.location = location
         self.gmaps_client = util.gmaps_client()
+        self.input_file = input_file
+        self.output_file = output_file
 
-    def get_users_fromlists(self, client, lists_data, output_file, k=None):
+    def get_users_fromlists(self, client, lists_data,k=None):
         unique = set()
         count = 0
         if k is None:
@@ -36,7 +38,8 @@ class UserGetter:
                     user_dicts = util.user_dictmaker(users.data)
                     for user in user_dicts:
                         user['geo_location'] = self.get_coordinates(user['location'])
-                    util.json_maker(output_file, user_dicts)
+                    util.json_maker(self.output_file, user_dicts)
+
             except Exception as e:
                 print(f"Error fetching users for list {item}: {e}")
                 continue
@@ -74,11 +77,8 @@ class UserGetter:
         
     def get_users(self):
         try:
-            dir = Path(__file__).parent.parent.parent / "data/raw_data"
-            input_file = dir / f"{self.location}_lists.json"
-            output_file = dir / f"{self.location}_totalusers_apr2_test2.json"
             print("till here")
-            lists_data = util.load_json(input_file)
+            lists_data = util.load_json(self.input_file)
             print(lists_data[:10], "here you go")
             client = util.client_creator()
             print("client created")
@@ -86,7 +86,7 @@ class UserGetter:
             print(len(isolated_lists))
             filtered_lists = util.list_filter_keywords(isolated_lists, self.location)
             print(len(filtered_lists))
-            self.get_users_fromlists(client, filtered_lists, output_file)
-            return output_file
+            self.get_users_fromlists(client, filtered_lists)
+
         except Exception as e:
             print(f"An error occurred: {e}")

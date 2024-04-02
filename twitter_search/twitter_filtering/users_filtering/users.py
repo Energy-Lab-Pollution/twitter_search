@@ -6,7 +6,7 @@ from transformers import pipeline
 from config_utils import util,constants
 
 class UserFilter:
-    def __init__(self, location, path):
+    def __init__(self, location, input_file,output_file):
 
         """
         Initialize UserFilter with a specific location.
@@ -17,7 +17,8 @@ class UserFilter:
 
         self.location = location
         self.relevant_labels = constants.RELEVANT_LABELS
-        self.input_dir = path
+        self.input_file = input_file
+        self.output_file = output_file
 
     def load_and_preprocess_data(self):
 
@@ -27,7 +28,7 @@ class UserFilter:
             #/ "twitter_search/data/raw_data"
         #input_file = data_dir / f"{self.location}_users_test.json"
         try:
-            self.users_list = util.load_json(self.input_dir)
+            self.users_list = util.load_json(self.input_file)
             self.total_user_dict = \
                 util.flatten_and_remove_empty(self.users_list)
         except Exception as e:
@@ -117,11 +118,8 @@ class UserFilter:
 
     def store_users(self):
 
-        output_dir = Path(__file__).parent.parent.parent.parent \
-        / "twitter_search/data/raw_data"
-        output_file = output_dir / f"{self.location}_users_filtered_apr2.json"
         try:
-            util.json_maker(output_file, self.filtered_user)
+            util.json_maker(self.output_file, self.filtered_user)
         except Exception as e:
             print(f"Error storing filtered users: {e}")
 
@@ -147,6 +145,7 @@ class UserFilter:
             print('non-relevant users removed, step 5 completed \n')
             self.store_users()
             print("Filtered users stored successfully.")
+            
         except Exception as e:
             print(f"An error occurred during filtering: {e}")         
 

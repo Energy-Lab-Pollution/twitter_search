@@ -14,10 +14,12 @@ class ListGetter:
     MAX_RESULTS = MAX_RESULTS_LISTS
     COUNT_THRESHOLD = COUNT_THRESHOLD
 
-    def __init__(self, location):
+    def __init__(self, location, input_file, output_file):
         self.location = location
+        self.input_file = input_file
+        self.output_file = output_file
 
-    def getlists_fromusers(self, client, users_list, output_file, k=None):
+    def getlists_fromusers(self, client, users_list, k=None):
         """
         Get lists from users.
 
@@ -48,7 +50,7 @@ class ListGetter:
             # Append data to the JSON file for each user
             print("lists_isolated")
             list_entries = util.list_dictmaker({user["user_id"]: only_lists})
-            util.json_maker(output_file, list_entries)
+            util.json_maker(self.output_file, list_entries)
             # except Exception as e:
             #     print(f"Incomplete, currently at user {count}. Error: {e}")
             count += 1
@@ -84,15 +86,11 @@ class ListGetter:
         and returns them.
         """
         try:
-            dir = Path(__file__).parent.parent.parent / "data/raw_data"
-            output_file = dir / f"{self.location}_lists.json"
-            input_file = dir / f"{self.location}_users_filtered.json"
-
             client = util.client_creator()
-            users_list = util.load_json(input_file)
+            users_list = util.load_json(self.input_file)
             isolated_lists = util.flatten_and_remove_empty(users_list)
             print("Now obtaining lists that the users are a part of: ", isolated_lists)
-            self.getlists_fromusers(client, isolated_lists, output_file)
+            self.getlists_fromusers(client, isolated_lists)
             # cleaned_lists = isolate_lists(all_lists)
             # list_dicts = util.list_dictmaker(all_lists)
 

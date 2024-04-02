@@ -5,7 +5,6 @@ Author : Praveen Chandar and Federico Molina
 """
 
 from config_utils import util, constants
-from pathlib import Path
 
 class UserSearcher:
     """
@@ -20,7 +19,7 @@ class UserSearcher:
         client: tweepy client
     """
 
-    def __init__(self,  location, query = None):
+    def __init__(self,  location, output_file, query = None):
         if query is None:
             self.query = self.query_builder(location)
         else:
@@ -30,6 +29,7 @@ class UserSearcher:
         self.total_users = None
         self.twitter_client = util.client_creator()
         self.gmaps_client = util.gmaps_client()
+        self.output_file = output_file
         print("Clients initiated")
 
     def query_builder(self,location):
@@ -154,9 +154,7 @@ class UserSearcher:
         Returns:
             None
         """
-        output_dir = Path(__file__).parent.parent.parent / "data/raw_data"
-        output_file = output_dir / f"{self.location}_users_test.json"
-        util.json_maker(output_file, self.total_users_dict)
+        util.json_maker(self.output_file, self.total_users_dict)
         print("Total number of users:", len(self.total_users))
 
     def run_search_all(self):
