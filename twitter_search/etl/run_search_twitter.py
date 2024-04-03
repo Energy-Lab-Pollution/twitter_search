@@ -3,7 +3,7 @@ from etl.data_collection.get_users import UserGetter
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.search_users import UserSearcher
 from twitter_filtering.users_filtering.users import UserFilter
-from etl.data_cleaning import clean_users
+from etl.data_cleaning.clean_users import UserCleaner
 
 
 def run_search_twitter(query, location):
@@ -66,6 +66,7 @@ def run_search_twitter(query, location):
         else:
             break
 
+
     return "Data collection and cleaning process completed."
 
 
@@ -87,7 +88,6 @@ def retrieve_lists(location, input_file_lists, output_file_lists):
 def retrieve_user_data(location, input_file_total, output_file_total):
     user_getter = UserGetter(location, input_file_total, output_file_total)
     user_getter.get_users()
-
 
 def additional_iterations_needed(count):
     return count <= 2  # Example: Perform 2 iterations

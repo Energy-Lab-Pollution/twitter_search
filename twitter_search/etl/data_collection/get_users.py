@@ -21,7 +21,22 @@ class UserGetter:
         self.input_file = input_file
         self.output_file = output_file
 
+
     def get_users_fromlists(self, client, lists_data,k=None):
+        """
+        Getting users from lists
+
+        Parameters
+        ----------
+        client : TweePy API object
+            Client to access Twitter API
+        lists_data : _type_
+            _description_
+        output_file : _type_
+            _description_
+        k : int, optional
+            _description_, by default None
+        """
         unique = set()
         count = 0
         if k is None:
