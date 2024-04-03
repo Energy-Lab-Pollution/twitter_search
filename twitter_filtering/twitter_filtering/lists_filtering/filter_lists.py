@@ -30,12 +30,31 @@ def read_json(file_path):
     return data
 
 
-twitter_lists = read_json(
-    "C:/Users/fdmol/Desktop/Energy-Lab/twitter_search/twitter_search/data/raw_data/Mumbai_lists.json"
-)
+def create_df(twitter_lists):
+    """
+    Creates a DataFrame from the JSON data
 
+    Args:
+        lists (list): List of dictionaries with the JSON data
+    Returns:
+        df (pd.DataFrame): DataFrame with the JSON data
+    """
 
-print(twitter_lists[1])
+    lists_df = pd.DataFrame([])
+
+    for twitter_list in twitter_lists:
+        if not twitter_list:
+            # remove entry if empty
+            continue
+
+        else:
+            # create a dataframe from the list
+            list_df = pd.DataFrame(twitter_list)
+            lists_df = pd.concat([lists_df, list_df], ignore_index=True)
+
+    lists_df = lists_df.loc[:, COLS_TO_KEEP].copy()
+
+    return lists_df
 
 
 class ListFilter:
@@ -93,3 +112,13 @@ class ListFilter:
         # If name is relevant, return True
         else:
             return relevant_name
+
+
+if __name__ == "__main__":
+
+    twitter_lists = read_json(f"{PATH}/Mumbai_lists.json")
+    lists_df = create_df(twitter_lists)
+    lists_df.drop_duplicates(subset=["list_id"], inplace=True)
+    list_filter = ListFilter(lists_df)
+    lists_df["relevant"] = lists_df.apply(list_filter.is_relevant, axis=1)
+    relevant_lists = lists_df.loc[lists_df["relevant"] == True, :]
