@@ -8,7 +8,7 @@ lists
 import json
 import pandas as pd
 
-from twitter_filtering.utils.constants import PATH, LISTS_KEYWORDS, COLS_TO_KEEP
+from twitter_search.config_utils.constants import PATH, LISTS_KEYWORDS, COLS_TO_KEEP
 
 # Constants
 
