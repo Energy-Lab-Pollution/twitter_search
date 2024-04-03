@@ -15,12 +15,15 @@ class UserGetter:
     COUNT_THRESHOLD = COUNT_THRESHOLD
     SLEEP_TIME = SLEEP_TIME
 
-    def __init__(self, location):
+    def __init__(self, location, input_file, output_file):
         self.location = location
+        self.gmaps_client = util.gmaps_client()
+        self.input_file = input_file
+        self.output_file = output_file
 
-    def get_users_fromlists(self, client, lists_data, output_file, k=None):
+
+    def get_users_fromlists(self, client, lists_data,k=None):
         """
-
         Getting users from lists
 
         Parameters
@@ -45,12 +48,13 @@ class UserGetter:
                 if list_id is not None and list_id not in unique:
                     unique.add(list_id)
                     users = client.get_list_members(
-                        id=list_id,
-                        max_results=self.MAX_RESULTS,
-                        user_fields=util.USER_FIELDS,
+                        id=list_id, max_results= 99, user_fields=util.USER_FIELDS
                     )
                     user_dicts = util.user_dictmaker(users.data)
-                    util.json_maker(output_file, user_dicts)
+                    for user in user_dicts:
+                        user['geo_location'] = self.get_coordinates(user['location'])
+                    util.json_maker(self.output_file, user_dicts)
+
             except Exception as e:
                 print(f"Error fetching users for list {item}: {e}")
                 continue
@@ -68,13 +72,28 @@ class UserGetter:
             # TODO
             # client = util.client_creator()
 
+    def get_coordinates(self,bio_location):
+        if bio_location is None:
+            return (None,None)
+        try:
+            # Geocode the location using Google Maps Geocoding API
+            geocode_result = self.gmaps_client.geocode(bio_location)
+            
+            # Check if any results were returned
+            if geocode_result:
+                lat = geocode_result[0]['geometry']['location']['lat']
+                lng = geocode_result[0]['geometry']['location']['lng']
+                return (lat,lng)
+            else:
+                return (None,None)
+        except Exception as e:
+            print(f"Error geocoding location '{bio_location}': {e}")
+            return (None,None)
+        
     def get_users(self):
         try:
-            dir = Path(__file__).parent.parent.parent / "data/raw_data"
-            input_file = dir / f"{self.location}_lists.json"
-            output_file = dir / f"{self.location}_totalusers.json"
             print("till here")
-            lists_data = util.load_json(input_file)
+            lists_data = util.load_json(self.input_file)
             print(lists_data[:10], "here you go")
             client = util.client_creator()
             print("client created")
@@ -82,7 +101,7 @@ class UserGetter:
             print(len(isolated_lists))
             filtered_lists = util.list_filter_keywords(isolated_lists, self.location)
             print(len(filtered_lists))
-            self.get_users_fromlists(client, filtered_lists, output_file)
+            self.get_users_fromlists(client, filtered_lists)
 
         except Exception as e:
             print(f"An error occurred: {e}")

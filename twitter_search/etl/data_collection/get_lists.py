@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from config_utils import util
-from config_utils.constants import MAX_RESULTS, COUNT_THRESHOLD
+from config_utils.constants import MAX_RESULTS_LISTS, COUNT_THRESHOLD
 
 
 class ListGetter:
@@ -11,13 +11,15 @@ class ListGetter:
     This class is in charge of parsing all of the lists of the twitter users
     """
 
-    MAX_RESULTS = MAX_RESULTS
+    MAX_RESULTS = MAX_RESULTS_LISTS
     COUNT_THRESHOLD = COUNT_THRESHOLD
 
-    def __init__(self, location):
+    def __init__(self, location, input_file, output_file):
         self.location = location
+        self.input_file = input_file
+        self.output_file = output_file
 
-    def getlists_fromusers(self, client, users_list, output_file, k=None):
+    def getlists_fromusers(self, client, users_list, k=None):
         """
         Get lists from users.
 
@@ -36,15 +38,19 @@ class ListGetter:
             k = len(users_list) - 1
         count = 0
         for user in users_list[:k]:
+            print(user,"user")
             response_user_list = client.get_list_memberships(
                 id=user["user_id"],
                 list_fields=util.LIST_FIELDS,
                 max_results=self.MAX_RESULTS,
             )
+            print(response_user_list,"response")
+            print("now isolating lists")
             only_lists = self.isolate_lists(response_user_list)
             # Append data to the JSON file for each user
+            print("lists_isolated")
             list_entries = util.list_dictmaker({user["user_id"]: only_lists})
-            util.json_maker(output_file, list_entries)
+            util.json_maker(self.output_file, list_entries)
             # except Exception as e:
             #     print(f"Incomplete, currently at user {count}. Error: {e}")
             count += 1
@@ -65,14 +71,14 @@ class ListGetter:
         """
         TODO: Add docstring
         """
-        isolated_lists = []
-        for sublist in uncleaned_list:
-            if sublist[0].id:
-                print(sublist[0].id)
-                if sublist not in isolated_lists:
-                    isolated_lists += sublist
+        # isolated_lists = []
+        # for sublist in uncleaned_list:
+        #     if sublist[0].id:
+        #         print(sublist[0].id)
+        #         if sublist not in isolated_lists:
+        #             isolated_lists += sublist
 
-        return isolated_lists
+        return uncleaned_list.data
 
     def get_lists(self):
         """
@@ -80,15 +86,11 @@ class ListGetter:
         and returns them.
         """
         try:
-            dir = Path(__file__).parent.parent.parent / "data/raw_data"
-            output_file = dir / f"{self.location}_lists.json"
-            input_file = dir / f"{self.location}_users.json"
-
             client = util.client_creator()
-            users_list = util.load_json(input_file)
+            users_list = util.load_json(self.input_file)
             isolated_lists = util.flatten_and_remove_empty(users_list)
             print("Now obtaining lists that the users are a part of: ", isolated_lists)
-            self.getlists_fromusers(client, isolated_lists, output_file)
+            self.getlists_fromusers(client, isolated_lists)
             # cleaned_lists = isolate_lists(all_lists)
             # list_dicts = util.list_dictmaker(all_lists)
 

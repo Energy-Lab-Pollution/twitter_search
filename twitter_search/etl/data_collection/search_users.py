@@ -4,8 +4,7 @@ Module for searching users on Twitter based on a query and location.
 Author : Praveen Chandar and Federico Molina
 """
 
-from twitter_search.config_utils import util, constants
-from pathlib import Path
+from config_utils import util, constants
 
 class UserSearcher:
     """
@@ -20,7 +19,7 @@ class UserSearcher:
         client: tweepy client
     """
 
-    def __init__(self,  location, query = None):
+    def __init__(self,  location, output_file, query = None):
         if query is None:
             self.query = self.query_builder(location)
         else:
@@ -30,6 +29,7 @@ class UserSearcher:
         self.total_users = None
         self.twitter_client = util.client_creator()
         self.gmaps_client = util.gmaps_client()
+        self.output_file = output_file
         print("Clients initiated")
 
     def query_builder(self,location):
@@ -137,10 +137,12 @@ class UserSearcher:
             author_id = tweet.get('author_id', None)
             if author_id:
                 for user in self.total_users_dict:
-                    user['geo_location'] = self.get_coordinates(user['location'])
                     if user['user_id'] == author_id:
-                        user['tweets'].append(tweet['text'])   
+                        user['tweets'].append(tweet['text']) 
 
+    def geo_coder(self):
+        for user in self.total_users_dict:
+            user['geo_location'] = self.get_coordinates(user['location'])
 
     def store_users(self):
         """
@@ -152,9 +154,7 @@ class UserSearcher:
         Returns:
             None
         """
-        output_dir = Path(__file__).parent.parent.parent / "data/raw_data"
-        output_file = output_dir / f"{self.location}_users_test.json"
-        util.json_maker(output_file, self.total_users_dict)
+        util.json_maker(self.output_file, self.total_users_dict)
         print("Total number of users:", len(self.total_users))
 
     def run_search_all(self):
