@@ -8,22 +8,26 @@ lists
 import json
 import pandas as pd
 
-from twitter_search.config_utils.constants import PATH, LISTS_KEYWORDS, COLS_TO_KEEP
+from twitter_search.config_utils.constants import (
+    RAW_DATA_PATH,
+    LISTS_KEYWORDS,
+    COLS_TO_KEEP,
+)
 
 # Constants
+FILENAME = "Mumbai_lists"
 
-
-# Functions and pipeline
+# Classes and pipeline
 
 
 class ListReader:
 
-    PATH = PATH
+    PATH = RAW_DATA_PATH
     LISTS_KEYWORDS = LISTS_KEYWORDS
     COLS_TO_KEEP = COLS_TO_KEEP
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, list_filename) -> None:
+        self.list_filename = list_filename
 
     def read_json(self):
         """
@@ -34,7 +38,8 @@ class ListReader:
         Returns:
             data (dict): Dictionary with the JSON data
         """
-        with open(self.PATH, "r") as file:
+
+        with open(f"{self.PATH}/{self.list_filename}", "r") as file:
             data = json.load(file)
         self.twitter_lists = data
 
@@ -66,7 +71,7 @@ class ListReader:
         """
         Performs the complete pipeline to get dataframe of lists
         """
-        self.read_json(f"{PATH}/Mumbai_lists.json")
+        self.read_json()
         self.parse_into_df()
         self.lists_df.drop_duplicates(subset=["list_id"], inplace=True)
 
@@ -133,8 +138,8 @@ class ListFilter:
 if __name__ == "__main__":
 
     print("Reading JSON to create Lists dataframe...")
-    print(f"Reading {PATH}")
-    list_reader = ListReader()
+    print(f"Reading {FILENAME}")
+    list_reader = ListReader(FILENAME)
     lists_df = list_reader.create_df()
 
     print("Filtering dataframe for relevant lists")
