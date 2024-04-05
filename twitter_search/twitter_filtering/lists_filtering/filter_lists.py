@@ -8,7 +8,7 @@ lists
 import json
 import pandas as pd
 
-from twitter_search.config_utils.constants import (
+from utils.constants import (
     RAW_DATA_PATH,
     LISTS_KEYWORDS,
     COLS_TO_KEEP,
@@ -146,4 +146,5 @@ if __name__ == "__main__":
     list_filter = ListFilter(lists_df)
     lists_df["relevant"] = lists_df.apply(list_filter.is_relevant, axis=1)
     relevant_lists = lists_df.loc[lists_df["relevant"].isin([True]), :]
+    print(relevant_lists)
     print("Done!")
