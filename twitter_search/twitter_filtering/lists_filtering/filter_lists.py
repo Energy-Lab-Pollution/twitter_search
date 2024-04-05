@@ -136,8 +136,11 @@ class ListFilter:
 
     def keep_relevant_lists(self):
         """
-        Filters the relevant lists
+        Filters the relevant lists from the dataframe
+        read when initializing the class
         """
         self.df["relevant"] = self.df.apply(self.is_relevant, axis=1)
         self.relevant_lists = self.df.loc[self.df["relevant"].isin([True]), :]
-        self.relevant_lists.drop_index(drop=True, inplace=True)
+        self.relevant_lists.reset_index(drop=True, inplace=True)
+
+        return self.relevant_lists

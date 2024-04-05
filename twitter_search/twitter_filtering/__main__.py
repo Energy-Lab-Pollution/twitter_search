@@ -7,6 +7,7 @@ import argparse
 
 # Local imports
 from lists_filtering.filter_lists import ListReader, ListFilter
+from utils.constants import CLEAN_DATA_PATH
 
 
 parser = argparse.ArgumentParser(description="Apply list filters to a given file")
@@ -16,6 +17,9 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
 
+    if ".json" not in args.filename:
+        raise ValueError("File must be of JSON type")
+
     print("Reading JSON to create Lists dataframe...")
     print(f"Reading {args.filename}")
     list_reader = ListReader(args.filename)
@@ -23,8 +27,8 @@ if __name__ == "__main__":
 
     print("Filtering dataframe for relevant lists")
     list_filter = ListFilter(lists_df)
-    lists_df["relevant"] = lists_df.apply(list_filter.is_relevant, axis=1)
-    relevant_lists = lists_df.loc[lists_df["relevant"].isin([True]), :]
-    relevant_lists.reset_index(drop=True, inplace=True)
-    print(relevant_lists)
-    print("Done!")
+    relevant_lists = list_filter.keep_relevant_lists()
+
+    new_filename = args.filename.replace(".json", "_filtered.json")
+    new_path = f"{CLEAN_DATA_PATH}/{new_filename}"
+    relevant_lists.to_json(f"{new_path}", orient="records")
