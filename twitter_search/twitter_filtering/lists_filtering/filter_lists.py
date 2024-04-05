@@ -134,17 +134,10 @@ class ListFilter:
         else:
             return relevant_name
 
-
-if __name__ == "__main__":
-
-    print("Reading JSON to create Lists dataframe...")
-    print(f"Reading {FILENAME}")
-    list_reader = ListReader(FILENAME)
-    lists_df = list_reader.create_df()
-
-    print("Filtering dataframe for relevant lists")
-    list_filter = ListFilter(lists_df)
-    lists_df["relevant"] = lists_df.apply(list_filter.is_relevant, axis=1)
-    relevant_lists = lists_df.loc[lists_df["relevant"].isin([True]), :]
-    print(relevant_lists)
-    print("Done!")
+    def keep_relevant_lists(self):
+        """
+        Filters the relevant lists
+        """
+        self.df["relevant"] = self.df.apply(self.is_relevant, axis=1)
+        self.relevant_lists = self.df.loc[self.df["relevant"].isin([True]), :]
+        self.relevant_lists.drop_index(drop=True, inplace=True)

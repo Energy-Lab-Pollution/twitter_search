@@ -25,5 +25,6 @@ if __name__ == "__main__":
     list_filter = ListFilter(lists_df)
     lists_df["relevant"] = lists_df.apply(list_filter.is_relevant, axis=1)
     relevant_lists = lists_df.loc[lists_df["relevant"].isin([True]), :]
+    relevant_lists.reset_index(drop=True, inplace=True)
     print(relevant_lists)
     print("Done!")
