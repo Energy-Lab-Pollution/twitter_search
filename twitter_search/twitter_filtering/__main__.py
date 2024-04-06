@@ -3,6 +3,7 @@ Script that executes the main pipelines for user and lists filtering
 """
 
 # Global imports
+import json
 import argparse
 
 # Local imports
