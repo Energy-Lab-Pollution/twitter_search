@@ -1,9 +1,14 @@
+# Twitter Search
+
+The repository contains the code for searching users on twitter based on a given query, and it then applies several filters to keep the users relevant to us. 
 
 ## File Descriptions
 
+For the extraction part, the following files are used:
+
 - **\_\_main\_\_.py:** Entry point of the project. Executes the main functionality based on command-line arguments.
 
-- **config_utils/:** Contains utility functions related to project configuration, such as creating a Tweepy client.
+- **config_utils/:** Contains utility functions related to project configuration, such as creating a Tweepy client, defining constants, etc.
 
 - **data/:** Directory for storing collected data. Includes subdirectories for cleaned and raw data.
 
@@ -16,6 +21,16 @@
   - **run_search_twitter.py:** Script for executing Twitter searches.
 
 - **run.py:** Module containing the main functionality for searching Twitter and saving user data.
+
+For the filtering part, the following files are used, which are located in the `twitter_filtering` directory:
+
+- **lists_filtering/** Directory with code for filtering the retrieved lists.
+
+- **users_filtering/** Directory with code for filtering the retrieved users.
+
+- **utils/** Directory with utility functions and constants for filtering.
+
+- **__main__.py:** Entry point of the filtering part of the project.
 
 ## How to Use
 
