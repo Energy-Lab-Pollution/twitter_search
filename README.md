@@ -34,10 +34,15 @@ For the filtering part, the following files are used, which are located in the `
 
 ## How to Use
 
+For the extraction part:
+
 1. Ensure you have the required dependencies installed by using the provided `poetry.lock` and `pyproject.toml` files.
 
 2. Execute the project using the `__main__.py` file. Provide necessary command-line arguments like location and algorithm.
 
 3. The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
 
+For the filtering part:
+
+Go to the `twitter_filtering` directory and execute the `__main__.py` file. The script will filter the users (still not implemented in the file) and lists based on the specified criteria.
 
