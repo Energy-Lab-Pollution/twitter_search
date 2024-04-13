@@ -58,6 +58,9 @@ def run_search_twitter(query, location):
         print("Retrieving lists associated with filtered users...")
         retrieve_lists(location, input_file_lists, output_file_lists)
 
+        # Filter lists
+        filter_twitter_lists(location, input_file_filter, output_file_filter)
+
         # Retrieve user data from the retrieved lists
         print("Retrieving user data from lists...")
         retrieve_user_data(location, input_file_total, output_file_total)
