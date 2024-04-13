@@ -1,3 +1,7 @@
+"""
+This script runs the Twitter search, data collection and filtering process.
+"""
+
 from pathlib import Path
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.get_lists import ListGetter
