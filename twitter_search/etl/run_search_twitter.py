@@ -48,7 +48,7 @@ def run_search_twitter(query, location):
         if count == 1:
             # Perform search only in the first iteration
             print("Searching for Twitter users...")
-            # search_twitter_users(location, query, output_file_search)
+            search_twitter_users(location, query, output_file_search)
 
         # Filter users based on location
         print("Filtering Twitter users based on location...")
