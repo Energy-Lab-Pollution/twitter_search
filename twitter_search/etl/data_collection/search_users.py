@@ -6,20 +6,21 @@ Author : Praveen Chandar and Federico Molina
 
 from config_utils import util, constants
 
+
 class UserSearcher:
     """
     A class for searching users based on location and optional query.
 
     Attributes:
         location (str): The location for which users are being searched.
-        query (str): The optional query string. If not provided, a default 
+        query (str): The optional query string. If not provided, a default
         query is generated based on the location.
         search_tweets_result: Placeholder for storing search results.
         total_users: Placeholder for storing total number of users found.
         client: tweepy client
     """
 
-    def __init__(self,  location, output_file, query = None):
+    def __init__(self, location, output_file, query=None):
         if query is None:
             self.query = self.query_builder(location)
         else:
@@ -32,16 +33,14 @@ class UserSearcher:
         self.output_file = output_file
         print("Clients initiated")
 
-    def query_builder(self,location):
+    def query_builder(self, location):
 
         return f"(air pollution {location} OR {location} air OR {location} \
             pollution OR {location} public health OR bad air {location} OR \
             {location} asthma OR {location} polluted OR pollution control board) \
             (#pollution OR #environment OR #cleanair OR #airquality) -is:retweet"
 
-    def search_tweets(
-        self, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS
-    ):
+    def search_tweets(self, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS):
         """
         Search for recent tweets based on a query.
 
@@ -57,11 +56,11 @@ class UserSearcher:
             dict: The search result containing tweets and associated users.
         """
         self.search_tweets_result = self.twitter_client.search_recent_tweets(
-            query = self.query,
-            max_results = MAX_RESULTS,
-            expansions = EXPANSIONS,
-            tweet_fields = TWEET_FIELDS,
-            user_fields = USER_FIELDS,
+            query=self.query,
+            max_results=MAX_RESULTS,
+            expansions=EXPANSIONS,
+            tweet_fields=TWEET_FIELDS,
+            user_fields=USER_FIELDS,
         )
         return self.search_tweets_result
 
@@ -91,7 +90,7 @@ class UserSearcher:
             None
         """
 
-        try: 
+        try:
             print("Now searching for tweets")
             self.search_tweets(
                 constants.MAX_RESULTS,
@@ -105,24 +104,24 @@ class UserSearcher:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def get_coordinates(self,location):
+    def get_coordinates(self, location):
         if location is None:
-            return (None,None)
+            return (None, None)
         try:
             # Geocode the location using Google Maps Geocoding API
             geocode_result = self.gmaps_client.geocode(location)
-            
+
             # Check if any results were returned
             if geocode_result:
-                lat = geocode_result[0]['geometry']['location']['lat']
-                lng = geocode_result[0]['geometry']['location']['lng']
-                return (lat,lng)
+                lat = geocode_result[0]["geometry"]["location"]["lat"]
+                lng = geocode_result[0]["geometry"]["location"]["lng"]
+                return (lat, lng)
             else:
-                return (None,None)
+                return (None, None)
         except Exception as e:
             print(f"Error geocoding location '{location}': {e}")
-            return (None,None)
-        
+            return (None, None)
+
     def process_tweets_for_users(self):
         """
         Adds tweets to each user's dictionary.
@@ -134,15 +133,15 @@ class UserSearcher:
             None
         """
         for tweet in self.search_tweets_result.data:
-            author_id = tweet.get('author_id', None)
+            author_id = tweet.get("author_id", None)
             if author_id:
                 for user in self.total_users_dict:
-                    if user['user_id'] == author_id:
-                        user['tweets'].append(tweet['text']) 
+                    if user["user_id"] == author_id:
+                        user["tweets"].append(tweet["text"])
 
     def geo_coder(self):
         for user in self.total_users_dict:
-            user['geo_location'] = self.get_coordinates(user['location'])
+            user["geo_location"] = self.get_coordinates(user["location"])
 
     def store_users(self):
         """
