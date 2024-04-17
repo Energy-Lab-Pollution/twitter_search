@@ -17,6 +17,18 @@ from twitter_filtering.users_filtering.users import UserFilter
 
 
 def filter_twitter_lists(location, input_file_filter, output_file_filter):
+    """
+    This helper function will filter the lists based on some pre-defined
+    keywords.
+
+    Args:
+        location (str): The location to filter the lists for.
+        input_file_filter (str): The input file containing the lists.
+        output_file_filter (str): The output file to save the filtered lists.
+
+    Returns:
+        None
+    """
     list_filter = ListFilter(location, input_file_filter, output_file_filter)
 
     list_reader = ListReader(input_file_filter)
@@ -31,6 +43,9 @@ def filter_twitter_lists(location, input_file_filter, output_file_filter):
 
 
 def additional_iterations_needed(count):
+    """
+    Determine if additional iterations are needed based on the count.
+    """
     return count <= 2  # Example: Perform 2 iterations
 
 
