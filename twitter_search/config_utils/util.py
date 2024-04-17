@@ -110,14 +110,12 @@ def user_dictmaker(user_list):
             "location": user["location"],
             "name": user["name"],
             "url": user["url"],
-            "tweets":[],
-            "geo_code":[]
+            "tweets": [],
+            "geo_code": [],
         }
         values.update(user["public_metrics"])
         dict_list.append(values)
     return dict_list
-
-
 
 
 def list_dictmaker(incoming_datastruct):
@@ -150,8 +148,10 @@ def list_dictmaker(incoming_datastruct):
             dict_list.append(values)
     return dict_list
 
+
 def gmaps_client():
-    return googlemaps.Client( key = config.SECRET_KEY)
+    return googlemaps.Client(key=config.SECRET_KEY)
+
 
 def client_creator():
     """
