@@ -36,17 +36,17 @@ def filter_twitter_lists(input_file_filter, output_file_filter):
     list_filter.keep_relevant_lists()
 
 
-def additional_iterations_needed(count):
+def additional_iterations_needed(count, num_iterations=2):
     """
     Determine if additional iterations are needed based on the count.
     """
-    return count <= 2  # Example: Perform 2 iterations
+    return count <= num_iterations  # Example: Perform 2 iterations
 
 
 # Main function -- May need to be a class later
 
 
-def run_search_twitter(query, location):
+def run_search_twitter(query, location, num_iterations=2):
     """
     Run Twitter search and data collection process.
 
@@ -117,7 +117,7 @@ def run_search_twitter(query, location):
         count += 1
 
         # Check if additional iterations are needed
-        if additional_iterations_needed(count):
+        if additional_iterations_needed(count, num_iterations):
             continue
         else:
             break
