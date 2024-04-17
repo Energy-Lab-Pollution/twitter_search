@@ -43,7 +43,7 @@ def additional_iterations_needed(count):
     return count <= 2  # Example: Perform 2 iterations
 
 
-# Main function
+# Main function -- May need to be a class later
 
 
 def run_search_twitter(query, location):
@@ -73,11 +73,14 @@ def run_search_twitter(query, location):
             input_file_filter = dir / f"{location}_totalusers_{count-1}.json"
 
         output_file_filter = dir / f"{location}_users_filtered_{count}.json"
+
         input_file_lists = output_file_filter
-
         output_file_lists = dir / f"{location}_lists_{count}.json"
-        input_file_total = output_file_lists
 
+        input_file_filter_lists = output_file_lists
+        output_file_filter_lists = dir / f"{location}_lists_filtered_{count}.json"
+
+        input_file_total = output_file_filter_lists
         output_file_total = dir / f"{location}_totalusers_{count}.json"
 
         print(f"Iteration {count}:")
@@ -101,7 +104,9 @@ def run_search_twitter(query, location):
         list_getter.get_lists()
 
         # Filter lists
-        filter_twitter_lists(location, input_file_filter, output_file_filter)
+        filter_twitter_lists(
+            location, input_file_filter_lists, output_file_filter_lists
+        )
 
         # Retrieve user data from the retrieved lists
         print("Retrieving user data from lists...")
