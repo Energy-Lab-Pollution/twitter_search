@@ -2,13 +2,39 @@
 This script runs the Twitter search, data collection and filtering process.
 """
 
+# General imports
+
 from pathlib import Path
-from etl.data_collection.get_users import UserGetter
-from etl.data_collection.get_lists import ListGetter
-from etl.data_collection.search_users import UserSearcher
-from twitter_filtering.users_filtering.users import UserFilter
-from twitter_filtering.lists_filtering.filter_lists import ListFilter, ListReader
+
 from etl.data_cleaning.clean_users import UserCleaner
+from etl.data_collection.get_lists import ListGetter
+from etl.data_collection.get_users import UserGetter
+from etl.data_collection.search_users import UserSearcher
+from twitter_filtering.lists_filtering.filter_lists import ListFilter, ListReader
+from twitter_filtering.users_filtering.users import UserFilter
+
+# Utils functions
+
+
+def filter_twitter_lists(location, input_file_filter, output_file_filter):
+    list_filter = ListFilter(location, input_file_filter, output_file_filter)
+
+    list_reader = ListReader(input_file_filter)
+    lists_df = list_reader.create_df()
+
+    print("Filtering dataframe for relevant lists")
+    list_filter = ListFilter(lists_df)
+    relevant_lists = list_filter.keep_relevant_lists()
+
+    new_filename = input_file_filter.replace(".json", "_filtered.json")
+    relevant_lists.to_json(f"{new_filename}", orient="records")
+
+
+def additional_iterations_needed(count):
+    return count <= 2  # Example: Perform 2 iterations
+
+
+# Main function
 
 
 def run_search_twitter(query, location):
@@ -83,21 +109,3 @@ def run_search_twitter(query, location):
             break
 
     return "Data collection and cleaning process completed."
-
-
-def filter_twitter_lists(location, input_file_filter, output_file_filter):
-    list_filter = ListFilter(location, input_file_filter, output_file_filter)
-
-    list_reader = ListReader(input_file_filter)
-    lists_df = list_reader.create_df()
-
-    print("Filtering dataframe for relevant lists")
-    list_filter = ListFilter(lists_df)
-    relevant_lists = list_filter.keep_relevant_lists()
-
-    new_filename = input_file_filter.replace(".json", "_filtered.json")
-    relevant_lists.to_json(f"{new_filename}", orient="records")
-
-
-def additional_iterations_needed(count):
-    return count <= 2  # Example: Perform 2 iterations
