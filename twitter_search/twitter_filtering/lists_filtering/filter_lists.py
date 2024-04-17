@@ -15,7 +15,7 @@ from twitter_filtering.utils.constants import (
 )
 
 # Constants
-FILENAME = "Mumbai_lists"
+# FILENAME = "Mumbai_lists"
 
 # Classes and pipeline
 
