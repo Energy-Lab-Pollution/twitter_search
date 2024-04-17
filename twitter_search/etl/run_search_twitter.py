@@ -104,9 +104,7 @@ def run_search_twitter(query, location, num_iterations=2):
         list_getter.get_lists()
 
         # Filter lists
-        filter_twitter_lists(
-            location, input_file_filter_lists, output_file_filter_lists
-        )
+        filter_twitter_lists(input_file_filter_lists, output_file_filter_lists)
 
         # Retrieve user data from the retrieved lists
         print("Retrieving user data from lists...")
