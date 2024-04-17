@@ -32,8 +32,8 @@ def filter_twitter_lists(input_file_filter, output_file_filter):
     lists_df = list_reader.create_df()
 
     print("Filtering dataframe for relevant lists")
-    list_filter = ListFilter(lists_df)
-    relevant_lists = list_filter.keep_relevant_lists()
+    list_filter = ListFilter(lists_df, output_file_filter)
+    list_filter.keep_relevant_lists()
 
 
 def additional_iterations_needed(count):

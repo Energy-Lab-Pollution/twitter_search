@@ -26,9 +26,7 @@ if __name__ == "__main__":
     lists_df = list_reader.create_df()
 
     print("Filtering dataframe for relevant lists")
-    list_filter = ListFilter(lists_df)
-    relevant_lists = list_filter.keep_relevant_lists()
-
     new_filename = args.filename.replace(".json", "_filtered.json")
     new_path = f"{CLEAN_DATA_PATH}/{new_filename}"
-    relevant_lists.to_json(f"{new_path}", orient="records")
+    list_filter = ListFilter(lists_df, new_path)
+    list_filter.keep_relevant_lists()
