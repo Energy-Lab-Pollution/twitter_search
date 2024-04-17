@@ -39,7 +39,7 @@ class ListReader:
             data (dict): Dictionary with the JSON data
         """
 
-        with open(f"{self.PATH}/{self.list_filename}", "r") as file:
+        with open(f"{self.list_filename}", "r") as file:
             data = json.load(file)
         self.twitter_lists = data
 
