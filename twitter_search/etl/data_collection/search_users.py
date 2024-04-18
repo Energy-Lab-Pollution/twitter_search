@@ -105,6 +105,9 @@ class UserSearcher:
             print(f"An error occurred: {e}")
 
     def get_coordinates(self, location):
+        """
+        Get the latitude and longitude coordinates of a location.
+        """
         if location is None:
             return (None, None)
         try:
