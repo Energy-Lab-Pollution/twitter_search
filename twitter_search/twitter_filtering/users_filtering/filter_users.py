@@ -122,7 +122,8 @@ class UserFilter:
                     print(joined_data.head())
                     try:
                         subnational = joined_data["shapeName"].iloc[0].lower()
-                    except:
+                    except Exception as e:
+                        print(f"Error determining subnational location: {e}")
                         subnational = None
                     print(subnational, "subnational")
                     desired_locations = constants.STATE_CAPITALS.get(self.location, [])
