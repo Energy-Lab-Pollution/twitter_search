@@ -82,40 +82,45 @@ class UserFilter:
         user location"""
 
         for user in self.total_user_dict:
-            if user["geo_location"] is not None and None not in user["geo_location"]:
-                # Assuming user['geo_location'] is always a list
-                # with two elements (latitude and longitude)
-                # latitude, longitude = user['geo_location']
-                user_location = gpd.GeoDataFrame(
-                    {
-                        "geometry": [
-                            Point(user["geo_location"][1], user["geo_location"][0])
-                        ]
-                    },
-                    crs="EPSG:4326",
-                )
 
-                shapefile_path = (
-                    Path(__file__).parent.parent
-                    / "utils/shape_files/geoBoundaries-IND-ADM1-all/geoBoundaries-IND-ADM1_simplified.shp"
-                )
+            if "geo_location" in user:
+                if (
+                    user["geo_location"] is not None
+                    and None not in user["geo_location"]
+                ):
+                    # Assuming user['geo_location'] is always a list
+                    # with two elements (latitude and longitude)
+                    # latitude, longitude = user['geo_location']
+                    user_location = gpd.GeoDataFrame(
+                        {
+                            "geometry": [
+                                Point(user["geo_location"][1], user["geo_location"][0])
+                            ]
+                        },
+                        crs="EPSG:4326",
+                    )
 
-                shapefile = gpd.read_file(shapefile_path)
-                joined_data = gpd.sjoin(
-                    user_location, shapefile, how="left", op="within"
-                )
+                    shapefile_path = (
+                        Path(__file__).parent.parent
+                        / "utils/shape_files/geoBoundaries-IND-ADM1-all/geoBoundaries-IND-ADM1_simplified.shp"
+                    )
 
-                print(joined_data.head())
-                try:
-                    subnational = joined_data["shapeName"].iloc[0].lower()
-                except:
-                    subnational = None
-                print(subnational, "subnational")
-                desired_locations = constants.STATE_CAPITALS.get(self.location, [])
-                print("desired locations", desired_locations)
-                user["location_relevance"] = subnational in desired_locations
-            else:
-                user["location_relevance"] = False
+                    shapefile = gpd.read_file(shapefile_path)
+                    joined_data = gpd.sjoin(
+                        user_location, shapefile, how="left", op="within"
+                    )
+
+                    print(joined_data.head())
+                    try:
+                        subnational = joined_data["shapeName"].iloc[0].lower()
+                    except:
+                        subnational = None
+                    print(subnational, "subnational")
+                    desired_locations = constants.STATE_CAPITALS.get(self.location, [])
+                    print("desired locations", desired_locations)
+                    user["location_relevance"] = subnational in desired_locations
+                else:
+                    user["location_relevance"] = False
 
     def remove_users(self):
 
