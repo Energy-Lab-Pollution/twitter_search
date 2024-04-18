@@ -89,13 +89,13 @@ def run_search_twitter(query, location, num_iterations=2):
             # Perform search only in the first iteration
             print("Searching for Twitter users...")
 
-        #     user_searcher = UserSearcher(location, output_file_search, query)
-        #     user_searcher.run_search_all()
+            user_searcher = UserSearcher(location, output_file_search, query)
+            user_searcher.run_search_all()
 
-        # # Filter users based on location
-        # print("Filtering Twitter users based on location...")
+        # Filter users based on location
+        print("Filtering Twitter users based on location...")
 
-        # print("Input file:", input_file_filter)
+        print("Input file:", input_file_filter)
 
         user_filter = UserFilter(location, input_file_filter, output_file_filter)
         user_filter.run_filtering()

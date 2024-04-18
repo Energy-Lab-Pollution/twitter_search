@@ -83,7 +83,9 @@ class UserFilter:
 
         for user in self.total_user_dict:
 
-            if "geo_location" in user:
+            if "geo_location" not in user:
+                raise ValueError("User geo_location not found")
+            else:
                 if (
                     user["geo_location"] is not None
                     and None not in user["geo_location"]
@@ -147,13 +149,11 @@ class UserFilter:
             location (str): The location to filter users from.
         """
         try:
-            # user_filter = UserFilter(location)
-            # print("object created, step 1 done \n")
             self.load_and_preprocess_data()
             print("data preprocessed, step 2 done yay \n")
             self.classify_content_relevance()
             print(
-                """users classified based on name,bio, \n
+                """users classified based on name, bio, \n
                 and their tweets, step 3 done \n"""
             )
             self.determine_location_relevance()

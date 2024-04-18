@@ -4,6 +4,14 @@ This script contains constants used across the project.
 
 # CONSTANTS FOR THE UTIL SCRIPT
 
+# MODEL TYPE AND PIPELINE
+
+HUGGINGFACE_PIPELINE = ("zero-shot-classification",)
+
+HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
+
+# OTHER CONSTANTS
+
 LIST_FIELDS = ["id", "name", "description"]
 USER_FIELDS = [
     "created_at",
