@@ -142,6 +142,8 @@ class UserFilter:
             ):
                 self.filtered_user.append(user)
 
+        print(f"Filtered {len(self.filtered_user)} relevant users")
+
     def store_users(self):
 
         try:

@@ -101,6 +101,10 @@ def run_search_twitter(query, location, num_iterations=2):
         user_filter = UserFilter(location, input_file_filter, output_file_filter)
         user_filter.run_filtering()
 
+        if not user_filter.filtered_user:
+            print("No relevant users were found.")
+            break
+
         print("Lists - input file:", input_file_lists)
         # Retrieve lists associated with filtered users
         print("Retrieving lists associated with filtered users...")
