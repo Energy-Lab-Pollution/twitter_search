@@ -11,7 +11,7 @@ from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
 from twitter_filtering.lists_filtering.filter_lists import ListFilter, ListReader
-from twitter_filtering.users_filtering.users import UserFilter
+from twitter_search.twitter_filtering.users_filtering.filter_users import UserFilter
 
 # Utils functions
 
