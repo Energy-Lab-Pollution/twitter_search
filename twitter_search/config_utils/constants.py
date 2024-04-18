@@ -4,11 +4,13 @@ This script contains constants used across the project.
 
 # CONSTANTS FOR THE UTIL SCRIPT
 
-# MODEL TYPE AND PIPELINE
+# NLP CONSTANTS
 
 HUGGINGFACE_PIPELINE = "zero-shot-classification"
 
 HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
+
+SCORE_THRESHOLD = 0.5
 
 # OTHER CONSTANTS
 

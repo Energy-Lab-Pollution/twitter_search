@@ -10,6 +10,8 @@ from config_utils import util, constants
 
 
 class UserFilter:
+    SCORE_THRESHOLD = constants.SCORE_THRESHOLD
+
     def __init__(self, location, input_file, output_file):
         """
         Initialize UserFilter with a specific location.
@@ -67,7 +69,7 @@ class UserFilter:
                     for label, score in zip(
                         classification["labels"], classification["scores"]
                     )
-                    if score > 0.5
+                    if score > self.SCORE_THRESHOLD
                 ]
 
                 user["content_is_relevant"] = bool(relevant_labels_predicted)
