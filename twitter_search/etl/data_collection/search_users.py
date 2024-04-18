@@ -1,7 +1,7 @@
 """
 Module for searching users on Twitter based on a query and location.
 
-Author : Praveen Chandar and Federico Molina
+Author : Praveen Chandar and Federico Dominguez Molina
 """
 
 from config_utils import util, constants
