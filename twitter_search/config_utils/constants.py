@@ -6,7 +6,7 @@ This script contains constants used across the project.
 
 # MODEL TYPE AND PIPELINE
 
-HUGGINGFACE_PIPELINE = ("zero-shot-classification",)
+HUGGINGFACE_PIPELINE = "zero-shot-classification"
 
 HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
 
