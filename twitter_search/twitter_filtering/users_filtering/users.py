@@ -23,6 +23,9 @@ class UserFilter:
         self.relevant_labels = constants.RELEVANT_LABELS
         self.input_file = input_file
         self.output_file = output_file
+        self.pipeline = pipeline(
+            constants.HUGGINGFACE_PIPELINE, model=constants.HUGGINGFACE_MODEL
+        )
 
     def load_and_preprocess_data(self):
         """Load and preprocess data from JSON file."""
@@ -39,9 +42,10 @@ class UserFilter:
 
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
-        their name, bio, and tweets"""
+        their name, bio, and tweets
 
-        pipe = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+        We use a pre-trained model from Hugging Face to classify
+        """
         count = 0
         for user in self.total_user_dict:
             count += 1
@@ -56,7 +60,7 @@ class UserFilter:
                 ]
             )
             try:
-                classification = pipe(
+                classification = self.pipeline(
                     user["token"], candidate_labels=self.relevant_labels
                 )
                 relevant_labels_predicted = [
@@ -84,7 +88,9 @@ class UserFilter:
         for user in self.total_user_dict:
 
             if "geo_location" not in user:
-                raise ValueError("User geo_location not found")
+                raise ValueError(
+                    f"User geo_location not found, present fields are: {user.keys()}"
+                )
             else:
                 if (
                     user["geo_location"] is not None
