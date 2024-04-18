@@ -17,14 +17,12 @@ def build_query(location):
 def main():
 
     parser = ArgumentParser(
-        description="Get users from Twitter \
-                        based on location and algorithm."
+        description="Get users from Twitter based on location and algorithm."
     )
     parser.add_argument(
         "location",
         type=str,
-        help="Specify the\
-                            location (city) for Twitter user search.",
+        help="Specify the location (city) for Twitter user search.",
     )
 
     parser.add_argument(

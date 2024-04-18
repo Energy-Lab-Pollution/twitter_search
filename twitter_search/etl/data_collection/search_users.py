@@ -140,6 +140,9 @@ class UserSearcher:
                         user["tweets"].append(tweet["text"])
 
     def geo_coder(self):
+        """
+        Runs the geocoding process for all users.
+        """
         for user in self.total_users_dict:
             user["geo_location"] = self.get_coordinates(user["location"])
 
@@ -159,4 +162,5 @@ class UserSearcher:
     def run_search_all(self):
         self.search_users()
         self.process_tweets_for_users()
+        self.geo_coder()
         self.store_users()
