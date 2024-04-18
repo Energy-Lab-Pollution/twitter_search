@@ -3,7 +3,6 @@ Script in charge of filtering users based on their location and content relevanc
 """
 
 from pathlib import Path
-import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 from transformers import pipeline
