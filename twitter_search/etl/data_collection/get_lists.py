@@ -1,6 +1,5 @@
 import time
 from datetime import datetime
-from pathlib import Path
 
 from config_utils import util
 from config_utils.constants import MAX_RESULTS_LISTS, COUNT_THRESHOLD
@@ -46,11 +45,13 @@ class ListGetter:
             )
             print(response_user_list, "response")
 
-            if response_user_list is None:
+            if response_user_list.data is None:
+                print("No users found")
                 continue
 
             print("now isolating lists")
             only_lists = self.isolate_lists(response_user_list)
+
             # Append data to the JSON file for each user
             print("lists_isolated")
             list_entries = util.list_dictmaker({user["user_id"]: only_lists})
@@ -91,12 +92,9 @@ class ListGetter:
             client = util.client_creator()
             users_list = util.load_json(self.input_file)
             isolated_lists = util.flatten_and_remove_empty(users_list)
-            print("Now obtaining lists that the users are a part of: ", isolated_lists)
+            print("Now obtaining lists that the users are a part of")
+            print(f"We have {len(isolated_lists)} users to get lists from")
             self.getlists_fromusers(client, isolated_lists)
-            # cleaned_lists = isolate_lists(all_lists)
-            # list_dicts = util.list_dictmaker(all_lists)
-
-            # util.json_maker_lists(output_file,list_dicts)
 
         except Exception as e:
             print(f"An error occurred: {e}")

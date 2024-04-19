@@ -3,10 +3,11 @@ Script in charge of filtering users based on their location and content relevanc
 """
 
 from pathlib import Path
+
 import geopandas as gpd
+from config_utils import constants, util
 from shapely.geometry import Point
 from transformers import pipeline
-from config_utils import util, constants
 
 
 class UserFilter:
@@ -36,9 +37,6 @@ class UserFilter:
     def load_and_preprocess_data(self):
         """Load and preprocess data from JSON file."""
 
-        # data_dir = Path(__file__).parent.parent.parent.parent \
-        # / "twitter_search/data/raw_data"
-        # input_file = data_dir / f"{self.location}_users_test.json"
         try:
             self.users_list = util.load_json(self.input_file)
             self.total_user_dict = util.flatten_and_remove_empty(self.users_list)
@@ -161,8 +159,7 @@ class UserFilter:
             print("data preprocessed, step 2 done yay \n")
             self.classify_content_relevance()
             print(
-                """users classified based on name, bio, \n
-                and their tweets, step 3 done \n"""
+                """users classified based on name, bio, and their tweets, step 3 done \n"""
             )
             self.determine_location_relevance()
             print(f"relevant users for {self.location} tagged step 4 done \n")
