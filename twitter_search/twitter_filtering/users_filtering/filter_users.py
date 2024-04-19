@@ -28,6 +28,11 @@ class UserFilter:
             constants.HUGGINGFACE_PIPELINE, model=constants.HUGGINGFACE_MODEL
         )
 
+        self.shapefile_path = (
+            Path(__file__).parent.parent
+            / "utils/shape_files/geoBoundaries-IND-ADM1-all/geoBoundaries-IND-ADM1_simplified.shp"
+        )
+
     def load_and_preprocess_data(self):
         """Load and preprocess data from JSON file."""
 
@@ -109,17 +114,10 @@ class UserFilter:
                         crs="EPSG:4326",
                     )
 
-                    shapefile_path = (
-                        Path(__file__).parent.parent
-                        / "utils/shape_files/geoBoundaries-IND-ADM1-all/geoBoundaries-IND-ADM1_simplified.shp"
-                    )
-
-                    shapefile = gpd.read_file(shapefile_path)
+                    shapefile = gpd.read_file(self.shapefile_path)
                     joined_data = gpd.sjoin(
                         user_location, shapefile, how="left", op="within"
                     )
-
-                    print(joined_data.head())
                     try:
                         subnational = joined_data["shapeName"].iloc[0].lower()
                     except Exception as e:
@@ -138,7 +136,7 @@ class UserFilter:
         for user in self.total_user_dict:
             if (
                 user["location_relevance"] is True
-                and user["content_is_relevant"] is True
+                or user["content_is_relevant"] is True
             ):
                 self.filtered_user.append(user)
 

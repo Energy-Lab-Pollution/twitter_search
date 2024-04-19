@@ -38,13 +38,13 @@ class ListGetter:
             k = len(users_list) - 1
         count = 0
         for user in users_list[:k]:
-            print(user,"user")
+            print(user, "user")
             response_user_list = client.get_list_memberships(
                 id=user["user_id"],
                 list_fields=util.LIST_FIELDS,
                 max_results=self.MAX_RESULTS,
             )
-            print(response_user_list,"response")
+            print(response_user_list, "response")
             print("now isolating lists")
             only_lists = self.isolate_lists(response_user_list)
             # Append data to the JSON file for each user
