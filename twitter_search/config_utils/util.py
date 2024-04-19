@@ -150,6 +150,9 @@ def list_dictmaker(incoming_datastruct):
 
 
 def gmaps_client():
+    """
+    Creates google maps client
+    """
     return googlemaps.Client(key=config.SECRET_KEY)
 
 
@@ -162,6 +165,7 @@ def client_creator():
     access_token = config.access_token
     access_token_secret = config.access_token_secret
     bearer_token = config.bearer_token
+
     return tweepy.Client(
         bearer_token=bearer_token,
         consumer_key=consumer_key,
