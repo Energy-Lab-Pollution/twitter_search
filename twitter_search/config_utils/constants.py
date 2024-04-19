@@ -4,6 +4,16 @@ This script contains constants used across the project.
 
 # CONSTANTS FOR THE UTIL SCRIPT
 
+# NLP CONSTANTS
+
+HUGGINGFACE_PIPELINE = "zero-shot-classification"
+
+HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
+
+SCORE_THRESHOLD = 0.5
+
+# OTHER CONSTANTS
+
 LIST_FIELDS = ["id", "name", "description"]
 USER_FIELDS = [
     "created_at",
@@ -63,7 +73,7 @@ STATE_CAPITALS = {
 }
 
 
-MAX_RESULTS = 10
+MAX_RESULTS = 25
 MAX_RESULTS_LISTS = 100
 EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
 TWEET_FIELDS = [

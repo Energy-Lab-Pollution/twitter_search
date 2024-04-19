@@ -21,8 +21,7 @@ class UserGetter:
         self.input_file = input_file
         self.output_file = output_file
 
-
-    def get_users_fromlists(self, client, lists_data,k=None):
+    def get_users_fromlists(self, client, lists_data, k=None):
         """
         Getting users from lists
 
@@ -48,11 +47,11 @@ class UserGetter:
                 if list_id is not None and list_id not in unique:
                     unique.add(list_id)
                     users = client.get_list_members(
-                        id=list_id, max_results= 99, user_fields=util.USER_FIELDS
+                        id=list_id, max_results=99, user_fields=util.USER_FIELDS
                     )
                     user_dicts = util.user_dictmaker(users.data)
                     for user in user_dicts:
-                        user['geo_location'] = self.get_coordinates(user['location'])
+                        user["geo_location"] = self.get_coordinates(user["location"])
                     util.json_maker(self.output_file, user_dicts)
 
             except Exception as e:
@@ -72,24 +71,24 @@ class UserGetter:
             # TODO
             # client = util.client_creator()
 
-    def get_coordinates(self,bio_location):
+    def get_coordinates(self, bio_location):
         if bio_location is None:
-            return (None,None)
+            return (None, None)
         try:
             # Geocode the location using Google Maps Geocoding API
             geocode_result = self.gmaps_client.geocode(bio_location)
-            
+
             # Check if any results were returned
             if geocode_result:
-                lat = geocode_result[0]['geometry']['location']['lat']
-                lng = geocode_result[0]['geometry']['location']['lng']
-                return (lat,lng)
+                lat = geocode_result[0]["geometry"]["location"]["lat"]
+                lng = geocode_result[0]["geometry"]["location"]["lng"]
+                return (lat, lng)
             else:
-                return (None,None)
+                return (None, None)
         except Exception as e:
             print(f"Error geocoding location '{bio_location}': {e}")
-            return (None,None)
-        
+            return (None, None)
+
     def get_users(self):
         try:
             print("till here")
