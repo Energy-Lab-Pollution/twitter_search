@@ -45,6 +45,10 @@ class ListGetter:
                 max_results=self.MAX_RESULTS,
             )
             print(response_user_list, "response")
+
+            if response_user_list is None:
+                continue
+
             print("now isolating lists")
             only_lists = self.isolate_lists(response_user_list)
             # Append data to the JSON file for each user
@@ -64,8 +68,6 @@ class ListGetter:
                     time_block += 1
                 count = 0
             time.sleep(1)
-            # TODO
-            # client = util.client_creator()
 
     def isolate_lists(self, uncleaned_list):
         """
