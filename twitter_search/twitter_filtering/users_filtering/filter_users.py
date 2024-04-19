@@ -129,12 +129,15 @@ class UserFilter:
                     user["location_relevance"] = False
 
     def remove_users(self):
+        """
+        Removes users that are not relevant based on their location and content.
+        """
 
         self.filtered_user = []
         for user in self.total_user_dict:
             if (
                 user["location_relevance"] is True
-                or user["content_is_relevant"] is True
+                and user["content_is_relevant"] is True
             ):
                 self.filtered_user.append(user)
 
