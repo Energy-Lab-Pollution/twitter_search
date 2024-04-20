@@ -8,14 +8,14 @@ lists
 import json
 import pandas as pd
 
-from utils.constants import (
+from twitter_filtering.utils.constants import (
     RAW_DATA_PATH,
     LISTS_KEYWORDS,
     COLS_TO_KEEP,
 )
 
 # Constants
-FILENAME = "Mumbai_lists"
+# FILENAME = "Mumbai_lists"
 
 # Classes and pipeline
 
@@ -39,7 +39,7 @@ class ListReader:
             data (dict): Dictionary with the JSON data
         """
 
-        with open(f"{self.PATH}/{self.list_filename}", "r") as file:
+        with open(f"{self.list_filename}", "r") as file:
             data = json.load(file)
         self.twitter_lists = data
 
@@ -83,8 +83,9 @@ class ListFilter:
     Class to filter lists based on keywords
     """
 
-    def __init__(self, df) -> None:
+    def __init__(self, df, output_file) -> None:
         self.df = df
+        self.output_file = output_file
 
     @staticmethod
     def clean_text(text):
@@ -142,5 +143,7 @@ class ListFilter:
         self.df["relevant"] = self.df.apply(self.is_relevant, axis=1)
         self.relevant_lists = self.df.loc[self.df["relevant"].isin([True]), :]
         self.relevant_lists.reset_index(drop=True, inplace=True)
+
+        self.relevant_lists.to_json(f"{self.output_file}", orient="records")
 
         return self.relevant_lists

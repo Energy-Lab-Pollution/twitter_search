@@ -17,14 +17,18 @@ def build_query(location):
 def main():
 
     parser = ArgumentParser(
-        description="Get users from Twitter \
-                        based on location and algorithm."
+        description="Get users from Twitter based on location and algorithm."
     )
     parser.add_argument(
         "location",
         type=str,
-        help="Specify the\
-                            location (city) for Twitter user search.",
+        help="Specify the location (city) for Twitter user search.",
+    )
+
+    parser.add_argument(
+        "--num_iterations",
+        type=int,
+        help="Specify the number of iterations to run.",
     )
     # parser.add_argument("--algorithm", type=int, choices=[1, 2], \
     # help="Specify the algorithm (1 or 2).")
@@ -34,4 +38,10 @@ def main():
     # Build the query based on args.location
     query = build_query(location)
     print(query)
-    run_search_twitter.run_search_twitter(query, location)
+
+    if args.num_iterations:
+        num_iterations = args.num_iterations
+        run_search_twitter.run_search_twitter(query, location, num_iterations)
+
+    else:
+        run_search_twitter.run_search_twitter(query, location)
