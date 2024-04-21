@@ -10,7 +10,7 @@ HUGGINGFACE_PIPELINE = "zero-shot-classification"
 
 HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
 
-SCORE_THRESHOLD = 0.5
+SCORE_THRESHOLD = 0.4
 
 # OTHER CONSTANTS
 
@@ -32,7 +32,7 @@ USER_FIELDS = [
 ]
 
 #TODO change the labels to more relevant stuff.
-RELEVANT_LABELS = ["pollution", "environment", "public health", "climate"]
+RELEVANT_LABELS = ["pollution", "environment", "public health", "climate","research","politics","policy maker"]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
 # Dictionary mapping Indian state capitals to their respective states
 STATE_CAPITALS = {
@@ -73,7 +73,7 @@ STATE_CAPITALS = {
 }
 
 
-MAX_RESULTS = 25
+MAX_RESULTS = 10
 MAX_RESULTS_LISTS = 100
 EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
 TWEET_FIELDS = [

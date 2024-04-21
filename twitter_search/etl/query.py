@@ -5,13 +5,15 @@ This script is used to create class Query. Query class' attributes help in build
 
 class Query:
 
-
     def __init__(self,location,account_type):
         self.location = location
         self.account_type = account_type
-        self.text = self.query_builder(location,account_type)
-
-
+        self.text = self.query_builder()
+        if self.text is not None:
+            print(f'query built for {self.location} location and \
+                  {self.account_type} account type')
+            
+    #TODO optimize the queries further by playing on twitter website.
     def query_builder(self):
         if self.account_type == 'media':
                 return f"(media {self.location} OR reporter {self.location} OR {self.location} journalism OR {self.location} \

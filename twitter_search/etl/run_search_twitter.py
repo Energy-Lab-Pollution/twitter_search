@@ -12,7 +12,7 @@ from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
 from twitter_filtering.lists_filtering.filter_lists import ListFilter, ListReader
 from twitter_filtering.users_filtering.filter_users import UserFilter
-from query import Query
+from etl.query import Query
 # Utils functions
 
 
@@ -68,23 +68,23 @@ def run_search_twitter(location,account_type,num_iterations=2):
     while True:
         # Set up file paths with count
         dir = Path(__file__).parent.parent / "data/raw_data"
-        output_file_search = dir / f"{location}_users_test.json"
+        output_file_search = dir / f"{location}_{account_type}_users_test.json"
 
         if count == 1:
             input_file_filter = output_file_search
         else:
-            input_file_filter = dir / f"{location}_totalusers_{count-1}.json"
+            input_file_filter = dir / f"{location}_{account_type}_totalusers_{count-1}.json"
 
-        output_file_filter = dir / f"{location}_users_filtered_{count}.json"
+        output_file_filter = dir / f"{location}_{account_type}_users_filtered_{count}.json"
 
         input_file_lists = output_file_filter
-        output_file_lists = dir / f"{location}_lists_{count}.json"
+        output_file_lists = dir / f"{location}_{account_type}_lists_{count}.json"
 
         input_file_filter_lists = output_file_lists
-        output_file_filter_lists = dir / f"{location}_lists_filtered_{count}.json"
+        output_file_filter_lists = dir / f"{location}_{account_type}_lists_filtered_{count}.json"
 
         input_file_total = output_file_filter_lists
-        output_file_total = dir / f"{location}_totalusers_{count}.json"
+        output_file_total = dir / f"{location}_{account_type}_totalusers_{count}.json"
 
         print(f"Iteration {count}:")
 

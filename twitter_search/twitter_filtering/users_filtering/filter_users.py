@@ -28,7 +28,7 @@ class UserFilter:
         self.pipeline = pipeline(
             constants.HUGGINGFACE_PIPELINE, model=constants.HUGGINGFACE_MODEL
         )
-
+        #TODO, based on location, select the appropriate shape file.
         self.shapefile_path = (
             Path(__file__).parent.parent
             / "utils/shape_files/geoBoundaries-IND-ADM1-all/geoBoundaries-IND-ADM1_simplified.shp"
@@ -40,6 +40,7 @@ class UserFilter:
         try:
             self.users_list = util.load_json(self.input_file)
             self.total_user_dict = util.flatten_and_remove_empty(self.users_list)
+            print('users look like this',self.total_user_dict)
         except Exception as e:
             print(f"Error loading data: {e}")
             self.total_user_dict = []
