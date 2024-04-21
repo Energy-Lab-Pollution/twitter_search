@@ -12,7 +12,7 @@ from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
 from twitter_filtering.lists_filtering.filter_lists import ListFilter, ListReader
 from twitter_filtering.users_filtering.filter_users import UserFilter
-
+from query import Query
 # Utils functions
 
 
@@ -46,7 +46,7 @@ def additional_iterations_needed(count, num_iterations=2):
 # Main function -- May need to be a class later
 
 
-def run_search_twitter(query, location, num_iterations=2):
+def run_search_twitter(location,account_type,num_iterations=2):
     """
     Run Twitter search and data collection process.
 
@@ -62,6 +62,8 @@ def run_search_twitter(query, location, num_iterations=2):
     """
     count = 1
     location = location.lower()
+    query = Query(location,account_type)
+    query.query_builder()
 
     while True:
         # Set up file paths with count
@@ -90,7 +92,7 @@ def run_search_twitter(query, location, num_iterations=2):
             # Perform search only in the first iteration
             print("Searching for Twitter users...")
 
-            user_searcher = UserSearcher(location, output_file_search, query)
+            user_searcher = UserSearcher(location, output_file_search, query.text)
             user_searcher.run_search_all()
 
         # Filter users based on location

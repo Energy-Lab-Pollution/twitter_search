@@ -6,36 +6,40 @@ This script is used to create class Query. Query class' attributes help in build
 class Query:
 
 
-    def __init__(self,location,type):
+    def __init__(self,location,account_type):
         self.location = location
-        self.type = type
-        self.text = self.query_builder(location,type)
+        self.account_type = account_type
+        self.text = self.query_builder(location,account_type)
 
 
-    def query_builder(self,location,type):
-        if type == 'media':
-                return f"(media {location} OR reporter {location} OR {location} journalism OR {location} \
-                        news OR {location} publications OR news agency {location}) \
+    def query_builder(self):
+        if self.account_type == 'media':
+                return f"(media {self.location} OR reporter {self.location} OR {self.location} journalism OR {self.location} \
+                        news OR {self.location} publications OR news agency {self.location}) \
                         (#news OR #media OR #journalism OR #reporter OR #journalist) -is:retweet"
-        elif type == 'organizations':
-            return f"(NGO {location} OR organization {location} OR non-profit {location} OR \
-                    {location} OR {location} institution OR non-governmental organization) \
+        elif self.account_type == 'organizations':
+            return f"(NGO {self.location} OR organization {self.location} OR non-profit {self.location} OR \
+                    {self.location} OR {self.location} institution OR non-governmental organization) \
                     (#non-profit OR #NGO OR #NPO)\
                     -is:retweet"
-        elif type == 'policymaker':
+        elif self.account_type == 'policymaker':
             return f"(member of parliament OR minister OR magistrate OR District magistrate OR IAS OR officer OR cabinet OR mayor OR councillor OR localgovernment OR city official OR MLA OR MP)  \
-                    ({location} OR {location} government OR {location} council OR {location} municipality) \
+                    ({self.location} OR {self.location} government OR {self.location} council OR {self.location} municipality) \
                     (#MP OR #MLA OR #cabinet OR #minister OR #seceretary OR #IAS OR #IPS)\
                     -is:retweet"
-        elif type == 'politicians':
+        elif self.account_type == 'politicians':
             return f"(politics OR politicians) \
-                    ({location} OR {location} politics OR {location} government) \
+                    ({self.location} OR {self.location} politics OR {self.location} government) \
                     (#politics OR #politician OR #election)\
                     -is:retweet"
-        elif type == 'researcher':
-            return f"(environmental researcher OR health researcher OR academic OR researcher OR studying) \
-                    (environment OR health OR research OR #science OR #academic) \
-                    ({location} OR {location} research OR {location} science OR {location} academic) \
+        elif self.account_type == 'researcher':
+            return f"{self.location} ((public heath) OR (environmental research) OR (environmental researcher) \
+                OR health OR science OR academic OR research) (#science OR #research OR #academic) \
                     -is:retweet"
+        elif self.account_type == 'environment':
+            return f"(air pollution {self.location} OR {self.location} air OR {self.location} \
+                    pollution OR {self.location} public health OR bad air {self.location} OR \
+                    {self.location} asthma OR {self.location} polluted OR pollution control board) \
+                    (#pollution OR #environment OR #cleanair OR #airquality) -is:retweet"
         else:
             return None

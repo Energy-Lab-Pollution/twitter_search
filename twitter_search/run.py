@@ -6,19 +6,12 @@ from etl import run_search_twitter
 from argparse import ArgumentParser
 
 
-def build_query(location):
-
-    return f"(air pollution {location} OR {location} air OR {location} \
-        pollution OR {location} public health OR bad air {location} OR \
-        {location} asthma OR {location} polluted OR pollution control board) \
-        (#pollution OR #environment OR #cleanair OR #airquality) -is:retweet"
-
-
 def main():
 
     parser = ArgumentParser(
-        description="Get users from Twitter based on location and algorithm."
+        description="Get users from Twitter based on location,type and algorithm."
     )
+
     parser.add_argument(
         "location",
         type=str,
@@ -26,22 +19,29 @@ def main():
     )
 
     parser.add_argument(
+        "account_type",
+        type=str,
+        help="type of accouts that you want\
+              [media,organizations,policymaker,politicians,researcher,environment]",
+    )
+
+    parser.add_argument(
         "--num_iterations",
         type=int,
         help="Specify the number of iterations to run.",
     )
+
     # parser.add_argument("--algorithm", type=int, choices=[1, 2], \
     # help="Specify the algorithm (1 or 2).")
     args = parser.parse_args()
     location = args.location
+    account_type = args.account_type
     print("Building query...")
-    # Build the query based on args.location
-    query = build_query(location)
-    print(query)
+
 
     if args.num_iterations:
         num_iterations = args.num_iterations
-        run_search_twitter.run_search_twitter(query, location, num_iterations)
+        run_search_twitter.run_search_twitter(location, account_type,num_iterations)
 
     else:
-        run_search_twitter.run_search_twitter(query, location)
+        run_search_twitter.run_search_twitter(location,account_type)
