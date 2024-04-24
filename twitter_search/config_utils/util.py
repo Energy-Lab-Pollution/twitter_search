@@ -85,6 +85,48 @@ def list_filter_keywords(all_lists, location):
 
     return list(filtered_lists)
 
+def tweet_dictmaker(tweet_list):
+    """
+    This function takes a list of tweet objects and
+    transforms it into a list of dictionaries
+
+    Parameters
+    ----------
+    tweet_list : list
+        List of tweet objects
+
+    Returns
+    -------
+    dict_list: list
+        List of dictionaries with tweet data
+    """
+    dict_list = []
+    for tweet in tweet_list:
+        values = {
+            "tweet_id": tweet.id,
+            "text": tweet.text,
+            "author_id": tweet.author_id,
+            "created_at": tweet.created_at.isoformat(),  # Convert datetime to ISO format string
+            "conversation_id": tweet.conversation_id,
+            "geo": tweet.geo,
+            "lang": tweet.lang,
+            "possibly_sensitive": tweet.possibly_sensitive,
+            "reply_settings": tweet.reply_settings,
+            "source": tweet.source,
+            "attachments": tweet.attachments,
+            "context_annotations": tweet.context_annotations,
+            "entities": tweet.entities,
+            "public_metrics": tweet.public_metrics,
+            "non_public_metrics": tweet.non_public_metrics,
+            "organic_metrics": tweet.organic_metrics,
+            "promoted_metrics": tweet.promoted_metrics,
+            "withheld": tweet.withheld,
+            "in_reply_to_user_id": tweet.in_reply_to_user_id,
+        }
+        dict_list.append(values)
+    return dict_list
+
+
 
 def user_dictmaker(user_list):
     """

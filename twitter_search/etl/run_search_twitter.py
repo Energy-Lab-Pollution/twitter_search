@@ -10,9 +10,10 @@ from etl.data_cleaning.clean_users import UserCleaner
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
+from etl.data_collection.tweet_processor import TweetProcessor
 from twitter_filtering.lists_filtering.filter_lists import ListFilter, ListReader
 from twitter_filtering.users_filtering.filter_users import UserFilter
-
+from etl.query import Query
 # Utils functions
 
 
@@ -40,13 +41,13 @@ def additional_iterations_needed(count, num_iterations=2):
     """
     Determine if additional iterations are needed based on the count.
     """
-    return count <= num_iterations  # Example: Perform 2 iterations
+    return count <= num_iterations 
 
 
 # Main function -- May need to be a class later
 
 
-def run_search_twitter(query, location, num_iterations=2):
+def run_search_twitter(location,account_type,list_needed,num_iterations=2):
     """
     Run Twitter search and data collection process.
 
@@ -62,27 +63,33 @@ def run_search_twitter(query, location, num_iterations=2):
     """
     count = 1
     location = location.lower()
+    query = Query(location,account_type)
+    query.query_builder()
 
     while True:
         # Set up file paths with count
         dir = Path(__file__).parent.parent / "data/raw_data"
-        output_file_search = dir / f"{location}_users_test.json"
+        output_file_users = dir / f"{location}_{account_type}_users_test.json"
+        output_file_tweets = dir / f"{location}_{account_type}_tweets_test.json"
 
+        input_file_processing = (output_file_tweets,output_file_users)
+        output_file_processing = dir / f"{location}_{account_type}_processed_users.json"
+        
         if count == 1:
-            input_file_filter = output_file_search
+            input_file_filter = output_file_processing
         else:
-            input_file_filter = dir / f"{location}_totalusers_{count-1}.json"
+            input_file_filter = dir / f"{location}_{account_type}_totalusers_{count-1}.json"
 
-        output_file_filter = dir / f"{location}_users_filtered_{count}.json"
+        output_file_filter = dir / f"{location}_{account_type}_users_filtered_{count}.json"
 
         input_file_lists = output_file_filter
-        output_file_lists = dir / f"{location}_lists_{count}.json"
+        output_file_lists = dir / f"{location}_{account_type}_lists_{count}.json"
 
         input_file_filter_lists = output_file_lists
-        output_file_filter_lists = dir / f"{location}_lists_filtered_{count}.json"
+        output_file_filter_lists = dir / f"{location}_{account_type}_lists_filtered_{count}.json"
 
         input_file_total = output_file_filter_lists
-        output_file_total = dir / f"{location}_totalusers_{count}.json"
+        output_file_total = dir / f"{location}_{account_type}_totalusers_{count}.json"
 
         print(f"Iteration {count}:")
 
@@ -90,8 +97,10 @@ def run_search_twitter(query, location, num_iterations=2):
             # Perform search only in the first iteration
             print("Searching for Twitter users...")
 
-            user_searcher = UserSearcher(location, output_file_search, query)
+            user_searcher = UserSearcher(location, output_file_users,output_file_tweets, query.text)
             user_searcher.run_search_all()
+            processor = TweetProcessor(location, input_file_processing,output_file_processing)
+            processor.run_processing()
 
         # Filter users based on location
         print("Filtering Twitter users based on location...")
@@ -100,6 +109,10 @@ def run_search_twitter(query, location, num_iterations=2):
 
         user_filter = UserFilter(location, input_file_filter, output_file_filter)
         user_filter.run_filtering()
+
+        if not list_needed:
+            print("lists not needed, exiting.")
+            break
 
         if not user_filter.filtered_user:
             print("No relevant users were found.")
@@ -123,7 +136,7 @@ def run_search_twitter(query, location, num_iterations=2):
         user_getter = UserGetter(location, input_file_total, output_file_total)
         user_getter.get_users()
 
-        # Increment count for the next iteration
+        #Increment count for the next iteration
         count += 1
 
         # Check if additional iterations are needed
@@ -132,4 +145,4 @@ def run_search_twitter(query, location, num_iterations=2):
         else:
             break
 
-    return "Data collection and cleaning process completed."
+    # return "Data collection and cleaning process completed."
