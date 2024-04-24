@@ -10,8 +10,6 @@ class ListGetter:
     This class is in charge of parsing all of the lists of the twitter users
     """
 
-    
-
     def __init__(self, location, input_file, output_file):
         self.location = location
         self.input_file = input_file
@@ -20,7 +18,7 @@ class ListGetter:
         self.COUNT_THRESHOLD = COUNT_THRESHOLD
         self.client = util.client_creator()
 
-    def getlists_fromusers(self,users_list):
+    def getlists_fromusers(self, users_list):
         """
         Get lists from users.
 
@@ -38,14 +36,16 @@ class ListGetter:
         count = 0
         for user in users_list:
             response_user_list = self.client.get_list_memberships(
-                id = user["user_id"],
-                list_fields = util.LIST_FIELDS,
-                max_results = self.MAX_RESULTS,
+                id=user["user_id"],
+                list_fields=util.LIST_FIELDS,
+                max_results=self.MAX_RESULTS,
             )
 
             only_lists = response_user_list.data
-            print(f"there are {len(only_lists)} lists associated\
-                   with {user['user_id']}")
+            print(
+                f"there are {len(only_lists)} lists associated\
+                   with {user['user_id']}"
+            )
             if response_user_list.data is None:
                 print("No lists found")
                 continue
@@ -65,10 +65,10 @@ class ListGetter:
             time.sleep(1)
 
     def load_users(self):
-            users_list_raw = util.load_json(self.input_file)
-            user_list = util.flatten_and_remove_empty(users_list_raw)
+        users_list_raw = util.load_json(self.input_file)
+        user_list = util.flatten_and_remove_empty(users_list_raw)
 
-            return user_list
+        return user_list
 
     def get_lists(self):
         """
