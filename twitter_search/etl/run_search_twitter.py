@@ -69,7 +69,8 @@ def run_search_twitter(location,account_type,num_iterations=2):
         # Set up file paths with count
         dir = Path(__file__).parent.parent / "data/raw_data"
         output_file_search = dir / f"{location}_{account_type}_users_test.json"
-
+        output_file_tweets = dir / f"{location}_{account_type}_tweets_test.json"
+        
         if count == 1:
             input_file_filter = output_file_search
         else:
@@ -92,7 +93,7 @@ def run_search_twitter(location,account_type,num_iterations=2):
             # Perform search only in the first iteration
             print("Searching for Twitter users...")
 
-            user_searcher = UserSearcher(location, output_file_search, query.text)
+            user_searcher = UserSearcher(location, output_file_search,output_file_tweets, query.text)
             user_searcher.run_search_all()
 
     #     # Filter users based on location
@@ -125,13 +126,13 @@ def run_search_twitter(location,account_type,num_iterations=2):
     #     user_getter = UserGetter(location, input_file_total, output_file_total)
     #     user_getter.get_users()
 
-    #     # Increment count for the next iteration
-    #     count += 1
+        # Increment count for the next iteration
+        count += 1
 
-    #     # Check if additional iterations are needed
-    #     if additional_iterations_needed(count, num_iterations):
-    #         continue
-    #     else:
-    #         break
+        # Check if additional iterations are needed
+        if additional_iterations_needed(count, num_iterations):
+            continue
+        else:
+            break
 
     # return "Data collection and cleaning process completed."
