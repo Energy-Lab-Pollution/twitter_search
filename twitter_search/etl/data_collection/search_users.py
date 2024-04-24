@@ -26,8 +26,8 @@ class UserSearcher:
         else:
             self.query = query
         self.location = location
-        self.search_tweets_result = None
-        self.total_users = None
+        self.search_tweets_tweets = []
+        self.total_users = []
         self.twitter_client = util.client_creator()
         self.gmaps_client = util.gmaps_client()
         self.output_file = output_file
@@ -55,28 +55,30 @@ class UserSearcher:
         Returns:
             dict: The search result containing tweets and associated users.
         """
-        self.search_tweets_result = self.twitter_client.search_recent_tweets(
-            query=self.query,
-            max_results=MAX_RESULTS,
-            expansions=EXPANSIONS,
-            tweet_fields=TWEET_FIELDS,
-            user_fields=USER_FIELDS,
-        )
-        return self.search_tweets_result
+        result_count = 0
+        next_token = None
 
-    @staticmethod
-    def get_users_from_tweets(tweets):
-        """
-        Extract users from the tweet search result.
-
-        Args:
-            tweets (dict): The search result containing tweets and associated
-            users.
-
-        Returns:
-            list: List of user objects.
-        """
-        return tweets.includes["users"]
+        #pagination
+        while result_count < MAX_RESULTS:
+            count = min(100, MAX_RESULTS - result_count)
+            response = self.twitter_client.search_recent_tweets(
+                query=self.query,
+                max_results=count,
+                next_token = next_token,
+                expansions=EXPANSIONS,
+                tweet_fields=TWEET_FIELDS,
+                user_fields=USER_FIELDS,
+            )
+            result_count += response.meta['result_count']
+            self.search_tweets_tweets.extend(response.data)
+            self.total_users.extend(response.includes['users'])
+            try:
+                next_token = response.meta['next_token']
+            except:
+                next_token = None
+                
+            if next_token is None:
+                break
 
     def search_users(self):
         """
@@ -98,13 +100,13 @@ class UserSearcher:
                 constants.TWEET_FIELDS,
                 constants.USER_FIELDS,
             )
-            self.total_users = self.get_users_from_tweets(self.search_tweets_result)
             self.total_users_dict = util.user_dictmaker(self.total_users)
 
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def get_coordinates(self, location):
+    @staticmethod
+    def get_coordinates(client, location):
         """
         Get the latitude and longitude coordinates of a location.
         """
@@ -112,7 +114,7 @@ class UserSearcher:
             return (None, None)
         try:
             # Geocode the location using Google Maps Geocoding API
-            geocode_result = self.gmaps_client.geocode(location)
+            geocode_result = client.geocode(location)
 
             # Check if any results were returned
             if geocode_result:
@@ -121,6 +123,7 @@ class UserSearcher:
                 return (lat, lng)
             else:
                 return (None, None)
+            
         except Exception as e:
             print(f"Error geocoding location '{location}': {e}")
             return (None, None)
@@ -135,7 +138,7 @@ class UserSearcher:
         Returns:
             None
         """
-        for tweet in self.search_tweets_result.data:
+        for tweet in self.search_tweets_tweets:
             author_id = tweet.get("author_id", None)
             if author_id:
                 for user in self.total_users_dict:
@@ -147,7 +150,7 @@ class UserSearcher:
         Runs the geocoding process for all users.
         """
         for user in self.total_users_dict:
-            user["geo_location"] = self.get_coordinates(user["location"])
+            user["geo_location"] = self.get_coordinates(self.gmaps_client,user["location"])
 
     def store_users(self):
         """

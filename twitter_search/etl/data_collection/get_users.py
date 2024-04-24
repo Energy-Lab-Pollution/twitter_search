@@ -39,7 +39,7 @@ class UserGetter:
         unique = set()
         count = 0
         if k is None:
-            k = len(lists_data) - 1
+            k = len(lists_data)
         for item in lists_data[:k]:
             try:
                 list_id = item
@@ -98,9 +98,9 @@ class UserGetter:
             print("client created")
             isolated_lists = util.flatten_and_remove_empty(lists_data)
             print(len(isolated_lists))
-            filtered_lists = util.list_filter_keywords(isolated_lists, self.location)
-            print(len(filtered_lists))
-            self.get_users_fromlists(client, filtered_lists)
+            #filtered_lists = util.list_filter_keywords(isolated_lists, self.location)
+            #print(len(filtered_lists))
+            self.get_users_fromlists(client, isolated_lists)
 
         except Exception as e:
             print(f"An error occurred: {e}")

@@ -34,7 +34,7 @@ class ListGetter:
             _description_, by default None
         """
         if k is None:
-            k = len(users_list) - 1
+            k = len(users_list)
         count = 0
         for user in users_list[:k]:
             print(user, "user")
