@@ -4,6 +4,8 @@ Main function to run the Twitter search and data collection process.
 
 from etl import run_search_twitter
 from argparse import ArgumentParser
+from distutils.util import strtobool
+
 
 
 def main():
@@ -26,6 +28,12 @@ def main():
     )
 
     parser.add_argument(
+        "list_needed",
+        type=str,
+        help="Specify if you need list based expansions.",
+    )
+
+    parser.add_argument(
         "--num_iterations",
         type=int,
         help="Specify the number of iterations to run.",
@@ -36,12 +44,15 @@ def main():
     args = parser.parse_args()
     location = args.location
     account_type = args.account_type
+    list_needed = strtobool(args.list_needed)
+    print(list_needed,'list needed?')
+
     print("Building query...")
 
 
     if args.num_iterations:
         num_iterations = args.num_iterations
-        run_search_twitter.run_search_twitter(location, account_type,num_iterations)
+        run_search_twitter.run_search_twitter(location, account_type,list_needed,num_iterations)
 
     else:
-        run_search_twitter.run_search_twitter(location,account_type)
+        run_search_twitter.run_search_twitter(location,account_type,list_needed)

@@ -47,7 +47,7 @@ def additional_iterations_needed(count, num_iterations=2):
 # Main function -- May need to be a class later
 
 
-def run_search_twitter(location,account_type,num_iterations=2):
+def run_search_twitter(location,account_type,list_needed,num_iterations=2):
     """
     Run Twitter search and data collection process.
 
@@ -110,6 +110,10 @@ def run_search_twitter(location,account_type,num_iterations=2):
         user_filter = UserFilter(location, input_file_filter, output_file_filter)
         user_filter.run_filtering()
 
+        if not list_needed:
+            print("lists not needed, exiting.")
+            break
+
         if not user_filter.filtered_user:
             print("No relevant users were found.")
             break
@@ -132,7 +136,7 @@ def run_search_twitter(location,account_type,num_iterations=2):
         user_getter = UserGetter(location, input_file_total, output_file_total)
         user_getter.get_users()
 
-        Increment count for the next iteration
+        #Increment count for the next iteration
         count += 1
 
         # Check if additional iterations are needed
