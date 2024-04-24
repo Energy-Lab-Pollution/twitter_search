@@ -29,7 +29,7 @@ class UserSearcher:
         self.total_tweets = []
         self.total_users = []
         self.twitter_client = util.client_creator()
-        self.gmaps_client = util.gmaps_client()
+        
         self.output_file_user = output_file_users
         self.output_file_tweets = output_file_tweets
 
