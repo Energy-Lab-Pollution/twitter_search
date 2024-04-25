@@ -20,7 +20,7 @@ class UserSearcher:
         client: tweepy client
     """
 
-    def __init__(self, location, output_file_users,output_file_tweets, query=None):
+    def __init__(self, location, output_file_users, output_file_tweets, query=None):
         if query is None:
             self.query = self.query_builder(location)
         else:
@@ -29,7 +29,7 @@ class UserSearcher:
         self.total_tweets = []
         self.total_users = []
         self.twitter_client = util.client_creator()
-        
+
         self.output_file_user = output_file_users
         self.output_file_tweets = output_file_tweets
 
@@ -41,7 +41,7 @@ class UserSearcher:
             pollution OR {location} public health OR bad air {location} OR \
             {location} asthma OR {location} polluted OR pollution control board) \
             (#pollution OR #environment OR #cleanair OR #airquality) -is:retweet"
-    
+
     def search_tweets(self, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS):
         """
         Search for recent tweets based on a query.
@@ -60,25 +60,25 @@ class UserSearcher:
         result_count = 0
         next_token = None
 
-        #pagination
+        # pagination
         while result_count < MAX_RESULTS:
             count = min(100, MAX_RESULTS - result_count)
             response = self.twitter_client.search_recent_tweets(
                 query=self.query,
                 max_results=count,
-                next_token = next_token,
+                next_token=next_token,
                 expansions=EXPANSIONS,
                 tweet_fields=TWEET_FIELDS,
                 user_fields=USER_FIELDS,
             )
-            result_count += response.meta['result_count']
+            result_count += response.meta["result_count"]
             self.total_tweets.extend(response.data)
-            self.total_users.extend(response.includes['users'])
+            self.total_users.extend(response.includes["users"])
             try:
-                next_token = response.meta['next_token']
+                next_token = response.meta["next_token"]
             except:
                 next_token = None
-                
+
             if next_token is None:
                 break
 
@@ -120,7 +120,6 @@ class UserSearcher:
         util.json_maker(self.output_file_user, self.total_users_dict)
         print("Total number of users:", len(self.total_users))
 
-
     def store_tweets(self):
         """
         convert the tweet list to a json and store it.
@@ -133,7 +132,6 @@ class UserSearcher:
         """
         util.json_maker(self.output_file_tweets, self.total_tweets_dict)
         print("Total number of tweets:", len(self.total_tweets_dict))
-
 
     def run_search_all(self):
         self.search_users_tweets()
