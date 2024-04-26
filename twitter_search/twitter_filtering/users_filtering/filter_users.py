@@ -28,7 +28,7 @@ class UserFilter:
         self.pipeline = pipeline(
             constants.HUGGINGFACE_PIPELINE, model=constants.HUGGINGFACE_MODEL
         )
-        #TODO, based on location, select the appropriate shape file.
+        # TODO, based on location, select the appropriate shape file.
         self.shapefile_path = (
             Path(__file__).parent.parent
             / "utils/shape_files/geoBoundaries-IND-ADM1-all/geoBoundaries-IND-ADM1_simplified.shp"
@@ -39,8 +39,10 @@ class UserFilter:
 
         try:
             self.users_list = util.load_json(self.input_file)
-            self.total_user_dict = util.flatten_and_remove_empty(self.users_list)
-            print('users look like this',self.total_user_dict)
+            self.total_user_dict = util.flatten_and_remove_empty(
+                self.users_list
+            )
+            print("users look like this", self.total_user_dict)
         except Exception as e:
             print(f"Error loading data: {e}")
             self.total_user_dict = []
@@ -59,9 +61,17 @@ class UserFilter:
             user["token"] = " ".join(
                 [
                     user["username"],
-                    user["description"] if user["description"] is not None else "",
+                    (
+                        user["description"]
+                        if user["description"] is not None
+                        else ""
+                    ),
                     user["location"] if user["location"] is not None else "",
-                    " ".join(user["tweets"]) if user["tweets"] is not None else "",
+                    (
+                        " ".join(user["tweets"])
+                        if user["tweets"] is not None
+                        else ""
+                    ),
                 ]
             )
             try:
@@ -107,7 +117,10 @@ class UserFilter:
                     user_location = gpd.GeoDataFrame(
                         {
                             "geometry": [
-                                Point(user["geo_location"][1], user["geo_location"][0])
+                                Point(
+                                    user["geo_location"][1],
+                                    user["geo_location"][0],
+                                )
                             ]
                         },
                         crs="EPSG:4326",
@@ -123,9 +136,13 @@ class UserFilter:
                         print(f"Error determining subnational location: {e}")
                         subnational = None
                     print(subnational, "subnational")
-                    desired_locations = constants.STATE_CAPITALS.get(self.location, [])
+                    desired_locations = constants.STATE_CAPITALS.get(
+                        self.location, []
+                    )
                     print("desired locations", desired_locations)
-                    user["location_relevance"] = subnational in desired_locations
+                    user["location_relevance"] = (
+                        subnational in desired_locations
+                    )
                 else:
                     user["location_relevance"] = False
 
@@ -136,10 +153,7 @@ class UserFilter:
 
         self.filtered_user = []
         for user in self.total_user_dict:
-            if (
-                user["location_relevance"] is True
-                and user["content_is_relevant"] is True
-            ):
+            if user["content_is_relevant"] is True:
                 self.filtered_user.append(user)
 
         print(f"Filtered {len(self.filtered_user)} relevant users")
@@ -165,8 +179,8 @@ class UserFilter:
             print(
                 """users classified based on name, bio, and their tweets, step 3 done \n"""
             )
-            self.determine_location_relevance()
-            print(f"relevant users for {self.location} tagged step 4 done \n")
+            # self.determine_location_relevance()
+            # print(f"relevant users for {self.location} tagged step 4 done \n")
             self.remove_users()
             print("non-relevant users removed, step 5 completed \n")
             self.store_users()
