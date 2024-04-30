@@ -85,6 +85,7 @@ def list_filter_keywords(all_lists, location):
 
     return list(filtered_lists)
 
+
 def tweet_dictmaker(tweet_list):
     """
     This function takes a list of tweet objects and
@@ -125,7 +126,6 @@ def tweet_dictmaker(tweet_list):
         }
         dict_list.append(values)
     return dict_list
-
 
 
 def user_dictmaker(user_list):

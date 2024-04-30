@@ -2,12 +2,11 @@ from config_utils import util
 
 
 class TweetProcessor:
-    def __init__(self, location, input_file_tuple,output_file):
+    def __init__(self, location, input_file_tuple, output_file):
         self.location = location
         self.gmaps_client = util.gmaps_client()
-        self.input_file_tweets,self.input_file_users = input_file_tuple
+        self.input_file_tweets, self.input_file_users = input_file_tuple
         self.output_file = output_file
-
 
     @staticmethod
     def get_coordinates(client, location):
@@ -27,7 +26,7 @@ class TweetProcessor:
                 return (lat, lng)
             else:
                 return (None, None)
-            
+
         except Exception as e:
             print(f"Error geocoding location '{location}': {e}")
             return (None, None)
@@ -54,7 +53,9 @@ class TweetProcessor:
         Runs the geocoding process for all users.
         """
         for user in self.user_list:
-            user["geo_location"] = self.get_coordinates(self.gmaps_client,user["location"])
+            user["geo_location"] = self.get_coordinates(
+                self.gmaps_client, user["location"]
+            )
 
     def store_users(self):
         """
@@ -68,7 +69,6 @@ class TweetProcessor:
         """
         util.json_maker(self.output_file, self.user_list)
         print("Total number of users:", len(self.user_list))
-
 
     def run_processing(self):
 

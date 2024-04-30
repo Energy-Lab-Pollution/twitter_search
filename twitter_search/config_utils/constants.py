@@ -31,8 +31,16 @@ USER_FIELDS = [
     "username",
 ]
 
-#TODO change the labels to more relevant stuff.
-RELEVANT_LABELS = ["pollution", "environment", "public health", "climate","research","politics","policy maker"]
+# TODO change the labels to more relevant stuff.
+RELEVANT_LABELS = [
+    "pollution",
+    "environment",
+    "public health",
+    "climate",
+    "research",
+    "politics",
+    "policy maker",
+]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
 # Dictionary mapping Indian state capitals to their respective states
 STATE_CAPITALS = {

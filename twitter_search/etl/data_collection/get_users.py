@@ -1,5 +1,4 @@
 import time
-from pathlib import Path
 from datetime import datetime
 
 from config_utils import util
@@ -98,8 +97,8 @@ class UserGetter:
             print("client created")
             isolated_lists = util.flatten_and_remove_empty(lists_data)
             print(len(isolated_lists))
-            #filtered_lists = util.list_filter_keywords(isolated_lists, self.location)
-            #print(len(filtered_lists))
+            # filtered_lists = util.list_filter_keywords(isolated_lists, self.location)
+            # print(len(filtered_lists))
             self.get_users_fromlists(client, isolated_lists)
 
         except Exception as e:
