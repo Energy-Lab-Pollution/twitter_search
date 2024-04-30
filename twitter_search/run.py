@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 from distutils.util import strtobool
 
 
-
 def main():
 
     parser = ArgumentParser(
@@ -45,14 +44,17 @@ def main():
     location = args.location
     account_type = args.account_type
     list_needed = strtobool(args.list_needed)
-    print(list_needed,'list needed?')
+    print(list_needed, "list needed?")
 
     print("Building query...")
 
-
     if args.num_iterations:
         num_iterations = args.num_iterations
-        run_search_twitter.run_search_twitter(location, account_type,list_needed,num_iterations)
+        run_search_twitter.run_search_twitter(
+            location, account_type, list_needed, num_iterations
+        )
 
     else:
-        run_search_twitter.run_search_twitter(location,account_type,list_needed)
+        run_search_twitter.run_search_twitter(
+            location, account_type, list_needed
+        )
