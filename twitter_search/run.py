@@ -22,7 +22,7 @@ def main():
     parser.add_argument(
         "account_type",
         type=str,
-        help="type of accouts that you want\
+        help="type of accounts that you want\
               [media,organizations,policymaker,politicians,researcher,environment]",
         choices=[
             "media",

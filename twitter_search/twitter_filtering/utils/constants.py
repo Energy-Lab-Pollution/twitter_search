@@ -17,4 +17,17 @@ RAW_DATA_PATH = project_root / "data" / "raw_data"
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
 COLS_TO_KEEP = ["user_id", "list_id", "name", "description"]
-LISTS_KEYWORDS = ["air", "pollution", "earth", "climate", "smog","science","research","researchers",'politics','politicians']
+LISTS_KEYWORDS = [
+    "air",
+    "pollution",
+    "earth",
+    "climate",
+    "smog",
+    "science",
+    "research",
+    "researchers",
+    "politics",
+    "politicians",
+    "media",
+    "journalists",
+]
