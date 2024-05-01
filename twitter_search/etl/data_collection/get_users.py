@@ -96,7 +96,6 @@ class UserGetter:
         try:
             print("till here")
             lists_data = util.load_json(self.input_file)
-            # print(lists_data[:10], "here you go")
             client = util.client_creator()
             print("client created")
             isolated_lists = util.flatten_and_remove_empty(lists_data)

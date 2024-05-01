@@ -42,7 +42,7 @@ class UserFilter:
             self.total_user_dict = util.flatten_and_remove_empty(
                 self.users_list
             )
-            print("users look like this", self.total_user_dict)
+            print("users look like this:", self.total_user_dict[0])
         except Exception as e:
             print(f"Error loading data: {e}")
             self.total_user_dict = []
