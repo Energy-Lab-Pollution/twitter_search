@@ -24,12 +24,21 @@ def main():
         type=str,
         help="type of accouts that you want\
               [media,organizations,policymaker,politicians,researcher,environment]",
+        choices=[
+            "media",
+            "organizations",
+            "policymaker",
+            "politicians",
+            "researcher",
+            "environment",
+        ],
     )
 
     parser.add_argument(
         "list_needed",
         type=str,
         help="Specify if you need list based expansions.",
+        choices=["True", "False"],
     )
 
     parser.add_argument(
@@ -49,6 +58,9 @@ def main():
     print("Building query...")
 
     if args.num_iterations:
+        print(
+            f"Running search with {args.num_iterations} iterations for {location} and {account_type} account type"
+        )
         num_iterations = args.num_iterations
         run_search_twitter.run_search_twitter(
             location, account_type, list_needed, num_iterations
