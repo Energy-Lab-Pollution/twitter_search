@@ -75,16 +75,35 @@ if __name__ == "__main__":
     json_files = os.listdir(RAW_DATA_PATH)
 
     # Filter the JSON files based on the location
-    location = "Mumbai"
+    location = "Bangalore"
 
     filtered_files = filter_json_files(json_files, location)
 
     user_files = [file for file in filtered_files if "users" in file]
     list_files = [file for file in filtered_files if "lists" in file]
 
+    user_df = pd.DataFrame()
     for user_file in user_files:
         input_file = RAW_DATA_PATH / user_file
+        print(
+            "===================================================================================================="
+        )
+        print(f"Converting {input_file} to CSV")
         df = convert_to_csv(input_file)
-        print(df.head())
-        # output_file = CLEAN_DATA_PATH / user_file.replace(".json", ".csv")
+        user_df = pd.concat([user_df, df], ignore_index=True)
         # convert_to_csv(input_file, output_file)
+
+    user_df.to_csv(CLEAN_DATA_PATH / f"{location}_users.csv", index=False)
+
+    list_df = pd.DataFrame()
+    for list_file in list_files:
+        input_file = RAW_DATA_PATH / list_file
+        print(
+            "===================================================================================================="
+        )
+        print(f"Converting {input_file} to CSV")
+        df = convert_to_csv(input_file)
+        list_df = pd.concat([list_df, df], ignore_index=True)
+        # convert_to_csv(input_file, output_file)
+
+    list_df.to_csv(CLEAN_DATA_PATH / f"{location}_lists.csv", index=False)
