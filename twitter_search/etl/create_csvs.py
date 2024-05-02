@@ -38,7 +38,7 @@ def filter_json_files(json_files, location):
     return filtered_files
 
 
-def create_csvs(input_file, output_file):
+def convert_to_csv(input_file):
     """
     Convert JSON files into CSV files.
 
@@ -54,7 +54,14 @@ def create_csvs(input_file, output_file):
         data = json.load(json_file)
 
     # Convert the JSON data into a DataFrame
-    df = pd.DataFrame.from_dict(data)
+
+    # If nested list
+
+    if isinstance(data[0], list):
+        df = pd.DataFrame(data[0])
+
+    else:
+        df = pd.DataFrame(data)
 
     # # Save the DataFrame as a CSV file
     # df.to_csv(output_file, index=False)
@@ -72,13 +79,12 @@ if __name__ == "__main__":
 
     filtered_files = filter_json_files(json_files, location)
 
-    print(f"Filtered files: {filtered_files}")
+    user_files = [file for file in filtered_files if "users" in file]
+    list_files = [file for file in filtered_files if "lists" in file]
 
-    # Convert the JSON files into CSV files
-
-    for file in filtered_files:
-        df = create_csvs(RAW_DATA_PATH / file, CLEAN_DATA_PATH / f"{file}.csv")
-        print("=====================================================")
-        print(f"File created for {file}")
+    for user_file in user_files:
+        input_file = RAW_DATA_PATH / user_file
+        df = convert_to_csv(input_file)
         print(df.head())
-        print("=====================================================")
+        # output_file = CLEAN_DATA_PATH / user_file.replace(".json", ".csv")
+        # convert_to_csv(input_file, output_file)
