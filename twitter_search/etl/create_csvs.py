@@ -38,7 +38,7 @@ def filter_json_files(json_files, location):
     return filtered_files
 
 
-def convert_to_csv(input_file):
+def convert_to_df(input_file):
     """
     Convert JSON files into CSV files.
 
@@ -69,6 +69,28 @@ def convert_to_csv(input_file):
     return df
 
 
+def concat_dataframes(files_list):
+    """
+    Reads the JSON files, creates a dataframe
+    for each file and concatenates all the dataframes.
+
+    Args:
+        files_list (list): List of JSON files.
+
+    Returns:
+        DataFrame: The concatenated DataFrame.
+    """
+
+    df = pd.DataFrame()
+
+    for file in files_list:
+        input_file = RAW_DATA_PATH / file
+        print(f"Converting {input_file} to CSV")
+        df = pd.concat([df, convert_to_df(input_file)], ignore_index=True)
+
+    return df
+
+
 if __name__ == "__main__":
 
     # See which JSON files are available
@@ -82,28 +104,10 @@ if __name__ == "__main__":
     user_files = [file for file in filtered_files if "users" in file]
     list_files = [file for file in filtered_files if "lists" in file]
 
-    user_df = pd.DataFrame()
-    for user_file in user_files:
-        input_file = RAW_DATA_PATH / user_file
-        print(
-            "===================================================================================================="
-        )
-        print(f"Converting {input_file} to CSV")
-        df = convert_to_csv(input_file)
-        user_df = pd.concat([user_df, df], ignore_index=True)
-        # convert_to_csv(input_file, output_file)
+    user_df = concat_dataframes(user_files)
 
+    # convert_to_csv(input_file, output_file)
     user_df.to_csv(CLEAN_DATA_PATH / f"{location}_users.csv", index=False)
 
-    list_df = pd.DataFrame()
-    for list_file in list_files:
-        input_file = RAW_DATA_PATH / list_file
-        print(
-            "===================================================================================================="
-        )
-        print(f"Converting {input_file} to CSV")
-        df = convert_to_csv(input_file)
-        list_df = pd.concat([list_df, df], ignore_index=True)
-        # convert_to_csv(input_file, output_file)
-
+    list_df = concat_dataframes(list_files)
     list_df.to_csv(CLEAN_DATA_PATH / f"{location}_lists.csv", index=False)
