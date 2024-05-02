@@ -45,7 +45,20 @@ class CSVConverter:
             if self.location.lower() in file.lower()
         ]
 
-    def convert_to_df(self, input_file):
+        self.user_files = [
+            file
+            for file in self.json_files
+            if "user" in file.lower() and self.location.lower() in file.lower()
+        ]
+
+        self.list_files = [
+            file
+            for file in self.json_files
+            if "list" in file.lower() and self.location.lower() in file.lower()
+        ]
+
+    @staticmethod
+    def convert_to_df(input_file):
         """
         Convert JSON files into CSV files.
 
@@ -101,6 +114,32 @@ class CSVConverter:
             )
 
         return df
+
+    def run(self):
+        """
+        Runs the entire process for converting JSON files
+        for a certain location, into DataFrames and then
+        concatenating them. This process runs for both
+        user and list data.
+
+        Args:
+            location (str): The location to filter on.
+
+        Returns:
+            None
+        """
+
+        user_df = self.concat_dataframes(self.user_files)
+        list_df = self.concat_dataframes(self.list_files)
+
+        # Save the DataFrames as CSV files
+        user_df.to_csv(
+            self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv", index=False
+        )
+
+        list_df.to_csv(
+            self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv", index=False
+        )
 
 
 if __name__ == "__main__":
