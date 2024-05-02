@@ -2,24 +2,28 @@
 This script converts the JSON files into CSV files for easier data manipulation.
 """
 
-# General imports
-import pandas as pd
 import json
 import os
-from pathlib import Path
 
+# General imports
+import pandas as pd
+
+# Local imports
+from twitter_search.config_utils.constants import CLEAN_DATA_PATH, RAW_DATA_PATH
 
 # Lists_filtering constants
 
 
-script_path = Path(__file__).resolve()
-project_root = script_path.parents[1]
+# script_path = Path(__file__).resolve()
+# project_root = script_path.parents[1]
 
 
 class CSVConverter:
     # Construct the path to the cleaned_data directory
-    RAW_DATA_PATH = project_root / "data" / "raw_data"
-    CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
+    # RAW_DATA_PATH = project_root / "data" / "raw_data"
+    # CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
+    RAW_DATA_PATH = RAW_DATA_PATH
+    CLEAN_DATA_PATH = CLEAN_DATA_PATH
 
     def __init__(self, location) -> None:
         # See which JSON files are available
@@ -140,10 +144,3 @@ class CSVConverter:
         list_df.to_csv(
             self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv", index=False
         )
-
-
-if __name__ == "__main__":
-
-    # Filter the JSON files based on the location
-    location = "Bangalore"
-    csv_converter = CSVConverter(location)
