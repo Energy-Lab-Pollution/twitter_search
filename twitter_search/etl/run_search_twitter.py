@@ -168,8 +168,5 @@ def run_search_twitter(location, account_type, list_needed, num_iterations=2):
             break
 
     print("Saving users and lists as CSV files...")
-    # Filter the JSON files based on the location
     csv_converter = CSVConverter(location)
     csv_converter.run()
-
-    # return "Data collection and cleaning process completed."
