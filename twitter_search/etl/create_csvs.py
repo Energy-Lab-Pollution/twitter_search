@@ -25,6 +25,7 @@ class CSVConverter:
         # See which JSON files are available
         self.json_files = os.listdir(self.RAW_DATA_PATH)
         self.location = location
+        self.filter_json_files()
 
     def filter_json_files(self):
         """
@@ -38,13 +39,11 @@ class CSVConverter:
             list: The filtered JSON files.
         """
         # Filter the JSON files based on the location
-        filtered_files = [
+        self.filtered_files = [
             file
             for file in self.json_files
             if self.location.lower() in file.lower()
         ]
-
-        return filtered_files
 
     def convert_to_df(self, input_file):
         """
@@ -76,7 +75,7 @@ class CSVConverter:
 
         return df
 
-    def concat_dataframes(self, files_list):
+    def concat_dataframes(self):
         """
         Reads the JSON files, creates a dataframe
         for each file and concatenates all the dataframes.
@@ -90,8 +89,12 @@ class CSVConverter:
 
         df = pd.DataFrame()
 
-        for file in files_list:
-            input_file = self.RAW_DATA_PATH / file
+        if not self.filtered_files:
+            print(f"No files found for {self.location}")
+            return df
+
+        for filtered_file in self.filtered_files:
+            input_file = self.RAW_DATA_PATH / filtered_file
             print(f"Converting {input_file} to CSV")
             df = pd.concat(
                 [df, self.convert_to_df(input_file)], ignore_index=True
@@ -104,3 +107,4 @@ if __name__ == "__main__":
 
     # Filter the JSON files based on the location
     location = "Bangalore"
+    csv_converter = CSVConverter(location)
