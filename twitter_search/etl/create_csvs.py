@@ -21,11 +21,12 @@ class CSVConverter:
     RAW_DATA_PATH = project_root / "data" / "raw_data"
     CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
-    def __init__(self) -> None:
+    def __init__(self, location) -> None:
         # See which JSON files are available
         self.json_files = os.listdir(self.RAW_DATA_PATH)
+        self.location = location
 
-    def filter_json_files(json_files, location):
+    def filter_json_files(self, json_files):
         """
         Filter the JSON files based on the location.
 
@@ -38,7 +39,7 @@ class CSVConverter:
         """
         # Filter the JSON files based on the location
         filtered_files = [
-            file for file in json_files if location.lower() in file.lower()
+            file for file in json_files if self.location.lower() in file.lower()
         ]
 
         return filtered_files
@@ -101,16 +102,3 @@ if __name__ == "__main__":
 
     # Filter the JSON files based on the location
     location = "Bangalore"
-
-    filtered_files = filter_json_files(json_files, location)
-
-    user_files = [file for file in filtered_files if "users" in file]
-    list_files = [file for file in filtered_files if "lists" in file]
-
-    user_df = concat_dataframes(user_files)
-
-    # convert_to_csv(input_file, output_file)
-    user_df.to_csv(CLEAN_DATA_PATH / f"{location}_users.csv", index=False)
-
-    list_df = concat_dataframes(list_files)
-    list_df.to_csv(CLEAN_DATA_PATH / f"{location}_lists.csv", index=False)
