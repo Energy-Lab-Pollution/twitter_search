@@ -26,7 +26,7 @@ class CSVConverter:
         self.json_files = os.listdir(self.RAW_DATA_PATH)
         self.location = location
 
-    def filter_json_files(self, json_files):
+    def filter_json_files(self):
         """
         Filter the JSON files based on the location.
 
@@ -39,7 +39,9 @@ class CSVConverter:
         """
         # Filter the JSON files based on the location
         filtered_files = [
-            file for file in json_files if self.location.lower() in file.lower()
+            file
+            for file in self.json_files
+            if self.location.lower() in file.lower()
         ]
 
         return filtered_files
