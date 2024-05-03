@@ -150,7 +150,7 @@ class TwitterDataHandler:
         self.user_filter = UserFilter(
             self.location,
             self.paths["input_file_filter"],
-            self.paths["output_file"],
+            self.paths["output_file_filter"],
         )
         self.user_filter.run_filtering()
 
