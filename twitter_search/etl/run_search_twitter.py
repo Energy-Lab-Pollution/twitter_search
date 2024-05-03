@@ -31,7 +31,7 @@ class TwitterDataHandler:
         account_type,
         list_needed,
         num_iterations=2,
-        convert_to_csv=False,
+        convert_to_csv=True,
     ):
         self.location = location.lower()
         self.account_type = account_type

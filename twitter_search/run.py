@@ -2,7 +2,7 @@
 Main function to run the Twitter search and data collection process.
 """
 
-from etl import run_search_twitter
+from etl.run_search_twitter import TwitterDataHandler
 from argparse import ArgumentParser
 from distutils.util import strtobool
 
@@ -51,9 +51,14 @@ def main():
     location = args.location
     account_type = args.account_type
     list_needed = strtobool(args.list_needed)
+
     print(list_needed, "list needed?")
 
     print("Building query...")
+
+    twitter_data_handler = TwitterDataHandler(
+        location, account_type, list_needed
+    )
 
     if args.num_iterations:
         print(
@@ -61,11 +66,6 @@ def main():
             and {account_type} account type"""
         )
         num_iterations = args.num_iterations
-        run_search_twitter.run_search_twitter(
-            location, account_type, list_needed, num_iterations
-        )
+        twitter_data_handler.num_iterations = num_iterations
 
-    else:
-        run_search_twitter.run_search_twitter(
-            location, account_type, list_needed
-        )
+    twitter_data_handler.run()
