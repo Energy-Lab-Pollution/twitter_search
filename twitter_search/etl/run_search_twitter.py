@@ -18,14 +18,8 @@ from twitter_filtering.lists_filtering.filter_lists import (
 )
 from twitter_filtering.users_filtering.filter_users import UserFilter
 
-# Utils functions
-
-# Function to store the data in a CSV file
-
 
 # Main function -- May need to be a class later
-
-
 class TwitterDataHandler:
     """
     This class handles the Twitter search and data collection process.
@@ -37,6 +31,15 @@ class TwitterDataHandler:
         self.list_needed = list_needed
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
+
+    def run(self):
+        """
+        Runs the entire process
+        """
+        for count in range(1, self.num_iterations + 1):
+            self.process_iteration(count)
+            if not self.additional_iterations_needed(count):
+                break
 
     def additional_iterations_needed(self, count):
         """
