@@ -9,7 +9,7 @@ import os
 import pandas as pd
 
 # Local imports
-from twitter_search.config_utils.constants import CLEAN_DATA_PATH, RAW_DATA_PATH
+from config_utils.constants import CLEAN_DATA_PATH, RAW_DATA_PATH
 
 # Lists_filtering constants
 

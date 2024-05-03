@@ -47,8 +47,6 @@ def main():
         help="Specify the number of iterations to run.",
     )
 
-    # parser.add_argument("--algorithm", type=int, choices=[1, 2], \
-    # help="Specify the algorithm (1 or 2).")
     args = parser.parse_args()
     location = args.location
     account_type = args.account_type
@@ -59,7 +57,8 @@ def main():
 
     if args.num_iterations:
         print(
-            f"Running search with {args.num_iterations} iterations for {location} and {account_type} account type"
+            f"""Running search with {args.num_iterations} iterations for {location}
+            and {account_type} account type"""
         )
         num_iterations = args.num_iterations
         run_search_twitter.run_search_twitter(
