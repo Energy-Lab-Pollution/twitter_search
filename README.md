@@ -18,7 +18,9 @@ For the extraction part, the following files are used:
 
   - **data_collection/:** Module for collecting data, including functions for searching tweets and users.
 
-  - **run_search_twitter.py:** Script for executing Twitter searches.
+  - **run_search_twitter.py:** Script for executing Twitter searches
+
+  - **generate_csv_files.py:** Script for generating CSV files from the collected data, specifying a location.
 
 - **run.py:** Module containing the main functionality for searching Twitter and saving user data.
 
