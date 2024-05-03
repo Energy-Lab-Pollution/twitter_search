@@ -46,5 +46,5 @@ For the extraction part:
 
 For the filtering part:
 
-Go to the `twitter_filtering` directory and execute the `__main__.py` file. The script will filter the users (still not implemented in the file) and lists based on the specified criteria.
+Go to the `twitter_filtering` directory and execute the `__main__.py` file. The script will filter the users and lists based on the specified criteria.
 
