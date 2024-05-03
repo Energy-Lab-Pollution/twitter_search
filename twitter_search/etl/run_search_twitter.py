@@ -107,9 +107,7 @@ class TwitterDataHandler:
         if count == 1:
             self.perform_initial_search()
 
-        self.filter_users(
-            self.paths["input_file_filter"], self.paths["output_file_filter"]
-        )
+        self.filter_users()
 
         if not self.list_needed:
             print("Lists not needed, exiting.")
