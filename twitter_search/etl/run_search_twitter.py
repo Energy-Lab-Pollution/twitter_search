@@ -49,6 +49,10 @@ class TwitterDataHandler:
             if count == self.num_iterations:
                 break
 
+        if self.convert_to_csv:
+            converter = CSVConverter(self.location)
+            converter.run()
+
     def setup_file_paths(self, count):
         """
         Set up file paths for the current iteration.
@@ -82,19 +86,6 @@ class TwitterDataHandler:
             / f"{self.location}_{self.account_type}_totalusers_{count}.json",
         }
         return paths
-
-    def convert_jsons_to_csv(self):
-        """
-        Converts JSON files to CSV files.
-
-        Args:
-            location (str): The location to filter on.
-
-        Returns:
-            None
-        """
-        converter = CSVConverter(self.location)
-        converter.run()
 
     def process_iteration(self, count):
         """
