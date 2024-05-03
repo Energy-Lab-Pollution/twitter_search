@@ -6,17 +6,17 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
+from etl.data_cleaning.create_csvs import CSVConverter
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
 from etl.data_collection.tweet_processor import TweetProcessor
+from etl.query import Query
 from twitter_filtering.lists_filtering.filter_lists import (
     ListFilter,
     ListReader,
 )
 from twitter_filtering.users_filtering.filter_users import UserFilter
-from etl.query import Query
-from etl.data_cleaning.create_csvs import CSVConverter
 
 # Utils functions
 
