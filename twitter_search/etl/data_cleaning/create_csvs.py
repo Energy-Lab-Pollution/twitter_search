@@ -113,9 +113,12 @@ class CSVConverter:
         for filtered_file in self.filtered_files:
             input_file = self.RAW_DATA_PATH / filtered_file
             print(f"Converting {input_file} to CSV")
-            df = pd.concat(
-                [df, self.convert_to_df(input_file)], ignore_index=True
-            )
+            input_df = self.convert_to_df(input_file)
+
+            if "relevant" or "content_is_relevant" in input_df.columns:
+                df = pd.concat(
+                    [df, self.convert_to_df(input_file)], ignore_index=True
+                )
 
         return df
 
