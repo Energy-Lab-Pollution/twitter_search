@@ -6,7 +6,6 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
-from etl.data_cleaning.create_csvs import CSVConverter
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
@@ -31,14 +30,12 @@ class TwitterDataHandler:
         account_type,
         list_needed,
         num_iterations=1,
-        convert_to_csv=False,
     ):
         self.location = location.lower()
         self.account_type = account_type
         self.list_needed = list_needed
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
-        self.convert_to_csv = convert_to_csv
 
     def run(self):
         """
@@ -48,10 +45,6 @@ class TwitterDataHandler:
             self.process_iteration(count)
             if count == self.num_iterations:
                 break
-
-        if self.convert_to_csv:
-            converter = CSVConverter(self.location)
-            converter.run()
 
     def setup_file_paths(self, count):
         """
