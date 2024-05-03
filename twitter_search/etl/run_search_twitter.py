@@ -25,12 +25,20 @@ class TwitterDataHandler:
     This class handles the Twitter search and data collection process.
     """
 
-    def __init__(self, location, account_type, list_needed, num_iterations=2):
+    def __init__(
+        self,
+        location,
+        account_type,
+        list_needed,
+        num_iterations=2,
+        convert_to_csv=False,
+    ):
         self.location = location.lower()
         self.account_type = account_type
         self.list_needed = list_needed
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
+        self.convert_to_csv = convert_to_csv
 
     def run(self):
         """
@@ -38,21 +46,8 @@ class TwitterDataHandler:
         """
         for count in range(1, self.num_iterations + 1):
             self.process_iteration(count)
-            if not self.additional_iterations_needed(count):
+            if count == self.num_iterations:
                 break
-
-    def additional_iterations_needed(self, count):
-        """
-        Determines if an additional iteration must be performed
-        based on the count.
-
-        Args:
-            count (int): The current iteration count.
-
-        Returns:
-            bool: True if an additional iteration is needed, False otherwise.
-        """
-        return count < self.num_iterations
 
     def setup_file_paths(self, count):
         """
@@ -87,6 +82,19 @@ class TwitterDataHandler:
             / f"{self.location}_{self.account_type}_totalusers_{count}.json",
         }
         return paths
+
+    def convert_jsons_to_csv(self):
+        """
+        Converts JSON files to CSV files.
+
+        Args:
+            location (str): The location to filter on.
+
+        Returns:
+            None
+        """
+        converter = CSVConverter(self.location)
+        converter.run()
 
     def process_iteration(self, count):
         """
