@@ -78,7 +78,7 @@ class UserSearcher:
             self.total_users.extend(response.includes["users"])
             try:
                 next_token = response.meta["next_token"]
-            except Exception as e:
+            except Exception as err:
                 next_token = None
 
             if next_token is None:

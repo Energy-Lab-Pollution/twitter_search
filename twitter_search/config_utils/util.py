@@ -87,36 +87,9 @@ def list_filter_keywords(all_lists, location):
     return list(filtered_lists)
 
 
-def remove_duplicate_tweets(records):
+def remove_duplicate_records(records):
     """
-    Removes duplicate tweet dictionaries
-    from a list of dictionaries.
-
-    Parameters
-    ----------
-    records : list
-        List of dictionaries
-
-    Returns
-    -------
-    list
-        List of dictionaries with duplicates removed
-    """
-    unique_tweets = []
-    seen_tweets = set()
-
-    for tweet in records:
-        tweet_id = tweet["tweet_id"]
-        if tweet_id not in seen_tweets:
-            unique_tweets.append(tweet)
-            seen_tweets.add(tweet_id)
-
-    return unique_tweets
-
-
-def remove_duplicate_users(records):
-    """
-    Removes duplicate user dictionaries
+    Removes duplicate tweet/user dictionaries
     from a list of dictionaries.
 
     Parameters
@@ -133,15 +106,15 @@ def remove_duplicate_users(records):
     seen_records = set()
 
     for record in records:
+        if "tweet_id" in record:
+            record_id = record["tweet_id"]
 
-        record_tuple = tuple(
-            (key, tuple(value) if isinstance(value, list) else value)
-            for key, value in record.items()
-        )
-        # Convert dictionary to tuple for hashing
-        if record_tuple not in seen_records:
-            unique_records.append(record_tuple)
-            seen_records.add(record_tuple)
+        elif "user_id" in record:
+            record_id = record["user_id"]
+
+        if record_id not in seen_records:
+            unique_records.append(record)
+            seen_records.add(record_id)
 
     return unique_records
 
