@@ -180,7 +180,8 @@ class UserFilter:
             print("data preprocessed, step 2 done yay \n")
             self.classify_content_relevance()
             print(
-                """users classified based on name, bio, and their tweets, step 3 done \n"""
+                """users classified based on name, bio, and their tweets,
+                 step 3 done \n"""
             )
             # self.determine_location_relevance()
             # print(f"relevant users for {self.location} tagged step 4 done \n")
