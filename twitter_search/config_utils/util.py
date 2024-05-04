@@ -87,6 +87,34 @@ def list_filter_keywords(all_lists, location):
     return list(filtered_lists)
 
 
+def remove_duplicates(records):
+    """
+    Removes duplicate dictionaries from a list of dictionaries.
+
+    Parameters
+    ----------
+    records : list
+        List of dictionaries
+
+    Returns
+    -------
+    list
+        List of dictionaries with duplicates removed
+    """
+    unique_records = []
+    seen_records = set()
+
+    for record in records:
+        record_tuple = tuple(
+            sorted(record.items())
+        )  # Convert dictionary to tuple for hashing
+        if record_tuple not in seen_records:
+            unique_records.append(record_tuple)
+            seen_records.add(record_tuple)
+
+    return unique_records
+
+
 def tweet_dictmaker(tweet_list):
     """
     This function takes a list of tweet objects and

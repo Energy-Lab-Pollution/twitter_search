@@ -2,6 +2,7 @@
 Script in charge of filtering users based on their location and content relevance.
 """
 
+import json
 from pathlib import Path
 
 import geopandas as gpd
