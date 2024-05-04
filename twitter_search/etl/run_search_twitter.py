@@ -82,7 +82,8 @@ class TwitterDataHandler:
         self.paths["input_file_processing"] = input_file_processing
 
         if count == 1:
-            self.paths["input_file_filter"] = input_file_processing
+            output_file_processing = self.paths["output_file_processing"]
+            self.paths["input_file_filter"] = output_file_processing
 
         else:
             self.paths["input_file_filter"] = (
