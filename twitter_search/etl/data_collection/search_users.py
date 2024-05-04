@@ -134,6 +134,7 @@ class UserSearcher:
         Returns:
             None
         """
+        print(self.total_tweets_dict)
         self.unique_tweets_dict = util.remove_duplicates(self.total_tweets_dict)
         util.json_maker(self.output_file_tweets, self.unique_tweets_dict)
         print("Total number of tweets:", len(self.unique_tweets_dict))
