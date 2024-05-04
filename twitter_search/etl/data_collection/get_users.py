@@ -50,9 +50,7 @@ class UserGetter:
                     )
                     user_dicts = util.user_dictmaker(users.data)
                     for user in user_dicts:
-                        user["geo_location"] = self.get_coordinates(
-                            user["location"]
-                        )
+                        user["geo_location"] = self.get_coordinates(user["location"])
                     util.json_maker(self.output_file, user_dicts)
 
             except Exception as e:
@@ -65,9 +63,7 @@ class UserGetter:
                 while time_block <= 3:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     time.sleep(self.SLEEP_TIME)
-                    print(
-                        f"{current_time} - {time_block * 5} minutes done out of 15"
-                    )
+                    print(f"{current_time} - {time_block * 5} minutes done out of 15")
                     time_block += 1
                 count = 0
             time.sleep(1)

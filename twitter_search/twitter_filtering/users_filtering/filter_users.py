@@ -39,12 +39,8 @@ class UserFilter:
 
         try:
             self.users_list = util.load_json(self.input_file)
-            self.total_user_dict = util.flatten_and_remove_empty(
-                self.users_list
-            )
-            self.total_user_dict = util.remove_duplicate_users(
-                self.total_user_dict
-            )
+            self.total_user_dict = util.flatten_and_remove_empty(self.users_list)
+            self.total_user_dict = util.remove_duplicate_records(self.total_user_dict)
             print("users look like this:", self.total_user_dict[0])
         except Exception as e:
             print(f"Error loading data: {e}")
@@ -64,17 +60,9 @@ class UserFilter:
             user["token"] = " ".join(
                 [
                     user["username"],
-                    (
-                        user["description"]
-                        if user["description"] is not None
-                        else ""
-                    ),
+                    (user["description"] if user["description"] is not None else ""),
                     user["location"] if user["location"] is not None else "",
-                    (
-                        " ".join(user["tweets"])
-                        if user["tweets"] is not None
-                        else ""
-                    ),
+                    (" ".join(user["tweets"]) if user["tweets"] is not None else ""),
                 ]
             )
             try:
@@ -139,13 +127,9 @@ class UserFilter:
                         print(f"Error determining subnational location: {e}")
                         subnational = None
                     print(subnational, "subnational")
-                    desired_locations = constants.STATE_CAPITALS.get(
-                        self.location, []
-                    )
+                    desired_locations = constants.STATE_CAPITALS.get(self.location, [])
                     print("desired locations", desired_locations)
-                    user["location_relevance"] = (
-                        subnational in desired_locations
-                    )
+                    user["location_relevance"] = subnational in desired_locations
                 else:
                     user["location_relevance"] = False
 

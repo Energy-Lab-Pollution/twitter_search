@@ -56,9 +56,7 @@ def main():
 
     print("Building query...")
 
-    twitter_data_handler = TwitterDataHandler(
-        location, account_type, list_needed
-    )
+    twitter_data_handler = TwitterDataHandler(location, account_type, list_needed)
 
     if args.num_iterations:
         print(

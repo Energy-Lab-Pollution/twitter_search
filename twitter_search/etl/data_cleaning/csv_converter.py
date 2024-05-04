@@ -44,9 +44,7 @@ class CSVConverter:
         """
         # Filter the JSON files based on the location
         self.filtered_files = [
-            file
-            for file in self.json_files
-            if self.location.lower() in file.lower()
+            file for file in self.json_files if self.location.lower() in file.lower()
         ]
 
         self.user_files = [
@@ -116,9 +114,7 @@ class CSVConverter:
             input_df = self.convert_to_df(input_file)
 
             if "relevant" or "content_is_relevant" in input_df.columns:
-                df = pd.concat(
-                    [df, self.convert_to_df(input_file)], ignore_index=True
-                )
+                df = pd.concat([df, self.convert_to_df(input_file)], ignore_index=True)
 
         return df
 
