@@ -2,7 +2,6 @@
 Script in charge of filtering users based on their location and content relevance.
 """
 
-import json
 from pathlib import Path
 
 import geopandas as gpd
@@ -42,6 +41,9 @@ class UserFilter:
             self.users_list = util.load_json(self.input_file)
             self.total_user_dict = util.flatten_and_remove_empty(
                 self.users_list
+            )
+            self.total_user_dict = util.remove_duplicate_users(
+                self.total_user_dict
             )
             print("users look like this:", self.total_user_dict[0])
         except Exception as e:
