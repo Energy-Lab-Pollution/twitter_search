@@ -132,6 +132,7 @@ class CSVConverter:
             user_df.to_csv(
                 self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv",
                 index=False,
+                encoding="utf-8-sig",
             )
             print(f"User data saved successfully for {self.location}")
 
@@ -144,6 +145,7 @@ class CSVConverter:
             list_df.to_csv(
                 self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",
                 index=False,
+                encoding="utf-8-sig",
             )
             print(f"List data saved successfully for {self.location}")
 
