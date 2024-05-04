@@ -3,27 +3,22 @@ This script converts the JSON files into CSV files for easier data manipulation.
 """
 
 import json
+from pathlib import Path
 import os
 
 # General imports
 import pandas as pd
 
-# Local imports
-from config_utils.constants import CLEAN_DATA_PATH, RAW_DATA_PATH
 
-# Lists_filtering constants
-
-
-# script_path = Path(__file__).resolve()
-# project_root = script_path.parents[1]
+script_path = Path(__file__).resolve()
+project_root = script_path.parents[2]
 
 
 class CSVConverter:
+
     # Construct the path to the cleaned_data directory
-    # RAW_DATA_PATH = project_root / "data" / "raw_data"
-    # CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
-    RAW_DATA_PATH = RAW_DATA_PATH
-    CLEAN_DATA_PATH = CLEAN_DATA_PATH
+    RAW_DATA_PATH = project_root / "data" / "raw_data"
+    CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
     def __init__(self, location) -> None:
         # See which JSON files are available
@@ -44,7 +39,9 @@ class CSVConverter:
         """
         # Filter the JSON files based on the location
         self.filtered_files = [
-            file for file in self.json_files if self.location.lower() in file.lower()
+            file
+            for file in self.json_files
+            if self.location.lower() in file.lower()
         ]
 
         self.user_files = [
@@ -90,7 +87,7 @@ class CSVConverter:
 
         return df
 
-    def concat_dataframes(self):
+    def concat_dataframes(self, files):
         """
         Reads the JSON files, creates a dataframe
         for each file and concatenates all the dataframes.
@@ -104,17 +101,14 @@ class CSVConverter:
 
         df = pd.DataFrame()
 
-        if not self.filtered_files:
-            print(f"No files found for {self.location}")
-            return df
-
-        for filtered_file in self.filtered_files:
-            input_file = self.RAW_DATA_PATH / filtered_file
-            print(f"Converting {input_file} to CSV")
+        for file in files:
+            input_file = self.RAW_DATA_PATH / file
             input_df = self.convert_to_df(input_file)
 
             if "relevant" or "content_is_relevant" in input_df.columns:
-                df = pd.concat([df, self.convert_to_df(input_file)], ignore_index=True)
+                df = pd.concat(
+                    [df, self.convert_to_df(input_file)], ignore_index=True
+                )
 
         return df
 

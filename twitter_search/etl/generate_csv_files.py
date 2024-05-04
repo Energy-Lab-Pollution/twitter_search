@@ -4,7 +4,7 @@ Detects JSON files in a specified location and converts them into CSV files.
 
 from argparse import ArgumentParser
 
-from twitter_search.etl.data_cleaning.csv_converter import CSVConverter
+from data_cleaning.csv_converter import CSVConverter
 
 parser = ArgumentParser(
     description="Specify location to convert JSON files into CSV files."
