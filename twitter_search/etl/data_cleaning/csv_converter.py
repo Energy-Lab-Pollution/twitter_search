@@ -125,15 +125,27 @@ class CSVConverter:
         Returns:
             None
         """
+        if self.user_files:
+            user_df = self.concat_dataframes(self.user_files)
+            user_df.dropna(subset=["content_is_relevant"], inplace=True)
+            # Drop columns that are not needed
+            user_df.to_csv(
+                self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv",
+                index=False,
+            )
+            print(f"User data saved successfully for {self.location}")
 
-        user_df = self.concat_dataframes(self.user_files)
-        list_df = self.concat_dataframes(self.list_files)
+        else:
+            print(f"No user data found for {self.location}")
 
-        # Save the DataFrames as CSV files
-        user_df.to_csv(
-            self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv", index=False
-        )
+        if self.list_files:
+            list_df = self.concat_dataframes(self.list_files)
+            list_df.dropna(subset=["relevant"], inplace=True)
+            list_df.to_csv(
+                self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",
+                index=False,
+            )
+            print(f"List data saved successfully for {self.location}")
 
-        list_df.to_csv(
-            self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv", index=False
-        )
+        else:
+            print(f"No list data found for {self.location}")
