@@ -6,165 +6,186 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
-from etl.data_cleaning.clean_users import UserCleaner
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
 from etl.data_collection.tweet_processor import TweetProcessor
+from etl.query import Query
 from twitter_filtering.lists_filtering.filter_lists import (
     ListFilter,
     ListReader,
 )
 from twitter_filtering.users_filtering.filter_users import UserFilter
-from etl.query import Query
-
-# Utils functions
-
-
-def filter_twitter_lists(input_file_filter, output_file_filter):
-    """
-    This helper function will filter the lists based on some pre-defined
-    keywords.
-
-    Args:
-        input_file_filter (str): The input file containing the lists.
-        output_file_filter (str): The output file to save the filtered lists.
-
-    Returns:
-        None
-    """
-    list_reader = ListReader(input_file_filter)
-    lists_df = list_reader.create_df()
-
-    print("Filtering dataframe for relevant lists")
-    list_filter = ListFilter(lists_df, output_file_filter)
-    list_filter.keep_relevant_lists()
-
-
-def additional_iterations_needed(count, num_iterations=2):
-    """
-    Determine if additional iterations are needed based on the count.
-    """
-    return count <= num_iterations
 
 
 # Main function -- May need to be a class later
-
-
-def run_search_twitter(location, account_type, list_needed, num_iterations=2):
+class TwitterDataHandler:
     """
-    Run Twitter search and data collection process.
-
-    Args:
-        query (str): The search query to search for Twitter users.
-        location (str): The location to filter the search for Twitter users.
-
-    Returns:
-        str: A message indicating the completion of the data cleaning process.
-
-    Raises:
-        ValueError: If any of the input arguments are invalid.
+    This class handles the Twitter search and data collection process.
     """
-    count = 1
-    location = location.lower()
-    query = Query(location, account_type)
-    query.query_builder()
 
-    while True:
-        # Set up file paths with count
-        dir = Path(__file__).parent.parent / "data/raw_data"
-        output_file_users = dir / f"{location}_{account_type}_users_test.json"
-        output_file_tweets = dir / f"{location}_{account_type}_tweets_test.json"
+    def __init__(
+        self,
+        location,
+        account_type,
+        list_needed,
+        num_iterations=1,
+    ):
+        self.location = location.lower()
+        self.account_type = account_type
+        self.list_needed = list_needed
+        self.num_iterations = num_iterations
+        self.base_dir = Path(__file__).parent.parent / "data/raw_data"
 
-        input_file_processing = (output_file_tweets, output_file_users)
-        output_file_processing = (
-            dir / f"{location}_{account_type}_processed_users.json"
+    def run(self):
+        """
+        Runs the entire process
+        """
+        for count in range(1, self.num_iterations + 1):
+            self.process_iteration(count)
+            if count == self.num_iterations:
+                break
+
+    def setup_file_paths(self, count):
+        """
+        Set up file paths for the current iteration.
+
+        Args:
+            count (int): The current iteration count.
+        """
+        self.paths = {
+            "output_file_users": self.base_dir
+            / f"{self.location}_{self.account_type}_users_test.json",
+            "output_file_tweets": self.base_dir
+            / f"{self.location}_{self.account_type}_tweets_test.json",
+            "output_file_processing": self.base_dir
+            / f"{self.location}_{self.account_type}_processed_users.json",
+            "output_file_filter": self.base_dir
+            / f"{self.location}_{self.account_type}_users_filtered_{count}.json",
+            "input_file_lists": self.base_dir
+            / f"{self.location}_{self.account_type}_lists_{count}.json",
+            "output_file_lists": self.base_dir
+            / f"{self.location}_{self.account_type}_lists_{count}.json",
+            "input_file_filter_lists": self.base_dir
+            / f"{self.location}_{self.account_type}_lists_filtered_{count}.json",
+            "output_file_filter_lists": self.base_dir
+            / f"{self.location}_{self.account_type}_lists_filtered_{count}.json",
+            "output_file_total": self.base_dir
+            / f"{self.location}_{self.account_type}_totalusers_{count}.json",
+        }
+
+        input_file_processing = (
+            self.paths["output_file_tweets"],
+            self.paths["output_file_users"],
         )
+
+        self.paths["input_file_processing"] = input_file_processing
 
         if count == 1:
-            input_file_filter = output_file_processing
+            output_file_processing = self.paths["output_file_processing"]
+            self.paths["input_file_filter"] = output_file_processing
+
         else:
-            input_file_filter = (
-                dir / f"{location}_{account_type}_totalusers_{count-1}.json"
+            self.paths["input_file_filter"] = (
+                self.base_dir
+                / f"{self.location}_{self.account_type}_totalusers_{count - 1}.json"
             )
 
-        output_file_filter = (
-            dir / f"{location}_{account_type}_users_filtered_{count}.json"
-        )
+    def process_iteration(self, count):
+        """
+        Process an iteration of the Twitter search and data collection process.
 
-        input_file_lists = output_file_filter
-        output_file_lists = (
-            dir / f"{location}_{account_type}_lists_{count}.json"
-        )
+        Args:
+            count (int): The current iteration count.
 
-        input_file_filter_lists = output_file_lists
-        output_file_filter_lists = (
-            dir / f"{location}_{account_type}_lists_filtered_{count}.json"
-        )
-
-        input_file_total = output_file_filter_lists
-        output_file_total = (
-            dir / f"{location}_{account_type}_totalusers_{count}.json"
-        )
+        Returns:
+            None
+        """
 
         print(f"Iteration {count}:")
+        self.setup_file_paths(count)
 
         if count == 1:
-            # Perform search only in the first iteration
-            print("Searching for Twitter users...")
+            self.perform_initial_search()
 
-            user_searcher = UserSearcher(
-                location, output_file_users, output_file_tweets, query.text
-            )
-            user_searcher.run_search_all()
-            processor = TweetProcessor(
-                location, input_file_processing, output_file_processing
-            )
-            processor.run_processing()
+        self.filter_users()
 
-        # Filter users based on location
-        print("Filtering Twitter users based on location...")
+        if not self.list_needed:
+            print("Lists not needed, exiting.")
+            return
 
-        print("Input file:", input_file_filter)
-
-        user_filter = UserFilter(
-            location, input_file_filter, output_file_filter
-        )
-        user_filter.run_filtering()
-
-        if not list_needed:
-            print("lists not needed, exiting.")
-            break
-
-        if not user_filter.filtered_user:
+        if not self.user_filter.filtered_user:
             print("No relevant users were found.")
-            break
+            return
 
-        print("Lists - input file:", input_file_lists)
-        # Retrieve lists associated with filtered users
+        self.handle_lists()
+
+    def perform_initial_search(self):
+        """
+        This function runs the initial search for Twitter users, and
+        it is only done in the first iteration.
+        """
+        print("Searching for Twitter users...")
+        query = Query(self.location, self.account_type)
+        query.query_builder()
+        user_searcher = UserSearcher(
+            self.location,
+            self.paths["output_file_users"],
+            self.paths["output_file_tweets"],
+            query.text,
+        )
+        user_searcher.run_search_all()
+        processor = TweetProcessor(
+            self.location,
+            self.paths["input_file_processing"],
+            self.paths["output_file_processing"],
+        )
+        processor.run_processing()
+
+    def filter_users(self):
+        """
+        Filter Twitter users based on location and
+        relevance.
+        """
+        print("Filtering Twitter users based on location...")
+        self.user_filter = UserFilter(
+            self.location,
+            self.paths["input_file_filter"],
+            self.paths["output_file_filter"],
+        )
+        self.user_filter.run_filtering()
+
+    def handle_lists(self):
+        """
+        Handle the lists associated with the filtered users.
+        """
         print("Retrieving lists associated with filtered users...")
-        list_getter = ListGetter(location, input_file_lists, output_file_lists)
+        list_getter = ListGetter(
+            self.location,
+            self.paths["input_file_lists"],
+            self.paths["output_file_lists"],
+        )
         list_getter.get_lists()
-        print("Output file:", output_file_lists)
 
-        # Filter lists
         print("Filtering lists...")
-        print("Input file:", input_file_filter_lists)
-        filter_twitter_lists(input_file_filter_lists, output_file_filter_lists)
-        print("Output file:", output_file_filter_lists)
+        self.filter_twitter_lists(
+            self.paths["input_file_filter_lists"],
+            self.paths["output_file_filter_lists"],
+        )
 
-        # Retrieve user data from the retrieved lists
         print("Retrieving user data from lists...")
-        user_getter = UserGetter(location, input_file_total, output_file_total)
+        user_getter = UserGetter(
+            self.location,
+            self.paths["output_file_filter_lists"],
+            self.paths["output_file_total"],
+        )
         user_getter.get_users()
 
-        # Increment count for the next iteration
-        count += 1
-
-        # Check if additional iterations are needed
-        if additional_iterations_needed(count, num_iterations):
-            continue
-        else:
-            break
-
-    # return "Data collection and cleaning process completed."
+    def filter_twitter_lists(self):
+        """
+        Filter the lists based on some pre-defined keywords.
+        """
+        list_reader = ListReader(self.paths["input_file_filter_lists"])
+        lists_df = list_reader.create_df()
+        list_filter = ListFilter(lists_df, self.paths["output_file_filter_lists"])
+        list_filter.keep_relevant_lists()

@@ -41,6 +41,10 @@ class ListGetter:
                 max_results=self.MAX_RESULTS,
             )
 
+            if response_user_list.data is None:
+                print(f"No lists found for {user['user_id']}")
+                continue
+
             only_lists = response_user_list.data
             print(
                 f"there are {len(only_lists)} lists associated\
