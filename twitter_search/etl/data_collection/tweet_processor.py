@@ -1,4 +1,4 @@
-from config_utils import util
+from config_utils import util,constants
 
 
 class TweetProcessor:
@@ -42,11 +42,28 @@ class TweetProcessor:
             None
         """
         for tweet in self.tweet_list:
+            for annotation in tweet["context_annotations"]:
+                domain_name = annotation["domain"]["name"]
+                entity_name = annotation["entity"].get("name", "").lower()
+                is_relevant = (domain_name == "Local News" or \
+                               domain_name == "Journalist" or \
+                                domain_name == "News") and \
+                                (entity_name == constants.\
+                                 STATE_CAPITALS[self.location] or \
+                                    entity_name == self.location)
+                
             author_id = tweet.get("author_id", None)
             if author_id:
                 for user in self.user_list:
                     if user["user_id"] == author_id:
                         user["tweets"].append(tweet["text"])
+                        try:
+                            if is_relevant:
+                                user['detected_loc'] = self.location
+                                user['detected_cat'] = "News"
+                        except:
+                                user['detected_loc'] = ""
+                                user['detected_cat'] = ""
 
     def geo_coder(self):
         """

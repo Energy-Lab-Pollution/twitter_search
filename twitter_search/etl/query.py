@@ -17,10 +17,13 @@ class Query:
 
     # TODO optimize the queries further by playing on twitter website.
     def query_builder(self):
+
         if self.account_type == "media":
-            return f"(media {self.location} OR reporter {self.location} OR {self.location} journalism OR {self.location} \
-                        news OR {self.location} publications OR news agency {self.location}) \
-                        (#news OR #media OR #journalism OR #reporter OR #journalist) -is:retweet"
+            return f"({self.location})(media OR press OR \
+                coverage OR broadcasting \
+                    OR alert OR breaking OR journalism OR journalist OR news \
+                        OR local OR news OR patrika) lang:bn -is:retweet"
+        
         elif self.account_type == "organizations":
             return f"(NGO {self.location} OR organization {self.location} OR non-profit {self.location} OR \
                     {self.location} OR {self.location} institution OR non-governmental organization) \
