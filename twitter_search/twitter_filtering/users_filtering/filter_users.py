@@ -153,7 +153,7 @@ class UserFilter:
 
         self.filtered_user = []
         for user in self.total_user_dict:
-            if user["content_is_relevant"] is True:
+            #if user["content_is_relevant"] is True:
                 self.filtered_user.append(user)
 
         print(f"Filtered {len(self.filtered_user)} relevant users")
@@ -174,15 +174,15 @@ class UserFilter:
         """
         try:
             self.load_and_preprocess_data()
-            print("data preprocessed, step 2 done yay \n")
+            print("data preprocessed, step 2 done \n")
             self.classify_content_relevance()
             print(
                 """users classified based on name, bio, and their tweets, step 3 done \n"""
             )
-            # self.determine_location_relevance()
-            # print(f"relevant users for {self.location} tagged step 4 done \n")
+            self.determine_location_relevance()
+            print(f"relevant users for {self.location} tagged step 4 done \n")
             self.remove_users()
-            print("non-relevant users removed, step 5 completed \n")
+            #print("non-relevant users removed, step 5 completed \n")
             self.store_users()
             print("Filtered users stored successfully.")
 
