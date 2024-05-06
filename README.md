@@ -45,10 +45,10 @@ python3 twitter_search location(str) industry_type(str) list_needed(bool) --num_
 For example:  
 
 ```bash
-python3 twitter_search "Kolkata" media False --num_iterations 1
+python3 twitter_search "Kolkata" "media" "False" --num_iterations 1
 ```
 
-gets users from kolkatta in the media industry, where lists(snowballing) is not needed. The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.  
+gets users from kolkatta in the media industry, where lists(snowballing) is not needed (note that you do not need to use the quotation marks). The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.  
 
 6 . The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
 
