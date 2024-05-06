@@ -50,7 +50,7 @@ python3 twitter_search "Kolkata" "media" "False" --num_iterations 1
 
 gets users from kolkatta in the media industry, where lists(snowballing) is not needed (note that you do not need to use the quotation marks). The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.  
 
-6 . The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
+6. The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
 
 7. If you want, it is also possible to generate csv files for a particular location. The command for generating Kolkata's csv files  would be:
 
