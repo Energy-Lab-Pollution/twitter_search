@@ -137,6 +137,7 @@ class TwitterDataHandler:
         user_searcher.run_search_all()
         processor = TweetProcessor(
             self.location,
+            self.account_type,
             self.paths["input_file_processing"],
             self.paths["output_file_processing"],
         )
