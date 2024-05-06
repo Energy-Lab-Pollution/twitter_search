@@ -2,8 +2,9 @@ from config_utils import util,constants
 
 
 class TweetProcessor:
-    def __init__(self, location, input_file_tuple, output_file):
+    def __init__(self, location, account_type, input_file_tuple, output_file):
         self.location = location
+        self.account_type = account_type
         self.gmaps_client = util.gmaps_client()
         self.input_file_tweets, self.input_file_users = input_file_tuple
         self.output_file = output_file
@@ -43,11 +44,10 @@ class TweetProcessor:
         """
         for tweet in self.tweet_list:
             for annotation in tweet["context_annotations"]:
-                domain_name = annotation["domain"]["name"]
+                domain_name = annotation["domain"]["name"].lower()
                 entity_name = annotation["entity"].get("name", "").lower()
-                is_relevant = (domain_name == "Local News" or \
-                               domain_name == "Journalist" or \
-                                domain_name == "News") and \
+                relevant_categories = constants.category_dict.get(self.account_type,[])
+                is_relevant = (domain_name in relevant_categories ) and \
                                 (entity_name == constants.\
                                  STATE_CAPITALS[self.location] or \
                                     entity_name == self.location)

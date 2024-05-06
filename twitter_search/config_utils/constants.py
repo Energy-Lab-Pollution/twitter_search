@@ -541,3 +541,27 @@ dict = {
     "Digital Assets & Crypto": 174,
     "Emergency Events": 175
 }
+
+
+category_dict =  category_dict = {
+    "media": ["tv shows", "tv episodes", "tv genres", "tv channels", "radio station", "podcast", 
+              "global tv show", "video game", "movie", "music album", "video game conference", 
+              "video game tournament", "movie festival", "concert", "award show", "holiday", 
+              "digital creator", "multimedia franchise",
+              "digital assets & crypto", "local news", "journalist", "sports events", 
+              "basketball game", "sports series", "soccer match", "baseball game", 
+              "hockey game", "cricket match", "sports personality", "coach", 
+              "esports team", "esports player", "fan community", "esports league","digital creator"],
+              
+    "organizations": ["community", "brand vertical", "brand category", "brand", "product", 
+                      "unified twitter taxonomy", "google product taxonomy", 
+                      "digital assets & crypto", "colleges & universities", "points of interest"],
+                      
+    "policymaker": ["political race", "political body", "emergency events"],
+    
+    "politicians": ["politicians", "political race"],
+    
+    "researcher": ["Technology"],
+    
+    "environment": ["weather", "cities", "states", "countries", "emergency events"]
+}
