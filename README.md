@@ -36,8 +36,9 @@ poetry shell
 4.1. Receive the secret code from the authors, go to twitter_search/config_utils, and create a file called config.py. And paste all the secret codes there. 
 
 5. Execute the project from the command line:
-```
-python3 twitter_search location(str) industry_type(str) list_needed(bool) --num_interations #(int)
+
+```bash
+python3 twitter_search location(str) industry_type(str) list_needed(bool) --num_interations (int)
 ```
 
 
