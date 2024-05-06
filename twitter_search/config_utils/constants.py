@@ -4,6 +4,19 @@ This script contains constants used across the project.
 
 # CONSTANTS FOR THE UTIL SCRIPT
 
+from pathlib import Path
+
+
+# Lists_filtering constants
+
+script_path = Path(__file__).resolve()
+project_root = script_path.parents[2]
+
+# Construct the path to the cleaned_data directory
+RAW_DATA_PATH = project_root / "data" / "raw_data"
+CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
+
+
 # NLP CONSTANTS
 
 HUGGINGFACE_PIPELINE = "zero-shot-classification"
@@ -81,7 +94,7 @@ STATE_CAPITALS = {
 }
 
 
-MAX_RESULTS = 10
+MAX_RESULTS = 50
 MAX_RESULTS_LISTS = 24
 EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
 TWEET_FIELDS = [

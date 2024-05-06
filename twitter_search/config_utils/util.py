@@ -1,5 +1,6 @@
 import json
 import os
+
 import googlemaps
 import pandas as pd
 import tweepy
@@ -84,6 +85,38 @@ def list_filter_keywords(all_lists, location):
             filtered_lists.add(lst["list_id"])
 
     return list(filtered_lists)
+
+
+def remove_duplicate_records(records):
+    """
+    Removes duplicate tweet/user dictionaries
+    from a list of dictionaries.
+
+    Parameters
+    ----------
+    records : list
+        List of dictionaries
+
+    Returns
+    -------
+    list
+        List of dictionaries with duplicates removed
+    """
+    unique_records = []
+    seen_records = set()
+
+    for record in records:
+        if "tweet_id" in record:
+            record_id = record["tweet_id"]
+
+        elif "user_id" in record:
+            record_id = record["user_id"]
+
+        if record_id not in seen_records:
+            unique_records.append(record)
+            seen_records.add(record_id)
+
+    return unique_records
 
 
 def tweet_dictmaker(tweet_list):
@@ -251,6 +284,11 @@ def json_maker(file_path, data_to_append):
 
     # Append the new data to the existing list
     existing_data.append(data_to_append)
+
+    # Keep only unique dictionaries in the list
+
+    existing_data = set(json.dumps(d, sort_keys=True) for d in existing_data)
+    existing_data = [json.loads(d) for d in existing_data]
 
     # Check if the file path exists
     if not os.path.exists(os.path.dirname(file_path)):

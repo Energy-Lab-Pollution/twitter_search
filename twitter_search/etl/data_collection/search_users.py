@@ -76,7 +76,7 @@ class UserSearcher:
             self.total_users.extend(response.includes["users"])
             try:
                 next_token = response.meta["next_token"]
-            except:
+            except Exception as err:
                 next_token = None
 
             if next_token is None:
@@ -117,7 +117,9 @@ class UserSearcher:
         Returns:
             None
         """
-        util.json_maker(self.output_file_user, self.total_users_dict)
+        self.unique_users_dict = util.remove_duplicate_records(self.total_users_dict)
+
+        util.json_maker(self.output_file_user, self.unique_users_dict)
         print("Total number of users:", len(self.total_users))
 
     def store_tweets(self):
@@ -130,8 +132,9 @@ class UserSearcher:
         Returns:
             None
         """
-        util.json_maker(self.output_file_tweets, self.total_tweets_dict)
-        print("Total number of tweets:", len(self.total_tweets_dict))
+        self.unique_tweets_dict = util.remove_duplicate_records(self.total_tweets_dict)
+        util.json_maker(self.output_file_tweets, self.unique_tweets_dict)
+        print("Total number of tweets:", len(self.unique_tweets_dict))
 
     def run_search_all(self):
         self.search_users_tweets()

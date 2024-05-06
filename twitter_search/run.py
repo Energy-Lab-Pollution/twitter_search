@@ -2,7 +2,7 @@
 Main function to run the Twitter search and data collection process.
 """
 
-from etl import run_search_twitter
+from etl.run_search_twitter import TwitterDataHandler
 from argparse import ArgumentParser
 
 
@@ -22,14 +22,23 @@ def main():
     parser.add_argument(
         "account_type",
         type=str,
-        help="type of accouts that you want\
+        help="type of accounts that you want\
               [media,organizations,policymaker,politicians,researcher,environment]",
+        choices=[
+            "media",
+            "organizations",
+            "policymaker",
+            "politicians",
+            "researcher",
+            "environment",
+        ],
     )
 
     parser.add_argument(
         "list_needed",
         type=str,
         help="Specify if you need list based expansions.",
+        choices=["True", "False"],
     )
 
     parser.add_argument(
@@ -38,23 +47,24 @@ def main():
         help="Specify the number of iterations to run.",
     )
 
-    # parser.add_argument("--algorithm", type=int, choices=[1, 2], \
-    # help="Specify the algorithm (1 or 2).")
     args = parser.parse_args()
     location = args.location
     account_type = args.account_type
+
     list_needed = args.list_needed
+
     print(list_needed, "list needed?")
 
     print("Building query...")
 
-    if args.num_iterations:
-        num_iterations = args.num_iterations
-        run_search_twitter.run_search_twitter(
-            location, account_type, list_needed, num_iterations
-        )
+    twitter_data_handler = TwitterDataHandler(location, account_type, list_needed)
 
-    else:
-        run_search_twitter.run_search_twitter(
-            location, account_type, list_needed
+    if args.num_iterations:
+        print(
+            f"""Running search with {args.num_iterations} iterations for {location}
+            and {account_type} account type"""
         )
+        num_iterations = args.num_iterations
+        twitter_data_handler.num_iterations = num_iterations
+
+    twitter_data_handler.run()
