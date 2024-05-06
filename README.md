@@ -8,13 +8,42 @@ The processing and filtering scripts geo-locate the users, classify them based o
 ## How to Use
 
 For the extraction part:
+   
+1. Clone the repository
 
-1. Ensure you have the required dependencies installed.
+```
+git clone https://github.com/Energy-Lab-Pollution/twitter_search.git
+```
 
-2. Execute the project from the command line: 
+2. Navigate to the repository
+   
+```   
+cd ./twitter_search
+```
+
+
+3. Download Poetry, which allows the user to run the application in a virtual environment, [following these instructions](https://python-poetry.org/docs/). Then install poetry.
+   
+```
+poetry install
+```
+
+4. Activate the virtual environment in poetry.
+
+```
+poetry shell
+```
+4.1. Receive the secret code from the authors, go to twitter_search/config_utils, and create a file called config.py. And paste all the secret codes there. 
+
+5. Execute the project from the command line:
+```
+python3 twitter_search location(str) industry_type(str) list_needed(bool) --num_interations #(int)
+```
+
+
 For example:  "python3 twitter_search Kolkata media False --num_iterations 1" gets users from kolkatta in the media industry, where lists(snowballing) is not needed. The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.  
 
-3. The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
+6 . The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
 
 
 
