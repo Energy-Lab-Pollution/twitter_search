@@ -136,7 +136,12 @@ class UserFilter:
                     try:
                         subnational = joined_data["shapeName"].iloc[0]
                         if isinstance(subnational, float):
+                            print(
+                                f"Subnational is float, skipping user: {user['username']}"
+                            )
                             subnational = None
+                            user["location_relevance"] = False
+                            continue
                         else:
                             subnational = subnational.lower()
                     except Exception as e:

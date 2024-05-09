@@ -169,10 +169,7 @@ class TwitterDataHandler:
         list_getter.get_lists()
 
         print("Filtering lists...")
-        self.filter_twitter_lists(
-            self.paths["input_file_filter_lists"],
-            self.paths["output_file_filter_lists"],
-        )
+        self.filter_twitter_lists()
 
         print("Retrieving user data from lists...")
         user_getter = UserGetter(
@@ -188,5 +185,7 @@ class TwitterDataHandler:
         """
         list_reader = ListReader(self.paths["input_file_filter_lists"])
         lists_df = list_reader.create_df()
-        list_filter = ListFilter(lists_df, self.paths["output_file_filter_lists"])
+        list_filter = ListFilter(
+            lists_df, self.paths["output_file_filter_lists"]
+        )
         list_filter.keep_relevant_lists()
