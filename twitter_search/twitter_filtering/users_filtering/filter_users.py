@@ -134,7 +134,11 @@ class UserFilter:
                         user_location, shapefile, how="left", op="within"
                     )
                     try:
-                        subnational = joined_data["shapeName"].iloc[0].lower()
+                        subnational = joined_data["shapeName"].iloc[0]
+                        if isinstance(subnational, float):
+                            subnational = None
+                        else:
+                            subnational = subnational.lower()
                     except Exception as e:
                         print(f"Error determining subnational location: {e}")
                         subnational = None
