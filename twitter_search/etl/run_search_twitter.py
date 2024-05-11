@@ -128,6 +128,9 @@ class TwitterDataHandler:
         print("Searching for Twitter users...")
         query = Query(self.location, self.account_type)
         query.query_builder()
+
+        print(query.text)
+
         user_searcher = UserSearcher(
             self.location,
             self.paths["output_file_users"],
@@ -188,5 +191,7 @@ class TwitterDataHandler:
         """
         list_reader = ListReader(self.paths["input_file_filter_lists"])
         lists_df = list_reader.create_df()
-        list_filter = ListFilter(lists_df, self.paths["output_file_filter_lists"])
+        list_filter = ListFilter(
+            lists_df, self.paths["output_file_filter_lists"]
+        )
         list_filter.keep_relevant_lists()
