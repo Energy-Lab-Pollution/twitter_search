@@ -135,6 +135,9 @@ class TwitterDataHandler:
             query.text,
         )
         user_searcher.run_search_all()
+        if not user_searcher.total_users:
+            print("No users found.")
+            return
         processor = TweetProcessor(
             self.location,
             self.account_type,
@@ -185,7 +188,5 @@ class TwitterDataHandler:
         """
         list_reader = ListReader(self.paths["input_file_filter_lists"])
         lists_df = list_reader.create_df()
-        list_filter = ListFilter(
-            lists_df, self.paths["output_file_filter_lists"]
-        )
+        list_filter = ListFilter(lists_df, self.paths["output_file_filter_lists"])
         list_filter.keep_relevant_lists()
