@@ -20,7 +20,9 @@ class UserSearcher:
         client: tweepy client
     """
 
-    def __init__(self, location, output_file_users, output_file_tweets, query=None):
+    def __init__(
+        self, location, output_file_users, output_file_tweets, query=None
+    ):
         if query is None:
             self.query = self.query_builder(location)
         else:
@@ -71,6 +73,9 @@ class UserSearcher:
                 tweet_fields=TWEET_FIELDS,
                 user_fields=USER_FIELDS,
             )
+            if response.meta["result_count"] == 0:
+                print("No more results found.")
+                break
             result_count += response.meta["result_count"]
             self.total_tweets.extend(response.data)
             self.total_users.extend(response.includes["users"])
@@ -102,8 +107,14 @@ class UserSearcher:
                 constants.TWEET_FIELDS,
                 constants.USER_FIELDS,
             )
+
+            if not self.total_users:
+                print("No users found.")
+                return
+
             self.total_users_dict = util.user_dictmaker(self.total_users)
             self.total_tweets_dict = util.tweet_dictmaker(self.total_tweets)
+
         except Exception as e:
             print(f"An error occurred: {e}")
 
@@ -117,7 +128,9 @@ class UserSearcher:
         Returns:
             None
         """
-        self.unique_users_dict = util.remove_duplicate_records(self.total_users_dict)
+        self.unique_users_dict = util.remove_duplicate_records(
+            self.total_users_dict
+        )
 
         util.json_maker(self.output_file_user, self.unique_users_dict)
         print("Total number of users:", len(self.total_users))
@@ -132,11 +145,15 @@ class UserSearcher:
         Returns:
             None
         """
-        self.unique_tweets_dict = util.remove_duplicate_records(self.total_tweets_dict)
+        self.unique_tweets_dict = util.remove_duplicate_records(
+            self.total_tweets_dict
+        )
         util.json_maker(self.output_file_tweets, self.unique_tweets_dict)
         print("Total number of tweets:", len(self.unique_tweets_dict))
 
     def run_search_all(self):
         self.search_users_tweets()
+        if not self.total_users:
+            return
         self.store_users()
         self.store_tweets()
