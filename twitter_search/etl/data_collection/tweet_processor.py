@@ -8,6 +8,7 @@ class TweetProcessor:
         self.gmaps_client = util.gmaps_client()
         self.input_file_tweets, self.input_file_users = input_file_tuple
         self.output_file = output_file
+        self.STATE_CAPITALS = constants.STATE_CAPITALS
 
     @staticmethod
     def get_coordinates(client, location):
@@ -49,10 +50,14 @@ class TweetProcessor:
                 relevant_categories = constants.category_dict.get(
                     self.account_type, []
                 )
-                is_relevant = (domain_name in relevant_categories) and (
-                    entity_name == constants.STATE_CAPITALS[self.location]
-                    or entity_name == self.location
-                )
+                if self.location in self.STATE_CAPITALS:
+                    is_relevant = (domain_name in relevant_categories) and (
+                        entity_name == self.STATE_CAPITALS[self.location]
+                        or entity_name == self.location
+                    )
+
+                else:
+                    is_relevant = domain_name in relevant_categories
 
             author_id = tweet.get("author_id", None)
             if author_id:

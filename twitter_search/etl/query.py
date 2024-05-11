@@ -27,8 +27,8 @@ class Query:
         if self.account_type == "media":
             return f"""({self.location})(media OR press OR coverage OR broadcasting
                     OR alert OR breaking OR journalism OR journalist OR news
-                        OR local OR news OR patrika) (lang:bn OR lang:en OR lang:es
-                        OR lang:rw) -is:retweet"""
+                        OR local OR news OR patrika) (lang:bn OR lang:en OR lang:es)
+                        -is:retweet"""
 
         elif self.account_type == "organizations":
             return f"""NGO {self.location} OR organization {self.location}
