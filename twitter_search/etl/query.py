@@ -31,7 +31,7 @@ class Query:
                         -is:retweet"""
 
         elif self.account_type == "organizations":
-            return f"""NGO {self.location} OR organization {self.location}
+            return f"""(NGO {self.location} OR organization {self.location}
                        OR non-profit {self.location} OR {self.location}
                        OR {self.location} institution OR non-governmental organization)
                        (#non-profit OR #NGO OR #NPO) -is:retweet"""
