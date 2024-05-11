@@ -1,4 +1,4 @@
-from config_utils import util,constants
+from config_utils import util, constants
 
 
 class TweetProcessor:
@@ -46,12 +46,14 @@ class TweetProcessor:
             for annotation in tweet["context_annotations"]:
                 domain_name = annotation["domain"]["name"].lower()
                 entity_name = annotation["entity"].get("name", "").lower()
-                relevant_categories = constants.category_dict.get(self.account_type,[])
-                is_relevant = (domain_name in relevant_categories ) and \
-                                (entity_name == constants.\
-                                 STATE_CAPITALS[self.location] or \
-                                    entity_name == self.location)
-                
+                relevant_categories = constants.category_dict.get(
+                    self.account_type, []
+                )
+                is_relevant = (domain_name in relevant_categories) and (
+                    entity_name == constants.STATE_CAPITALS[self.location]
+                    or entity_name == self.location
+                )
+
             author_id = tweet.get("author_id", None)
             if author_id:
                 for user in self.user_list:
@@ -59,11 +61,11 @@ class TweetProcessor:
                         user["tweets"].append(tweet["text"])
                         try:
                             if is_relevant:
-                                user['detected_loc'] = self.location
-                                user['detected_cat'] = "News"
+                                user["detected_loc"] = self.location
+                                user["detected_cat"] = "News"
                         except:
-                                user['detected_loc'] = ""
-                                user['detected_cat'] = ""
+                            user["detected_loc"] = ""
+                            user["detected_cat"] = ""
 
     def geo_coder(self):
         """
