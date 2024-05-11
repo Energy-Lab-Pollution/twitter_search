@@ -6,6 +6,21 @@ from etl.run_search_twitter import TwitterDataHandler
 from argparse import ArgumentParser
 
 
+def strtobool(val):
+    """Convert a string representation of truth to true (1) or false (0).
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
+    are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
+    'val' is anything else.
+    """
+    val = val.lower()
+    if val in ("y", "yes", "t", "true", "on", "1"):
+        return 1
+    elif val in ("n", "no", "f", "false", "off", "0"):
+        return 0
+    else:
+        raise ValueError("invalid truth value %r" % (val,))
+
+
 def main():
 
     parser = ArgumentParser(
@@ -50,7 +65,7 @@ def main():
     location = args.location
     account_type = args.account_type
 
-    list_needed = args.list_needed
+    list_needed = strtobool(args.list_needed)
 
     print(list_needed, "list needed?")
 
