@@ -194,10 +194,15 @@ class UserFilter:
                  step 3 done \n"""
             )
 
-            self.determine_location_relevance()
-            print(f"relevant users for {self.location} tagged step 4 done \n")
+            if self.location in self.STATE_CAPITALS:
+                self.determine_location_relevance()
+                print(
+                    f"relevant users for {self.location} tagged step 4 done \n"
+                )
+            else:
+                print(f"Location {self.location} not found in STATE_CAPITALS")
+
             self.remove_users()
-            # print("non-relevant users removed, step 5 completed \n")
             self.store_users()
             print("Filtered users stored successfully.")
 
