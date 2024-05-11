@@ -94,7 +94,7 @@ STATE_CAPITALS = {
 }
 
 
-MAX_RESULTS = 50
+MAX_RESULTS = 75
 MAX_RESULTS_LISTS = 24
 EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
 TWEET_FIELDS = [
@@ -539,29 +539,68 @@ dict = {
     "Global TV Show": 172,
     "Google Product Taxonomy": 173,
     "Digital Assets & Crypto": 174,
-    "Emergency Events": 175
+    "Emergency Events": 175,
 }
 
 
-category_dict =  category_dict = {
-    "media": ["tv shows", "tv episodes", "tv genres", "tv channels", "radio station", "podcast", 
-              "global tv show", "video game", "movie", "music album", "video game conference", 
-              "video game tournament", "movie festival", "concert", "award show", "holiday", 
-              "digital creator", "multimedia franchise",
-              "digital assets & crypto", "local news", "journalist", "sports events", 
-              "basketball game", "sports series", "soccer match", "baseball game", 
-              "hockey game", "cricket match", "sports personality", "coach", 
-              "esports team", "esports player", "fan community", "esports league","digital creator"],
-              
-    "organizations": ["community", "brand vertical", "brand category", "brand", "product", 
-                      "unified twitter taxonomy", "google product taxonomy", 
-                      "digital assets & crypto", "colleges & universities", "points of interest"],
-                      
+category_dict = category_dict = {
+    "media": [
+        "tv shows",
+        "tv episodes",
+        "tv genres",
+        "tv channels",
+        "radio station",
+        "podcast",
+        "global tv show",
+        "video game",
+        "movie",
+        "music album",
+        "video game conference",
+        "video game tournament",
+        "movie festival",
+        "concert",
+        "award show",
+        "holiday",
+        "digital creator",
+        "multimedia franchise",
+        "digital assets & crypto",
+        "local news",
+        "journalist",
+        "sports events",
+        "basketball game",
+        "sports series",
+        "soccer match",
+        "baseball game",
+        "hockey game",
+        "cricket match",
+        "sports personality",
+        "coach",
+        "esports team",
+        "esports player",
+        "fan community",
+        "esports league",
+        "digital creator",
+    ],
+    "organizations": [
+        "community",
+        "brand vertical",
+        "brand category",
+        "brand",
+        "product",
+        "unified twitter taxonomy",
+        "google product taxonomy",
+        "digital assets & crypto",
+        "colleges & universities",
+        "points of interest",
+    ],
     "policymaker": ["political race", "political body", "emergency events"],
-    
     "politicians": ["politicians", "political race"],
-    
     "researcher": ["Technology"],
-    
-    "environment": ["weather", "cities", "states", "countries", "emergency events"]
+    "environment": [
+        "weather",
+        "cities",
+        "states",
+        "countries",
+        "emergency events",
+    ],
 }

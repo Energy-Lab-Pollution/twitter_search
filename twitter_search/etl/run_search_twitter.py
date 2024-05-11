@@ -33,7 +33,7 @@ class TwitterDataHandler:
     ):
         self.location = location.lower()
         self.account_type = account_type
-        self.list_needed = list_needed
+        self.list_needed = True if list_needed == "True" else False
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
 

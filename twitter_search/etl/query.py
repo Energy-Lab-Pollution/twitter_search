@@ -3,6 +3,9 @@ This script is used to create class Query. Query class' attributes help in build
 the query for the required use-case
 """
 
+# Changmai from Thailand
+# Rwanda - Kigali
+
 
 class Query:
     def __init__(self, location, account_type):
@@ -23,9 +26,9 @@ class Query:
                 coverage OR broadcasting \
                     OR alert OR breaking OR journalism OR journalist OR news \
                         OR local OR news OR patrika) lang:bn -is:retweet"
-        
+
         elif self.account_type == "organizations":
-            return f"(NGO {self.location} OR organization {self.location} OR non-profit {self.location} OR \
+            return f"NGO {self.location} OR organization {self.location} OR non-profit {self.location} OR \
                     {self.location} OR {self.location} institution OR non-governmental organization) \
                     (#non-profit OR #NGO OR #NPO)\
                     -is:retweet"
@@ -43,6 +46,7 @@ class Query:
             return f"{self.location} ((public heath) OR (environmental research) OR (environmental researcher) \
                 OR health OR science OR academic OR research) (#science OR #research OR #academic) \
                     -is:retweet"
+            # TODO: Add more keywords
         elif self.account_type == "environment":
             return f"(air pollution {self.location} OR {self.location} air OR {self.location} \
                     pollution OR {self.location} public health OR bad air {self.location} OR \
