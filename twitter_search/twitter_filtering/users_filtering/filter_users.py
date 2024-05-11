@@ -25,6 +25,7 @@ class UserFilter:
         self.relevant_labels = constants.RELEVANT_LABELS
         self.input_file = input_file
         self.output_file = output_file
+        self.STATE_CAPITALS = constants.STATE_CAPITALS
         self.pipeline = pipeline(
             constants.HUGGINGFACE_PIPELINE, model=constants.HUGGINGFACE_MODEL
         )
@@ -148,7 +149,7 @@ class UserFilter:
                         print(f"Error determining subnational location: {e}")
                         subnational = None
                     print(subnational, "subnational")
-                    desired_locations = constants.STATE_CAPITALS.get(
+                    desired_locations = self.STATE_CAPITALS.get(
                         self.location, []
                     )
                     print("desired locations", desired_locations)
@@ -192,6 +193,7 @@ class UserFilter:
                 """users classified based on name, bio, and their tweets,
                  step 3 done \n"""
             )
+
             self.determine_location_relevance()
             print(f"relevant users for {self.location} tagged step 4 done \n")
             self.remove_users()
