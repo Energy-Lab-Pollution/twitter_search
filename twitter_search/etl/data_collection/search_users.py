@@ -71,6 +71,9 @@ class UserSearcher:
                 tweet_fields=TWEET_FIELDS,
                 user_fields=USER_FIELDS,
             )
+            if response.meta["result_count"] == 0:
+                print("No more results found.")
+                break
             result_count += response.meta["result_count"]
             self.total_tweets.extend(response.data)
             self.total_users.extend(response.includes["users"])
@@ -102,8 +105,14 @@ class UserSearcher:
                 constants.TWEET_FIELDS,
                 constants.USER_FIELDS,
             )
+
+            if not self.total_users:
+                print("No users found.")
+                return
+
             self.total_users_dict = util.user_dictmaker(self.total_users)
             self.total_tweets_dict = util.tweet_dictmaker(self.total_tweets)
+
         except Exception as e:
             print(f"An error occurred: {e}")
 
@@ -138,5 +147,7 @@ class UserSearcher:
 
     def run_search_all(self):
         self.search_users_tweets()
+        if not self.total_users:
+            return
         self.store_users()
         self.store_tweets()

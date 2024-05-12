@@ -33,7 +33,7 @@ class TwitterDataHandler:
     ):
         self.location = location.lower()
         self.account_type = account_type
-        self.list_needed = list_needed
+        self.list_needed = True if list_needed == "True" else False
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
 
@@ -128,6 +128,9 @@ class TwitterDataHandler:
         print("Searching for Twitter users...")
         query = Query(self.location, self.account_type)
         query.query_builder()
+
+        print(query.text)
+
         user_searcher = UserSearcher(
             self.location,
             self.paths["output_file_users"],
@@ -135,6 +138,9 @@ class TwitterDataHandler:
             query.text,
         )
         user_searcher.run_search_all()
+        if not user_searcher.total_users:
+            print("No users found.")
+            return
         processor = TweetProcessor(
             self.location,
             self.account_type,
@@ -169,10 +175,7 @@ class TwitterDataHandler:
         list_getter.get_lists()
 
         print("Filtering lists...")
-        self.filter_twitter_lists(
-            self.paths["input_file_filter_lists"],
-            self.paths["output_file_filter_lists"],
-        )
+        self.filter_twitter_lists()
 
         print("Retrieving user data from lists...")
         user_getter = UserGetter(

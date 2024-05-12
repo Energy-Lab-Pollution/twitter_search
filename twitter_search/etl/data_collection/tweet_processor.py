@@ -1,4 +1,4 @@
-from config_utils import util,constants
+from config_utils import util, constants
 
 
 class TweetProcessor:
@@ -8,6 +8,7 @@ class TweetProcessor:
         self.gmaps_client = util.gmaps_client()
         self.input_file_tweets, self.input_file_users = input_file_tuple
         self.output_file = output_file
+        self.STATE_CAPITALS = constants.STATE_CAPITALS
 
     @staticmethod
     def get_coordinates(client, location):
@@ -57,7 +58,7 @@ class TweetProcessor:
             #                     (entity_name == constants.\
             #                      STATE_CAPITALS[self.location] or \
             #                         entity_name == self.location)
-                
+
             author_id = tweet.get("author_id", None)
             if author_id:
                 for user in self.user_list:

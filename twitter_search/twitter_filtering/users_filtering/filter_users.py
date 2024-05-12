@@ -25,6 +25,7 @@ class UserFilter:
         self.relevant_labels = constants.RELEVANT_LABELS
         self.input_file = input_file
         self.output_file = output_file
+        self.STATE_CAPITALS = constants.STATE_CAPITALS
         self.pipeline = pipeline(
             constants.HUGGINGFACE_PIPELINE, model=constants.HUGGINGFACE_MODEL
         )
@@ -122,12 +123,21 @@ class UserFilter:
                         user_location, shapefile, how="left", op="within"
                     )
                     try:
-                        subnational = joined_data["shapeName"].iloc[0].lower()
+                        subnational = joined_data["shapeName"].iloc[0]
+                        if isinstance(subnational, float):
+                            print(
+                                f"Subnational is float, skipping user: {user['username']}"
+                            )
+                            subnational = None
+                            user["location_relevance"] = False
+                            continue
+                        else:
+                            subnational = subnational.lower()
                     except Exception as e:
                         print(f"Error determining subnational location: {e}")
                         subnational = None
                     print(subnational, "subnational")
-                    desired_locations = constants.STATE_CAPITALS.get(self.location, [])
+                    desired_locations = self.STATE_CAPITALS.get(self.location, [])
                     print("desired locations", desired_locations)
                     user["location_relevance"] = subnational in desired_locations
                 else:
@@ -140,8 +150,8 @@ class UserFilter:
 
         self.filtered_user = []
         for user in self.total_user_dict:
-            #if user["content_is_relevant"] is True:
-                self.filtered_user.append(user)
+            # if user["content_is_relevant"] is True:
+            self.filtered_user.append(user)
 
         print(f"Filtered {len(self.filtered_user)} relevant users")
 
@@ -167,10 +177,14 @@ class UserFilter:
                 """users classified based on name, bio, and their tweets,
                  step 3 done \n"""
             )
-            self.determine_location_relevance()
-            print(f"relevant users for {self.location} tagged step 4 done \n")
+
+            if self.location in self.STATE_CAPITALS:
+                self.determine_location_relevance()
+                print(f"relevant users for {self.location} tagged step 4 done \n")
+            else:
+                print(f"Location {self.location} not found in STATE_CAPITALS")
+
             self.remove_users()
-            #print("non-relevant users removed, step 5 completed \n")
             self.store_users()
             print("Filtered users stored successfully.")
 

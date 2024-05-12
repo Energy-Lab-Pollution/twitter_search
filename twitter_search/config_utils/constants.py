@@ -16,7 +16,36 @@ project_root = script_path.parents[2]
 RAW_DATA_PATH = project_root / "data" / "raw_data"
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
+# QUERY DICTIONARY
 
+
+{
+    "media": """(location)(media OR press OR coverage OR broadcasting
+            OR alert OR breaking OR journalism OR journalist OR news
+            OR local OR news OR patrika) lang:bn -is:retweet""",
+    "organizations": """NGO location OR organization location OR non-profit
+                    location OR location  OR location institution OR
+                    non-governmental organization) (#non-profit OR #NGO OR #NPO)
+                    -is:retweet""",
+    "policymaker": """(member of parliament OR minister OR magistrate OR
+                    District magistrate OR IAS OR officer OR cabinet OR mayor
+                    OR councillor OR localgovernment OR city official OR MLA OR MP)
+                    (location OR location government OR location
+                    council OR location municipality)  (#MP OR #MLA OR #cabinet
+                    OR #minister OR #seceretary OR #IAS OR #IPS) -is:retweet""",
+    "politicians": """(politics OR politicians) (self.location OR location politics
+                    OR location government) (#politics OR #politician OR #election)
+                    -is:retweet""",
+    "researcher": """location ((public heath) OR (environmental research) OR
+                (environmental researcher) OR health OR science OR academic
+                    OR research) (#science OR #research OR #academic)
+                    -is:retweet""",
+    # TODO: Add more keywords
+    "environment": """(air pollution location OR location air OR location
+                    pollution OR location public health OR bad air location OR
+                    location asthma OR location polluted OR pollution control board)
+            (#pollution OR #environment OR #cleanair OR #airquality) -is:retweet""",
+}
 # NLP CONSTANTS
 
 HUGGINGFACE_PIPELINE = "zero-shot-classification"
@@ -94,7 +123,7 @@ STATE_CAPITALS = {
 }
 
 
-MAX_RESULTS = 20
+MAX_RESULTS = 75
 MAX_RESULTS_LISTS = 24
 EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
 TWEET_FIELDS = [
@@ -539,29 +568,68 @@ dict = {
     "Global TV Show": 172,
     "Google Product Taxonomy": 173,
     "Digital Assets & Crypto": 174,
-    "Emergency Events": 175
+    "Emergency Events": 175,
 }
 
 
-category_dict =  category_dict = {
-    "media": ["tv shows", "tv episodes", "tv genres", "tv channels", "radio station", "podcast", 
-              "global tv show", "video game", "movie", "music album", "video game conference", 
-              "video game tournament", "movie festival", "concert", "award show", "holiday", 
-              "digital creator", "multimedia franchise",
-              "digital assets & crypto", "local news", "journalist", "sports events", 
-              "basketball game", "sports series", "soccer match", "baseball game", 
-              "hockey game", "cricket match", "sports personality", "coach", 
-              "esports team", "esports player", "fan community", "esports league","digital creator"],
-              
-    "organizations": ["community", "brand vertical", "brand category", "brand", "product", 
-                      "unified twitter taxonomy", "google product taxonomy", 
-                      "digital assets & crypto", "colleges & universities", "points of interest"],
-                      
+category_dict = category_dict = {
+    "media": [
+        "tv shows",
+        "tv episodes",
+        "tv genres",
+        "tv channels",
+        "radio station",
+        "podcast",
+        "global tv show",
+        "video game",
+        "movie",
+        "music album",
+        "video game conference",
+        "video game tournament",
+        "movie festival",
+        "concert",
+        "award show",
+        "holiday",
+        "digital creator",
+        "multimedia franchise",
+        "digital assets & crypto",
+        "local news",
+        "journalist",
+        "sports events",
+        "basketball game",
+        "sports series",
+        "soccer match",
+        "baseball game",
+        "hockey game",
+        "cricket match",
+        "sports personality",
+        "coach",
+        "esports team",
+        "esports player",
+        "fan community",
+        "esports league",
+        "digital creator",
+    ],
+    "organizations": [
+        "community",
+        "brand vertical",
+        "brand category",
+        "brand",
+        "product",
+        "unified twitter taxonomy",
+        "google product taxonomy",
+        "digital assets & crypto",
+        "colleges & universities",
+        "points of interest",
+    ],
     "policymaker": ["political race", "political body", "emergency events"],
-    
     "politicians": ["politicians", "political race"],
-    
     "researcher": ["Technology"],
-    
-    "environment": ["weather", "cities", "states", "countries", "emergency events"]
+    "environment": [
+        "weather",
+        "cities",
+        "states",
+        "countries",
+        "emergency events",
+    ],
 }
