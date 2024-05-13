@@ -26,6 +26,7 @@ class CSVConverter:
         self.location = location
         self.filter_json_files()
 
+    @staticmethod
     def create_user_url(username):
         """
         Create the URL for a user based on their username.
