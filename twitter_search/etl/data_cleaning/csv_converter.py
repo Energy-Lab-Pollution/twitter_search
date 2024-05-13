@@ -26,6 +26,18 @@ class CSVConverter:
         self.location = location
         self.filter_json_files()
 
+    def create_user_url(username):
+        """
+        Create the URL for a user based on their username.
+
+        Args:
+            username (str): The username of the user.
+
+        Returns:
+            str: The URL of the user.
+        """
+        return f"https://twitter.com/{username}"
+
     def filter_json_files(self):
         """
         Filter the JSON files based on the location.
@@ -82,9 +94,6 @@ class CSVConverter:
         else:
             df = pd.DataFrame(data)
 
-        # # Save the DataFrame as a CSV file
-        # df.to_csv(output_file, index=False)
-
         return df
 
     def concat_dataframes(self, files):
@@ -129,8 +138,14 @@ class CSVConverter:
         """
         if self.user_files:
             user_df = self.concat_dataframes(self.user_files)
-            user_df.dropna(subset=["content_is_relevant"], inplace=True)
             # Drop columns that are not needed
+            user_df.dropna(subset=["content_is_relevant"], inplace=True)
+
+            # Get the user URL
+            user_df.loc[:, "user_url"] = user_df["username"].apply(
+                lambda x: self.create_user_url(x)
+            )
+
             user_df.to_csv(
                 self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv",
                 index=False,
