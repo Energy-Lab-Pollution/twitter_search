@@ -26,6 +26,19 @@ class CSVConverter:
         self.location = location
         self.filter_json_files()
 
+    @staticmethod
+    def create_user_url(username):
+        """
+        Create the URL for a user based on their username.
+
+        Args:
+            username (str): The username of the user.
+
+        Returns:
+            str: The URL of the user.
+        """
+        return f"https://twitter.com/{username}"
+
     def filter_json_files(self):
         """
         Filter the JSON files based on the location.
@@ -39,7 +52,9 @@ class CSVConverter:
         """
         # Filter the JSON files based on the location
         self.filtered_files = [
-            file for file in self.json_files if self.location.lower() in file.lower()
+            file
+            for file in self.json_files
+            if self.location.lower() in file.lower()
         ]
 
         self.user_files = [
@@ -80,9 +95,6 @@ class CSVConverter:
         else:
             df = pd.DataFrame(data)
 
-        # # Save the DataFrame as a CSV file
-        # df.to_csv(output_file, index=False)
-
         return df
 
     def concat_dataframes(self, files):
@@ -104,7 +116,11 @@ class CSVConverter:
             input_df = self.convert_to_df(input_file)
 
             if "relevant" or "content_is_relevant" in input_df.columns:
-                df = pd.concat([df, self.convert_to_df(input_file)], ignore_index=True)
+                df = pd.concat(
+                    [df, self.convert_to_df(input_file)], ignore_index=True
+                )
+
+        df.loc[:, "search_location"] = self.location
 
         return df
 
@@ -123,8 +139,14 @@ class CSVConverter:
         """
         if self.user_files:
             user_df = self.concat_dataframes(self.user_files)
-            user_df.dropna(subset=["content_is_relevant"], inplace=True)
             # Drop columns that are not needed
+            user_df.dropna(subset=["content_is_relevant"], inplace=True)
+
+            # Get the user URL
+            user_df.loc[:, "user_url"] = user_df["username"].apply(
+                lambda x: self.create_user_url(x)
+            )
+
             user_df.to_csv(
                 self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv",
                 index=False,
