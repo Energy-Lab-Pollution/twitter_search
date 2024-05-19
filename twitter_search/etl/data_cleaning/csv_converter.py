@@ -60,7 +60,7 @@ class CSVConverter:
         self.user_files = [
             file
             for file in self.json_files
-            if "user" in file.lower() and self.location.lower() in file.lower()
+            if "users" in file.lower() and self.location.lower() in file.lower()
         ]
 
         self.list_files = [
@@ -120,6 +120,8 @@ class CSVConverter:
                     [df, self.convert_to_df(input_file)], ignore_index=True
                 )
 
+                print(f"Data loaded successfully from {file}")
+
         df.loc[:, "search_location"] = self.location
 
         return df
@@ -140,7 +142,7 @@ class CSVConverter:
         if self.user_files:
             user_df = self.concat_dataframes(self.user_files)
             # Drop columns that are not needed
-            user_df.dropna(subset=["content_is_relevant"], inplace=True)
+            # user_df.dropna(subset=["content_is_relevant"], inplace=True)
 
             # Get the user URL
             user_df.loc[:, "user_url"] = user_df["username"].apply(
