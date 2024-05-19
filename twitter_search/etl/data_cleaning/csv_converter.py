@@ -26,6 +26,11 @@ class CSVConverter:
         self.location = location
         self.filter_json_files()
 
+        self.file_type_column = {
+            "user": "content_is_relevant",
+            "list": "relevant",
+        }
+
     @staticmethod
     def create_user_url(username):
         """
@@ -97,7 +102,7 @@ class CSVConverter:
 
         return df
 
-    def concat_dataframes(self, files):
+    def concat_dataframes(self, files, file_type):
         """
         Reads the JSON files, creates a dataframe
         for each file and concatenates all the dataframes.
@@ -109,13 +114,19 @@ class CSVConverter:
             DataFrame: The concatenated DataFrame.
         """
 
+        if file_type not in self.file_type_column:
+            raise ValueError(
+                f"""File type {file_type} not recognized,must be
+                              one from {self.file_type_column.keys()}"""
+            )
+
         df = pd.DataFrame()
 
         for file in files:
             input_file = self.RAW_DATA_PATH / file
             input_df = self.convert_to_df(input_file)
 
-            if "relevant" or "content_is_relevant" in input_df.columns:
+            if self.file_type_column[file_type] in input_df.columns:
                 df = pd.concat(
                     [df, self.convert_to_df(input_file)], ignore_index=True
                 )
@@ -140,9 +151,8 @@ class CSVConverter:
             None
         """
         if self.user_files:
-            user_df = self.concat_dataframes(self.user_files)
+            user_df = self.concat_dataframes(self.user_files, file_type="user")
             # Drop columns that are not needed
-            # user_df.dropna(subset=["content_is_relevant"], inplace=True)
 
             # Get the user URL
             user_df.loc[:, "user_url"] = user_df["username"].apply(
@@ -160,7 +170,7 @@ class CSVConverter:
             print(f"No user data found for {self.location}")
 
         if self.list_files:
-            list_df = self.concat_dataframes(self.list_files)
+            list_df = self.concat_dataframes(self.list_files, file_type="list")
             list_df.dropna(subset=["relevant"], inplace=True)
             list_df.to_csv(
                 self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",
