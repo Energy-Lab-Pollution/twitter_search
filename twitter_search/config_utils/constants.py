@@ -16,6 +16,24 @@ project_root = script_path.parents[2]
 RAW_DATA_PATH = project_root / "data" / "raw_data"
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
+# RELEVANT USER COLUMNS
+
+USER_COLUMNS = [
+    "user_id",
+    "username",
+    "name",
+    "description",
+    "user_url",
+    "location",
+    "search_location",
+    "tweet_count",
+    "followers_count",
+    "following_count",
+    "listed_count",
+    "tweets",
+    "token",
+]
+
 # QUERY DICTIONARY
 
 

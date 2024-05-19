@@ -13,6 +13,21 @@ import pandas as pd
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
 
+USER_COLUMNS = [
+    "user_id",
+    "username",
+    "name",
+    "description",
+    "location",
+    "tweet_count",
+    "followers_count",
+    "following_count",
+    "listed_count",
+    "tweets",
+    "content_is_relevant",
+    "content_labels",
+]
+
 
 class CSVConverter:
 
@@ -30,6 +45,8 @@ class CSVConverter:
             "user": "content_is_relevant",
             "list": "relevant",
         }
+
+        self.user_columns = USER_COLUMNS
 
     @staticmethod
     def create_user_url(username):
@@ -127,9 +144,9 @@ class CSVConverter:
             input_df = self.convert_to_df(input_file)
 
             if self.file_type_column[file_type] in input_df.columns:
-                df = pd.concat(
-                    [df, self.convert_to_df(input_file)], ignore_index=True
-                )
+
+                input_df = input_df.loc[:, self.user_columns]
+                df = pd.concat([df, input_df], ignore_index=True)
 
                 print(f"Data loaded successfully from {file}")
 
