@@ -13,7 +13,7 @@ googlemaps = "^4.10.0"
 googletrans= "^3.0.0"
 langdetect = "^1.0.9"
 geopandas = "^0.14.4"
-transformers = "^4.40.2"
+transformers = "^4.40.2" 
 torch = "^2.3.0"
 
 [build-system]

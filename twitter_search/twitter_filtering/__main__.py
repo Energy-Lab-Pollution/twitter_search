@@ -6,13 +6,11 @@ Script that executes the main pipelines for user and lists filtering
 import argparse
 
 # Local imports
-from lists_filtering.filter_lists import ListFilter, ListReader
+from lists_filtering.filter_lists import ListReader, ListFilter
 from utils.constants import CLEAN_DATA_PATH
 
 
-parser = argparse.ArgumentParser(
-    description="Apply list filters to a given file"
-)
+parser = argparse.ArgumentParser(description="Apply list filters to a given file")
 parser.add_argument(
     "filename", type=str, help="Filename to parse, please include full path"
 )
@@ -20,6 +18,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 if __name__ == "__main__":
+
     if ".json" not in args.filename:
         raise ValueError("File must be of JSON type")
 

@@ -1,4 +1,4 @@
-from config_utils import constants, util
+from config_utils import util, constants
 
 
 class TweetProcessor:
@@ -96,6 +96,7 @@ class TweetProcessor:
         print("Total number of users:", len(self.user_list))
 
     def run_processing(self):
+
         tweet_list_raw = util.load_json(self.input_file_tweets)
         user_list_raw = util.load_json(self.input_file_users)
         self.tweet_list = util.flatten_and_remove_empty(tweet_list_raw)

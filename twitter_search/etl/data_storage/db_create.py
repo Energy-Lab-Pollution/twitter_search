@@ -1,5 +1,5 @@
-import json
 import sqlite3
+import json
 
 
 def schema():
