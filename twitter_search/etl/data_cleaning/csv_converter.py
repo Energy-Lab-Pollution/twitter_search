@@ -13,6 +13,21 @@ import pandas as pd
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
 
+USER_COLUMNS = [
+    "user_id",
+    "username",
+    "name",
+    "description",
+    "location",
+    "tweet_count",
+    "followers_count",
+    "following_count",
+    "listed_count",
+    "tweets",
+    "content_is_relevant",
+    "content_labels",
+]
+
 
 class CSVConverter:
 
@@ -25,6 +40,13 @@ class CSVConverter:
         self.json_files = os.listdir(self.RAW_DATA_PATH)
         self.location = location
         self.filter_json_files()
+
+        self.file_type_column = {
+            "user": "content_is_relevant",
+            "list": "relevant",
+        }
+
+        self.user_columns = USER_COLUMNS
 
     @staticmethod
     def create_user_url(username):
@@ -60,7 +82,7 @@ class CSVConverter:
         self.user_files = [
             file
             for file in self.json_files
-            if "user" in file.lower() and self.location.lower() in file.lower()
+            if "users" in file.lower() and self.location.lower() in file.lower()
         ]
 
         self.list_files = [
@@ -97,7 +119,7 @@ class CSVConverter:
 
         return df
 
-    def concat_dataframes(self, files):
+    def concat_dataframes(self, files, file_type):
         """
         Reads the JSON files, creates a dataframe
         for each file and concatenates all the dataframes.
@@ -109,16 +131,24 @@ class CSVConverter:
             DataFrame: The concatenated DataFrame.
         """
 
+        if file_type not in self.file_type_column:
+            raise ValueError(
+                f"""File type {file_type} not recognized,must be
+                              one from {self.file_type_column.keys()}"""
+            )
+
         df = pd.DataFrame()
 
         for file in files:
             input_file = self.RAW_DATA_PATH / file
             input_df = self.convert_to_df(input_file)
 
-            if "relevant" or "content_is_relevant" in input_df.columns:
-                df = pd.concat(
-                    [df, self.convert_to_df(input_file)], ignore_index=True
-                )
+            if self.file_type_column[file_type] in input_df.columns:
+
+                input_df = input_df.loc[:, self.user_columns]
+                df = pd.concat([df, input_df], ignore_index=True)
+
+                print(f"Data loaded successfully from {file}")
 
         df.loc[:, "search_location"] = self.location
 
@@ -138,9 +168,8 @@ class CSVConverter:
             None
         """
         if self.user_files:
-            user_df = self.concat_dataframes(self.user_files)
+            user_df = self.concat_dataframes(self.user_files, file_type="user")
             # Drop columns that are not needed
-            user_df.dropna(subset=["content_is_relevant"], inplace=True)
 
             # Get the user URL
             user_df.loc[:, "user_url"] = user_df["username"].apply(
@@ -158,7 +187,7 @@ class CSVConverter:
             print(f"No user data found for {self.location}")
 
         if self.list_files:
-            list_df = self.concat_dataframes(self.list_files)
+            list_df = self.concat_dataframes(self.list_files, file_type="list")
             list_df.dropna(subset=["relevant"], inplace=True)
             list_df.to_csv(
                 self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",
