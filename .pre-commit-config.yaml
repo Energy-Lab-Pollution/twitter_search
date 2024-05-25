@@ -6,14 +6,14 @@ repos:
       - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-json
-        exclude: /twitter_search/twitter_filtering/utils/shapefiles/
+        exclude: /twitter_search/twitter_filtering/utils/shape_files/
       - id: check-case-conflict
       - id: check-toml
       - id: check-merge-conflict
       - id: check-xml
       - id: check-yaml
       - id: end-of-file-fixer
-        exclude: /twitter_search/twitter_filtering/utils/shapefiles/
+        exclude: /twitter_search/twitter_filtering/utils/shape_files/
       - id: check-symlinks
       - id: mixed-line-ending
       - id: sort-simple-yaml
@@ -23,7 +23,7 @@ repos:
       - id: pretty-format-json
         args:
           - --autofix
-        exclude: /twitter_search/twitter_filtering/utils/shapefiles/
+        exclude: /twitter_search/twitter_filtering/utils/shape_files/
 
 
   - repo: https://github.com/pre-commit/pygrep-hooks
