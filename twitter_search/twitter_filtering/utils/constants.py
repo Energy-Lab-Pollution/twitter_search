@@ -6,6 +6,7 @@ Script with constants for the list filtering process
 
 from pathlib import Path
 
+
 # Lists_filtering constants
 
 script_path = Path(__file__).resolve()

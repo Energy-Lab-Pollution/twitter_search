@@ -1,1 +1,24 @@
-{"boundaryID": "IND-ADM1-1811400", "boundaryISO": "IND", "boundaryYear": "2011", "boundaryType": "ADM1", "boundarySource": "DataMeet India community, Election Commission of India", "boundaryCanonical": "State / Union Territory", "boundaryLicense": "Creative Commons Attribution 2.5 India (CC BY 2.5 IN)", "licenseDetail": "", "licenseSource": "https//github.com/datameet/maps", "boundarySourceURL": "https//github.com/datameet/maps", "sourceDataUpdateDate": "Thu Jan 19 07:31:04 2023", "buildDate": "Jan 23, 2023", "admUnitCount": "36", "meanVertices": "29240.0", "minVertices": "1465", "maxVertices": "111946", "meanPerimeterLengthKM": "2898.9877860855454", "maxPerimeterLengthKM": "7834.207729775352", "minPerimeterLengthKM": "68.40903557904203", "meanAreaSqKM": "90835.83327140143", "minAreaSqKM": "29.90223802178997", "maxAreaSqKM": "342169.5548314523"}
+{
+  "admUnitCount": "36",
+  "boundaryCanonical": "State / Union Territory",
+  "boundaryID": "IND-ADM1-1811400",
+  "boundaryISO": "IND",
+  "boundaryLicense": "Creative Commons Attribution 2.5 India (CC BY 2.5 IN)",
+  "boundarySource": "DataMeet India community, Election Commission of India",
+  "boundarySourceURL": "https//github.com/datameet/maps",
+  "boundaryType": "ADM1",
+  "boundaryYear": "2011",
+  "buildDate": "Jan 23, 2023",
+  "licenseDetail": "",
+  "licenseSource": "https//github.com/datameet/maps",
+  "maxAreaSqKM": "342169.5548314523",
+  "maxPerimeterLengthKM": "7834.207729775352",
+  "maxVertices": "111946",
+  "meanAreaSqKM": "90835.83327140143",
+  "meanPerimeterLengthKM": "2898.9877860855454",
+  "meanVertices": "29240.0",
+  "minAreaSqKM": "29.90223802178997",
+  "minPerimeterLengthKM": "68.40903557904203",
+  "minVertices": "1465",
+  "sourceDataUpdateDate": "Thu Jan 19 07:31:04 2023"
+}

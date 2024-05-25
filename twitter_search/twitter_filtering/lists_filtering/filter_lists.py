@@ -6,13 +6,14 @@ lists
 # Global imports
 
 import json
-import pandas as pd
 
+import pandas as pd
 from twitter_filtering.utils.constants import (
-    RAW_DATA_PATH,
-    LISTS_KEYWORDS,
     COLS_TO_KEEP,
+    LISTS_KEYWORDS,
+    RAW_DATA_PATH,
 )
+
 
 # Constants
 # FILENAME = "Mumbai_lists"
@@ -21,7 +22,6 @@ from twitter_filtering.utils.constants import (
 
 
 class ListReader:
-
     PATH = RAW_DATA_PATH
     LISTS_KEYWORDS = LISTS_KEYWORDS
     COLS_TO_KEEP = COLS_TO_KEEP
@@ -63,7 +63,9 @@ class ListReader:
             else:
                 # create a dataframe from the list
                 list_df = pd.DataFrame(twitter_list)
-                self.lists_df = pd.concat([self.lists_df, list_df], ignore_index=True)
+                self.lists_df = pd.concat(
+                    [self.lists_df, list_df], ignore_index=True
+                )
 
         self.lists_df = self.lists_df.loc[:, COLS_TO_KEEP].copy()
 
