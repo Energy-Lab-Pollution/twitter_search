@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 
 from data_cleaning.csv_converter import CSVConverter
 
+
 parser = ArgumentParser(
     description="Specify location to convert JSON files into CSV files."
 )
@@ -18,6 +19,5 @@ parser.add_argument(
 args = parser.parse_args()
 
 if __name__ == "__main__":
-
     converter = CSVConverter(args.location)
     converter.run()
