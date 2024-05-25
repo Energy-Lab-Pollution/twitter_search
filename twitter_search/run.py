@@ -10,6 +10,7 @@ from etl.run_search_twitter import TwitterDataHandler
 
 
 def main():
+
     parser = ArgumentParser(
         description="Get users from Twitter based on location,type and algorithm."
     )
@@ -58,9 +59,7 @@ def main():
 
     print("Building query...")
 
-    twitter_data_handler = TwitterDataHandler(
-        location, account_type, list_needed
-    )
+    twitter_data_handler = TwitterDataHandler(location, account_type, list_needed)
 
     if args.num_iterations:
         print(

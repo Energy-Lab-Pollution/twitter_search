@@ -23,6 +23,7 @@ class Query:
 
     # TODO optimize the queries further by playing on twitter website.
     def query_builder(self):
+
         if self.account_type == "media":
             return f"""({self.location})(media OR press OR coverage OR broadcasting
                     OR alert OR breaking OR journalism OR journalist OR news
