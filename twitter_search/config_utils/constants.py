@@ -142,6 +142,7 @@ STATE_CAPITALS = {
 
 
 MAX_RESULTS = 75
+MAX_TWEETS_FROM_USERS = 5
 MAX_RESULTS_LISTS = 24
 EXPANSIONS = ["author_id", "entities.mentions.username", "geo.place_id"]
 TWEET_FIELDS = [
