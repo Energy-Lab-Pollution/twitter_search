@@ -4,7 +4,7 @@ Module for searching users on Twitter based on a query and location.
 Author : Praveen Chandar and Federico Dominguez Molina
 """
 
-from config_utils import util, constants
+from config_utils import constants, util
 
 
 class UserSearcher:
@@ -20,7 +20,9 @@ class UserSearcher:
         client: tweepy client
     """
 
-    def __init__(self, location, output_file_users, output_file_tweets, query=None):
+    def __init__(
+        self, location, output_file_users, output_file_tweets, query=None
+    ):
         if query is None:
             self.query = self.query_builder(location)
         else:
@@ -36,7 +38,6 @@ class UserSearcher:
         print("Clients initiated")
 
     def query_builder(self, location):
-
         return f"(air pollution {location} OR {location} air OR {location} \
             pollution OR {location} public health OR bad air {location} OR \
             {location} asthma OR {location} polluted OR pollution control board) \
@@ -126,7 +127,9 @@ class UserSearcher:
         Returns:
             None
         """
-        self.unique_users_dict = util.remove_duplicate_records(self.total_users_dict)
+        self.unique_users_dict = util.remove_duplicate_records(
+            self.total_users_dict
+        )
 
         util.json_maker(self.output_file_user, self.unique_users_dict)
         print("Total number of users:", len(self.total_users))
@@ -141,7 +144,9 @@ class UserSearcher:
         Returns:
             None
         """
-        self.unique_tweets_dict = util.remove_duplicate_records(self.total_tweets_dict)
+        self.unique_tweets_dict = util.remove_duplicate_records(
+            self.total_tweets_dict
+        )
         util.json_maker(self.output_file_tweets, self.unique_tweets_dict)
         print("Total number of tweets:", len(self.unique_tweets_dict))
 

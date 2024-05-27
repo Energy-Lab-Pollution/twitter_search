@@ -3,8 +3,8 @@ This script converts the JSON files into CSV files for easier data manipulation.
 """
 
 import json
-from pathlib import Path
 import os
+from pathlib import Path
 
 # General imports
 import pandas as pd
@@ -30,7 +30,6 @@ USER_COLUMNS = [
 
 
 class CSVConverter:
-
     # Construct the path to the cleaned_data directory
     RAW_DATA_PATH = project_root / "data" / "raw_data"
     CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
@@ -144,7 +143,6 @@ class CSVConverter:
             input_df = self.convert_to_df(input_file)
 
             if self.file_type_column[file_type] in input_df.columns:
-
                 input_df = input_df.loc[:, self.user_columns]
                 df = pd.concat([df, input_df], ignore_index=True)
 
