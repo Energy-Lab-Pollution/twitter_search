@@ -7,10 +7,10 @@ This script runs the Twitter search, data collection and filtering process.
 from pathlib import Path
 
 from etl.data_collection.get_lists import ListGetter
+from etl.data_collection.get_tweets import TweetGetter
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
 from etl.data_collection.tweet_processor import TweetProcessor
-from etl.data_collection.get_tweets import TweetGetter
 from etl.query import Query
 from twitter_filtering.lists_filtering.filter_lists import (
     ListFilter,
@@ -63,7 +63,7 @@ class TwitterDataHandler:
             / f"{self.location}_{self.account_type}_processed_users.json",
             "output_file_filter": self.base_dir
             / f"{self.location}_{self.account_type}_users_filtered_{count}.json",
-            "output_file_tweet_add":self.base_dir
+            "output_file_tweet_add": self.base_dir
             / f"{self.location}_{self.account_type}_users_tweet_added",
             "input_file_lists": self.base_dir
             / f"{self.location}_{self.account_type}_lists_{count}.json",
@@ -112,7 +112,7 @@ class TwitterDataHandler:
             # self.perform_initial_search()
             self.get_users_tweets()
 
-        #self.filter_users()
+        # self.filter_users()
 
         if not self.list_needed:
             print("Lists not needed, exiting.")
@@ -154,11 +154,10 @@ class TwitterDataHandler:
         processor.run_processing()
 
     def get_users_tweets(self):
-
         self.tweet_getter = TweetGetter(
-        self.location,
-        self.paths["output_file_processing"],
-        self.paths["output_file_tweet_add"],
+            self.location,
+            self.paths["output_file_processing"],
+            self.paths["output_file_tweet_add"],
         )
         self.tweet_getter.get_users_tweets()
 
@@ -204,5 +203,7 @@ class TwitterDataHandler:
         """
         list_reader = ListReader(self.paths["input_file_filter_lists"])
         lists_df = list_reader.create_df()
-        list_filter = ListFilter(lists_df, self.paths["output_file_filter_lists"])
+        list_filter = ListFilter(
+            lists_df, self.paths["output_file_filter_lists"]
+        )
         list_filter.keep_relevant_lists()
