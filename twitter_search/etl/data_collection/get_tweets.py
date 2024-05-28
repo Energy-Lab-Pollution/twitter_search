@@ -68,13 +68,13 @@ class TweetGetter:
             # FOR TESTING BREAKING ON ONLY 2 loops
             if count >= self.COUNT_THRESHOLD_TWEETS:
                 break
-                print("Reached threshold, waiting for 15 minutes")
-                for time_block in range(1, 4):
-                    time.sleep(300)
-                    print(
-                        f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {time_block * 5} minutes done out of 15"
-                    )
-                count = 0
+            print("Reached threshold, waiting for 15 minutes")
+            for time_block in range(1, 4):
+                time.sleep(300)
+                print(
+                    f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {time_block * 5} minutes done out of 15"
+                )
+            count = 0
 
         self.total_users_dict = users_list
 
