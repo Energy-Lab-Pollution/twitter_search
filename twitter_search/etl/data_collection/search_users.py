@@ -81,6 +81,7 @@ class UserSearcher:
             try:
                 next_token = response.meta["next_token"]
             except Exception as err:
+                print(err)
                 next_token = None
 
             if next_token is None:
