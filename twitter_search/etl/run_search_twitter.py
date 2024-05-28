@@ -10,6 +10,7 @@ from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
 from etl.data_collection.tweet_processor import TweetProcessor
+from etl.data_collection.get_tweets import TweetGetter
 from etl.query import Query
 from twitter_filtering.lists_filtering.filter_lists import (
     ListFilter,
@@ -62,6 +63,8 @@ class TwitterDataHandler:
             / f"{self.location}_{self.account_type}_processed_users.json",
             "output_file_filter": self.base_dir
             / f"{self.location}_{self.account_type}_users_filtered_{count}.json",
+            "output_file_tweet_add":self.base_dir
+            / f"{self.location}_{self.account_type}_users_tweet_added",
             "input_file_lists": self.base_dir
             / f"{self.location}_{self.account_type}_lists_{count}.json",
             "output_file_lists": self.base_dir
@@ -106,9 +109,10 @@ class TwitterDataHandler:
         self.setup_file_paths(count)
 
         if count == 1:
-            self.perform_initial_search()
+            # self.perform_initial_search()
+            self.get_users_tweets()
 
-        self.filter_users()
+        #self.filter_users()
 
         if not self.list_needed:
             print("Lists not needed, exiting.")
@@ -148,6 +152,15 @@ class TwitterDataHandler:
             self.paths["output_file_processing"],
         )
         processor.run_processing()
+
+    def get_users_tweets(self):
+
+        self.tweet_getter = TweetGetter(
+        self.location,
+        self.paths["output_file_processing"],
+        self.paths["output_file_tweet_add"],
+        )
+        self.tweet_getter.get_users_tweets()
 
     def filter_users(self):
         """
