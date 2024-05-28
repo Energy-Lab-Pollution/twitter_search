@@ -109,10 +109,10 @@ class TwitterDataHandler:
         self.setup_file_paths(count)
 
         if count == 1:
-            # self.perform_initial_search()
-            self.get_users_tweets()
+            self.perform_initial_search()
+            # self.get_users_tweets()
 
-        # self.filter_users()
+        self.filter_users()
 
         if not self.list_needed:
             print("Lists not needed, exiting.")
@@ -154,6 +154,10 @@ class TwitterDataHandler:
         processor.run_processing()
 
     def get_users_tweets(self):
+        """
+        In the first iteration, gets extra tweets from any users that
+        we deemed relevant.
+        """
         self.tweet_getter = TweetGetter(
             self.location,
             self.paths["output_file_processing"],
