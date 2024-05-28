@@ -34,7 +34,7 @@ class Query:
                        OR non-profit {self.location} OR {self.location}
                        OR {self.location} institution OR non-governmental organization)
                        (#non-profit OR #NGO OR #NPO) -is:retweet"""
-        
+
         elif self.account_type == "policymaker":
             return f"""(member of parliament OR minister OR magistrate OR
                     District magistrate OR IAS OR officer OR cabinet OR mayor
@@ -43,18 +43,18 @@ class Query:
                     OR {self.location} council OR {self.location} municipality)
                     (#MP OR #MLA OR #cabinet OR #minister
                     OR #seceretary OR #IAS OR #IPS) -is:retweet"""
-        
+
         elif self.account_type == "politicians":
             return f"""(politics OR politicians) ({self.location}
                     OR {self.location} politics OR {self.location} government)
                     (#politics OR #politician OR #election) -is:retweet"""
-        
+
         elif self.account_type == "researcher":
             return f"""{self.location} ((public heath) OR (environmental research)
                     OR (environmental researcher) OR health OR science OR academic
                     OR research) (#science OR #research OR #academic)
                     -is:retweet"""
-        
+
             # TODO: Add more keywords
         elif self.account_type == "environment":
             return f"""(air pollution {self.location} OR {self.location} air
