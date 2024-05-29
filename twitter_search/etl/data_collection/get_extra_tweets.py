@@ -1,7 +1,7 @@
 """
-This module defines the `TweetGetter` class, which is responsible for retrieving tweets from specified users.
-It includes methods to load user data from an input file, fetch tweets using a configured client, and store
-the results in an output file.
+This module defines the `TweetGetter` class, which is responsible for retrieving tweets
+from specified users. It includes methods to load user data from an input file, fetch
+tweets using a configured client, and store the results in an output file.
 """
 
 import time
