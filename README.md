@@ -61,3 +61,17 @@ cd twitter_search/etl
 # Run the script
 python3 generate_csv_files.py "Kolkata"
 ```
+
+## Make Commands and addtional information
+
+Note that, to add code to the repository, you will need to install pre-commit. This will ensure that the code is formatted correctly and that the tests pass before you commit. To install pre-commit, run the following command:
+
+```bash
+pip install pre-commit
+```
+
+You can then use the Makefile to format the code:
+
+```bash
+make lint
+```
