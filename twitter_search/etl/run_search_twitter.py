@@ -7,7 +7,6 @@ This script runs the Twitter search, data collection and filtering process.
 from pathlib import Path
 
 from etl.data_collection.get_lists import ListGetter
-from etl.data_collection.get_tweets import TweetGetter
 from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
 from etl.data_collection.tweet_processor import TweetProcessor
@@ -17,6 +16,8 @@ from twitter_filtering.lists_filtering.filter_lists import (
     ListReader,
 )
 from twitter_filtering.users_filtering.filter_users import UserFilter
+
+from twitter_search.etl.data_collection.get_extra_tweets import TweetGetter
 
 
 # Main function -- May need to be a class later
@@ -109,10 +110,11 @@ class TwitterDataHandler:
         self.setup_file_paths(count)
 
         if count == 1:
-            # self.perform_initial_search()
-            self.get_users_tweets()
+            self.perform_initial_search()
+            # TODO: Add a check to see if we need to get extra tweets
+            # self.get_extra_tweets()
 
-        # self.filter_users()
+        self.filter_users()
 
         if not self.list_needed:
             print("Lists not needed, exiting.")
@@ -153,7 +155,11 @@ class TwitterDataHandler:
         )
         processor.run_processing()
 
-    def get_users_tweets(self):
+    def get_extra_tweets(self):
+        """
+        In the first iteration, gets extra tweets from any users that
+        we deemed relevant.
+        """
         self.tweet_getter = TweetGetter(
             self.location,
             self.paths["output_file_processing"],
