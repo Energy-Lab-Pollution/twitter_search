@@ -131,7 +131,7 @@ class UserFilter:
 
                     shapefile = gpd.read_file(self.shapefile_path)
                     joined_data = gpd.sjoin(
-                        user_location, shapefile, how="left", op="within"
+                        user_location, shapefile, how="left", predicate="within"
                     )
                     try:
                         subnational = joined_data["shapeName"].iloc[0]

@@ -55,11 +55,7 @@ gets users from kolkatta in the media industry, where lists(snowballing) is not 
 7. If you want, it is also possible to generate csv files for a particular location. The command for generating Kolkata's csv files  would be:
 
 ```bash
-# Go to the etl directory
-cd twitter_search/etl
-
-# Run the script
-python3 generate_csv_files.py "Kolkata"
+python3 twitter_search/etl/generate_csv_files.py "Kolkata"
 ```
 
 ## Make Commands and addtional information
