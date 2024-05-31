@@ -17,7 +17,7 @@ from twitter_filtering.lists_filtering.filter_lists import (
 )
 from twitter_filtering.users_filtering.filter_users import UserFilter
 
-from twitter_search.etl.data_collection.get_extra_tweets import TweetGetter
+from etl.data_collection.get_extra_tweets import TweetGetter
 
 
 # Main function -- May need to be a class later
