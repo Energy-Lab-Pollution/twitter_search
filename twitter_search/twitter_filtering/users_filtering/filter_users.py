@@ -2,6 +2,8 @@
 Script in charge of filtering users based on their location and content relevance.
 """
 
+import json
+import os
 from pathlib import Path
 
 import geopandas as gpd
@@ -36,7 +38,11 @@ class UserFilter:
         )
 
     def load_and_preprocess_data(self):
-        """Load and preprocess data from JSON file."""
+        """
+        Load and preprocess data from JSON file.
+
+        Removes duplicate records, etc.
+        """
 
         try:
             self.users_list = util.load_json(self.input_file)
@@ -50,6 +56,25 @@ class UserFilter:
         except Exception as e:
             print(f"Error loading data: {e}")
             self.total_user_dict = []
+
+    def read_previous_json(self):
+        """
+        Checks if the output JSON file still exists.
+
+        We then check which users exist and have already been
+        classified.
+        """
+
+        if os.path.exists(self.output_file):
+            prev_json_file = json.load(self.output_file)
+            prev_json_file = prev_json_file[0]
+
+            print(prev_json_file)
+
+            return prev_json_file
+
+        else:
+            return None
 
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
@@ -163,16 +188,20 @@ class UserFilter:
         Removes users that are not relevant based on their location and content.
         """
 
-        self.filtered_user = []
+        self.filtered_users = []
         for user in self.total_user_dict:
             # if user["content_is_relevant"] is True:
-            self.filtered_user.append(user)
+            self.filtered_users.append(user)
 
-        print(f"Filtered {len(self.filtered_user)} relevant users")
+        print(f"Filtered {len(self.filtered_users)} relevant users")
 
     def store_users(self):
+        """
+        Stores users on a JSON file; checks if the JSON exists. If it does, read it and
+        see if the user is already there. If it is, skip it.
+        """
         try:
-            util.json_maker(self.output_file, self.filtered_user)
+            util.json_maker(self.output_file, self.filtered_users)
         except Exception as e:
             print(f"Error storing filtered users: {e}")
 
