@@ -2,7 +2,6 @@
 Script in charge of filtering users based on their location and content relevance.
 """
 
-import json
 import os
 from pathlib import Path
 
@@ -233,18 +232,16 @@ class UserFilter:
         """
         try:
             self.load_and_preprocess_data()
-            print("data preprocessed, step 2 done \n")
+            print("data preprocessed, step 2 done")
             self.classify_content_relevance()
             print(
                 """users classified based on name, bio, and their tweets,
-                 step 3 done \n"""
+                 step 3 done"""
             )
 
             if self.location in self.STATE_CAPITALS:
                 self.determine_location_relevance()
-                print(
-                    f"relevant users for {self.location} tagged step 4 done \n"
-                )
+                print(f"relevant users for {self.location} tagged step 4 done")
             else:
                 print(f"Location {self.location} not found in STATE_CAPITALS")
 
