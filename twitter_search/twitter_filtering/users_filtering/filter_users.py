@@ -2,6 +2,7 @@
 Script in charge of filtering users based on their location and content relevance.
 """
 
+import os
 from pathlib import Path
 
 import geopandas as gpd
@@ -36,7 +37,11 @@ class UserFilter:
         )
 
     def load_and_preprocess_data(self):
-        """Load and preprocess data from JSON file."""
+        """
+        Load and preprocess data from JSON file.
+
+        Removes duplicate records, etc.
+        """
 
         try:
             self.users_list = util.load_json(self.input_file)
@@ -47,9 +52,47 @@ class UserFilter:
                 self.total_user_dict
             )
             print("users look like this:", self.total_user_dict[0])
+
+            self.get_already_classified_users()
+
+            print(f"Already classified {len(self.classified_users)} users")
+
+            print(f"{len(self.unclassified_users)} users to classify")
+
         except Exception as e:
             print(f"Error loading data: {e}")
             self.total_user_dict = []
+
+    def get_already_classified_users(self):
+        """
+        Checks if the output JSON file still exists and
+        gets the already classified users
+
+        We then get a list of current _unclassified_ users
+        """
+
+        users_index = 1
+        self.unclassified_users = []
+
+        if os.path.exists(self.output_file):
+            classified_users = util.load_json(self.output_file)
+            self.classified_users = classified_users[users_index]
+
+            classified_user_ids = [
+                classified_user["user_id"]
+                for classified_user in self.classified_users
+            ]
+
+            for user in self.total_user_dict:
+                if user["user_id"] in classified_user_ids:
+                    continue
+                else:
+                    self.unclassified_users.append(user)
+
+        else:
+            print("No previously classified users")
+            self.unclassified_users = self.total_user_dict.copy()
+            self.classified_users = []
 
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
@@ -58,9 +101,9 @@ class UserFilter:
         We use a pre-trained model from Hugging Face to classify
         """
         count = 0
-        for user in self.total_user_dict:
+        for user in self.unclassified_users:
             count += 1
-            length = len(self.total_user_dict)
+            length = len(self.unclassified_users)
             print(f"{count} users done out of {length}")
             user["token"] = " ".join(
                 [
@@ -104,7 +147,7 @@ class UserFilter:
         """Determine the relevance of
         user location"""
 
-        for user in self.total_user_dict:
+        for user in self.unclassified_users:
             if "geo_location" not in user:
                 raise ValueError(
                     f"User geo_location not found, present fields are: {user.keys()}"
@@ -131,7 +174,7 @@ class UserFilter:
 
                     shapefile = gpd.read_file(self.shapefile_path)
                     joined_data = gpd.sjoin(
-                        user_location, shapefile, how="left", op="within"
+                        user_location, shapefile, how="left", predicate="within"
                     )
                     try:
                         subnational = joined_data["shapeName"].iloc[0]
@@ -163,16 +206,20 @@ class UserFilter:
         Removes users that are not relevant based on their location and content.
         """
 
-        self.filtered_user = []
-        for user in self.total_user_dict:
+        self.filtered_users = []
+        for user in self.all_users:
             # if user["content_is_relevant"] is True:
-            self.filtered_user.append(user)
+            self.filtered_users.append(user)
 
-        print(f"Filtered {len(self.filtered_user)} relevant users")
+        print(f"Filtered {len(self.filtered_users)} relevant users")
 
     def store_users(self):
+        """
+        Stores users on a JSON file; checks if the JSON exists. If it does, read it and
+        see if the user is already there. If it is, skip it.
+        """
         try:
-            util.json_maker(self.output_file, self.filtered_user)
+            util.json_maker(self.output_file, self.all_users)
         except Exception as e:
             print(f"Error storing filtered users: {e}")
 
@@ -185,20 +232,25 @@ class UserFilter:
         """
         try:
             self.load_and_preprocess_data()
-            print("data preprocessed, step 2 done \n")
+            print("data preprocessed, step 2 done")
             self.classify_content_relevance()
             print(
                 """users classified based on name, bio, and their tweets,
-                 step 3 done \n"""
+                 step 3 done"""
             )
 
             if self.location in self.STATE_CAPITALS:
                 self.determine_location_relevance()
-                print(
-                    f"relevant users for {self.location} tagged step 4 done \n"
-                )
+                print(f"relevant users for {self.location} tagged step 4 done")
             else:
                 print(f"Location {self.location} not found in STATE_CAPITALS")
+
+            # Paste both classified and unclassified users
+            self.all_users = []
+            self.all_users.extend(self.classified_users)
+            self.all_users.extend(self.unclassified_users)
+
+            print("Extended both classified and unclassified users")
 
             self.remove_users()
             self.store_users()
