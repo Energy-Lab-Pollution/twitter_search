@@ -74,7 +74,6 @@ class UserFilter:
 
         users_index = 1
         self.unclassified_users = []
-        self.classified_users = []
 
         if os.path.exists(self.output_file):
             classified_users = util.load_json(self.output_file)
@@ -88,21 +87,25 @@ class UserFilter:
 
             for user in self.total_user_dict:
                 if user["user_id"] in classified_user_ids:
-                    self.classified_users.append(user)
-
+                    continue
                 else:
                     self.unclassified_users.append(user)
 
-    def classify_content_relevance(self, users):
+        else:
+            print("No previously classified users")
+            self.unclassified_users = self.total_user_dict.copy()
+            self.classified_users = []
+
+    def classify_content_relevance(self):
         """Classify content relevance for each user based on
         their name, bio, and tweets
 
         We use a pre-trained model from Hugging Face to classify
         """
         count = 0
-        for user in users:
+        for user in self.unclassified_users:
             count += 1
-            length = len(users)
+            length = len(self.unclassified_users)
             print(f"{count} users done out of {length}")
             user["token"] = " ".join(
                 [
@@ -142,11 +145,11 @@ class UserFilter:
                 user["content_is_relevant"] = False
                 user["content_labels"] = []
 
-    def determine_location_relevance(self, users):
+    def determine_location_relevance(self):
         """Determine the relevance of
         user location"""
 
-        for user in users:
+        for user in self.unclassified_users:
             if "geo_location" not in user:
                 raise ValueError(
                     f"User geo_location not found, present fields are: {user.keys()}"
