@@ -53,6 +53,11 @@ class UserFilter:
                 self.total_user_dict
             )
             print("users look like this:", self.total_user_dict[0])
+
+            self.classified_users = self.read_previous_json()
+
+            #
+
         except Exception as e:
             print(f"Error loading data: {e}")
             self.total_user_dict = []
@@ -66,12 +71,9 @@ class UserFilter:
         """
 
         if os.path.exists(self.output_file):
-            prev_json_file = json.load(self.output_file)
-            prev_json_file = prev_json_file[0]
-
+            prev_json_file = util.load_json(self.output_file)
+            print("PREVIOUS JSON FILE:")
             print(prev_json_file)
-
-            return prev_json_file
 
         else:
             return None
