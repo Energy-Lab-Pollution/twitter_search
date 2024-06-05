@@ -54,29 +54,41 @@ class UserFilter:
             )
             print("users look like this:", self.total_user_dict[0])
 
-            self.classified_users = self.read_previous_json()
+            self.classified_users = self.get_already_classified_users()
 
-            #
+            print("Already classified ")
 
         except Exception as e:
             print(f"Error loading data: {e}")
             self.total_user_dict = []
 
-    def read_previous_json(self):
+    def get_already_classified_users(self):
         """
-        Checks if the output JSON file still exists.
+        Checks if the output JSON file still exists and
+        gets the already classified users
 
-        We then check which users exist and have already been
-        classified.
+        We then get a list of current _unclassified_ users
         """
+
+        users_index = 1
+        self.unclassified_users = []
 
         if os.path.exists(self.output_file):
-            prev_json_file = util.load_json(self.output_file)
-            print("PREVIOUS JSON FILE:")
-            print(prev_json_file)
+            classified_users = util.load_json(self.output_file)
+            self.classified_users = classified_users[users_index]
+            print(classified_users)
 
-        else:
-            return None
+            classified_user_ids = [
+                classified_user["user_id"]
+                for classified_user in classified_users
+            ]
+
+            for user in self.total_user_dict:
+                if user["user_id"] in classified_user_ids:
+                    continue
+
+                else:
+                    self.unclassified_users.append(user)
 
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
