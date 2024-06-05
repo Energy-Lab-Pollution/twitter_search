@@ -78,11 +78,10 @@ class UserFilter:
         if os.path.exists(self.output_file):
             classified_users = util.load_json(self.output_file)
             self.classified_users = classified_users[users_index]
-            print(classified_users)
 
             classified_user_ids = [
                 classified_user["user_id"]
-                for classified_user in classified_users
+                for classified_user in self.classified_users
             ]
 
             for user in self.total_user_dict:
@@ -209,7 +208,7 @@ class UserFilter:
         """
 
         self.filtered_users = []
-        for user in self.total_user_dict:
+        for user in self.all_users:
             # if user["content_is_relevant"] is True:
             self.filtered_users.append(user)
 
@@ -221,7 +220,7 @@ class UserFilter:
         see if the user is already there. If it is, skip it.
         """
         try:
-            util.json_maker(self.output_file, self.filtered_users)
+            util.json_maker(self.output_file, self.all_users)
         except Exception as e:
             print(f"Error storing filtered users: {e}")
 
@@ -250,6 +249,11 @@ class UserFilter:
                 print(f"Location {self.location} not found in STATE_CAPITALS")
 
             # Paste both classified and unclassified users
+            self.all_users = []
+            self.all_users.extend(self.classified_users)
+            self.all_users.extend(self.unclassified_users)
+
+            print("Extended both classified and unclassified users")
 
             self.remove_users()
             self.store_users()
