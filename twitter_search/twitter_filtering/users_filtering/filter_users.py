@@ -54,9 +54,11 @@ class UserFilter:
             )
             print("users look like this:", self.total_user_dict[0])
 
-            self.classified_users = self.get_already_classified_users()
+            self.get_already_classified_users()
 
-            print("Already classified ")
+            print(f"Already classified {len(self.classified_users)} users")
+
+            print(f"{len(self.unclassified_users)} users to classify")
 
         except Exception as e:
             print(f"Error loading data: {e}")
@@ -72,6 +74,7 @@ class UserFilter:
 
         users_index = 1
         self.unclassified_users = []
+        self.classified_users = []
 
         if os.path.exists(self.output_file):
             classified_users = util.load_json(self.output_file)
@@ -85,7 +88,7 @@ class UserFilter:
 
             for user in self.total_user_dict:
                 if user["user_id"] in classified_user_ids:
-                    continue
+                    self.classified_users.append(user)
 
                 else:
                     self.unclassified_users.append(user)
