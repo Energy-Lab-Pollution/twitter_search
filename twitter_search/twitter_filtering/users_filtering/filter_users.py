@@ -249,6 +249,8 @@ class UserFilter:
             else:
                 print(f"Location {self.location} not found in STATE_CAPITALS")
 
+            # Paste both classified and unclassified users
+
             self.remove_users()
             self.store_users()
             print("Filtered users stored successfully.")
