@@ -3,8 +3,9 @@ Detects all generated .csv files and concatenates them into a single file
 """
 
 import os
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 
 script_path = Path(__file__).resolve()
