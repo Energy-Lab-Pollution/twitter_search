@@ -10,8 +10,6 @@ from pathlib import Path
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[1]
 
-print(project_root)
-
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
 
