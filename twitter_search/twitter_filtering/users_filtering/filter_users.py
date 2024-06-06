@@ -76,7 +76,12 @@ class UserFilter:
 
         if os.path.exists(self.output_file):
             classified_users = util.load_json(self.output_file)
-            self.classified_users = classified_users[users_index]
+
+            # Sometimes, the contents are in the second element
+            if len(classified_users) > 1:
+                self.classified_users = classified_users[users_index]
+            else:
+                self.classified_users = classified_users[users_index - 1]
 
             classified_user_ids = [
                 classified_user["user_id"]
