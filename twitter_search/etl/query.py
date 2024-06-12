@@ -26,7 +26,7 @@ class Query:
         if self.account_type == "media":
             return f"""({self.location})(media OR press OR coverage OR broadcasting
                     OR alert OR breaking OR journalism OR journalist OR news
-                        OR local OR news OR patrika) (lang:bn OR lang:en OR lang:es)
+                        OR local OR news OR patrika)
                         -is:retweet"""
 
         elif self.account_type == "organizations":
@@ -42,7 +42,7 @@ class Query:
                     ({self.location} OR {self.location} government
                     OR {self.location} council OR {self.location} municipality)
                     (#MP OR #MLA OR #cabinet OR #minister
-                    OR #seceretary OR #IAS OR #IPS) -is:retweet"""
+                    OR #secretary OR #IAS OR #IPS) -is:retweet"""
 
         elif self.account_type == "politicians":
             return f"""(politics OR politicians) ({self.location}
