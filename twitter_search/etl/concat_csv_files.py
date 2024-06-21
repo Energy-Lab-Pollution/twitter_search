@@ -22,10 +22,7 @@ def concat_files():
     """
 
     csv_files = os.listdir(CLEAN_DATA_PATH)
-    csv_files = [file for file in csv_files if ".csv" in file]
-    csv_files = [
-        file for file in csv_files if "user" in file and "all_users" not in file
-    ]
+    csv_files = [file for file in csv_files if "user_data" in file]
 
     all_users = pd.DataFrame()
 

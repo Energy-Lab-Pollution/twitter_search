@@ -63,10 +63,10 @@ class UserSearcher:
 
         # pagination
         while result_count < MAX_RESULTS:
-            count = min(100, MAX_RESULTS - result_count)
+            print(f"Max results is: {result_count}")
             response = self.twitter_client.search_recent_tweets(
                 query=self.query,
-                max_results=count,
+                max_results=MAX_RESULTS,
                 next_token=next_token,
                 expansions=EXPANSIONS,
                 tweet_fields=TWEET_FIELDS,
