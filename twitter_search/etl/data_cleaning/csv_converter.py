@@ -111,7 +111,16 @@ class CSVConverter:
         # If nested list
 
         if isinstance(data[0], list):
-            df = pd.DataFrame(data[0])
+            df = pd.DataFrame([])
+            for sub_list in data:
+                if sub_list:
+                    try:
+                        df = pd.DataFrame(sub_list)
+                    except Exception as error:
+                        print(f"Error parsing dataframe: {error}")
+                        continue
+                else:
+                    continue
 
         else:
             df = pd.DataFrame(data)
