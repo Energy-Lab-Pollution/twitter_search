@@ -115,7 +115,8 @@ class CSVConverter:
             for sub_list in data:
                 if sub_list:
                     try:
-                        df = pd.DataFrame(sub_list)
+                        sub_df = pd.DataFrame(sub_list)
+                        df = pd.concat([df, sub_df], ignore_index=True)
                     except Exception as error:
                         print(f"Error parsing dataframe: {error}")
                         continue
