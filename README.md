@@ -33,7 +33,7 @@ poetry install
 ```
 poetry shell
 ```
-4.1. Receive the secret code from the authors, go to twitter_search/config_utils, and create a file called config.py. And paste all the secret codes there.
+**Note:**  Receive the secret keys from the authors, go to twitter_search/config_utils, and create a file called config.py. You then need to paste all of the access keys there.
 
 5. Execute the project from the command line:
 
