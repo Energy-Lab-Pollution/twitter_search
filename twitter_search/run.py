@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 # Local imports
 from config_utils.util import strtobool
-from etl.run_search_twitter import TwitterDataHandler
+from etl.twitter_data_handler import TwitterDataHandler
 
 
 def main():
