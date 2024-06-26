@@ -17,12 +17,15 @@ from twitter_filtering.lists_filtering.filter_lists import (
     ListReader,
 )
 from twitter_filtering.users_filtering.filter_users import UserFilter
+from config_utils.queries import QUERIES
 
 
 class TwitterDataHandler:
     """
     This class handles the Twitter search and data collection process.
     """
+
+    QUERIES = QUERIES
 
     def __init__(
         self,
@@ -36,6 +39,19 @@ class TwitterDataHandler:
         self.list_needed = True if list_needed == "True" else False
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
+
+    def run_all_account_types(self):
+        """
+        Runs the entire process for all the available
+        account types for a particular location.
+        """
+        account_types = self.QUERIES
+        for account_type in account_types:
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
+            self.account_type = account_type
+            self.run()
 
     def run(self):
         """
