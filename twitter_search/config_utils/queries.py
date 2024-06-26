@@ -1,5 +1,5 @@
 # QUERY DICTIONARY
-{
+QUERIES = {
     "media": """(location)(media OR press OR coverage OR broadcasting
             OR alert OR breaking OR journalism OR journalist OR news
             OR local OR news OR patrika) lang:bn -is:retweet""",
