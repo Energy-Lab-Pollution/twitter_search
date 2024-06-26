@@ -58,6 +58,14 @@ gets users from kolkatta in the media industry, where lists(snowballing) is not 
 python3 twitter_search/etl/generate_csv_files.py "Kolkata"
 ```
 
+8. Concatenate all .csv files
+
+There is another command we can use to concatenate all of the .csv files in the `cleaned_data` directory into a single file. This command is:
+
+```bash
+python3 twitter_search/etl/concat_csv_files.py
+```
+
 ## Make Commands and addtional information
 
 Note that, to add code to the repository, you will need to install pre-commit. This will ensure that the code is formatted correctly and that the tests pass before you commit. To install pre-commit, run the following command:

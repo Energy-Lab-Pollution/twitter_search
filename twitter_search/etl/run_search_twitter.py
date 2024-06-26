@@ -19,7 +19,6 @@ from twitter_filtering.lists_filtering.filter_lists import (
 from twitter_filtering.users_filtering.filter_users import UserFilter
 
 
-# Main function -- May need to be a class later
 class TwitterDataHandler:
     """
     This class handles the Twitter search and data collection process.
