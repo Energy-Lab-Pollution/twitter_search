@@ -6,6 +6,7 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
+from config_utils.queries import QUERIES
 from etl.data_collection.get_extra_tweets import TweetGetter
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
@@ -19,11 +20,12 @@ from twitter_filtering.lists_filtering.filter_lists import (
 from twitter_filtering.users_filtering.filter_users import UserFilter
 
 
-# Main function -- May need to be a class later
 class TwitterDataHandler:
     """
     This class handles the Twitter search and data collection process.
     """
+
+    QUERIES = QUERIES
 
     def __init__(
         self,
@@ -37,6 +39,19 @@ class TwitterDataHandler:
         self.list_needed = True if list_needed == "True" else False
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
+
+    def run_all_account_types(self):
+        """
+        Runs the entire process for all the available
+        account types for a particular location.
+        """
+        account_types = self.QUERIES
+        for account_type in account_types:
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
+            self.account_type = account_type
+            self.run()
 
     def run(self):
         """

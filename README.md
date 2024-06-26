@@ -33,7 +33,7 @@ poetry install
 ```
 poetry shell
 ```
-4.1. Receive the secret code from the authors, go to twitter_search/config_utils, and create a file called config.py. And paste all the secret codes there.
+**Note:**  Receive the secret keys from the authors, go to twitter_search/config_utils, and create a file called config.py. You then need to paste all of the access keys there.
 
 5. Execute the project from the command line:
 
@@ -48,7 +48,7 @@ For example:
 python3 twitter_search "Kolkata" "media" "False" --num_iterations 1
 ```
 
-gets users from kolkatta in the media industry, where lists(snowballing) is not needed (note that you do not need to use the quotation marks). The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.
+gets users from Kolkata in the media industry, where lists(snowballing) is not needed (note that you do not need to use the quotation marks). The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.
 
 6. The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
 
@@ -57,6 +57,23 @@ gets users from kolkatta in the media industry, where lists(snowballing) is not 
 ```bash
 python3 twitter_search/etl/generate_csv_files.py "Kolkata"
 ```
+
+8. Concatenate all .csv files
+
+There is another command we can use to concatenate all of the .csv files in the `cleaned_data` directory into a single file. This command is:
+
+```bash
+python3 twitter_search/etl/concat_csv_files.py
+```
+
+### For a given location, get all the account types at once
+
+If you want to get all the account types for a given location, you can use the following command:
+
+```bash
+python3 twitter_search "Kolkata" "all" "False"
+```
+Which will output all the account types for the given location (in this case, Kolkata).
 
 ## Make Commands and addtional information
 
@@ -71,3 +88,5 @@ You can then use the Makefile to format the code:
 ```bash
 make lint
 ```
+
+Also, the available types of accounts, along with the queries used to search for the twitter users, are in the `config_utils/queries.py` file.

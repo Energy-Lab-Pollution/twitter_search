@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 # Local imports
 from config_utils.util import strtobool
-from etl.run_search_twitter import TwitterDataHandler
+from etl.twitter_data_handler import TwitterDataHandler
 
 
 def main():
@@ -32,6 +32,7 @@ def main():
             "politicians",
             "researcher",
             "environment",
+            "all",
         ],
     )
 
@@ -70,4 +71,7 @@ def main():
         num_iterations = args.num_iterations
         twitter_data_handler.num_iterations = num_iterations
 
-    twitter_data_handler.run()
+    if args.account_type == "all":
+        twitter_data_handler.run_all_account_types()
+    else:
+        twitter_data_handler.run()
