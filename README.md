@@ -66,6 +66,14 @@ There is another command we can use to concatenate all of the .csv files in the 
 python3 twitter_search/etl/concat_csv_files.py
 ```
 
+### For a given location, get all the account types at once
+
+If you want to get all the account types for a given location, you can use the following command:
+
+```bash
+python3 twitter_search "Kolkata" "all" "False"
+```
+
 ## Make Commands and addtional information
 
 Note that, to add code to the repository, you will need to install pre-commit. This will ensure that the code is formatted correctly and that the tests pass before you commit. To install pre-commit, run the following command:
