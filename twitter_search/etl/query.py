@@ -5,6 +5,7 @@ the query for the required use-case
 
 from config_utils.queries import QUERIES
 
+
 # Changmai from Thailand
 # Rwanda - Kigali
 

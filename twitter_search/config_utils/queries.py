@@ -5,7 +5,7 @@ QUERIES = {
                         OR local OR news OR patrika)
                         -is:retweet""",
     "organizations": """(NGO location OR organization location
-                       OR non-profit location OR location OR location institution OR 
+                       OR non-profit location OR location OR location institution OR
                        non-governmental organization)
                        (#non-profit OR #NGO OR #NPO) -is:retweet""",
     "policymaker": """(member of parliament OR minister OR magistrate OR
