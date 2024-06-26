@@ -6,6 +6,7 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
+from config_utils.queries import QUERIES
 from etl.data_collection.get_extra_tweets import TweetGetter
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
@@ -17,7 +18,6 @@ from twitter_filtering.lists_filtering.filter_lists import (
     ListReader,
 )
 from twitter_filtering.users_filtering.filter_users import UserFilter
-from config_utils.queries import QUERIES
 
 
 class TwitterDataHandler:
