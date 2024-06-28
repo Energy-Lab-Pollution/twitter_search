@@ -149,7 +149,7 @@ class UserSearcher:
             else:
                 user_dict["tweet_date"] = self.todays_date_str
 
-            user_dict["user_date_id"] = f"{user_id}-{author_date}"
+            user_dict["user_date_id"] = f"{user_id}-{user_dict['tweet_date']}"
 
     def store_users(self):
         """
