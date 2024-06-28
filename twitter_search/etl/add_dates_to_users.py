@@ -58,10 +58,15 @@ class DateAdder:
         ]
 
         self.user_files = [
-            file
-            for file in self.json_files
-            if "users" in file.lower() in file.lower()
-            and self.location.lower() in file.lower()
+            filtered_file
+            for filtered_file in self.filtered_files
+            if "user" in filtered_file.lower()
+        ]
+
+        self.tweets_files = [
+            filtered_file
+            for filtered_file in self.filtered_files
+            if "tweets" in filtered_file.lower()
         ]
 
     def add_date_to_user(self):
