@@ -38,6 +38,7 @@ class UserSearcher:
         self.output_file_tweets = output_file_tweets
         self.todays_date = datetime.now(pytz.timezone("America/Chicago"))
         self.todays_date_str = datetime.strftime(self.todays_date, "%Y-%m-%d")
+        self.date_digits = 10
 
         print("Clients initiated")
 
@@ -142,7 +143,8 @@ class UserSearcher:
             author_date = authors_dates_dict.get(user_id)
 
             if author_date:
-                user_dict["tweet_date"] = author_date
+                # Just get 10 digits for year, month and day
+                user_dict["tweet_date"] = author_date[: self.date_digits]
 
             else:
                 user_dict["tweet_date"] = self.todays_date_str
