@@ -36,7 +36,8 @@ class UserSearcher:
 
         self.output_file_user = output_file_users
         self.output_file_tweets = output_file_tweets
-        self.todays_date = datetime.now(pytz.timezone())
+        self.todays_date = datetime.now(pytz.timezone("America/Chicago"))
+        self.todays_date_str = datetime.strftime(self.todays_date, "%Y-%m-%d")
 
         print("Clients initiated")
 
@@ -124,6 +125,9 @@ class UserSearcher:
     def add_date_to_user(self):
         """
         If there is a date associated to any tweet, add it to the user
+
+        If the user does not have any tweet associated to her, the
+        function adds a default datetime string
         """
         # Get authors and dates from the available tweets
         tweet_authors = [tweet["author_id"] for tweet in self.total_tweets_dict]
@@ -141,7 +145,7 @@ class UserSearcher:
                 user_dict["tweet_date"] = author_date
 
             else:
-                user_dict["tweet_date"] = default_date
+                user_dict["tweet_date"] = self.todays_date_str
 
     def store_users(self):
         """
