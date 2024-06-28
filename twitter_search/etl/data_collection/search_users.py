@@ -4,6 +4,8 @@ Module for searching users on Twitter based on a query and location.
 Author : Praveen Chandar and Federico Dominguez Molina
 """
 
+import pytz
+from datetime import datetime
 from config_utils import constants, util
 
 
@@ -34,6 +36,7 @@ class UserSearcher:
 
         self.output_file_user = output_file_users
         self.output_file_tweets = output_file_tweets
+        self.todays_date = datetime.now(pytz.timezone())
 
         print("Clients initiated")
 
@@ -117,6 +120,28 @@ class UserSearcher:
 
         except Exception as e:
             print(f"An error occurred: {e}")
+
+    def add_date_to_user(self):
+        """
+        If there is a date associated to any tweet, add it to the user
+        """
+        # Get authors and dates from the available tweets
+        tweet_authors = [tweet["author_id"] for tweet in self.total_tweets_dict]
+        tweet_dates = [tweet["created_at"] for tweet in self.total_tweets_dict]
+
+        # Dictionary of dates and authors
+        authors_dates_dict = dict(zip(tweet_authors, tweet_dates))
+
+        # Add such date to the collected users
+        for user_dict in self.total_users:
+            user_id = user_dict["user_id"]
+            author_date = authors_dates_dict.get(user_id)
+
+            if author_date:
+                user_dict["tweet_date"] = author_date
+
+            else:
+                user_dict["tweet_date"] = default_date
 
     def store_users(self):
         """
