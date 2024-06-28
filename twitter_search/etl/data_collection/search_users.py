@@ -137,7 +137,7 @@ class UserSearcher:
         authors_dates_dict = dict(zip(tweet_authors, tweet_dates))
 
         # Add such date to the collected users
-        for user_dict in self.total_users:
+        for user_dict in self.total_users_dict:
             user_id = user_dict["user_id"]
             author_date = authors_dates_dict.get(user_id)
 
@@ -146,6 +146,8 @@ class UserSearcher:
 
             else:
                 user_dict["tweet_date"] = self.todays_date_str
+
+            user_dict["user_date_id"] = f"{user_id}-{author_date}"
 
     def store_users(self):
         """
@@ -157,6 +159,7 @@ class UserSearcher:
         Returns:
             None
         """
+        self.add_date_to_user()
         self.unique_users_dict = util.remove_duplicate_records(
             self.total_users_dict
         )
