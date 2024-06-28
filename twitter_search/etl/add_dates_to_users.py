@@ -63,3 +63,31 @@ class DateAdder:
             if "users" in file.lower() in file.lower()
             and self.location.lower() in file.lower()
         ]
+
+    def add_date_to_user(self):
+        """
+        If there is a date associated to any tweet, add it to the user
+
+        If the user does not have any tweet associated to her, the
+        function adds a default datetime string
+        """
+        # Get authors and dates from the available tweets
+        tweet_authors = [tweet["author_id"] for tweet in self.total_tweets_dict]
+        tweet_dates = [tweet["created_at"] for tweet in self.total_tweets_dict]
+
+        # Dictionary of dates and authors
+        authors_dates_dict = dict(zip(tweet_authors, tweet_dates))
+
+        # Add such date to the collected users
+        for user_dict in self.total_users_dict:
+            user_id = user_dict["user_id"]
+            author_date = authors_dates_dict.get(user_id)
+
+            if author_date:
+                # Just get 10 digits for year, month and day
+                user_dict["tweet_date"] = author_date[: self.date_digits]
+
+            else:
+                user_dict["tweet_date"] = self.todays_date_str
+
+            user_dict["user_date_id"] = f"{user_id}-{user_dict['tweet_date']}"
