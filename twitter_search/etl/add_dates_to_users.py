@@ -117,6 +117,18 @@ class DateAdder:
         return data
 
     @staticmethod
+    def write_json(file_path, data):
+        """
+        Writes a JSON file to the given path with the data
+
+        Will store the JSON with the new users' info to
+        the given path
+        """
+
+        with open(file_path, "w") as file:
+            json.dump(data, file, indent=4)
+
+    @staticmethod
     def remove_duplicate_records(records):
         """
         Removes duplicate records, based on the new
@@ -158,6 +170,7 @@ class DateAdder:
                 tweets_dict_list, users_dict_list
             ):
                 users_dict = self.add_date_to_users(tweets_dict, users_dict)
+
                 self.final_users_list.extend(users_dict)
 
         self.final_users_list = self.remove_duplicate_records(
