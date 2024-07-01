@@ -275,7 +275,15 @@ def flatten_and_remove_empty(input_list):
     Returns:
         list: The flattened list with empty lists removed.
     """
-    return [item for sublist in input_list for item in sublist if sublist]
+    new_list = []
+    for item in input_list:
+        if isinstance(item, list):
+            subitems = [subitem for subitem in item]
+            subitems.extend(new_list)
+        else:
+            new_list.append(item)
+
+    return new_list
 
 
 def json_maker(file_path, data_to_append):
