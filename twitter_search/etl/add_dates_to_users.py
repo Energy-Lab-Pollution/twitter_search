@@ -9,16 +9,6 @@ import json
 from argparse import ArgumentParser
 from pathlib import Path
 
-# df = pd.read_csv(
-#     "twitter_search/data/cleaned_data/all_users.csv", encoding="utf-8-sig"
-# )
-
-
-# df_unique = df.drop_duplicates(subset=["user_id"])
-
-# print(df_unique)
-
-
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[1]
 
@@ -148,7 +138,7 @@ class DateAdder:
                 record_id = record["tweet_id"]
 
             else:
-                raise Exception(f"Record {record} should have date or tweet id")
+                continue
 
             if record_id not in seen_records:
                 unique_records.append(record)
@@ -171,16 +161,25 @@ class DateAdder:
                 f"{self.RAW_DATA_PATH}/{users_file}"
             )
 
-            # Each file has a list of dictionaries...
-            for tweets_dict, users_dict in zip(
-                tweets_dict_list, users_dict_list
-            ):
-                users_dict = self.add_date_to_users(tweets_dict, users_dict)
-                self.final_users_list.extend(users_dict)
+            if any(isinstance(sublist, list) for sublist in users_dict_list):
 
-            self.final_users_list = self.remove_duplicate_records(
-                self.final_users_list
-            )
+                # Each file has a list of dictionaries...
+                for tweets_dict, users_dict in zip(
+                    tweets_dict_list, users_dict_list
+                ):
+                    users_dict = self.add_date_to_users(tweets_dict, users_dict)
+                    self.final_users_list.extend(users_dict)
+
+                self.final_users_list = self.remove_duplicate_records(
+                    self.final_users_list
+                )
+
+            else:
+
+                users_dict = self.add_date_to_users(
+                    tweets_dict_list, users_dict_list
+                )
+                self.final_users_list.extend(users_dict)
 
             self.write_json(
                 f"{self.RAW_DATA_PATH}/{users_file}", self.final_users_list
