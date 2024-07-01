@@ -74,14 +74,12 @@ class UserFilter:
 
         if os.path.exists(self.output_file):
             classified_users_json = util.load_json(self.output_file)
-            self.classified_users = self.classified_users.extend(
-                classified_users_json
-            )
 
             for classified_user in classified_users_json:
                 if isinstance(classified_user, dict):
                     user_id = classified_user["user_id"]
                     self.classified_users_ids.append(user_id)
+                    self.classified_users.append(classified_user)
                 else:
                     continue
 
