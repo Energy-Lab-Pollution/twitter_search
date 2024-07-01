@@ -4,8 +4,8 @@ Reads the old JSONs and adds the corresponding dates from each tweet to
 """
 
 import os
-import json
 import pandas as pd
+from argparse import ArgumentParser
 
 from pathlib import Path
 from config_utils.util import load_json
@@ -72,6 +72,9 @@ class DateAdder:
             if "tweets" in filtered_file.lower()
         ]
 
+        if not self.filtered_files:
+            raise ValueError(f"No files found for location {self.location}")
+
     def add_date_to_users(self, tweets_dict, users_dict):
         """
         If there is a date associated to any tweet, add it to the user
@@ -120,3 +123,15 @@ class DateAdder:
             users_dict = self.add_date_to_users(tweets_dict, users_dict)
 
             print(users_dict)
+
+
+if __name__ == "__main__":
+
+    parser = ArgumentParser(
+        description="Please add the location to parse the users"
+    )
+    parser.add_argument(
+        "location", type=str, help="Location to parse the corresponding users"
+    )
+
+    date_adder = DateAdder()
