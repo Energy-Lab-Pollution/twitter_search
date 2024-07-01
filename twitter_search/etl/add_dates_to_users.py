@@ -8,6 +8,7 @@ import json
 import pandas as pd
 
 from pathlib import Path
+from 
 
 # df = pd.read_csv(
 #     "twitter_search/data/cleaned_data/all_users.csv", encoding="utf-8-sig"
@@ -69,7 +70,7 @@ class DateAdder:
             if "tweets" in filtered_file.lower()
         ]
 
-    def add_date_to_user(self):
+    def add_date_to_user(self, tweets_dict, users_dict):
         """
         If there is a date associated to any tweet, add it to the user
 
@@ -77,14 +78,14 @@ class DateAdder:
         function adds a default datetime string
         """
         # Get authors and dates from the available tweets
-        tweet_authors = [tweet["author_id"] for tweet in self.total_tweets_dict]
-        tweet_dates = [tweet["created_at"] for tweet in self.total_tweets_dict]
+        tweet_authors = [tweet["author_id"] for tweet in tweets_dict]
+        tweet_dates = [tweet["created_at"] for tweet in tweets_dict]
 
         # Dictionary of dates and authors
         authors_dates_dict = dict(zip(tweet_authors, tweet_dates))
 
         # Add such date to the collected users
-        for user_dict in self.total_users_dict:
+        for user_dict in users_dict:
             user_id = user_dict["user_id"]
             author_date = authors_dates_dict.get(user_id)
 
