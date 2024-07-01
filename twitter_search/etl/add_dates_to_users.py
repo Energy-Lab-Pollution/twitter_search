@@ -4,11 +4,9 @@ Reads the old JSONs and adds the corresponding dates from each tweet to
 """
 
 import os
-import pandas as pd
+import json
 from argparse import ArgumentParser
-
 from pathlib import Path
-from config_utils.util import load_json
 
 # df = pd.read_csv(
 #     "twitter_search/data/cleaned_data/all_users.csv", encoding="utf-8-sig"
@@ -21,7 +19,7 @@ from config_utils.util import load_json
 
 
 script_path = Path(__file__).resolve()
-project_root = script_path.parents[2]
+project_root = script_path.parents[1]
 
 
 class DateAdder:
@@ -111,14 +109,26 @@ class DateAdder:
 
         return users_dict
 
+    @staticmethod
+    def load_json(file_path):
+        """
+        Loads a JSON file from the given path
+
+        Reads the JSON file from the path and returns
+        a dictionary
+        """
+        with open(file_path, "r") as json_file:
+            data = json.load(json_file)
+        return data
+
     def add_date_to_files(self):
         """
         Loops through each file and assigns a date to all the users, if available
         """
 
         for tweets_file, users_file in zip(self.users_files, self.tweets_files):
-            tweets_dict = load_json(tweets_file)
-            users_dict = load_json(users_file)
+            tweets_dict = self.load_json(tweets_file)
+            users_dict = self.load_json(users_file)
 
             users_dict = self.add_date_to_users(tweets_dict, users_dict)
 
@@ -134,4 +144,6 @@ if __name__ == "__main__":
         "location", type=str, help="Location to parse the corresponding users"
     )
 
-    date_adder = DateAdder()
+    args = parser.parse_args()
+
+    date_adder = DateAdder(args.location)
