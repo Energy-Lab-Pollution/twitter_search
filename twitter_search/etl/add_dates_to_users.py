@@ -81,10 +81,9 @@ class DateAdder:
         function adds a default datetime string
         """
         # Get authors and dates from the available tweets
+        tweets_dict = self.remove_duplicate_records(tweets_dict)
         tweet_authors = [tweet["author_id"] for tweet in tweets_dict]
         tweet_dates = [tweet["created_at"] for tweet in tweets_dict]
-
-        print(tweet_dates)
 
         # Dictionary of dates and authors
         authors_dates_dict = dict(zip(tweet_authors, tweet_dates))
@@ -117,6 +116,31 @@ class DateAdder:
             data = json.load(json_file)
         return data
 
+    @staticmethod
+    def remove_duplicate_records(records):
+        """
+        Removes duplicate records, based on the new
+        """
+
+        unique_records = []
+        seen_records = set()
+
+        for record in records:
+            if "user_date_id" in record:
+                record_id = record["user_date_id"]
+
+            elif "tweet_id" in record:
+                record_id = record["tweet_id"]
+
+            else:
+                raise Exception(f"Record {record} should have date")
+
+            if record_id not in seen_records:
+                unique_records.append(record)
+                seen_records.add(record_id)
+
+        return unique_records
+
     def add_date_to_files(self):
         """
         Loops through each file and assigns a date to all the users, if available
@@ -135,6 +159,10 @@ class DateAdder:
             ):
                 users_dict = self.add_date_to_users(tweets_dict, users_dict)
                 self.final_users_list.extend(users_dict)
+
+        self.final_users_list = self.remove_duplicate_records(
+            self.final_users_list
+        )
 
 
 if __name__ == "__main__":
