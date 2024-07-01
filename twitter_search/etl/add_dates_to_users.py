@@ -128,6 +128,8 @@ class DateAdder:
         with open(file_path, "w") as file:
             json.dump(data, file, indent=4)
 
+        print(f"Succesfully wrote {file_path}")
+
     @staticmethod
     def remove_duplicate_records(records):
         """
@@ -157,8 +159,10 @@ class DateAdder:
         """
         Loops through each file and assigns a date to all the users, if available
         """
-        self.final_users_list = []
         for tweets_file, users_file in zip(self.tweets_files, self.users_files):
+
+            # For each file, we will have a final users list
+            self.final_users_list = []
             tweets_dict_list = self.load_json(
                 f"{self.RAW_DATA_PATH}/{tweets_file}"
             )
@@ -166,16 +170,20 @@ class DateAdder:
                 f"{self.RAW_DATA_PATH}/{users_file}"
             )
 
+            # Each file has a list of dictionaries...
             for tweets_dict, users_dict in zip(
                 tweets_dict_list, users_dict_list
             ):
                 users_dict = self.add_date_to_users(tweets_dict, users_dict)
-
                 self.final_users_list.extend(users_dict)
 
-        self.final_users_list = self.remove_duplicate_records(
-            self.final_users_list
-        )
+            self.final_users_list = self.remove_duplicate_records(
+                self.final_users_list
+            )
+
+            self.write_json(
+                f"{self.RAW_DATA_PATH}/{users_file}", self.final_users_list
+            )
 
 
 if __name__ == "__main__":
@@ -191,5 +199,3 @@ if __name__ == "__main__":
 
     date_adder = DateAdder(args.location)
     date_adder.add_date_to_files()
-
-    print(len(date_adder.final_users_list))
