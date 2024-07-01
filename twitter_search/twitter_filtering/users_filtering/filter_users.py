@@ -70,31 +70,23 @@ class UserFilter:
         """
         self.unclassified_users = []
         self.classified_users = []
+        self.classified_users_ids = []
 
         if os.path.exists(self.output_file):
             classified_users_json = util.load_json(self.output_file)
+            self.classified_users = self.classified_users.extend(
+                classified_users_json
+            )
 
             for classified_user in classified_users_json:
                 if isinstance(classified_user, dict):
                     user_id = classified_user["user_id"]
-                    self.classified_users.append(user_id)
+                    self.classified_users_ids.append(user_id)
                 else:
                     continue
 
-            # Add the registered users
-            self.classified_users.extend(classified_users_json)
-
-            for classified_user in self.classified_users:
-                if "user_id" not in classified_user:
-                    print(classified_user)
-
-            classified_user_ids = [
-                classified_user["user_id"]
-                for classified_user in self.classified_users
-            ]
-
             for user in self.total_user_dict:
-                if user["user_id"] in classified_user_ids:
+                if user["user_id"] in self.classified_users_ids:
                     continue
                 else:
                     self.unclassified_users.append(user)

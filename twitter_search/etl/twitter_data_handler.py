@@ -123,10 +123,10 @@ class TwitterDataHandler:
         print(f"Iteration {count}:")
         self.setup_file_paths(count)
 
-        if count == 1:
-            self.perform_initial_search()
-            # TODO: Add a check to see if we need to get extra tweets
-            # self.get_extra_tweets()
+        # if count == 1:
+        #     self.perform_initial_search()
+        # TODO: Add a check to see if we need to get extra tweets
+        # self.get_extra_tweets()
 
         self.filter_users()
 
