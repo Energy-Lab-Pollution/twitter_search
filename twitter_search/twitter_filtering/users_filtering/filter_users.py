@@ -71,11 +71,12 @@ class UserFilter:
         We then get a list of current _unclassified_ users
         """
         self.unclassified_users = []
+        self.classified_users = []
 
         if os.path.exists(self.output_file):
             classified_users_json = util.load_json(self.output_file)
 
-            # Sometimes, the contents are in the second element
+            # Add the registered users
             for json_field in classified_users_json:
                 self.classified_users.extend(json_field)
 
@@ -93,7 +94,6 @@ class UserFilter:
         else:
             print("No previously classified users")
             self.unclassified_users = self.total_user_dict.copy()
-            self.classified_users = []
 
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
