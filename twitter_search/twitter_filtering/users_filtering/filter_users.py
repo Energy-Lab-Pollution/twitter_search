@@ -43,25 +43,23 @@ class UserFilter:
         Removes duplicate records, etc.
         """
 
-        try:
-            self.users_list = util.load_json(self.input_file)
-            self.total_user_dict = util.flatten_and_remove_empty(
-                self.users_list
-            )
-            self.total_user_dict = util.remove_duplicate_records(
-                self.total_user_dict
-            )
-            print("users look like this:", self.total_user_dict[0])
+        # try:
+        self.users_list = util.load_json(self.input_file)
+        self.total_user_dict = util.flatten_and_remove_empty(self.users_list)
+        self.total_user_dict = util.remove_duplicate_records(
+            self.total_user_dict
+        )
+        print("users look like this:", self.total_user_dict[0])
 
-            self.get_already_classified_users()
+        self.get_already_classified_users()
 
-            print(f"Already classified {len(self.classified_users)} users")
+        print(f"Already classified {len(self.classified_users)} users")
 
-            print(f"{len(self.unclassified_users)} users to classify")
+        print(f"{len(self.unclassified_users)} users to classify")
 
-        except Exception as e:
-            print(f"Error loading data: {e}")
-            self.total_user_dict = []
+        # except Exception as e:
+        #     print(f"Error loading data: {e}")
+        #     self.total_user_dict = []
 
     def get_already_classified_users(self):
         """
@@ -76,9 +74,19 @@ class UserFilter:
         if os.path.exists(self.output_file):
             classified_users_json = util.load_json(self.output_file)
 
+            for classified_user in classified_users_json:
+                if isinstance(classified_user, dict):
+                    user_id = classified_user["user_id"]
+                    self.classified_users.append(user_id)
+                else:
+                    continue
+
             # Add the registered users
-            for json_field in classified_users_json:
-                self.classified_users.extend(json_field)
+            self.classified_users.extend(classified_users_json)
+
+            for classified_user in self.classified_users:
+                if "user_id" not in classified_user:
+                    print(classified_user)
 
             classified_user_ids = [
                 classified_user["user_id"]
@@ -231,31 +239,31 @@ class UserFilter:
         Args:
             location (str): The location to filter users from.
         """
-        try:
-            self.load_and_preprocess_data()
-            print("data preprocessed, step 2 done")
-            self.classify_content_relevance()
-            print(
-                """users classified based on name, bio, and their tweets,
-                 step 3 done"""
-            )
+        # try:
+        self.load_and_preprocess_data()
+        print("data preprocessed, step 2 done")
+        self.classify_content_relevance()
+        print(
+            """users classified based on name, bio, and their tweets,
+                step 3 done"""
+        )
 
-            if self.location in self.STATE_CAPITALS:
-                self.determine_location_relevance()
-                print(f"relevant users for {self.location} tagged step 4 done")
-            else:
-                print(f"Location {self.location} not found in STATE_CAPITALS")
+        if self.location in self.STATE_CAPITALS:
+            self.determine_location_relevance()
+            print(f"relevant users for {self.location} tagged step 4 done")
+        else:
+            print(f"Location {self.location} not found in STATE_CAPITALS")
 
-            # Paste both classified and unclassified users
-            self.all_users = []
-            self.all_users.extend(self.classified_users)
-            self.all_users.extend(self.unclassified_users)
+        # Paste both classified and unclassified users
+        self.all_users = []
+        self.all_users.extend(self.classified_users)
+        self.all_users.extend(self.unclassified_users)
 
-            print("Extended both classified and unclassified users")
+        print("Extended both classified and unclassified users")
 
-            self.remove_users()
-            self.store_users()
-            print("Filtered users stored successfully.")
+        self.remove_users()
+        self.store_users()
+        print("Filtered users stored successfully.")
 
-        except Exception as e:
-            print(f"An error occurred during filtering: {e}")
+        # except Exception as e:
+        #     print(f"An error occurred during filtering: {e}")
