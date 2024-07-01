@@ -1,5 +1,6 @@
 """
-Reads the old JSONs and adds the corresponding dates from each tweet to 
+Reads the old JSONs and adds the corresponding dates to a user if
+a tweet is associated with them.
 
 """
 
