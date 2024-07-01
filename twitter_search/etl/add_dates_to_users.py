@@ -84,6 +84,8 @@ class DateAdder:
         tweet_authors = [tweet["author_id"] for tweet in tweets_dict]
         tweet_dates = [tweet["created_at"] for tweet in tweets_dict]
 
+        print(tweet_dates)
+
         # Dictionary of dates and authors
         authors_dates_dict = dict(zip(tweet_authors, tweet_dates))
 
@@ -96,16 +98,10 @@ class DateAdder:
                 if author_date:
                     # Just get 10 digits for year, month and day
                     user_dict["tweet_date"] = author_date[: self.date_digits]
-
-                else:
-                    user_dict["tweet_date"] = None
-
-                user_dict["user_date_id"] = (
-                    f"{user_id}-{user_dict['tweet_date']}"
-                )
-
             else:
-                continue
+                user_dict["tweet_date"] = None
+
+            user_dict["user_date_id"] = f"{user_id}-{user_dict['tweet_date']}"
 
         return users_dict
 
@@ -125,14 +121,20 @@ class DateAdder:
         """
         Loops through each file and assigns a date to all the users, if available
         """
+        self.final_users_list = []
+        for tweets_file, users_file in zip(self.tweets_files, self.users_files):
+            tweets_dict_list = self.load_json(
+                f"{self.RAW_DATA_PATH}/{tweets_file}"
+            )
+            users_dict_list = self.load_json(
+                f"{self.RAW_DATA_PATH}/{users_file}"
+            )
 
-        for tweets_file, users_file in zip(self.users_files, self.tweets_files):
-            tweets_dict = self.load_json(tweets_file)
-            users_dict = self.load_json(users_file)
-
-            users_dict = self.add_date_to_users(tweets_dict, users_dict)
-
-            print(users_dict)
+            for tweets_dict, users_dict in zip(
+                tweets_dict_list, users_dict_list
+            ):
+                users_dict = self.add_date_to_users(tweets_dict, users_dict)
+                self.final_users_list.extend(users_dict)
 
 
 if __name__ == "__main__":
@@ -147,3 +149,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     date_adder = DateAdder(args.location)
+    date_adder.add_date_to_files()
+
+    print(len(date_adder.final_users_list))
