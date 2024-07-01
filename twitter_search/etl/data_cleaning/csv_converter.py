@@ -26,6 +26,7 @@ USER_COLUMNS = [
     "tweets",
     "content_is_relevant",
     "content_labels",
+    "tweet_date",
 ]
 
 
