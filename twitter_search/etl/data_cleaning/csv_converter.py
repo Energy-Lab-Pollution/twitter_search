@@ -106,10 +106,11 @@ class CSVConverter:
         with open(input_file, "r") as json_file:
             data = json.load(json_file)
 
+        if not data:
+            return pd.DataFrame([])
+
         # Convert the JSON data into a DataFrame
-
         # If nested list
-
         if isinstance(data[0], list):
             df = pd.DataFrame([])
             for sub_list in data:
