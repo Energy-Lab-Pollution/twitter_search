@@ -133,7 +133,7 @@ class DateAdder:
                 record_id = record["tweet_id"]
 
             else:
-                raise Exception(f"Record {record} should have date")
+                raise Exception(f"Record {record} should have date or tweet id")
 
             if record_id not in seen_records:
                 unique_records.append(record)
