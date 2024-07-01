@@ -297,11 +297,10 @@ def json_maker(file_path, data_to_append):
     except (json.JSONDecodeError, FileNotFoundError):
         existing_data = []
 
-    # Append the new data to the existing list
-    existing_data.append(data_to_append)
+    # Extend the new data to the existing list
+    existing_data.extend(data_to_append)
 
     # Keep only unique dictionaries in the list
-
     existing_data = set(json.dumps(d, sort_keys=True) for d in existing_data)
     existing_data = [json.loads(d) for d in existing_data]
 
