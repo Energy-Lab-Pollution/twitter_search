@@ -8,7 +8,7 @@ import json
 import pandas as pd
 
 from pathlib import Path
-from 
+from config_utils.util import load_json
 
 # df = pd.read_csv(
 #     "twitter_search/data/cleaned_data/all_users.csv", encoding="utf-8-sig"
@@ -59,7 +59,7 @@ class DateAdder:
             if self.location.lower() in file.lower()
         ]
 
-        self.user_files = [
+        self.users_files = [
             filtered_file
             for filtered_file in self.filtered_files
             if "user" in filtered_file.lower()
@@ -99,12 +99,24 @@ class DateAdder:
                 else:
                     user_dict["tweet_date"] = None
 
-                user_dict["user_date_id"] = f"{user_id}-{user_dict['tweet_date']}"
+                user_dict["user_date_id"] = (
+                    f"{user_id}-{user_dict['tweet_date']}"
+                )
 
             else:
                 continue
-    
+
+        return users_dict
+
     def add_date_to_files(self):
         """
         Loops through each file and assigns a date to all the users, if available
         """
+
+        for tweets_file, users_file in zip(self.users_files, self.tweets_files):
+            tweets_dict = load_json(tweets_file)
+            users_dict = load_json(users_file)
+
+            users_dict = self.add_date_to_users(tweets_dict, users_dict)
+
+            print(users_dict)
