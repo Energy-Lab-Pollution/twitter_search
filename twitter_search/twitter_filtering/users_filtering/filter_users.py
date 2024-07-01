@@ -70,18 +70,14 @@ class UserFilter:
 
         We then get a list of current _unclassified_ users
         """
-
-        users_index = 1
         self.unclassified_users = []
 
         if os.path.exists(self.output_file):
-            classified_users = util.load_json(self.output_file)
+            classified_users_json = util.load_json(self.output_file)
 
             # Sometimes, the contents are in the second element
-            if len(classified_users) > 1:
-                self.classified_users = classified_users[users_index]
-            else:
-                self.classified_users = classified_users[users_index - 1]
+            for json_field in classified_users_json:
+                self.classified_users.extend(json_field)
 
             classified_user_ids = [
                 classified_user["user_id"]
