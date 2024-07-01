@@ -33,6 +33,7 @@ class DateAdder:
 
         self.json_files = os.listdir(self.RAW_DATA_PATH)
         self.location = location
+        self.date_digits = 10
         self.filter_json_files()
 
         self.file_type_column = {
@@ -62,6 +63,7 @@ class DateAdder:
             filtered_file
             for filtered_file in self.filtered_files
             if "user" in filtered_file.lower()
+            and "filtered" in filtered_file.lower()
         ]
 
         self.tweets_files = [
@@ -70,7 +72,7 @@ class DateAdder:
             if "tweets" in filtered_file.lower()
         ]
 
-    def add_date_to_user(self, tweets_dict, users_dict):
+    def add_date_to_users(self, tweets_dict, users_dict):
         """
         If there is a date associated to any tweet, add it to the user
 
@@ -89,11 +91,20 @@ class DateAdder:
             user_id = user_dict["user_id"]
             author_date = authors_dates_dict.get(user_id)
 
-            if author_date:
-                # Just get 10 digits for year, month and day
-                user_dict["tweet_date"] = author_date[: self.date_digits]
+            if "tweet_date" in user_dict:
+                if author_date:
+                    # Just get 10 digits for year, month and day
+                    user_dict["tweet_date"] = author_date[: self.date_digits]
+
+                else:
+                    user_dict["tweet_date"] = None
+
+                user_dict["user_date_id"] = f"{user_id}-{user_dict['tweet_date']}"
 
             else:
-                user_dict["tweet_date"] = self.todays_date_str
-
-            user_dict["user_date_id"] = f"{user_id}-{user_dict['tweet_date']}"
+                continue
+    
+    def add_date_to_files(self):
+        """
+        Loops through each file and assigns a date to all the users, if available
+        """
