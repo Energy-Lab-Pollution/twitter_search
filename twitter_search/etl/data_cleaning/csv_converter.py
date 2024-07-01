@@ -126,7 +126,7 @@ class CSVConverter:
                     continue
 
         else:
-            df = pd.DataFrame(data)
+            df = pd.DataFrame.from_dict(data)
 
         return df
 
@@ -180,7 +180,6 @@ class CSVConverter:
         if self.user_files:
             user_df = self.concat_dataframes(self.user_files, file_type="user")
             # Drop columns that are not needed
-
             # Get the user URL
             user_df.loc[:, "user_url"] = user_df["username"].apply(
                 lambda x: self.create_user_url(x)
