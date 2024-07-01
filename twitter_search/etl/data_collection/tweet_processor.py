@@ -62,6 +62,7 @@ class TweetProcessor:
             author_id = tweet.get("author_id", None)
             if author_id:
                 for user in self.user_list:
+                    print(user)
                     if user["user_id"] == author_id:
                         user["tweets"].append(tweet["text"])
                         # user["tweet_info"] = entity_list
