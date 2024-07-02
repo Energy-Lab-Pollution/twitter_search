@@ -101,8 +101,16 @@ make lint
 ```
 
 
-### Constants
+## Constants
 
 Several constants are used in the code. 
 
-Also, the available types of accounts, along with the queries used to search for the twitter users, are in the `config_utils/queries.py` file.
+- Queries and account types: The available types of accounts, along with the queries used to search for the twitter users, are in the `config_utils/queries.py` file.
+
+- Locations of interest: The locations of interest are in the `config_utils/cities.py` file. The `run.py` script iterates over these locations to search for users when the `all` argument is passed for the location.
+
+- Access: The access keys are in the `config_utils/config.py` file. This tokens are used to access the Twitter API and the Google Maps API; you need to ask for this file from the authors.
+
+- Other constants: Other constants are in the `config_utils/constants.py` file. These constants include paths, the number of users to fetch, capitals, the zero-shot threshold score and others.
+
+- Constants for the `twitter_filtering code`: There are also some other constants in the `twitter_filtering/util/constants.py` file. These constants include paths, mostly.
