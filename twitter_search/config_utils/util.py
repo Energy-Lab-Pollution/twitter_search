@@ -8,8 +8,12 @@ from config_utils import config
 
 
 def load_json(file_path):
+    """
+    Loads json from file
+    """
     with open(file_path, "r") as json_file:
         data = json.load(json_file)
+
     return data
 
 
@@ -121,11 +125,17 @@ def remove_duplicate_records(records):
     seen_records = set()
 
     for record in records:
-        if "tweet_id" in record:
+        if "user_date_id" in record:
+            record_id = record["user_date_id"]
+
+        elif "tweet_id" in record:
             record_id = record["tweet_id"]
 
         elif "user_id" in record:
             record_id = record["user_id"]
+
+        else:
+            continue
 
         if record_id not in seen_records:
             unique_records.append(record)
@@ -279,7 +289,7 @@ def flatten_and_remove_empty(input_list):
     for item in input_list:
         if isinstance(item, list):
             subitems = [subitem for subitem in item]
-            subitems.extend(new_list)
+            new_list.extend(subitems)
         else:
             new_list.append(item)
 
