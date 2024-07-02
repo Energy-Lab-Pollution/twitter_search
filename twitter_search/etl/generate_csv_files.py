@@ -6,7 +6,19 @@ from argparse import ArgumentParser
 
 from data_cleaning.csv_converter import CSVConverter
 
-# from twitter_search.config_utils.cities import CITIES
+CITIES = [
+    "bangalore",
+    "bangkok",
+    "chennai",
+    "chiang mai",
+    "delhi",
+    "guatemala",
+    "kanpur",
+    "kigali",
+    "kolkata",
+    "mumbai",
+]
+
 
 parser = ArgumentParser(
     description="Specify location to convert JSON files into CSV files."
@@ -20,5 +32,10 @@ parser.add_argument(
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    converter = CSVConverter(args.location)
-    converter.run()
+    if args.location == "all":
+        for city in CITIES:
+            converter = CSVConverter(city)
+            converter.run()
+    else:
+        converter = CSVConverter(args.location)
+        converter.run()
