@@ -75,9 +75,8 @@ def main():
         twitter_data_handler.num_iterations = num_iterations
 
     if args.account_type == "all":
-        if args.location == "all_cities":
+        if args.location == "all":
             twitter_data_handler.run_all_locations_accounts()
-
             for city in CITIES:
                 csv_converter = CSVConverter(city)
                 csv_converter.run()
