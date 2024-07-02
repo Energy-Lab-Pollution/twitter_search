@@ -5,7 +5,8 @@ Detects JSON files in a specified location and converts them into CSV files.
 from argparse import ArgumentParser
 
 from data_cleaning.csv_converter import CSVConverter
-from config_utils.cities import CITIES
+
+# from twitter_search.config_utils.cities import CITIES
 
 parser = ArgumentParser(
     description="Specify location to convert JSON files into CSV files."
@@ -19,13 +20,5 @@ parser.add_argument(
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    if args.location == "all":
-        for city in CITIES:
-            print(
-                f"============================ {city} ========================"
-            )
-            converter = CSVConverter(city)
-            converter.run()
-    else:
-        converter = CSVConverter(args.location)
-        converter.run()
+    converter = CSVConverter(args.location)
+    converter.run()
