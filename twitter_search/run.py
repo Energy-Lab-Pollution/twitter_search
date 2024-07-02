@@ -72,6 +72,9 @@ def main():
         twitter_data_handler.num_iterations = num_iterations
 
     if args.account_type == "all":
-        twitter_data_handler.run_all_account_types()
+        if args.location == "all":
+            twitter_data_handler.run_all_locations_accounts()
+        else:
+            twitter_data_handler.run_all_account_types()
     else:
         twitter_data_handler.run()
