@@ -7,6 +7,7 @@ This script runs the Twitter search, data collection and filtering process.
 from pathlib import Path
 
 from config_utils.queries import QUERIES
+from config_utils.cities import CITIES
 from etl.data_collection.get_extra_tweets import TweetGetter
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
@@ -26,6 +27,7 @@ class TwitterDataHandler:
     """
 
     QUERIES = QUERIES
+    CITIES = CITIES
 
     def __init__(
         self,
@@ -39,6 +41,16 @@ class TwitterDataHandler:
         self.list_needed = True if list_needed == "True" else False
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
+
+    def run_all_locations_accounts(self):
+        """
+        Runs the entire process for all the available locations
+        and cities
+        """
+        for city in CITIES:
+            print(f" =============== CITY: {city} ======================")
+            self.location = city
+            self.run_all_account_types()
 
     def run_all_account_types(self):
         """
