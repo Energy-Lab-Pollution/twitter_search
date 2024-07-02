@@ -103,7 +103,7 @@ make lint
 
 ## Constants
 
-Several constants are used in the code. 
+Several constants are used in the code.
 
 - Queries and account types: The available types of accounts, along with the queries used to search for the twitter users, are in the `config_utils/queries.py` file.
 
