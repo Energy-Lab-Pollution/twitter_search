@@ -4,8 +4,9 @@ Module for searching users on Twitter based on a query and location.
 Author : Praveen Chandar and Federico Dominguez Molina
 """
 
-import pytz
 from datetime import datetime
+
+import pytz
 from config_utils import constants, util
 
 

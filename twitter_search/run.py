@@ -4,11 +4,12 @@ Main function to run the Twitter search and data collection process.
 
 from argparse import ArgumentParser
 
+from config_utils.cities import CITIES
+
 # Local imports
 from config_utils.util import strtobool
-from config_utils.cities import CITIES
-from etl.twitter_data_handler import TwitterDataHandler
 from etl.generate_csv_files import CSVConverter
+from etl.twitter_data_handler import TwitterDataHandler
 
 
 def main():

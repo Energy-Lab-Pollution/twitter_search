@@ -6,8 +6,8 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
-from config_utils.queries import QUERIES
 from config_utils.cities import CITIES
+from config_utils.queries import QUERIES
 from etl.data_collection.get_extra_tweets import TweetGetter
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter

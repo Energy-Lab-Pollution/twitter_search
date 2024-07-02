@@ -4,10 +4,11 @@ a tweet is associated with them.
 
 """
 
-import os
 import json
+import os
 from argparse import ArgumentParser
 from pathlib import Path
+
 
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[1]
@@ -19,7 +20,6 @@ class DateAdder:
     CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
     def __init__(self, location):
-
         self.json_files = os.listdir(self.RAW_DATA_PATH)
         self.location = location
         self.date_digits = 10
@@ -151,7 +151,6 @@ class DateAdder:
         Loops through each file and assigns a date to all the users, if available
         """
         for tweets_file, users_file in zip(self.tweets_files, self.users_files):
-
             # For each file, we will have a final users list
             self.final_users_list = []
             tweets_dict_list = self.load_json(
@@ -162,7 +161,6 @@ class DateAdder:
             )
 
             if any(isinstance(sublist, list) for sublist in users_dict_list):
-
                 # Each file has a list of dictionaries...
                 for tweets_dict, users_dict in zip(
                     tweets_dict_list, users_dict_list
@@ -175,7 +173,6 @@ class DateAdder:
                 )
 
             else:
-
                 users_dict = self.add_date_to_users(
                     tweets_dict_list, users_dict_list
                 )
@@ -187,7 +184,6 @@ class DateAdder:
 
 
 if __name__ == "__main__":
-
     parser = ArgumentParser(
         description="Please add the location to parse the users"
     )
