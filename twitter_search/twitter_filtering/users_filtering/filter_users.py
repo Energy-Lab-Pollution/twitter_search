@@ -43,12 +43,13 @@ class UserFilter:
         Removes duplicate records, etc.
         """
 
-        # try:
+        # Read users, flatten list if necessary and remove duplicate recs
         self.users_list = util.load_json(self.input_file)
         self.total_user_dict = util.flatten_and_remove_empty(self.users_list)
         self.total_user_dict = util.remove_duplicate_records(
             self.total_user_dict
         )
+
         print("users look like this:", self.total_user_dict[0])
 
         self.get_already_classified_users()
