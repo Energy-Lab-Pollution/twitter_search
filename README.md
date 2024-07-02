@@ -73,7 +73,18 @@ If you want to get all the account types for a given location, you can use the f
 ```bash
 python3 twitter_search "Kolkata" "all" "False"
 ```
-Which will output all the account types for the given location (in this case, Kolkata).
+Which will output all the account types for the given location (in this case, Kolkata). This will also generate the corresponding csv file for "Kolkata".
+
+
+## For all locations, get all the account types at once
+
+If you want to get all the account types for all locations, you can use the following command:
+
+```bash
+python3 twitter_search "all" "all" "False"
+```
+
+Which will output all the account types for all locations. Additionally, this will also generate the corresponding csv files for each location.
 
 ## Make Commands and addtional information
 
@@ -88,5 +99,10 @@ You can then use the Makefile to format the code:
 ```bash
 make lint
 ```
+
+
+### Constants
+
+Several constants are used in the code. 
 
 Also, the available types of accounts, along with the queries used to search for the twitter users, are in the `config_utils/queries.py` file.
