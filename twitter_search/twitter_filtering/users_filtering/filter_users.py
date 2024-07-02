@@ -230,31 +230,31 @@ class UserFilter:
         Args:
             location (str): The location to filter users from.
         """
-        # try:
-        self.load_and_preprocess_data()
-        print("data preprocessed, step 2 done")
-        self.classify_content_relevance()
-        print(
-            """users classified based on name, bio, and their tweets,
-                step 3 done"""
-        )
+        try:
+            self.load_and_preprocess_data()
+            print("data preprocessed, step 2 done")
+            self.classify_content_relevance()
+            print(
+                """users classified based on name, bio, and their tweets,
+                    step 3 done"""
+            )
 
-        if self.location in self.STATE_CAPITALS:
-            self.determine_location_relevance()
-            print(f"relevant users for {self.location} tagged step 4 done")
-        else:
-            print(f"Location {self.location} not found in STATE_CAPITALS")
+            if self.location in self.STATE_CAPITALS:
+                self.determine_location_relevance()
+                print(f"relevant users for {self.location} tagged step 4 done")
+            else:
+                print(f"Location {self.location} not found in STATE_CAPITALS")
 
-        # Paste both classified and unclassified users
-        self.all_users = []
-        self.all_users.extend(self.classified_users)
-        self.all_users.extend(self.unclassified_users)
+            # Paste both classified and unclassified users
+            self.all_users = []
+            self.all_users.extend(self.classified_users)
+            self.all_users.extend(self.unclassified_users)
 
-        print("Extended both classified and unclassified users")
+            print("Extended both classified and unclassified users")
 
-        self.remove_users()
-        self.store_users()
-        print("Filtered users stored successfully.")
+            self.remove_users()
+            self.store_users()
+            print("Filtered users stored successfully.")
 
-        # except Exception as e:
-        #     print(f"An error occurred during filtering: {e}")
+        except FileNotFoundError as e:
+            print(f"An error occurred during filtering: {e}")
