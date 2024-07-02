@@ -4,6 +4,9 @@ Module for searching users on Twitter based on a query and location.
 Author : Praveen Chandar and Federico Dominguez Molina
 """
 
+from datetime import datetime
+
+import pytz
 from config_utils import constants, util
 
 
@@ -34,6 +37,9 @@ class UserSearcher:
 
         self.output_file_user = output_file_users
         self.output_file_tweets = output_file_tweets
+        self.todays_date = datetime.now(pytz.timezone("America/Chicago"))
+        self.todays_date_str = datetime.strftime(self.todays_date, "%Y-%m-%d")
+        self.date_digits = 10
 
         print("Clients initiated")
 
@@ -118,6 +124,34 @@ class UserSearcher:
         except Exception as e:
             print(f"An error occurred: {e}")
 
+    def add_date_to_user(self):
+        """
+        If there is a date associated to any tweet, add it to the user
+
+        If the user does not have any tweet associated to her, the
+        function adds a default datetime string
+        """
+        # Get authors and dates from the available tweets
+        tweet_authors = [tweet["author_id"] for tweet in self.total_tweets_dict]
+        tweet_dates = [tweet["created_at"] for tweet in self.total_tweets_dict]
+
+        # Dictionary of dates and authors
+        authors_dates_dict = dict(zip(tweet_authors, tweet_dates))
+
+        # Add such date to the collected users
+        for user_dict in self.total_users_dict:
+            user_id = user_dict["user_id"]
+            author_date = authors_dates_dict.get(user_id)
+
+            if author_date:
+                # Just get 10 digits for year, month and day
+                user_dict["tweet_date"] = author_date[: self.date_digits]
+
+            else:
+                user_dict["tweet_date"] = self.todays_date_str
+
+            user_dict["user_date_id"] = f"{user_id}-{user_dict['tweet_date']}"
+
     def store_users(self):
         """
         convert the user list to a json and store it.
@@ -128,6 +162,7 @@ class UserSearcher:
         Returns:
             None
         """
+        self.add_date_to_user()
         self.unique_users_dict = util.remove_duplicate_records(
             self.total_users_dict
         )

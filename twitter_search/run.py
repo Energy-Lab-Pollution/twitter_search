@@ -4,8 +4,11 @@ Main function to run the Twitter search and data collection process.
 
 from argparse import ArgumentParser
 
+from config_utils.cities import CITIES
+
 # Local imports
 from config_utils.util import strtobool
+from etl.generate_csv_files import CSVConverter
 from etl.twitter_data_handler import TwitterDataHandler
 
 
@@ -72,6 +75,16 @@ def main():
         twitter_data_handler.num_iterations = num_iterations
 
     if args.account_type == "all":
-        twitter_data_handler.run_all_account_types()
+        if args.location == "all":
+            twitter_data_handler.run_all_locations_accounts()
+
+            for city in CITIES:
+                csv_converter = CSVConverter(city)
+                csv_converter.run()
+
+        else:
+            twitter_data_handler.run_all_account_types()
+            csv_converter = CSVConverter(args.location)
+            csv_converter.run()
     else:
         twitter_data_handler.run()

@@ -43,25 +43,24 @@ class UserFilter:
         Removes duplicate records, etc.
         """
 
-        try:
-            self.users_list = util.load_json(self.input_file)
-            self.total_user_dict = util.flatten_and_remove_empty(
-                self.users_list
-            )
-            self.total_user_dict = util.remove_duplicate_records(
-                self.total_user_dict
-            )
-            print("users look like this:", self.total_user_dict[0])
+        # Read users, flatten list if necessary and remove duplicate recs
+        self.users_list = util.load_json(self.input_file)
+        self.total_user_dict = util.flatten_and_remove_empty(self.users_list)
+        self.total_user_dict = util.remove_duplicate_records(
+            self.total_user_dict
+        )
 
-            self.get_already_classified_users()
+        print("users look like this:", self.total_user_dict[0])
 
-            print(f"Already classified {len(self.classified_users)} users")
+        self.get_already_classified_users()
 
-            print(f"{len(self.unclassified_users)} users to classify")
+        print(f"Already classified {len(self.classified_users)} users")
 
-        except Exception as e:
-            print(f"Error loading data: {e}")
-            self.total_user_dict = []
+        print(f"{len(self.unclassified_users)} users to classify")
+
+        # except Exception as e:
+        #     print(f"Error loading data: {e}")
+        #     self.total_user_dict = []
 
     def get_already_classified_users(self):
         """
@@ -70,26 +69,23 @@ class UserFilter:
 
         We then get a list of current _unclassified_ users
         """
-
-        users_index = 1
         self.unclassified_users = []
+        self.classified_users = []
+        self.classified_users_ids = []
 
         if os.path.exists(self.output_file):
-            classified_users = util.load_json(self.output_file)
+            classified_users_json = util.load_json(self.output_file)
 
-            # Sometimes, the contents are in the second element
-            if len(classified_users) > 1:
-                self.classified_users = classified_users[users_index]
-            else:
-                self.classified_users = classified_users[users_index - 1]
-
-            classified_user_ids = [
-                classified_user["user_id"]
-                for classified_user in self.classified_users
-            ]
+            for classified_user in classified_users_json:
+                if isinstance(classified_user, dict):
+                    user_id = classified_user["user_id"]
+                    self.classified_users_ids.append(user_id)
+                    self.classified_users.append(classified_user)
+                else:
+                    continue
 
             for user in self.total_user_dict:
-                if user["user_id"] in classified_user_ids:
+                if user["user_id"] in self.classified_users_ids:
                     continue
                 else:
                     self.unclassified_users.append(user)
@@ -97,7 +93,6 @@ class UserFilter:
         else:
             print("No previously classified users")
             self.unclassified_users = self.total_user_dict.copy()
-            self.classified_users = []
 
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
@@ -241,7 +236,7 @@ class UserFilter:
             self.classify_content_relevance()
             print(
                 """users classified based on name, bio, and their tweets,
-                 step 3 done"""
+                    step 3 done"""
             )
 
             if self.location in self.STATE_CAPITALS:
@@ -261,5 +256,5 @@ class UserFilter:
             self.store_users()
             print("Filtered users stored successfully.")
 
-        except Exception as e:
+        except FileNotFoundError as e:
             print(f"An error occurred during filtering: {e}")
