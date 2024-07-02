@@ -8,7 +8,7 @@ from config_utils.cities import CITIES
 
 # Local imports
 from config_utils.util import strtobool
-from etl.generate_csv_files import CSVConverter
+from etl.data_cleaning.csv_converter import CSVConverter
 from etl.twitter_data_handler import TwitterDataHandler
 
 
@@ -27,7 +27,7 @@ def main():
         "account_type",
         type=str,
         help="type of accounts that you want\
-              [media,organizations,policymaker,politicians,researcher,environment]",
+              [media,organizations,policymaker,politicians,researcher,environment,all]",
         choices=[
             "media",
             "organizations",
@@ -75,7 +75,7 @@ def main():
         twitter_data_handler.num_iterations = num_iterations
 
     if args.account_type == "all":
-        if args.location == "all":
+        if args.location == "all_cities":
             twitter_data_handler.run_all_locations_accounts()
 
             for city in CITIES:
