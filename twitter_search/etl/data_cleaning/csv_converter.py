@@ -81,14 +81,12 @@ class CSVConverter:
 
         self.user_files = [
             file
-            for file in self.json_files
-            if "users" in file.lower() and self.location.lower() in file.lower()
+            for file in self.filtered_files
+            if "users" in file.lower() and "filtered" in file.lower()
         ]
 
         self.list_files = [
-            file
-            for file in self.json_files
-            if "list" in file.lower() and self.location.lower() in file.lower()
+            file for file in self.filtered_files if "list" in file.lower()
         ]
 
     @staticmethod
@@ -107,6 +105,12 @@ class CSVConverter:
         with open(input_file, "r") as json_file:
             data = json.load(json_file)
 
+        # Preliminary cleaning! - if not dictionary, byeee
+        data = [
+            item
+            for item in data
+            if isinstance(item, dict) or isinstance(item, list)
+        ]
         if not data:
             return pd.DataFrame([])
 
@@ -116,17 +120,33 @@ class CSVConverter:
             df = pd.DataFrame([])
             for sub_list in data:
                 if sub_list:
+                    if isinstance(sub_list, str):
+                        continue
                     try:
-                        sub_df = pd.DataFrame(sub_list)
+                        sub_df = pd.DataFrame.from_records(sub_list)
                         df = pd.concat([df, sub_df], ignore_index=True)
                     except Exception as error:
-                        print(f"Error parsing dataframe: {error}")
+                        print(
+                            f"Error parsing dataframe from records, trying as from_dict: {error}"
+                        )
+
+                        try:
+                            sub_df = pd.DataFrame.from_dict(
+                                sub_list, orient="index"
+                            )
+                            df = pd.concat([sub_df, df], ignore_index=True)
+                        except Exception as error:
+                            print(f"Error parsing as df with dict: {error}")
                         continue
                 else:
                     continue
 
         else:
-            df = pd.DataFrame.from_dict(data)
+            try:
+                df = pd.DataFrame.from_records(data)
+            except Exception as error:
+                print(error)
+                df = pd.DataFrame(data)
 
         return df
 
@@ -155,6 +175,9 @@ class CSVConverter:
             input_df = self.convert_to_df(input_file)
 
             if self.file_type_column[file_type] in input_df.columns:
+                # Add date column if not available
+                if "tweet_date" not in input_df.columns:
+                    input_df.loc[:, "tweet_date"] = None
                 input_df = input_df.loc[:, self.user_columns]
                 df = pd.concat([df, input_df], ignore_index=True)
 
