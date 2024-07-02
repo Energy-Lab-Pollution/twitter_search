@@ -6,7 +6,9 @@ from argparse import ArgumentParser
 
 # Local imports
 from config_utils.util import strtobool
+from config_utils.cities import CITIES
 from etl.twitter_data_handler import TwitterDataHandler
+from etl.generate_csv_files import CSVConverter
 
 
 def main():
@@ -74,7 +76,14 @@ def main():
     if args.account_type == "all":
         if args.location == "all":
             twitter_data_handler.run_all_locations_accounts()
+
+            for city in CITIES:
+                csv_converter = CSVConverter(city)
+                csv_converter.run()
+
         else:
             twitter_data_handler.run_all_account_types()
+            csv_converter = CSVConverter(args.location)
+            csv_converter.run()
     else:
         twitter_data_handler.run()
