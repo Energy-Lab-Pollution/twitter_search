@@ -21,6 +21,9 @@ args = parser.parse_args()
 if __name__ == "__main__":
     if args.location == "all":
         for city in CITIES:
+            print(
+                f"============================ {city} ========================"
+            )
             converter = CSVConverter(city)
             converter.run()
     else:
