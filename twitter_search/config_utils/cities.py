@@ -6,7 +6,7 @@ CITIES = [
     "delhi",
     "guatemala",
     "kanpur",
+    "kigali",
     "kolkata",
     "mumbai",
-    "kigali",
 ]
