@@ -132,7 +132,7 @@ class CSVConverter:
             if isinstance(item, dict) or isinstance(item, list)
         ]
 
-        # Remove sublists to avoid bugs
+        # Remove nested lists to avoid bugs
         data = self.flatten_and_remove_empty(data)
 
         if not data:
