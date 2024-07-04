@@ -90,7 +90,27 @@ class CSVConverter:
         ]
 
     @staticmethod
-    def convert_to_df(input_file):
+    def flatten_and_remove_empty(input_list):
+        """
+        Flatten a list of lists into a single list and remove any empty lists within it.
+
+        Args:
+            input_list (list): The list of lists to be flattened and cleaned.
+
+        Returns:
+            list: The flattened list with empty lists removed.
+        """
+        new_list = []
+        for item in input_list:
+            if isinstance(item, list):
+                subitems = [subitem for subitem in item]
+                new_list.extend(subitems)
+            else:
+                new_list.append(item)
+
+        return new_list
+
+    def convert_to_df(self, input_file):
         """
         Convert JSON files into CSV files.
 
@@ -111,6 +131,10 @@ class CSVConverter:
             for item in data
             if isinstance(item, dict) or isinstance(item, list)
         ]
+
+        # Remove sublists to avoid bugs
+        data = self.flatten_and_remove_empty(data)
+
         if not data:
             return pd.DataFrame([])
 
@@ -120,6 +144,7 @@ class CSVConverter:
             df = pd.DataFrame([])
             for sub_list in data:
                 if sub_list:
+                    print(sub_list)
                     if isinstance(sub_list, str):
                         continue
                     try:
