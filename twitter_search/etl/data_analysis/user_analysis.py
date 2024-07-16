@@ -16,8 +16,23 @@ all_users_df = pd.read_csv(
 
 # Analyze user types
 
-user_types = all_users_df.groupby(
-    by=["search_location", "search_account_type"]
-).count()
 
-print(user_types)
+def get_user_types_by_city(all_users_df):
+    """
+    Gets user types by city
+    """
+    user_types = all_users_df.groupby(
+        by=["search_location", "search_account_type"]
+    ).count()
+    user_types.reset_index(drop=False, inplace=True)
+    user_types.rename(columns={"user_id": "count"}, inplace=True)
+    user_types = user_types.loc[
+        :, ["search_location", "search_account_type", "count"]
+    ]
+
+    return user_types
+
+
+# Get totals by city
+user_cities = all_users_df.groupby(by=["search_location"]).count()
+user_cities.reset_index(drop=False, inplace=True)
