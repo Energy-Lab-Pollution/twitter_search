@@ -33,12 +33,12 @@ class TwitterDataHandler:
         self,
         location,
         account_type,
-        list_needed,
+        list_expansion,
         num_iterations=1,
     ):
         self.location = location.lower()
         self.account_type = account_type
-        self.list_needed = True if list_needed == "True" else False
+        self.list_expansion = True if list_expansion == "True" else False
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
 
@@ -142,14 +142,14 @@ class TwitterDataHandler:
 
         self.filter_users()
 
-        if not self.list_needed:
-            print("Lists not needed, exiting.")
-            return
-
         if not self.user_filter.filtered_user:
             print("No relevant users were found.")
             return
 
+    def perform_list_expansion(self):
+        """
+        Performs list expansion
+        """
         self.handle_lists()
 
     def perform_initial_search(self):
