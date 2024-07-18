@@ -40,7 +40,7 @@ def main():
     )
 
     parser.add_argument(
-        "list_needed",
+        "list_expansions",
         type=str,
         help="Specify if you need list based expansions.",
         choices=["True", "False"],
