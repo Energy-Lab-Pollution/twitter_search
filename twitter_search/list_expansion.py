@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 from config_utils.cities import CITIES
 
 # Local imports
-from config_utils.util import strtobool
 from etl.data_cleaning.csv_converter import CSVConverter
 from etl.twitter_data_handler import TwitterDataHandler
 

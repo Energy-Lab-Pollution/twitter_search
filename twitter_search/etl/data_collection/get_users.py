@@ -46,7 +46,9 @@ class UserGetter:
                 if list_id is not None and list_id not in unique:
                     unique.add(list_id)
                     users = client.get_list_members(
-                        id=list_id, max_results=99, user_fields=util.USER_FIELDS
+                        id=list_id,
+                        max_results=self.MAX_RESULTS,
+                        user_fields=util.USER_FIELDS,
                     )
                     user_dicts = util.user_dictmaker(users.data)
                     for user in user_dicts:
