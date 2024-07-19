@@ -146,12 +146,6 @@ class TwitterDataHandler:
             print("No relevant users were found.")
             return
 
-    def perform_list_expansion(self):
-        """
-        Performs list expansion
-        """
-        self.handle_lists()
-
     def perform_initial_search(self):
         """
         This function runs the initial search for Twitter users, and
@@ -206,7 +200,7 @@ class TwitterDataHandler:
         )
         self.user_filter.run_filtering()
 
-    def handle_lists(self):
+    def perform_list_expansion(self):
         """
         Handle the lists associated with the filtered users.
         """
@@ -228,6 +222,20 @@ class TwitterDataHandler:
             self.paths["output_file_total"],
         )
         user_getter.get_users()
+
+    def list_expansion_all_account_types(self):
+        """
+        Performs the list expansion process
+        for all the available account types
+        """
+
+        account_types = self.QUERIES
+        for account_type in account_types:
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
+            self.account_type = account_type
+            self.perform_list_expansion()
 
     def filter_twitter_lists(self):
         """
