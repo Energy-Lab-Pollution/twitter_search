@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 from config_utils.cities import CITIES
 
 # Local imports
-from config_utils.util import strtobool
 from etl.data_cleaning.csv_converter import CSVConverter
 from etl.twitter_data_handler import TwitterDataHandler
 
@@ -38,14 +37,6 @@ def main():
             "all",
         ],
     )
-
-    parser.add_argument(
-        "list_expansions",
-        type=str,
-        help="Specify if you need list based expansions.",
-        choices=["True", "False"],
-    )
-
     parser.add_argument(
         "--num_iterations",
         type=int,
@@ -55,16 +46,9 @@ def main():
     args = parser.parse_args()
     location = args.location
     account_type = args.account_type
-
-    list_needed = strtobool(args.list_needed)
-
-    print(list_needed, "list needed?")
-
     print("Building query...")
 
-    twitter_data_handler = TwitterDataHandler(
-        location, account_type, list_needed
-    )
+    twitter_data_handler = TwitterDataHandler(location, account_type)
 
     if args.num_iterations:
         print(
