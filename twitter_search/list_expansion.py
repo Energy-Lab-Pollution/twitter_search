@@ -1,5 +1,5 @@
 """
-Main function to run the Twitter search and data collection process.
+Main function to run the List Expansion collection process.
 """
 
 from argparse import ArgumentParser
@@ -8,7 +8,7 @@ from config_utils.cities import CITIES
 
 # Local imports
 from etl.data_cleaning.csv_converter import CSVConverter
-from etl.twitter_data_handler import TwitterDataHandler
+from etl.lists_handler import ListsHandler
 
 
 def main():
@@ -42,13 +42,9 @@ def main():
     location = args.location
     account_type = args.account_type
 
-    list_expansion = True
-
     print("Building query...")
 
-    twitter_data_handler = TwitterDataHandler(
-        location, account_type, list_expansion
-    )
+    twitter_data_handler = ListsHandler(location, account_type)
 
     if args.num_iterations:
         print(

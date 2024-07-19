@@ -29,13 +29,9 @@ class ListsHandler:
         self,
         location,
         account_type,
-        list_expansion,
-        num_iterations=1,
     ):
         self.location = location.lower()
         self.account_type = account_type
-        self.list_expansion = True if list_expansion == "True" else False
-        self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
 
     def setup_file_paths(self, count):
