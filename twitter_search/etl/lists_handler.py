@@ -1,0 +1,173 @@
+"""
+This script runs the Twitter search, data collection and filtering process.
+"""
+
+# General imports
+
+from pathlib import Path
+
+from config_utils.cities import CITIES
+from config_utils.queries import QUERIES
+from etl.data_collection.get_lists import ListGetter
+from etl.data_collection.get_users import UserGetter
+from twitter_filtering.lists_filtering.filter_lists import (
+    ListFilter,
+    ListReader,
+)
+from twitter_filtering.users_filtering.filter_users import UserFilter
+
+
+class ListsHandler:
+    """
+    This class handles the Twitter search and data collection process.
+    """
+
+    QUERIES = QUERIES
+    CITIES = CITIES
+
+    def __init__(
+        self,
+        location,
+        account_type,
+        list_expansion,
+        num_iterations=1,
+    ):
+        self.location = location.lower()
+        self.account_type = account_type
+        self.list_expansion = True if list_expansion == "True" else False
+        self.num_iterations = num_iterations
+        self.base_dir = Path(__file__).parent.parent / "data/raw_data"
+
+    def setup_file_paths(self, count):
+        """
+        Set up file paths for the current iteration.
+
+        Args:
+            count (int): The current iteration count.
+        """
+        self.paths = {
+            "input_file_lists": self.base_dir
+            / f"{self.location}_{self.account_type}_lists.json",
+            "output_file_lists": self.base_dir
+            / f"{self.location}_{self.account_type}_lists.json",
+            "input_file_filter_lists": self.base_dir
+            / f"{self.location}_{self.account_type}_lists_filtered.json",
+            "output_file_filter_lists": self.base_dir
+            / f"{self.location}_{self.account_type}_lists_filtered.json",
+            "output_file_total": self.base_dir
+            / f"{self.location}_{self.account_type}_totalusers_{count}.json",
+        }
+
+        input_file_processing = (
+            self.paths["output_file_tweets"],
+            self.paths["output_file_users"],
+        )
+
+        self.paths["input_file_processing"] = input_file_processing
+
+        if count == 1:
+            output_file_processing = self.paths["output_file_processing"]
+            self.paths["input_file_filter"] = output_file_processing
+
+        else:
+            self.paths["input_file_filter"] = (
+                self.base_dir
+                / f"{self.location}_{self.account_type}_totalusers_{count - 1}.json"
+            )
+
+    def filter_users(self):
+        """
+        Filter Twitter users based on location and
+        relevance.
+        """
+        print("Filtering Twitter users based on location...")
+        self.user_filter = UserFilter(
+            self.location,
+            self.paths["input_file_filter"],
+            self.paths["output_file_filter"],
+        )
+        self.user_filter.run_filtering()
+
+    def perform_list_expansion(self):
+        """
+        Handle the lists associated with the filtered users.
+        """
+        print("Retrieving lists associated with filtered users...")
+        list_getter = ListGetter(
+            self.location,
+            self.paths["input_file_lists"],
+            self.paths["output_file_lists"],
+        )
+        list_getter.get_lists()
+
+        print("Filtering lists...")
+        self.filter_twitter_lists()
+
+        print("Retrieving user data from lists...")
+        user_getter = UserGetter(
+            self.location,
+            self.paths["output_file_filter_lists"],
+            self.paths["output_file_total"],
+        )
+        user_getter.get_users()
+
+    def list_expansion_all_account_types(self):
+        """
+        Performs the list expansion process
+        for all the available account types
+        """
+
+        account_types = self.QUERIES
+        for account_type in account_types:
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
+
+            # Set account types and paths accordingly
+            self.account_type = account_type
+
+            self.paths["input_file_lists"] = (
+                self.base_dir
+                / f"{self.location}_{self.account_type}_lists.json"
+            )
+            self.paths["output_file_lists"] = (
+                self.base_dir
+                / f"{self.location}_{self.account_type}_lists.json"
+            )
+
+            self.paths["input_file_filter_lists"] = (
+                self.base_dir
+                / f"{self.location}_{self.account_type}_lists_filtered.json"
+            )
+            self.paths["output_file_filter_lists"] = (
+                self.base_dir
+                / f"{self.location}_{self.account_type}_lists_filtered.json"
+            )
+            self.paths["output_file_total"] = (
+                self.base_dir
+                / f"{self.location}_{self.account_type}_totalusers.json"
+            )
+
+            self.perform_list_expansion()
+
+    def list_expansion_all_locations(self):
+        """
+        Performs the list expansion process
+        for all the available account types
+        """
+
+        for city in CITIES:
+            print(f" =============== CITY: {city} ======================")
+            self.location = city
+            self.list_expansion_all_account_types()
+
+    def filter_twitter_lists(self):
+        """
+        Filter the lists based on some pre-defined keywords.
+        """
+        list_reader = ListReader(self.paths["input_file_filter_lists"])
+        lists_df = list_reader.create_df()
+        list_filter = ListFilter(
+            lists_df, self.paths["output_file_filter_lists"]
+        )
+        list_filter.keep_relevant_lists()
