@@ -93,13 +93,13 @@ class TwitterDataHandler:
             "output_file_tweet_add": self.base_dir
             / f"{self.location}_{self.account_type}_users_tweet_added",
             "input_file_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_{count}.json",
+            / f"{self.location}_{self.account_type}_lists.json",
             "output_file_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_{count}.json",
+            / f"{self.location}_{self.account_type}_lists.json",
             "input_file_filter_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_filtered_{count}.json",
+            / f"{self.location}_{self.account_type}_lists_filtered.json",
             "output_file_filter_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_filtered_{count}.json",
+            / f"{self.location}_{self.account_type}_lists_filtered.json",
             "output_file_total": self.base_dir
             / f"{self.location}_{self.account_type}_totalusers_{count}.json",
         }
@@ -234,8 +234,34 @@ class TwitterDataHandler:
             print(
                 f" =============== PROCESSING: {account_type} ======================"
             )
+
+            # Set account types and paths accordingly
             self.account_type = account_type
+
+            self.paths["input_file_lists"] = (
+                self.base_dir
+                / f"{self.location}_{self.account_type}_lists.json"
+            )
+            self.paths["output_file_lists"] = (
+                self.base_dir
+                / f"{self.location}_{self.account_type}_lists.json"
+            )
+
+            self.paths["output_file_filter_lists"]
+            self.paths["output_file_total"]
+
             self.perform_list_expansion()
+
+    def list_expansion_all_locations(self):
+        """
+        Performs the list expansion process
+        for all the available account types
+        """
+
+        for city in CITIES:
+            print(f" =============== CITY: {city} ======================")
+            self.location = city
+            self.list_expansion_all_account_types()
 
     def filter_twitter_lists(self):
         """
