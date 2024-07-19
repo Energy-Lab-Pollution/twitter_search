@@ -84,16 +84,6 @@ class TwitterDataHandler:
             / f"{self.location}_{self.account_type}_users_filtered_{count}.json",
             "output_file_tweet_add": self.base_dir
             / f"{self.location}_{self.account_type}_users_tweet_added",
-            "input_file_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists.json",
-            "output_file_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists.json",
-            "input_file_filter_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_filtered.json",
-            "output_file_filter_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_filtered.json",
-            "output_file_total": self.base_dir
-            / f"{self.location}_{self.account_type}_totalusers_{count}.json",
         }
 
         input_file_processing = (
