@@ -67,3 +67,7 @@ def main():
             csv_converter.run()
     else:
         twitter_data_handler.run()
+
+
+if __name__ == "__main__":
+    main()
