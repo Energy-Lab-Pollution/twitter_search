@@ -41,9 +41,6 @@ def main():
     args = parser.parse_args()
     location = args.location
     account_type = args.account_type
-
-    print("Building query...")
-
     lists_handler = ListsHandler(location, account_type)
 
     if args.account_type == "all":
@@ -58,7 +55,7 @@ def main():
             # csv_converter = CSVConverter(args.location)
             # csv_converter.run()
     else:
-        lists_handler.run()
+        lists_handler.perform_list_expansion()
 
 
 if __name__ == "__main__":
