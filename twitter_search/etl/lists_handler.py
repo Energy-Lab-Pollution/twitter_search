@@ -43,7 +43,7 @@ class ListsHandler:
         """
         self.paths = {
             "input_file_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists.json",
+            / f"{self.location}_{self.account_type}_users_filtered_1.json",
             "output_file_lists": self.base_dir
             / f"{self.location}_{self.account_type}_lists.json",
             "input_file_filter_lists": self.base_dir
@@ -53,16 +53,6 @@ class ListsHandler:
             "output_file_total": self.base_dir
             / f"{self.location}_{self.account_type}_totalusers.json",
         }
-
-        input_file_processing = (
-            self.paths["output_file_tweets"],
-            self.paths["output_file_users"],
-        )
-
-        self.paths["input_file_processing"] = input_file_processing
-
-        output_file_processing = self.paths["output_file_processing"]
-        self.paths["input_file_filter"] = output_file_processing
 
     def filter_users(self):
         """
@@ -81,6 +71,9 @@ class ListsHandler:
         """
         Handle the lists associated with the filtered users.
         """
+        # Setting up paths
+        self.setup_file_paths()
+
         print("Retrieving lists associated with filtered users...")
         list_getter = ListGetter(
             self.location,
