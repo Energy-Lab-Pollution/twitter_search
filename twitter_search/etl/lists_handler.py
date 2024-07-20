@@ -34,7 +34,7 @@ class ListsHandler:
         self.account_type = account_type
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
 
-    def setup_file_paths(self, count):
+    def setup_file_paths(self):
         """
         Set up file paths for the current iteration.
 
@@ -51,7 +51,7 @@ class ListsHandler:
             "output_file_filter_lists": self.base_dir
             / f"{self.location}_{self.account_type}_lists_filtered.json",
             "output_file_total": self.base_dir
-            / f"{self.location}_{self.account_type}_totalusers_{count}.json",
+            / f"{self.location}_{self.account_type}_totalusers.json",
         }
 
         input_file_processing = (
@@ -61,15 +61,8 @@ class ListsHandler:
 
         self.paths["input_file_processing"] = input_file_processing
 
-        if count == 1:
-            output_file_processing = self.paths["output_file_processing"]
-            self.paths["input_file_filter"] = output_file_processing
-
-        else:
-            self.paths["input_file_filter"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_totalusers_{count - 1}.json"
-            )
+        output_file_processing = self.paths["output_file_processing"]
+        self.paths["input_file_filter"] = output_file_processing
 
     def filter_users(self):
         """
@@ -141,7 +134,7 @@ class ListsHandler:
             )
             self.paths["output_file_total"] = (
                 self.base_dir
-                / f"{self.location}_{self.account_type}_totalusers.json"
+                / f"{self.location}_{self.account_type}_lists_users.json"
             )
 
             self.perform_list_expansion()
