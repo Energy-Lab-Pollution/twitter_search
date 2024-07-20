@@ -58,11 +58,11 @@ class ListGetter:
             util.json_maker(self.output_file, list_entries)
             count += 1
             if count > self.COUNT_THRESHOLD:
-                print("You have to wait for 15 mins")
+                print("You have to wait for 1 min")
                 time_block = 1
                 while time_block <= 3:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    time.sleep(300)
+                    time.sleep(20)
                     print(
                         f"{current_time} - {time_block * 5} minutes done out of 15"
                     )

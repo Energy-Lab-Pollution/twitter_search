@@ -47,7 +47,7 @@ class ListsHandler:
             "output_file_lists": self.base_dir
             / f"{self.location}_{self.account_type}_lists.json",
             "input_file_filter_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_filtered.json",
+            / f"{self.location}_{self.account_type}_lists.json",
             "output_file_filter_lists": self.base_dir
             / f"{self.location}_{self.account_type}_lists_filtered.json",
             "output_file_total": self.base_dir
