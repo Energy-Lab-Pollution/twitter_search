@@ -2,8 +2,10 @@
 Does an analysis of the all the collected users
 """
 
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+
 
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
@@ -63,7 +65,6 @@ def get_percentages(user_types, user_cities):
 
 
 if __name__ == "__main__":
-
     user_types = get_user_types_by_city(all_users_df)
     user_cities = get_users_per_city(all_users_df)
     final_df = get_percentages(user_types, user_cities)

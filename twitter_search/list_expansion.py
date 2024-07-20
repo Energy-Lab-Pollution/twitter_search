@@ -4,11 +4,12 @@ Main function to run the List Expansion collection process.
 
 from argparse import ArgumentParser
 
-# from config_utils.cities import CITIES
-
 # Local imports
 # from etl.data_cleaning.csv_converter import CSVConverter
 from etl.lists_handler import ListsHandler
+
+
+# from config_utils.cities import CITIES
 
 
 def main():
