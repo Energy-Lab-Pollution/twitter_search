@@ -77,6 +77,9 @@ class UserGetter:
             # client = util.client_creator()
 
     def get_coordinates(self, bio_location):
+        """
+        Uses google maps to determine a location
+        """
         if bio_location is None:
             return (None, None)
         try:
