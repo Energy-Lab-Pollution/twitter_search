@@ -81,18 +81,18 @@ class ListsHandler:
             self.location,
             self.paths["input_file_lists"],
             self.paths["output_file_lists"],
-            self.paths["output_file_filter_total"],
         )
         list_getter.get_lists()
 
         print("Filtering lists...")
         self.filter_twitter_lists()
 
-        print("Retrieving user data from lists...")
+        print("Retrieving and filtering user data from lists...")
         user_getter = UserGetter(
             self.location,
             self.paths["output_file_filter_lists"],
             self.paths["output_file_total"],
+            self.paths["output_file_filter_total"],
         )
         user_getter.get_users()
 
