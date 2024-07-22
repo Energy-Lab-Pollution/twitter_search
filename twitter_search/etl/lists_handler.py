@@ -81,6 +81,7 @@ class ListsHandler:
             self.location,
             self.paths["input_file_lists"],
             self.paths["output_file_lists"],
+            self.paths["output_file_filter_total"],
         )
         list_getter.get_lists()
 

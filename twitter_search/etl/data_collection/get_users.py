@@ -16,16 +16,17 @@ class UserGetter:
     COUNT_THRESHOLD = COUNT_THRESHOLD
     SLEEP_TIME = SLEEP_TIME
 
-    def __init__(self, location, input_file, output_file):
+    def __init__(self, location, input_file, output_file, filter_output_file):
         self.location = location
         self.geolocator = Nominatim(user_agent="EnergyLab")
         self.input_file = input_file
         self.output_file = output_file
+        self.filter_output_file = filter_output_file
 
         # Define a user filter which will read the data from the output file
-        # and will write it there as well.
+        # and will write it to the filter_output_file
         self.user_filter = UserFilter(
-            self.location, self.output_file, self.output_file
+            self.location, self.output_file, self.filter_output_file
         )
 
     def get_users_fromlists(self, client, lists_data):
