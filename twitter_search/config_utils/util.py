@@ -9,6 +9,7 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 # Local imports
 from config_utils import config
+from constants import GEOCODE_TIMEOUT
 
 
 def load_json(file_path):
@@ -262,7 +263,7 @@ def gmaps_client():
 
 def geocode_address(address, geolocator):
     """
-    Geocodes an address using the
+    Geocodes an address using the geopy library
     """
     try:
         location = geolocator.geocode(address, timeout=10)

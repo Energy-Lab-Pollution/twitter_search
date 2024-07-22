@@ -1,7 +1,7 @@
 import time
-from datetime import datetime
-
 from geopy.geocoders import Nominatim
+
+# Local imports
 from config_utils import util
 from config_utils.constants import COUNT_THRESHOLD, MAX_RESULTS, SLEEP_TIME
 
@@ -51,9 +51,7 @@ class UserGetter:
                     )
                     user_dicts = util.user_dictmaker(users.data)
                     for user in user_dicts:
-                        user["geo_location"] = self.get_coordinates(
-                            user["location"]
-                        )
+                        user["geo_location"] = self.get_coordinates(user["location"])
                     util.json_maker(self.output_file, user_dicts)
 
             except Exception as e:
