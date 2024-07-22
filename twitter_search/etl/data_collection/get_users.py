@@ -4,6 +4,7 @@ from geopy.geocoders import Nominatim
 # Local imports
 from config_utils import util
 from config_utils.constants import COUNT_THRESHOLD, MAX_RESULTS, SLEEP_TIME
+from twitter_filtering.users_filtering.filter_users import UserFilter
 
 
 class UserGetter:
@@ -20,6 +21,12 @@ class UserGetter:
         self.geolocator = Nominatim(user_agent="EnergyLab")
         self.input_file = input_file
         self.output_file = output_file
+
+        # Define a user filter which will read the data from the output file
+        # and will write it there as well.
+        self.user_filter = UserFilter(
+            self.location, self.output_file, self.output_file
+        )
 
     def get_users_fromlists(self, client, lists_data):
         """
@@ -51,7 +58,9 @@ class UserGetter:
                     )
                     user_dicts = util.user_dictmaker(users.data)
                     for user in user_dicts:
-                        user["geo_location"] = self.get_coordinates(user["location"])
+                        user["geo_location"] = self.get_coordinates(
+                            user["location"]
+                        )
                     util.json_maker(self.output_file, user_dicts)
 
             except Exception as e:
@@ -81,9 +90,9 @@ class UserGetter:
             print("client created")
             isolated_lists = util.flatten_and_remove_empty(lists_data)
             print(len(isolated_lists))
-            # filtered_lists = util.list_filter_keywords(isolated_lists, self.location)
-            # print(len(filtered_lists))
+            # Get users from lists and filter them using NLP
             self.get_users_fromlists(client, isolated_lists)
+            self.user_filter.run_filtering()
 
         except Exception as e:
             print(f"An error occurred: {e}")
