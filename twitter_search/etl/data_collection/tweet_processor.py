@@ -1,3 +1,7 @@
+"""
+This script processes and parses the tweets corresponding to each user
+"""
+
 from geopy.geocoders import Nominatim
 
 # Local imports
