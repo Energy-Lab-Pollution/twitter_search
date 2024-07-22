@@ -127,7 +127,7 @@ class ListsHandler:
             )
             self.paths["output_file_total"] = (
                 self.base_dir
-                / f"{self.location}_{self.account_type}_expanded_users.json"
+                / f"{self.location}_{self.account_type}_all_expanded_users.json"
             )
 
             self.perform_list_expansion()
