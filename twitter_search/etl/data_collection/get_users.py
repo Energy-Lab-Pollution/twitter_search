@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 
+from geopy.geocoders import Nominatim
 from config_utils import util
 from config_utils.constants import COUNT_THRESHOLD, MAX_RESULTS, SLEEP_TIME
 
@@ -16,7 +17,7 @@ class UserGetter:
 
     def __init__(self, location, input_file, output_file):
         self.location = location
-        self.gmaps_client = util.gmaps_client()
+        self.geolocator = Nominatim(user_agent="EnergyLab")
         self.input_file = input_file
         self.output_file = output_file
 
@@ -70,20 +71,10 @@ class UserGetter:
         """
         if bio_location is None:
             return (None, None)
-        try:
             # Geocode the location using Google Maps Geocoding API
-            geocode_result = self.gmaps_client.geocode(bio_location)
-
-            # Check if any results were returned
-            if geocode_result:
-                lat = geocode_result[0]["geometry"]["location"]["lat"]
-                lng = geocode_result[0]["geometry"]["location"]["lng"]
-                return (lat, lng)
-            else:
-                return (None, None)
-        except Exception as e:
-            print(f"Error geocoding location '{bio_location}': {e}")
-            return (None, None)
+        else:
+            lat, lng = util.geocode_address(bio_location, self.geolocator)
+            return (lat, lng)
 
     def get_users(self):
         try:

@@ -4,6 +4,10 @@ import os
 import googlemaps
 import pandas as pd
 import tweepy
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+
+
+# Local imports
 from config_utils import config
 
 
@@ -254,6 +258,28 @@ def gmaps_client():
     Creates google maps client
     """
     return googlemaps.Client(key=config.SECRET_KEY)
+
+
+def geocode_address(address, geolocator):
+    """
+    Geocodes an address using the
+    """
+    try:
+        location = geolocator.geocode(address, timeout=10)
+
+        if location:
+            return location.latitude, location.longitude
+        else:
+            print(f"Address '{address}' could not be geocoded.")
+            return None, None
+
+    except GeocoderTimedOut:
+        print(f"Geocoding service timed out for address: '{address}'")
+        return None, None
+
+    except GeocoderServiceError as e:
+        print(f"Geocoding service error: {e}")
+        return None, None
 
 
 def client_creator():
