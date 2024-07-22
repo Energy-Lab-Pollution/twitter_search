@@ -99,10 +99,10 @@ class UserGetter:
 
     def get_users(self):
         try:
-            print("till here")
             lists_data = util.load_json(self.input_file)
             client = util.client_creator()
             print("client created")
+            print(lists_data)
             isolated_lists = util.flatten_and_remove_empty(lists_data)
             print(len(isolated_lists))
             # filtered_lists = util.list_filter_keywords(isolated_lists, self.location)

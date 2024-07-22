@@ -30,4 +30,11 @@ LISTS_KEYWORDS = [
     "politicians",
     "media",
     "journalists",
+    "ngo",
+    "nonprofit",
+    "non-profits",
+    "non profit",
+    "humanitarian",
+    "environment",
+    "environmental",
 ]
