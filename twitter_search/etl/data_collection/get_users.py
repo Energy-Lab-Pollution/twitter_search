@@ -51,7 +51,9 @@ class UserGetter:
                     )
                     user_dicts = util.user_dictmaker(users.data)
                     for user in user_dicts:
-                        user["geo_location"] = self.get_coordinates(user["location"])
+                        user["geo_location"] = self.get_coordinates(
+                            user["location"]
+                        )
                     util.json_maker(self.output_file, user_dicts)
 
             except Exception as e:
@@ -69,7 +71,7 @@ class UserGetter:
         """
         if bio_location is None:
             return (None, None)
-            # Geocode the location using Google Maps Geocoding API
+            # Geocode the location using Geopy
         else:
             lat, lng = util.geocode_address(bio_location, self.geolocator)
             return (lat, lng)
