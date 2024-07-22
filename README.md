@@ -84,7 +84,28 @@ If you want to get all the account types for all locations, you can use the foll
 python3 twitter_search "all" "all"
 ```
 
-Which will output all the account types for all locations. Additionally, this will also generate the corresponding csv files for each location.
+## Get more users by using list expansion.
+
+```bash
+python3 twitter_search/list_expansion.py "bangalore" "researcher"
+```
+
+This will analyze the filtered users from bangalore that belong to the 'researcher' query (you must have already run the default script for the location and account type). It will then get all the lists that the users are a part of, filter the lists based on keywords, and then get all the users from the fitered lists. 
+
+TODO: The script will then filter the users based on location and content relevance.
+
+Additionally, you can use the "all" parameter for the location to get all the account types for all locations. For example:
+
+```bash
+python3 twitter_search/list_expansion.py "all" "all"
+```
+
+You can also get all the account types for a given location by using the "all" parameter for the account type. For example:
+
+```bash
+python3 twitter_search/list_expansion.py "bangalore" "all"
+```
+
 
 ## Make Commands and addtional information
 
