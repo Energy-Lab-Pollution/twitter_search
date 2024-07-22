@@ -104,20 +104,16 @@ class ListsHandler:
 
         account_types = self.QUERIES
         for account_type in account_types:
-            print(
-                f" =============== PROCESSING: {account_type} ======================"
-            )
+            print(f" =============== PROCESSING: {account_type} ======================")
 
             # Set account types and paths accordingly
             self.account_type = account_type
 
             self.paths["input_file_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists.json"
+                self.base_dir / f"{self.location}_{self.account_type}_lists.json"
             )
             self.paths["output_file_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists.json"
+                self.base_dir / f"{self.location}_{self.account_type}_lists.json"
             )
 
             self.paths["input_file_filter_lists"] = (
@@ -152,7 +148,5 @@ class ListsHandler:
         """
         list_reader = ListReader(self.paths["input_file_filter_lists"])
         lists_df = list_reader.create_df()
-        list_filter = ListFilter(
-            lists_df, self.paths["output_file_filter_lists"]
-        )
+        list_filter = ListFilter(lists_df, self.paths["output_file_filter_lists"])
         list_filter.keep_relevant_lists()
