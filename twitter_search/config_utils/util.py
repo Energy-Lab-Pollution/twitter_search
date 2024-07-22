@@ -1,3 +1,7 @@
+"""
+Util script with different functions used throughout the project
+"""
+
 import json
 import os
 

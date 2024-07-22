@@ -52,6 +52,8 @@ class ListsHandler:
             / f"{self.location}_{self.account_type}_lists_filtered.json",
             "output_file_total": self.base_dir
             / f"{self.location}_{self.account_type}_expanded_users.json",
+            "output_file_filter_total": self.base_dir
+            / f"{self.location}_{self.account_type}_expanded_users_filtered.json",
         }
 
     def filter_users(self):
