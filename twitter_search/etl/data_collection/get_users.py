@@ -20,7 +20,7 @@ class UserGetter:
         self.input_file = input_file
         self.output_file = output_file
 
-    def get_users_fromlists(self, client, lists_data, k=None):
+    def get_users_fromlists(self, client, lists_data):
         """
         Getting users from lists
 
@@ -37,11 +37,9 @@ class UserGetter:
         """
         unique = set()
         count = 0
-        if k is None:
-            k = len(lists_data)
-        for item in lists_data[:k]:
+        for list in lists_data:
             try:
-                list_id = item
+                list_id = list["list_id"]
                 print("list_id", list_id)
                 if list_id is not None and list_id not in unique:
                     unique.add(list_id)
@@ -58,23 +56,13 @@ class UserGetter:
                     util.json_maker(self.output_file, user_dicts)
 
             except Exception as e:
-                print(f"Error fetching users for list {item}: {e}")
+                print(f"Error fetching users for list {list}: {e}")
                 continue
             count += 1
             if count > self.COUNT_THRESHOLD:
-                print("You have to wait for 15 mins")
-                time_block = 1
-                while time_block <= 3:
-                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    time.sleep(self.SLEEP_TIME)
-                    print(
-                        f"{current_time} - {time_block * 5} minutes done out of 15"
-                    )
-                    time_block += 1
+                print("Sleeping..")
+                time.sleep(self.SLEEP_TIME)
                 count = 0
-            time.sleep(1)
-            # TODO
-            # client = util.client_creator()
 
     def get_coordinates(self, bio_location):
         """
@@ -102,7 +90,6 @@ class UserGetter:
             lists_data = util.load_json(self.input_file)
             client = util.client_creator()
             print("client created")
-            print(lists_data)
             isolated_lists = util.flatten_and_remove_empty(lists_data)
             print(len(isolated_lists))
             # filtered_lists = util.list_filter_keywords(isolated_lists, self.location)
