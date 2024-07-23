@@ -20,7 +20,7 @@ class ListGetter:
 
     def getlists_fromusers(self, users_list):
         """
-        Get lists from users.
+        Get lists from the current set of users.
 
         Parameters
         ----------
@@ -71,6 +71,9 @@ class ListGetter:
             time.sleep(1)
 
     def load_users(self):
+        """
+        Loads json file with users data
+        """
         users_list_raw = util.load_json(self.input_file)
         user_list = util.flatten_and_remove_empty(users_list_raw)
 
