@@ -58,10 +58,6 @@ class UserFilter:
 
         print(f"{len(self.unclassified_users)} users to classify")
 
-        # except Exception as e:
-        #     print(f"Error loading data: {e}")
-        #     self.total_user_dict = []
-
     def get_already_classified_users(self):
         """
         Checks if the output JSON file still exists and
@@ -94,6 +90,37 @@ class UserFilter:
             print("No previously classified users")
             self.unclassified_users = self.total_user_dict.copy()
 
+    @staticmethod
+    def create_token(user):
+        """
+        This function will create the token to
+        classify the user using the HF model
+        """
+
+        token = " ".join(
+            [
+                (
+                    user["description"]
+                    if user["description"] is not None
+                    else ""
+                ),
+                (
+                    " ".join(user["tweets"])
+                    if user["tweets"] is not None
+                    else ""
+                ),
+            ]
+        )
+
+        return token
+
+    def add_token_field(self, user):
+        """
+        Uses the 'create_token' function to add a new field
+        """
+        user["token"] = self.create_token(user)
+        return user
+
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
         their name, bio, and tweets
@@ -101,6 +128,11 @@ class UserFilter:
         We use a pre-trained model from Hugging Face to classify
         """
         count = 0
+
+        self.unclassified_users = list(
+            map(self.add_token_field, self.unclassified_users)
+        )
+
         for user in self.unclassified_users:
             count += 1
             length = len(self.unclassified_users)
