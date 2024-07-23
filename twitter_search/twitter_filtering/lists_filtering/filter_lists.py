@@ -4,7 +4,7 @@ lists
 """
 
 # Global imports
-
+import os
 import json
 
 import pandas as pd
@@ -38,10 +38,13 @@ class ListReader:
         Returns:
             data (dict): Dictionary with the JSON data
         """
+        if os.path.exists(self.list_filename):
+            with open(f"{self.list_filename}", "r") as file:
+                data = json.load(file)
+            self.twitter_lists = data
 
-        with open(f"{self.list_filename}", "r") as file:
-            data = json.load(file)
-        self.twitter_lists = data
+        else:
+            self.twitter_lists = None
 
     def parse_into_df(self):
         """
@@ -61,8 +64,12 @@ class ListReader:
         Performs the complete pipeline to get dataframe of lists
         """
         self.read_json()
-        self.parse_into_df()
-        self.lists_df.drop_duplicates(subset=["list_id"], inplace=True)
+        if self.twitter_lists:
+            self.parse_into_df()
+            self.lists_df.drop_duplicates(subset=["list_id"], inplace=True)
+
+        else:
+            self.lists_df = None
 
         return self.lists_df
 
