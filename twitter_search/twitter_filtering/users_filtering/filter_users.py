@@ -3,6 +3,7 @@ Script in charge of filtering users based on their location and content relevanc
 """
 
 import os
+import torch
 from pathlib import Path
 
 import geopandas as gpd
@@ -27,8 +28,13 @@ class UserFilter:
         self.input_file = input_file
         self.output_file = output_file
         self.STATE_CAPITALS = constants.STATE_CAPITALS
-        self.pipeline = pipeline(
-            constants.HUGGINGFACE_PIPELINE, model=constants.HUGGINGFACE_MODEL
+
+        # Setting up NLP classifier
+        device = 0 if torch.cuda.is_available() else -1
+        self.classifier = pipeline(
+            constants.HUGGINGFACE_PIPELINE,
+            model=constants.HUGGINGFACE_MODEL,
+            device=device,
         )
         # TODO, based on location, select the appropriate shape file.
         self.shapefile_path = (
@@ -128,7 +134,7 @@ class UserFilter:
         We use a pre-trained model from Hugging Face to classify
         """
         count = 0
-
+        print(f"Classifying {len(self.unclassified_users)}")
         self.unclassified_users = list(
             map(self.add_token_field, self.unclassified_users)
         )
@@ -137,21 +143,6 @@ class UserFilter:
             count += 1
             length = len(self.unclassified_users)
             print(f"{count} users done out of {length}")
-            user["token"] = " ".join(
-                [
-                    (
-                        user["description"]
-                        if user["description"] is not None
-                        else ""
-                    ),
-                    user["location"] if user["location"] is not None else "",
-                    (
-                        " ".join(user["tweets"])
-                        if user["tweets"] is not None
-                        else ""
-                    ),
-                ]
-            )
             try:
                 classification = self.pipeline(
                     user["token"], candidate_labels=self.relevant_labels
