@@ -88,14 +88,16 @@ class ListsHandler:
         print("Filtering lists...")
         self.filter_twitter_lists()
 
-        print("Retrieving and filtering user data from lists...")
-        user_getter = UserGetter(
-            self.location,
-            self.paths["output_file_filter_lists"],
-            self.paths["output_file_total"],
-            self.paths["output_file_filter_total"],
-        )
-        user_getter.get_users()
+        # Only get users if lists were found
+        if self.lists_df:
+            print("Retrieving and filtering user data from lists...")
+            user_getter = UserGetter(
+                self.location,
+                self.paths["output_file_filter_lists"],
+                self.paths["output_file_total"],
+                self.paths["output_file_filter_total"],
+            )
+            user_getter.get_users()
 
     def list_expansion_all_account_types(self):
         """
@@ -152,10 +154,10 @@ class ListsHandler:
         Filter the lists based on some pre-defined keywords.
         """
         list_reader = ListReader(self.paths["input_file_filter_lists"])
-        lists_df = list_reader.create_df()
-        if lists_df:
+        self.lists_df = list_reader.create_df()
+        if self.lists_df:
             list_filter = ListFilter(
-                lists_df, self.paths["output_file_filter_lists"]
+                self.lists_df, self.paths["output_file_filter_lists"]
             )
             list_filter.keep_relevant_lists()
         else:
