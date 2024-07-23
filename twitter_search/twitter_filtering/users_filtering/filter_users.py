@@ -144,7 +144,7 @@ class UserFilter:
             length = len(self.unclassified_users)
             print(f"{count} users done out of {length}")
             try:
-                classification = self.pipeline(
+                classification = self.classifier(
                     user["token"], candidate_labels=self.relevant_labels
                 )
                 relevant_labels_predicted = [
