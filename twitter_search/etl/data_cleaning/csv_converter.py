@@ -77,9 +77,7 @@ class CSVConverter:
         """
         # Filter the JSON files based on the location
         self.filtered_files = [
-            file
-            for file in self.json_files
-            if self.location.lower() in file.lower()
+            file for file in self.json_files if self.location.lower() in file.lower()
         ]
 
         self.user_files = [
@@ -134,9 +132,7 @@ class CSVConverter:
 
         # Preliminary cleaning! - if not dictionary, byeee
         data = [
-            item
-            for item in data
-            if isinstance(item, dict) or isinstance(item, list)
+            item for item in data if isinstance(item, dict) or isinstance(item, list)
         ]
 
         # Remove nested lists to avoid bugs
@@ -163,9 +159,7 @@ class CSVConverter:
                         )
 
                         try:
-                            sub_df = pd.DataFrame.from_dict(
-                                sub_list, orient="index"
-                            )
+                            sub_df = pd.DataFrame.from_dict(sub_list, orient="index")
                             df = pd.concat([sub_df, df], ignore_index=True)
                         except Exception as error:
                             print(f"Error parsing as df with dict: {error}")
