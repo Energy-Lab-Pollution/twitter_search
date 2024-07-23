@@ -53,7 +53,9 @@ class UserCleaner:
             max_matches = 0
             matched_category = None
             for category, keywords in constants.CATEGORIES.items():
-                num_matches = sum(keyword.lower() in user_token for keyword in keywords)
+                num_matches = sum(
+                    keyword.lower() in user_token for keyword in keywords
+                )
                 if num_matches > max_matches:
                     max_matches = num_matches
                     matched_category = category

@@ -8,12 +8,11 @@ import os
 import googlemaps
 import pandas as pd
 import tweepy
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
-
 
 # Local imports
 from config_utils import config
 from config_utils.constants import GEOCODE_TIMEOUT
+from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 
 
 def load_json(file_path):

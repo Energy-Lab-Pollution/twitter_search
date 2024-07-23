@@ -2,10 +2,9 @@
 This script processes and parses the tweets corresponding to each user
 """
 
-from geopy.geocoders import Nominatim
-
 # Local imports
 from config_utils import constants, util
+from geopy.geocoders import Nominatim
 
 
 class TweetProcessor:

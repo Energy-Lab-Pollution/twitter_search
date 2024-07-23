@@ -10,7 +10,9 @@ from lists_filtering.filter_lists import ListFilter, ListReader
 from utils.constants import CLEAN_DATA_PATH
 
 
-parser = argparse.ArgumentParser(description="Apply list filters to a given file")
+parser = argparse.ArgumentParser(
+    description="Apply list filters to a given file"
+)
 parser.add_argument(
     "filename", type=str, help="Filename to parse, please include full path"
 )

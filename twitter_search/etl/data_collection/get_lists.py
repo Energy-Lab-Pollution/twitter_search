@@ -63,7 +63,9 @@ class ListGetter:
                 while time_block <= 3:
                     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     time.sleep(20)
-                    print(f"{current_time} - {time_block * 5} minutes done out of 15")
+                    print(
+                        f"{current_time} - {time_block * 5} minutes done out of 15"
+                    )
                     time_block += 1
                 count = 0
             time.sleep(1)
