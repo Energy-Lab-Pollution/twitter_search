@@ -33,6 +33,7 @@ class ListsHandler:
         self.location = location.lower()
         self.account_type = account_type
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
+        self.setup_file_paths()
 
     def setup_file_paths(self):
         """

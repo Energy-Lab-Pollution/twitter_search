@@ -1,8 +1,15 @@
+"""
+This 
+"""
+
 import time
-from datetime import datetime
 
 from config_utils import util
-from config_utils.constants import COUNT_THRESHOLD, MAX_RESULTS_LISTS
+from config_utils.constants import (
+    COUNT_THRESHOLD,
+    MAX_RESULTS_LISTS,
+    SLEEP_TIME,
+)
 
 
 class ListGetter:
@@ -16,6 +23,7 @@ class ListGetter:
         self.output_file = output_file
         self.MAX_RESULTS = MAX_RESULTS_LISTS
         self.COUNT_THRESHOLD = COUNT_THRESHOLD
+        self.SLEEP_TIME = SLEEP_TIME
         self.client = util.client_creator()
 
     def getlists_fromusers(self, users_list):
@@ -59,16 +67,7 @@ class ListGetter:
             count += 1
             if count > self.COUNT_THRESHOLD:
                 print("You have to wait for 1 min")
-                time_block = 1
-                while time_block <= 3:
-                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    time.sleep(20)
-                    print(
-                        f"{current_time} - {time_block * 5} minutes done out of 15"
-                    )
-                    time_block += 1
-                count = 0
-            time.sleep(1)
+                time.sleep(self.SLEEP_TIME)
 
     def load_users(self):
         """
