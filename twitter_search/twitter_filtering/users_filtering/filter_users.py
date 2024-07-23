@@ -4,6 +4,7 @@ Script in charge of filtering users based on their location and content relevanc
 
 import os
 import torch
+import concurrent.futures
 from pathlib import Path
 
 import geopandas as gpd
@@ -24,7 +25,7 @@ class UserFilter:
         """
 
         self.location = location
-        self.relevant_labels = constants.RELEVANT_LABELS
+        self.RELEVANT_LABELS = constants.RELEVANT_LABELS
         self.input_file = input_file
         self.output_file = output_file
         self.STATE_CAPITALS = constants.STATE_CAPITALS
@@ -126,6 +127,31 @@ class UserFilter:
         """
         user["token"] = self.create_token(user)
         return user
+
+    def classify_single_user(self, user):
+        """
+        This function classifies a single user
+        """
+
+        try:
+            classification = self.classifier(
+                user["token"], candidate_labels=self.RELEVANT_LABELS
+            )
+            relevant_labels = [
+                label
+                for label, score in zip(
+                    classification["labels"], classification["scores"]
+                )
+                if score > self.SCORE_THRESHOLD
+            ]
+
+            user["content_is_relevant"] = bool(relevant_labels)
+            user["content_labels"] = relevant_labels
+
+        except Exception as error:
+            print(f"Error classifying user: {error}")
+            user["content_is_relevant"] = False
+            user["content_labels"] = []
 
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
