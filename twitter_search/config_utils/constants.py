@@ -70,7 +70,7 @@ RELEVANT_LABELS = [
     "research",
     "politics",
     "policy maker",
-    "organization",
+    "nonprofit organization",
 ]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
 # Dictionary mapping Indian state capitals to their respective states
