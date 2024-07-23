@@ -70,6 +70,7 @@ RELEVANT_LABELS = [
     "research",
     "politics",
     "policy maker",
+    "organization",
 ]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
 # Dictionary mapping Indian state capitals to their respective states
@@ -155,6 +156,7 @@ USER_FIELDS = [
 # THRESHOLDS FOR GETTING LISTS
 COUNT_THRESHOLD = 24
 SLEEP_TIME = 300
+GEOCODE_TIMEOUT = 10
 
 
 # KEYWORD CONSTANTS

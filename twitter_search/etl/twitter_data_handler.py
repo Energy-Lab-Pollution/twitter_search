@@ -9,15 +9,9 @@ from pathlib import Path
 from config_utils.cities import CITIES
 from config_utils.queries import QUERIES
 from etl.data_collection.get_extra_tweets import TweetGetter
-from etl.data_collection.get_lists import ListGetter
-from etl.data_collection.get_users import UserGetter
 from etl.data_collection.search_users import UserSearcher
 from etl.data_collection.tweet_processor import TweetProcessor
 from etl.query import Query
-from twitter_filtering.lists_filtering.filter_lists import (
-    ListFilter,
-    ListReader,
-)
 from twitter_filtering.users_filtering.filter_users import UserFilter
 
 
@@ -33,12 +27,10 @@ class TwitterDataHandler:
         self,
         location,
         account_type,
-        list_needed,
         num_iterations=1,
     ):
         self.location = location.lower()
         self.account_type = account_type
-        self.list_needed = True if list_needed == "True" else False
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
 
@@ -92,16 +84,6 @@ class TwitterDataHandler:
             / f"{self.location}_{self.account_type}_users_filtered_{count}.json",
             "output_file_tweet_add": self.base_dir
             / f"{self.location}_{self.account_type}_users_tweet_added",
-            "input_file_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_{count}.json",
-            "output_file_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_{count}.json",
-            "input_file_filter_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_filtered_{count}.json",
-            "output_file_filter_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_filtered_{count}.json",
-            "output_file_total": self.base_dir
-            / f"{self.location}_{self.account_type}_totalusers_{count}.json",
         }
 
         input_file_processing = (
@@ -142,15 +124,9 @@ class TwitterDataHandler:
 
         self.filter_users()
 
-        if not self.list_needed:
-            print("Lists not needed, exiting.")
-            return
-
         if not self.user_filter.filtered_user:
             print("No relevant users were found.")
             return
-
-        self.handle_lists()
 
     def perform_initial_search(self):
         """
@@ -205,37 +181,3 @@ class TwitterDataHandler:
             self.paths["output_file_filter"],
         )
         self.user_filter.run_filtering()
-
-    def handle_lists(self):
-        """
-        Handle the lists associated with the filtered users.
-        """
-        print("Retrieving lists associated with filtered users...")
-        list_getter = ListGetter(
-            self.location,
-            self.paths["input_file_lists"],
-            self.paths["output_file_lists"],
-        )
-        list_getter.get_lists()
-
-        print("Filtering lists...")
-        self.filter_twitter_lists()
-
-        print("Retrieving user data from lists...")
-        user_getter = UserGetter(
-            self.location,
-            self.paths["output_file_filter_lists"],
-            self.paths["output_file_total"],
-        )
-        user_getter.get_users()
-
-    def filter_twitter_lists(self):
-        """
-        Filter the lists based on some pre-defined keywords.
-        """
-        list_reader = ListReader(self.paths["input_file_filter_lists"])
-        lists_df = list_reader.create_df()
-        list_filter = ListFilter(
-            lists_df, self.paths["output_file_filter_lists"]
-        )
-        list_filter.keep_relevant_lists()

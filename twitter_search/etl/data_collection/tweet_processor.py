@@ -1,37 +1,32 @@
+"""
+This script processes and parses the tweets corresponding to each user
+"""
+
+# Local imports
 from config_utils import constants, util
+from geopy.geocoders import Nominatim
 
 
 class TweetProcessor:
     def __init__(self, location, account_type, input_file_tuple, output_file):
         self.location = location
         self.account_type = account_type
-        self.gmaps_client = util.gmaps_client()
+        self.geolocator = Nominatim(user_agent="EnergyLab")
         self.input_file_tweets, self.input_file_users = input_file_tuple
         self.output_file = output_file
         self.STATE_CAPITALS = constants.STATE_CAPITALS
 
     @staticmethod
-    def get_coordinates(client, location):
+    def get_coordinates(self, location):
         """
         Get the latitude and longitude coordinates of a location.
         """
         if location is None:
             return (None, None)
-        try:
-            # Geocode the location using Google Maps Geocoding API
-            geocode_result = client.geocode(location)
-
-            # Check if any results were returned
-            if geocode_result:
-                lat = geocode_result[0]["geometry"]["location"]["lat"]
-                lng = geocode_result[0]["geometry"]["location"]["lng"]
-                return (lat, lng)
-            else:
-                return (None, None)
-
-        except Exception as e:
-            print(f"Error geocoding location '{location}': {e}")
-            return (None, None)
+            # Geocode the location using Geopy
+        else:
+            lat, lng = util.geocode_address(location, self.geolocator)
+            return (lat, lng)
 
     def process_tweets_for_users(self):
         """
@@ -78,9 +73,7 @@ class TweetProcessor:
         Runs the geocoding process for all users.
         """
         for user in self.user_list:
-            user["geo_location"] = self.get_coordinates(
-                self.gmaps_client, user["location"]
-            )
+            user["geo_location"] = self.get_coordinates(user["location"])
 
     def store_users(self):
         """
@@ -96,6 +89,9 @@ class TweetProcessor:
         print("Total number of users:", len(self.user_list))
 
     def run_processing(self):
+        """
+        Runs the entire process
+        """
         tweet_list_raw = util.load_json(self.input_file_tweets)
         user_list_raw = util.load_json(self.input_file_users)
         self.tweet_list = util.flatten_and_remove_empty(tweet_list_raw)

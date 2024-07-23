@@ -38,17 +38,17 @@ poetry shell
 5. Execute the project from the command line:
 
 ```bash
-python3 twitter_search location(str) industry_type(str) list_needed(bool) --num_interations (int)
+python3 twitter_search location(str) industry_type(str) --num_interations (int)
 ```
 
 
 For example:
 
 ```bash
-python3 twitter_search "Kolkata" "media" "False" --num_iterations 1
+python3 twitter_search "Kolkata" "media" --num_iterations 1
 ```
 
-gets users from Kolkata in the media industry, where lists(snowballing) is not needed (note that you do not need to use the quotation marks). The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.
+gets users from Kolkata in the media industry (note that you do not need to use the quotation marks). The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.
 
 6. The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
 
@@ -71,7 +71,7 @@ python3 twitter_search/etl/concat_csv_files.py
 If you want to get all the account types for a given location, you can use the following command:
 
 ```bash
-python3 twitter_search "Kolkata" "all" "False"
+python3 twitter_search "Kolkata" "all"
 ```
 Which will output all the account types for the given location (in this case, Kolkata). This will also generate the corresponding csv file for "Kolkata".
 
@@ -81,10 +81,31 @@ Which will output all the account types for the given location (in this case, Ko
 If you want to get all the account types for all locations, you can use the following command:
 
 ```bash
-python3 twitter_search "all" "all" "False"
+python3 twitter_search "all" "all"
 ```
 
-Which will output all the account types for all locations. Additionally, this will also generate the corresponding csv files for each location.
+## Get more users by using list expansion.
+
+```bash
+python3 twitter_search/list_expansion.py "bangalore" "researcher"
+```
+
+This will analyze the filtered users from bangalore that belong to the 'researcher' query (you must have already run the default script for the location and account type). It will then get all the lists that the users are a part of, filter the lists based on keywords, and then get all the users from the fitered lists.
+
+TODO: The script will then filter the users based on location and content relevance.
+
+Additionally, you can use the "all" parameter for the location to get all the account types for all locations. For example:
+
+```bash
+python3 twitter_search/list_expansion.py "all" "all"
+```
+
+You can also get all the account types for a given location by using the "all" parameter for the account type. For example:
+
+```bash
+python3 twitter_search/list_expansion.py "bangalore" "all"
+```
+
 
 ## Make Commands and addtional information
 

@@ -26,6 +26,7 @@ USER_COLUMNS = [
     "tweets",
     "content_is_relevant",
     "content_labels",
+    "search_account_type",
     "tweet_date",
 ]
 
@@ -34,6 +35,8 @@ class CSVConverter:
     # Construct the path to the cleaned_data directory
     RAW_DATA_PATH = project_root / "data" / "raw_data"
     CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
+    FILETYPE_INDEX = 4
+    ACCOUNT_TYPE_COL = "search_account_type"
 
     def __init__(self, location) -> None:
         # See which JSON files are available
@@ -121,6 +124,10 @@ class CSVConverter:
         Returns:
             None
         """
+        # Get file type
+        filename_split = str(input_file).split("_")
+        filetype = filename_split[self.FILETYPE_INDEX]
+
         # Load the JSON file
         with open(input_file, "r") as json_file:
             data = json.load(json_file)
@@ -169,10 +176,12 @@ class CSVConverter:
         else:
             try:
                 df = pd.DataFrame.from_records(data)
+
             except Exception as error:
                 print(error)
                 df = pd.DataFrame(data)
 
+        df[self.ACCOUNT_TYPE_COL] = filetype
         return df
 
     def concat_dataframes(self, files, file_type):

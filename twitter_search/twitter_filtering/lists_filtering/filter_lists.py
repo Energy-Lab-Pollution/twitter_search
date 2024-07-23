@@ -53,20 +53,7 @@ class ListReader:
             df (pd.DataFrame): DataFrame with the JSON data
         """
 
-        self.lists_df = pd.DataFrame([])
-
-        for twitter_list in self.twitter_lists:
-            if not twitter_list:
-                # remove entry if empty
-                continue
-
-            else:
-                # create a dataframe from the list
-                list_df = pd.DataFrame(twitter_list)
-                self.lists_df = pd.concat(
-                    [self.lists_df, list_df], ignore_index=True
-                )
-
+        self.lists_df = pd.DataFrame.from_records(self.twitter_lists)
         self.lists_df = self.lists_df.loc[:, COLS_TO_KEEP].copy()
 
     def create_df(self):
