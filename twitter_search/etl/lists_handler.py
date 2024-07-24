@@ -144,7 +144,7 @@ class ListsHandler:
         for all the available account types
         """
 
-        for city in CITIES:
+        for city in self.CITIES:
             print(f" =============== CITY: {city} ======================")
             self.location = city
             self.list_expansion_all_account_types()

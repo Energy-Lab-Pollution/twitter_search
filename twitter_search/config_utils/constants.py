@@ -37,10 +37,10 @@ USER_COLUMNS = [
 # NLP CONSTANTS
 
 HUGGINGFACE_PIPELINE = "zero-shot-classification"
-
 HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
-
 SCORE_THRESHOLD = 0.4
+NUM_WORKERS = 8
+
 
 # OTHER CONSTANTS
 

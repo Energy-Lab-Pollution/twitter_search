@@ -4,6 +4,7 @@ Script in charge of filtering users based on their location and content relevanc
 
 import os
 import torch
+from tqdm import tqdm
 import concurrent.futures
 from pathlib import Path
 
@@ -29,6 +30,7 @@ class UserFilter:
         self.input_file = input_file
         self.output_file = output_file
         self.STATE_CAPITALS = constants.STATE_CAPITALS
+        self.NUM_WORKERS = constants.NUM_WORKERS
 
         # Setting up NLP classifier
         device = 0 if torch.cuda.is_available() else -1
@@ -153,43 +155,44 @@ class UserFilter:
             user["content_is_relevant"] = False
             user["content_labels"] = []
 
+    def classify_users_concurrently(self, users):
+        """
+        Classifies all users using threads
+        """
+
+        results = []
+
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=self.NUM_WORKERS
+        ) as executor:
+            futures = {
+                executor.submit(
+                    self.classify_single_user(user) for user in users
+                )
+            }
+
+            for future in tqdm(
+                concurrent.futures.as_completed(futures), total=len(futures)
+            ):
+                results.append(future)
+
+        return results
+
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
         their name, bio, and tweets
 
         We use a pre-trained model from Hugging Face to classify
+        all the users concurrently
         """
-        count = 0
         print(f"Classifying {len(self.unclassified_users)}")
         self.unclassified_users = list(
             map(self.add_token_field, self.unclassified_users)
         )
 
-        for user in self.unclassified_users:
-            count += 1
-            length = len(self.unclassified_users)
-            print(f"{count} users done out of {length}")
-            try:
-                classification = self.classifier(
-                    user["token"], candidate_labels=self.relevant_labels
-                )
-                relevant_labels_predicted = [
-                    label
-                    for label, score in zip(
-                        classification["labels"], classification["scores"]
-                    )
-                    if score > self.SCORE_THRESHOLD
-                ]
-
-                user["content_is_relevant"] = bool(relevant_labels_predicted)
-                user["content_labels"] = relevant_labels_predicted
-            except Exception as e:
-                print(
-                    f"Error classifying content relevance for user \
-                      {user['username']}: {e}"
-                )
-                user["content_is_relevant"] = False
-                user["content_labels"] = []
+        self.unclassified_users = self.classify_users_concurrently(
+            self.unclassified_users
+        )
 
     def determine_location_relevance(self):
         """Determine the relevance of
