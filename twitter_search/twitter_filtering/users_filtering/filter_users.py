@@ -160,6 +160,8 @@ class UserFilter:
         Classifies all users using threads
         """
 
+        users = users[:10]
+
         results = []
 
         with concurrent.futures.ThreadPoolExecutor(

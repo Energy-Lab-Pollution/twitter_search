@@ -3,6 +3,8 @@ This script fetches the lists associated with the filtered users
 """
 
 import time
+import tweepy
+import tweepy.errors
 
 from config_utils import util
 from config_utils.constants import (
@@ -26,7 +28,28 @@ class ListGetter:
         self.SLEEP_TIME = SLEEP_TIME
         self.client = util.client_creator()
 
-    def getlists_fromusers(self, users_list):
+    def get_list_membership(self, user):
+        """
+        Uses Twitter's API to get a users' lists
+        """
+
+        success = False
+        while not success:
+            try:
+                response_user_list = self.client.get_list_memberships(
+                    id=user["user_id"],
+                    list_fields=util.LIST_FIELDS,
+                    max_results=self.MAX_RESULTS,
+                )
+                success = True
+
+            except tweepy.errors.TooManyRequests:
+                print("Too many requests, sleeping...")
+                time.sleep(self.SLEEP_TIME)
+
+        return response_user_list
+
+    def get_lists_from_users(self, users_list):
         """
         Get lists from the current set of users.
 
