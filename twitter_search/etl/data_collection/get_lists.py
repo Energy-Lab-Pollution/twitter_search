@@ -112,7 +112,7 @@ class ListGetter:
             user_list = self.load_users()
             print("Now obtaining lists that the users are a part of")
             print(f"We have {len(user_list)} users to get lists from")
-            self.getlists_fromusers(user_list)
+            self.get_lists_from_users(user_list)
 
         except Exception as e:
             print(f"An error occurred: {e}")
