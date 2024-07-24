@@ -43,9 +43,14 @@ class ListGetter:
                 )
                 success = True
 
-            except tweepy.errors.TooManyRequests:
-                print("Too many requests, sleeping...")
+            except tweepy.errors.TooManyRequests as error:
+                print(f"{error} - sleeping...")
                 time.sleep(self.SLEEP_TIME)
+
+            except Exception as error:
+                print(f"Unknown error, skipping: {error}")
+                response_user_list = None
+                break
 
         return response_user_list
 
@@ -66,11 +71,8 @@ class ListGetter:
         """
         count = 0
         for user in users_list:
-            response_user_list = self.client.get_list_memberships(
-                id=user["user_id"],
-                list_fields=util.LIST_FIELDS,
-                max_results=self.MAX_RESULTS,
-            )
+
+            response_user_list = self.get_list_membership(user)
 
             if response_user_list.data is None:
                 print(f"No lists found for {user['user_id']}")
