@@ -89,7 +89,7 @@ class ListsHandler:
         self.filter_twitter_lists()
 
         # Only get users if lists were found
-        if self.lists_df:
+        if not self.lists_df.empty:
             print("Retrieving and filtering user data from lists...")
             user_getter = UserGetter(
                 self.location,
