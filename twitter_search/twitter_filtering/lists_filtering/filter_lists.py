@@ -69,7 +69,7 @@ class ListReader:
             self.lists_df.drop_duplicates(subset=["list_id"], inplace=True)
 
         else:
-            self.lists_df = None
+            self.lists_df = pd.DataFrame([])
 
         return self.lists_df
 

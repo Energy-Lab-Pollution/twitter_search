@@ -155,7 +155,7 @@ class ListsHandler:
         """
         list_reader = ListReader(self.paths["input_file_filter_lists"])
         self.lists_df = list_reader.create_df()
-        if self.lists_df:
+        if not self.lists_df.empty:
             list_filter = ListFilter(
                 self.lists_df, self.paths["output_file_filter_lists"]
             )
