@@ -43,13 +43,16 @@ class DateAdder:
         """
         # Filter the JSON files based on the location
         self.filtered_files = [
-            file for file in self.json_files if self.location.lower() in file.lower()
+            file
+            for file in self.json_files
+            if self.location.lower() in file.lower()
         ]
 
         self.users_files = [
             filtered_file
             for filtered_file in self.filtered_files
-            if "user" in filtered_file.lower() and "filtered" in filtered_file.lower()
+            if "user" in filtered_file.lower()
+            and "filtered" in filtered_file.lower()
         ]
 
         self.tweets_files = [
@@ -150,12 +153,18 @@ class DateAdder:
         for tweets_file, users_file in zip(self.tweets_files, self.users_files):
             # For each file, we will have a final users list
             self.final_users_list = []
-            tweets_dict_list = self.load_json(f"{self.RAW_DATA_PATH}/{tweets_file}")
-            users_dict_list = self.load_json(f"{self.RAW_DATA_PATH}/{users_file}")
+            tweets_dict_list = self.load_json(
+                f"{self.RAW_DATA_PATH}/{tweets_file}"
+            )
+            users_dict_list = self.load_json(
+                f"{self.RAW_DATA_PATH}/{users_file}"
+            )
 
             if any(isinstance(sublist, list) for sublist in users_dict_list):
                 # Each file has a list of dictionaries...
-                for tweets_dict, users_dict in zip(tweets_dict_list, users_dict_list):
+                for tweets_dict, users_dict in zip(
+                    tweets_dict_list, users_dict_list
+                ):
                     users_dict = self.add_date_to_users(tweets_dict, users_dict)
                     self.final_users_list.extend(users_dict)
 
@@ -164,14 +173,20 @@ class DateAdder:
                 )
 
             else:
-                users_dict = self.add_date_to_users(tweets_dict_list, users_dict_list)
+                users_dict = self.add_date_to_users(
+                    tweets_dict_list, users_dict_list
+                )
                 self.final_users_list.extend(users_dict)
 
-            self.write_json(f"{self.RAW_DATA_PATH}/{users_file}", self.final_users_list)
+            self.write_json(
+                f"{self.RAW_DATA_PATH}/{users_file}", self.final_users_list
+            )
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Please add the location to parse the users")
+    parser = ArgumentParser(
+        description="Please add the location to parse the users"
+    )
     parser.add_argument(
         "location", type=str, help="Location to parse the corresponding users"
     )

@@ -2,15 +2,15 @@
 Script in charge of filtering users based on their location and content relevance.
 """
 
-import os
-import torch
-from tqdm import tqdm
 import concurrent.futures
+import os
 from pathlib import Path
 
 import geopandas as gpd
+import torch
 from config_utils import constants, util
 from shapely.geometry import Point
+from tqdm import tqdm
 from transformers import pipeline
 
 

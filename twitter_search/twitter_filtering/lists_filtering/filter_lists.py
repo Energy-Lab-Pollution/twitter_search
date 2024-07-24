@@ -3,9 +3,10 @@ This script does the initial filtering process for the twitter
 lists
 """
 
+import json
+
 # Global imports
 import os
-import json
 
 import pandas as pd
 from twitter_filtering.utils.constants import (

@@ -3,9 +3,9 @@ This script fetches the lists associated with the filtered users
 """
 
 import time
+
 import tweepy
 import tweepy.errors
-
 from config_utils import util
 from config_utils.constants import (
     COUNT_THRESHOLD,
@@ -71,7 +71,6 @@ class ListGetter:
         """
         count = 0
         for user in users_list:
-
             response_user_list = self.get_list_membership(user)
 
             if response_user_list.data is None:
