@@ -174,7 +174,7 @@ class UserFilter:
             for future in tqdm(
                 concurrent.futures.as_completed(futures), total=len(futures)
             ):
-                results.append(future)
+                results.append(future.result())
 
         return results
 
