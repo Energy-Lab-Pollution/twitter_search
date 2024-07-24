@@ -1,5 +1,5 @@
 """
-This 
+This script fetches the lists associated with the filtered users
 """
 
 import time
