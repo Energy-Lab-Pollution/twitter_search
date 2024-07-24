@@ -165,11 +165,10 @@ class UserFilter:
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=self.NUM_WORKERS
         ) as executor:
-            futures = {
-                executor.submit(
-                    self.classify_single_user(user) for user in users
-                )
-            }
+            futures = [
+                executor.submit(self.classify_single_user, user)
+                for user in users
+            ]
 
             for future in tqdm(
                 concurrent.futures.as_completed(futures), total=len(futures)
