@@ -55,7 +55,9 @@ class UserFilter:
         # Read users, flatten list if necessary and remove duplicate recs
         self.users_list = util.load_json(self.input_file)
         self.total_user_dict = util.flatten_and_remove_empty(self.users_list)
-        self.total_user_dict = util.remove_duplicate_records(self.total_user_dict)
+        self.total_user_dict = util.remove_duplicate_records(
+            self.total_user_dict
+        )
 
         print("users look like this:", self.total_user_dict[0])
 
@@ -106,8 +108,16 @@ class UserFilter:
 
         token = " ".join(
             [
-                (user["description"] if user["description"] is not None else ""),
-                (" ".join(user["tweets"]) if user["tweets"] is not None else ""),
+                (
+                    user["description"]
+                    if user["description"] is not None
+                    else ""
+                ),
+                (
+                    " ".join(user["tweets"])
+                    if user["tweets"] is not None
+                    else ""
+                ),
             ]
         )
 
@@ -145,20 +155,20 @@ class UserFilter:
             user["content_is_relevant"] = False
             user["content_labels"] = []
 
+        return user
+
     def classify_users_concurrently(self, users):
         """
         Classifies all users using threads
         """
-
-        users = users[:10]
-
         results = []
 
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=self.NUM_WORKERS
         ) as executor:
             futures = [
-                executor.submit(self.classify_single_user, user) for user in users
+                executor.submit(self.classify_single_user, user)
+                for user in users
             ]
 
             for future in tqdm(
@@ -232,9 +242,13 @@ class UserFilter:
                         print(f"Error determining subnational location: {e}")
                         subnational = None
                     print(subnational, "subnational")
-                    desired_locations = self.STATE_CAPITALS.get(self.location, [])
+                    desired_locations = self.STATE_CAPITALS.get(
+                        self.location, []
+                    )
                     print("desired locations", desired_locations)
-                    user["location_relevance"] = subnational in desired_locations
+                    user["location_relevance"] = (
+                        subnational in desired_locations
+                    )
                 else:
                     user["location_relevance"] = False
 
