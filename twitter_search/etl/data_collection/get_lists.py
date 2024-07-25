@@ -1,8 +1,17 @@
-import time
-from datetime import datetime
+"""
+This script fetches the lists associated with the filtered users
+"""
 
+import time
+
+import tweepy
+import tweepy.errors
 from config_utils import util
-from config_utils.constants import COUNT_THRESHOLD, MAX_RESULTS_LISTS
+from config_utils.constants import (
+    COUNT_THRESHOLD,
+    MAX_RESULTS_LISTS,
+    SLEEP_TIME,
+)
 
 
 class ListGetter:
@@ -16,11 +25,38 @@ class ListGetter:
         self.output_file = output_file
         self.MAX_RESULTS = MAX_RESULTS_LISTS
         self.COUNT_THRESHOLD = COUNT_THRESHOLD
+        self.SLEEP_TIME = SLEEP_TIME
         self.client = util.client_creator()
 
-    def getlists_fromusers(self, users_list):
+    def get_list_membership(self, user):
         """
-        Get lists from users.
+        Uses Twitter's API to get a users' lists
+        """
+
+        success = False
+        while not success:
+            try:
+                response_user_list = self.client.get_list_memberships(
+                    id=user["user_id"],
+                    list_fields=util.LIST_FIELDS,
+                    max_results=self.MAX_RESULTS,
+                )
+                success = True
+
+            except tweepy.errors.TooManyRequests as error:
+                print(f"{error} - sleeping...")
+                time.sleep(self.SLEEP_TIME)
+
+            except Exception as error:
+                print(f"Unknown error, skipping: {error}")
+                response_user_list = None
+                break
+
+        return response_user_list
+
+    def get_lists_from_users(self, users_list):
+        """
+        Get lists from the current set of users.
 
         Parameters
         ----------
@@ -35,11 +71,7 @@ class ListGetter:
         """
         count = 0
         for user in users_list:
-            response_user_list = self.client.get_list_memberships(
-                id=user["user_id"],
-                list_fields=util.LIST_FIELDS,
-                max_results=self.MAX_RESULTS,
-            )
+            response_user_list = self.get_list_membership(user)
 
             if response_user_list.data is None:
                 print(f"No lists found for {user['user_id']}")
@@ -59,18 +91,12 @@ class ListGetter:
             count += 1
             if count > self.COUNT_THRESHOLD:
                 print("You have to wait for 1 min")
-                time_block = 1
-                while time_block <= 3:
-                    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    time.sleep(20)
-                    print(
-                        f"{current_time} - {time_block * 5} minutes done out of 15"
-                    )
-                    time_block += 1
-                count = 0
-            time.sleep(1)
+                time.sleep(self.SLEEP_TIME)
 
     def load_users(self):
+        """
+        Loads json file with users data
+        """
         users_list_raw = util.load_json(self.input_file)
         user_list = util.flatten_and_remove_empty(users_list_raw)
 
@@ -85,7 +111,7 @@ class ListGetter:
             user_list = self.load_users()
             print("Now obtaining lists that the users are a part of")
             print(f"We have {len(user_list)} users to get lists from")
-            self.getlists_fromusers(user_list)
+            self.get_lists_from_users(user_list)
 
         except Exception as e:
             print(f"An error occurred: {e}")

@@ -37,10 +37,10 @@ USER_COLUMNS = [
 # NLP CONSTANTS
 
 HUGGINGFACE_PIPELINE = "zero-shot-classification"
-
 HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
-
 SCORE_THRESHOLD = 0.4
+NUM_WORKERS = 8
+
 
 # OTHER CONSTANTS
 
@@ -70,7 +70,7 @@ RELEVANT_LABELS = [
     "research",
     "politics",
     "policy maker",
-    "organization",
+    "nonprofit organization",
 ]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
 # Dictionary mapping Indian state capitals to their respective states
@@ -155,7 +155,7 @@ USER_FIELDS = [
 
 # THRESHOLDS FOR GETTING LISTS
 COUNT_THRESHOLD = 24
-SLEEP_TIME = 300
+SLEEP_TIME = 120
 GEOCODE_TIMEOUT = 10
 
 

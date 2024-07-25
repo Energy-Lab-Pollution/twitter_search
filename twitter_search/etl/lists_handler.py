@@ -33,6 +33,7 @@ class ListsHandler:
         self.location = location.lower()
         self.account_type = account_type
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
+        self.setup_file_paths()
 
     def setup_file_paths(self):
         """
@@ -87,14 +88,16 @@ class ListsHandler:
         print("Filtering lists...")
         self.filter_twitter_lists()
 
-        print("Retrieving and filtering user data from lists...")
-        user_getter = UserGetter(
-            self.location,
-            self.paths["output_file_filter_lists"],
-            self.paths["output_file_total"],
-            self.paths["output_file_filter_total"],
-        )
-        user_getter.get_users()
+        # Only get users if lists were found
+        if not self.lists_df.empty:
+            print("Retrieving and filtering user data from lists...")
+            user_getter = UserGetter(
+                self.location,
+                self.paths["output_file_filter_lists"],
+                self.paths["output_file_total"],
+                self.paths["output_file_filter_total"],
+            )
+            user_getter.get_users()
 
     def list_expansion_all_account_types(self):
         """
@@ -141,7 +144,7 @@ class ListsHandler:
         for all the available account types
         """
 
-        for city in CITIES:
+        for city in self.CITIES:
             print(f" =============== CITY: {city} ======================")
             self.location = city
             self.list_expansion_all_account_types()
@@ -151,8 +154,11 @@ class ListsHandler:
         Filter the lists based on some pre-defined keywords.
         """
         list_reader = ListReader(self.paths["input_file_filter_lists"])
-        lists_df = list_reader.create_df()
-        list_filter = ListFilter(
-            lists_df, self.paths["output_file_filter_lists"]
-        )
-        list_filter.keep_relevant_lists()
+        self.lists_df = list_reader.create_df()
+        if not self.lists_df.empty:
+            list_filter = ListFilter(
+                self.lists_df, self.paths["output_file_filter_lists"]
+            )
+            list_filter.keep_relevant_lists()
+        else:
+            print("No lists found")

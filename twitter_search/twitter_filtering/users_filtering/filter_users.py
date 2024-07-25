@@ -2,12 +2,15 @@
 Script in charge of filtering users based on their location and content relevance.
 """
 
+import concurrent.futures
 import os
 from pathlib import Path
 
 import geopandas as gpd
+import torch
 from config_utils import constants, util
 from shapely.geometry import Point
+from tqdm import tqdm
 from transformers import pipeline
 
 
@@ -23,12 +26,18 @@ class UserFilter:
         """
 
         self.location = location
-        self.relevant_labels = constants.RELEVANT_LABELS
+        self.RELEVANT_LABELS = constants.RELEVANT_LABELS
         self.input_file = input_file
         self.output_file = output_file
         self.STATE_CAPITALS = constants.STATE_CAPITALS
-        self.pipeline = pipeline(
-            constants.HUGGINGFACE_PIPELINE, model=constants.HUGGINGFACE_MODEL
+        self.NUM_WORKERS = constants.NUM_WORKERS
+
+        # Setting up NLP classifier
+        device = 0 if torch.cuda.is_available() else -1
+        self.classifier = pipeline(
+            constants.HUGGINGFACE_PIPELINE,
+            model=constants.HUGGINGFACE_MODEL,
+            device=device,
         )
         # TODO, based on location, select the appropriate shape file.
         self.shapefile_path = (
@@ -57,10 +66,6 @@ class UserFilter:
         print(f"Already classified {len(self.classified_users)} users")
 
         print(f"{len(self.unclassified_users)} users to classify")
-
-        # except Exception as e:
-        #     print(f"Error loading data: {e}")
-        #     self.total_user_dict = []
 
     def get_already_classified_users(self):
         """
@@ -94,54 +99,100 @@ class UserFilter:
             print("No previously classified users")
             self.unclassified_users = self.total_user_dict.copy()
 
+    @staticmethod
+    def create_token(user):
+        """
+        This function will create the token to
+        classify the user using the HF model
+        """
+
+        token = " ".join(
+            [
+                (
+                    user["description"]
+                    if user["description"] is not None
+                    else ""
+                ),
+                (
+                    " ".join(user["tweets"])
+                    if user["tweets"] is not None
+                    else ""
+                ),
+            ]
+        )
+
+        return token
+
+    def add_token_field(self, user):
+        """
+        Uses the 'create_token' function to add a new field
+        """
+        user["token"] = self.create_token(user)
+        return user
+
+    def classify_single_user(self, user):
+        """
+        This function classifies a single user
+        """
+
+        try:
+            classification = self.classifier(
+                user["token"], candidate_labels=self.RELEVANT_LABELS
+            )
+            relevant_labels = [
+                label
+                for label, score in zip(
+                    classification["labels"], classification["scores"]
+                )
+                if score > self.SCORE_THRESHOLD
+            ]
+
+            user["content_is_relevant"] = bool(relevant_labels)
+            user["content_labels"] = relevant_labels
+
+        except Exception as error:
+            print(f"Error classifying user: {error}")
+            user["content_is_relevant"] = False
+            user["content_labels"] = []
+
+        return user
+
+    def classify_users_concurrently(self, users):
+        """
+        Classifies all users using threads
+        """
+        results = []
+
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=self.NUM_WORKERS
+        ) as executor:
+            futures = [
+                executor.submit(self.classify_single_user, user)
+                for user in users
+            ]
+
+            for future in tqdm(
+                concurrent.futures.as_completed(futures), total=len(futures)
+            ):
+                results.append(future.result())
+
+        return results
+
     def classify_content_relevance(self):
         """Classify content relevance for each user based on
         their name, bio, and tweets
 
         We use a pre-trained model from Hugging Face to classify
+        all the users concurrently
         """
-        count = 0
-        for user in self.unclassified_users:
-            count += 1
-            length = len(self.unclassified_users)
-            print(f"{count} users done out of {length}")
-            user["token"] = " ".join(
-                [
-                    user["username"],
-                    (
-                        user["description"]
-                        if user["description"] is not None
-                        else ""
-                    ),
-                    user["location"] if user["location"] is not None else "",
-                    (
-                        " ".join(user["tweets"])
-                        if user["tweets"] is not None
-                        else ""
-                    ),
-                ]
-            )
-            try:
-                classification = self.pipeline(
-                    user["token"], candidate_labels=self.relevant_labels
-                )
-                relevant_labels_predicted = [
-                    label
-                    for label, score in zip(
-                        classification["labels"], classification["scores"]
-                    )
-                    if score > self.SCORE_THRESHOLD
-                ]
+        print(f"Classifying {len(self.unclassified_users)}")
+        self.unclassified_users = list(
+            map(self.add_token_field, self.unclassified_users)
+        )
 
-                user["content_is_relevant"] = bool(relevant_labels_predicted)
-                user["content_labels"] = relevant_labels_predicted
-            except Exception as e:
-                print(
-                    f"Error classifying content relevance for user \
-                      {user['username']}: {e}"
-                )
-                user["content_is_relevant"] = False
-                user["content_labels"] = []
+        self.unclassified_users = self.classify_users_concurrently(
+            self.unclassified_users
+        )
 
     def determine_location_relevance(self):
         """Determine the relevance of
