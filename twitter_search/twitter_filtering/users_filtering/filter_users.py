@@ -274,6 +274,29 @@ class UserFilter:
         except Exception as e:
             print(f"Error storing filtered users: {e}")
 
+    def reclassify_all_users(self):
+        """
+        Re-classifies all the users
+
+        This method should be used when one wants to re-apply the
+        classification to all available users
+        """
+        try:
+            print("Re-classifying all users")
+            self.load_and_preprocess_data()
+            self.unclassified_users = self.total_user_dict.copy()
+            self.classify_content_relevance()
+            # Paste both classified and unclassified users
+            self.all_users = []
+            self.all_users.extend(self.unclassified_users)
+            print("Reclassified all users")
+            self.remove_users()
+            self.store_users()
+            print("Filtered users stored successfully.")
+
+        except FileNotFoundError as e:
+            print(f"An error occurred during filtering: {e}")
+
     def run_filtering(self):
         """
         Run the filtering process for a specific location.
