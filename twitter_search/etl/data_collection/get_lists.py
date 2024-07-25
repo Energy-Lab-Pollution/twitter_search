@@ -70,7 +70,6 @@ class ListGetter:
             _description_, by default None
         """
         count = 0
-        print(users_list)
         for user in users_list:
 
             if not isinstance(user, dict):
