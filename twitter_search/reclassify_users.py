@@ -5,11 +5,11 @@ Main function to run the List Expansion collection process.
 from argparse import ArgumentParser
 
 # Local imports
-# from etl.data_cleaning.csv_converter import CSVConverter
+from etl.data_cleaning.csv_converter import CSVConverter
 from etl.twitter_data_handler import TwitterDataHandler
 
 
-# from config_utils.cities import CITIES
+from config_utils.cities import CITIES
 
 
 def main():
@@ -46,16 +46,17 @@ def main():
 
     if args.account_type == "all":
         if args.location == "all":
+            twitter_data_handler.reclassify_all_locations_accounts()
             for city in CITIES:
                 csv_converter = CSVConverter(city)
                 csv_converter.run()
 
         else:
-            lists_handler.list_expansion_all_account_types()
-            # csv_converter = CSVConverter(args.location)
-            # csv_converter.run()
+            twitter_data_handler.reclassify_all_accounts()
+            csv_converter = CSVConverter(args.location)
+            csv_converter.run()
     else:
-        lists_handler.perform_list_expansion()
+        twitter_data_handler.reclassify_users()
 
 
 if __name__ == "__main__":
