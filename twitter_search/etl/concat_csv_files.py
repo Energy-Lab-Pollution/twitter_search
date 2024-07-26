@@ -9,9 +9,7 @@ import pandas as pd
 
 
 class CSVConcat:
-
     def __init__(self):
-
         self.script_path = Path(__file__).resolve()
         self.project_root = self.script_path.parents[1]
         self.CLEAN_DATA_PATH = self.project_root / "data" / "cleaned_data"
