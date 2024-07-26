@@ -205,9 +205,9 @@ class TwitterDataHandler:
         for city in CITIES:
             print(f" =============== CITY: {city} ======================")
             self.location = city
-            self.reclassify_users_all_accounts()
+            self.reclassify_all_accounts()
 
-    def reclassify_users_all_accounts(self):
+    def reclassify_all_accounts(self):
         """
         Performs the re-classification process fir all accounts
         """
