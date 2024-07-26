@@ -113,7 +113,7 @@ class CSVConverter:
 
         return new_list
 
-    def convert_to_df(self, input_file):
+    def convert_users_to_df(self, input_file):
         """
         Convert JSON files into CSV files.
 
@@ -184,7 +184,7 @@ class CSVConverter:
         df[self.ACCOUNT_TYPE_COL] = filetype
         return df
 
-    def concat_dataframes(self, files, file_type):
+    def concat_user_dataframes(self, files, file_type):
         """
         Reads the JSON files, creates a dataframe
         for each file and concatenates all the dataframes.
@@ -206,13 +206,55 @@ class CSVConverter:
 
         for file in files:
             input_file = self.RAW_DATA_PATH / file
-            input_df = self.convert_to_df(input_file)
+            input_df = self.convert_users_to_df(input_file)
 
             if self.file_type_column[file_type] in input_df.columns:
                 # Add date column if not available
-                if "tweet_date" not in input_df.columns:
-                    input_df.loc[:, "tweet_date"] = None
-                input_df = input_df.loc[:, self.user_columns]
+                df = pd.concat([df, input_df], ignore_index=True)
+
+                print(f"Data loaded successfully from {file}")
+
+        df.loc[:, "search_location"] = self.location
+
+        return df
+
+    def convert_lists_to_df(self, input_file):
+        """
+        Converts the lists data into a dataframe
+        """
+        # Load the JSON file
+        with open(input_file, "r") as json_file:
+            data = json.load(json_file)
+
+        df = pd.DataFrame.from_records(data)
+
+        return df
+
+    def concat_list_dataframes(self, files, file_type):
+        """
+        Reads the JSON files, creates a dataframe
+        for each file and concatenates all the dataframes.
+
+        Args:
+            files_list (list): List of JSON files.
+
+        Returns:
+            DataFrame: The concatenated DataFrame.
+        """
+
+        if file_type not in self.file_type_column:
+            raise ValueError(
+                f"""File type {file_type} not recognized,must be
+                              one from {self.file_type_column.keys()}"""
+            )
+
+        df = pd.DataFrame()
+
+        for file in files:
+            input_file = self.RAW_DATA_PATH / file
+            input_df = self.convert_lists_to_df(input_file)
+
+            if self.file_type_column[file_type] in input_df.columns:
                 df = pd.concat([df, input_df], ignore_index=True)
 
                 print(f"Data loaded successfully from {file}")
@@ -235,7 +277,9 @@ class CSVConverter:
             None
         """
         if self.user_files:
-            user_df = self.concat_dataframes(self.user_files, file_type="user")
+            user_df = self.concat_user_dataframes(
+                self.user_files, file_type="user"
+            )
             # Drop columns that are not needed
             # Get the user URL
             user_df.dropna(subset=["user_id"], inplace=True)
@@ -253,15 +297,15 @@ class CSVConverter:
         else:
             print(f"No user data found for {self.location}")
 
-        # if self.list_files:
-        #     list_df = self.concat_dataframes(self.list_files, file_type="list")
-        #     list_df.dropna(subset=["relevant"], inplace=True)
-        #     list_df.to_csv(
-        #         self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",
-        #         index=False,
-        #         encoding="utf-8-sig",
-        #     )
-        #     print(f"List data saved successfully for {self.location}")
+        if self.list_files:
+            list_df = self.concat_dataframes(self.list_files, file_type="list")
+            list_df.dropna(subset=["relevant"], inplace=True)
+            list_df.to_csv(
+                self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",
+                index=False,
+                encoding="utf-8-sig",
+            )
+            print(f"List data saved successfully for {self.location}")
 
-        # else:
-        #     print(f"No list data found for {self.location}")
+        else:
+            print(f"No list data found for {self.location}")
