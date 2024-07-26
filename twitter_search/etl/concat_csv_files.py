@@ -22,7 +22,7 @@ class CSVConcat:
         # and the final name of the concatenated csv file
         self.file_dict = {
             "user_data": "all_users",
-            "unique_users": "all_unique_users",
+            "unique_users": "all_distinct_users",
         }
 
     def concat_files(self, str_to_look, final_file):
