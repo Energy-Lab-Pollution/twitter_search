@@ -287,6 +287,13 @@ class CSVConverter:
                 lambda x: self.create_user_url(x)
             )
 
+            unique_users = user_df.drop_duplicates(subset=["user_id"])
+            unique_users.to_csv(
+                self.CLEAN_DATA_PATH / f"{self.location}_unique_users.csv",
+                index=False,
+                encoding="utf-8-sig",
+            )
+
             user_df.to_csv(
                 self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv",
                 index=False,
@@ -298,7 +305,9 @@ class CSVConverter:
             print(f"No user data found for {self.location}")
 
         if self.list_files:
-            list_df = self.concat_dataframes(self.list_files, file_type="list")
+            list_df = self.concat_list_dataframes(
+                self.list_files, file_type="list"
+            )
             list_df.dropna(subset=["relevant"], inplace=True)
             list_df.to_csv(
                 self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",
