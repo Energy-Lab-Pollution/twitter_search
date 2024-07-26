@@ -141,6 +141,9 @@ class ListFilter:
         self.relevant_lists = self.df.loc[self.df["relevant"].isin([True]), :]
         self.relevant_lists.reset_index(drop=True, inplace=True)
 
-        self.relevant_lists.to_json(f"{self.output_file}", orient="records")
+        self.relevant_lists.to_json(
+            f"{self.output_file}",
+            orient="records",
+        )
 
         return self.relevant_lists

@@ -181,3 +181,40 @@ class TwitterDataHandler:
             self.paths["output_file_filter"],
         )
         self.user_filter.run_filtering()
+
+    def reclassify_users(self):
+        """
+        Reclassify all twitter users if needed, without
+        performing any initial search
+        """
+        COUNT = 1
+        self.setup_file_paths(COUNT)
+        print("Reclassifying Twitter users based on location...")
+        self.user_filter = UserFilter(
+            self.location,
+            self.paths["input_file_filter"],
+            self.paths["output_file_filter"],
+        )
+        self.user_filter.reclassify_all_users()
+
+    def reclassify_all_locations_accounts(self):
+        """
+        Runs the entire process for all the available locations
+        and cities
+        """
+        for city in CITIES:
+            print(f" =============== CITY: {city} ======================")
+            self.location = city
+            self.reclassify_all_accounts()
+
+    def reclassify_all_accounts(self):
+        """
+        Performs the re-classification process fir all accounts
+        """
+        account_types = self.QUERIES
+        for account_type in account_types:
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
+            self.account_type = account_type
+            self.reclassify_users()

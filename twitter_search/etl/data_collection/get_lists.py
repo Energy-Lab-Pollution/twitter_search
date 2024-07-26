@@ -71,6 +71,9 @@ class ListGetter:
         """
         count = 0
         for user in users_list:
+            if not isinstance(user, dict):
+                continue
+
             response_user_list = self.get_list_membership(user)
 
             if response_user_list.data is None:

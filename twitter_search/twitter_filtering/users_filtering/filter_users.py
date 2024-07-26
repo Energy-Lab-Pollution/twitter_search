@@ -3,6 +3,7 @@ Script in charge of filtering users based on their location and content relevanc
 """
 
 import concurrent.futures
+import json
 import os
 from pathlib import Path
 
@@ -273,6 +274,40 @@ class UserFilter:
             util.json_maker(self.output_file, self.all_users)
         except Exception as e:
             print(f"Error storing filtered users: {e}")
+
+    def rewrite_json_file(self):
+        """
+        Overwrites the json file of the users
+        """
+        # Write the updated list of dictionaries back to the file
+        with open(self.output_file, "w") as file:
+            json.dump(self.all_users, file, indent=1)
+
+    def reclassify_all_users(self):
+        """
+        Re-classifies all the users
+
+        This method should be used when one wants to re-apply the
+        classification to all available users
+        """
+        try:
+            print("Re-classifying all users")
+            self.load_and_preprocess_data()
+            self.unclassified_users = self.total_user_dict.copy()
+            self.unclassified_users = util.remove_duplicate_records(
+                self.unclassified_users
+            )
+            self.classify_content_relevance()
+            # Paste both classified and unclassified users
+            self.all_users = []
+            self.all_users.extend(self.unclassified_users)
+            print("Reclassified all users")
+            self.remove_users()
+            self.rewrite_json_file()
+            print("Filtered users stored successfully.")
+
+        except FileNotFoundError as e:
+            print(f"An error occurred during filtering: {e}")
 
     def run_filtering(self):
         """
