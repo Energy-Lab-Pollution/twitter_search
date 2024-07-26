@@ -3,9 +3,9 @@ Script in charge of filtering users based on their location and content relevanc
 """
 
 import concurrent.futures
+import json
 import os
 from pathlib import Path
-import json
 
 import geopandas as gpd
 import torch

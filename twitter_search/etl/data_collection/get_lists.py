@@ -71,7 +71,6 @@ class ListGetter:
         """
         count = 0
         for user in users_list:
-
             if not isinstance(user, dict):
                 continue
 
