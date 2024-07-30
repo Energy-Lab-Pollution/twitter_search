@@ -45,7 +45,7 @@ class ListsHandler:
         if self.account_type == "manually_added":
             self.paths = {
                 "output_file_filter_lists": self.base_dir
-                / f"{self.account_type}_lists_filtered.json",
+                / f"{self.account_type}_lists.json",
                 "output_file_total": self.base_dir
                 / f"{self.account_type}_expanded_users.json",
                 "output_file_filter_total": self.base_dir
