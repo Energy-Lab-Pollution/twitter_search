@@ -35,7 +35,8 @@ def main():
             "politicians",
             "researcher",
             "environment",
-            "manually_added" "all",
+            "manually_added",
+            "all",
         ],
     )
 
