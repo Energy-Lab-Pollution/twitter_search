@@ -77,9 +77,7 @@ class CSVConverter:
         """
         # Filter the JSON files based on the location
         self.filtered_files = [
-            file
-            for file in self.json_files
-            if self.location.lower() in file.lower()
+            file for file in self.json_files if self.location.lower() in file.lower()
         ]
 
         self.user_files = [
@@ -94,7 +92,7 @@ class CSVConverter:
 
         self.expanded_user_files = [
             file
-            for file in self.json_files
+            for file in self.filtered_files
             if "expanded" in file.lower() and "filtered" in file.lower()
         ]
 
@@ -140,9 +138,7 @@ class CSVConverter:
 
         # Preliminary cleaning! - if not dictionary, byeee
         data = [
-            item
-            for item in data
-            if isinstance(item, dict) or isinstance(item, list)
+            item for item in data if isinstance(item, dict) or isinstance(item, list)
         ]
 
         # Remove nested lists to avoid bugs
@@ -169,9 +165,7 @@ class CSVConverter:
                         )
 
                         try:
-                            sub_df = pd.DataFrame.from_dict(
-                                sub_list, orient="index"
-                            )
+                            sub_df = pd.DataFrame.from_dict(sub_list, orient="index")
                             df = pd.concat([sub_df, df], ignore_index=True)
                         except Exception as error:
                             print(f"Error parsing as df with dict: {error}")
@@ -272,6 +266,41 @@ class CSVConverter:
 
         return df
 
+    def parse_user_df(self, user_type):
+        """
+        Pre-processes and parses the users dataframe
+
+        Args:
+            - user_type: can either be "normal" or "expanded"
+        """
+
+        if user_type == "normal":
+            user_df = self.concat_user_dataframes(self.user_files, file_type="user")
+        else:
+            user_df = self.concat_user_dataframes(
+                self.expanded_user_files, file_type="user"
+            )
+        # Drop columns that are not needed
+        # Get the user URL
+        user_df.dropna(subset=["user_id"], inplace=True)
+        user_df.dropna(subset=["content_is_relevant"], inplace=True)
+        user_df.loc[:, "user_url"] = user_df["username"].apply(
+            lambda x: self.create_user_url(x)
+        )
+
+        unique_users = user_df.drop_duplicates(subset=["user_id"])
+        unique_users.to_csv(
+            self.CLEAN_DATA_PATH / f"{self.location}_unique_users.csv",
+            index=False,
+            encoding="utf-8-sig",
+        )
+
+        user_df.to_csv(
+            self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv",
+            index=False,
+            encoding="utf-8-sig",
+        )
+
     def run(self):
         """
         Runs the entire process for converting JSON files
@@ -286,9 +315,7 @@ class CSVConverter:
             None
         """
         if self.user_files:
-            user_df = self.concat_user_dataframes(
-                self.user_files, file_type="user"
-            )
+            user_df = self.concat_user_dataframes(self.user_files, file_type="user")
             # Drop columns that are not needed
             # Get the user URL
             user_df.dropna(subset=["user_id"], inplace=True)
@@ -315,9 +342,7 @@ class CSVConverter:
             print(f"No user data found for {self.location}")
 
         if self.list_files:
-            list_df = self.concat_list_dataframes(
-                self.list_files, file_type="list"
-            )
+            list_df = self.concat_list_dataframes(self.list_files, file_type="list")
             list_df.dropna(subset=["relevant"], inplace=True)
             list_df.to_csv(
                 self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",

@@ -51,9 +51,7 @@ class TwitterDataHandler:
         """
         account_types = self.QUERIES
         for account_type in account_types:
-            print(
-                f" =============== PROCESSING: {account_type} ======================"
-            )
+            print(f" =============== PROCESSING: {account_type} ======================")
             self.account_type = account_type
             self.run()
 
@@ -124,7 +122,7 @@ class TwitterDataHandler:
 
         self.filter_users()
 
-        if not self.user_filter.filtered_user:
+        if not self.user_filter.filtered_users:
             print("No relevant users were found.")
             return
 
@@ -213,8 +211,6 @@ class TwitterDataHandler:
         """
         account_types = self.QUERIES
         for account_type in account_types:
-            print(
-                f" =============== PROCESSING: {account_type} ======================"
-            )
+            print(f" =============== PROCESSING: {account_type} ======================")
             self.account_type = account_type
             self.reclassify_users()
