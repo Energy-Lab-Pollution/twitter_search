@@ -22,7 +22,7 @@ class CSVConcat:
             "user_data": "all_users",
             "unique_users": "all_distinct_users",
             "expanded_user_data": "expanded_all_users",
-            "expanded_unique_users": "expanded_unique_users",
+            "expanded_unique_users": "expanded_distinct_users",
         }
 
         # Dictionary with strings to avoid when looking for
