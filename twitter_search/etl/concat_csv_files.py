@@ -21,16 +21,33 @@ class CSVConcat:
         self.file_dict = {
             "user_data": "all_users",
             "unique_users": "all_distinct_users",
+            "expanded_user_data": "expanded_all_users",
         }
 
-    def concat_files(self, str_to_look, final_file):
+        self.str_to_avoid_dict = {
+            "user_data": "expanded",
+            "unique_users": "all_distinct_users",
+            "expanded_user_data": None,
+        }
+
+    def concat_files(self, str_to_look, str_to_avoid, final_file):
         """
         Concatenates all of the csv files
 
         Reads all of the available files and concatenates them
         """
 
-        user_files = [file for file in self.csv_files if str_to_look in file]
+        if str_to_avoid:
+            user_files = [
+                file
+                for file in self.csv_files
+                if str_to_look in file and str_to_avoid not in file
+            ]
+
+        else:
+            user_files = [
+                file for file in self.csv_files if str_to_look in file
+            ]
 
         all_users = pd.DataFrame()
 
@@ -52,7 +69,10 @@ class CSVConcat:
         """
 
         for str_to_look in self.file_dict.keys():
-            self.concat_files(str_to_look, self.file_dict[str_to_look])
+            str_to_avoid = self.str_to_avoid_dict[str_to_look]
+            self.concat_files(
+                str_to_look, str_to_avoid, self.file_dict[str_to_look]
+            )
 
 
 if __name__ == "__main__":
