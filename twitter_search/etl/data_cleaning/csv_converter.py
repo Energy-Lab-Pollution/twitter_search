@@ -334,9 +334,11 @@ class CSVConverter:
         """
         if self.user_files:
             self.parse_user_df(user_type="normal")
+            print(f"Normal users found for {self.location}")
 
         elif self.expanded_user_files:
             self.parse_user_df(user_type="expanded")
+            print(f"Expanded users found for {self.location}")
 
         else:
             print(f"No user data found for {self.location}")
