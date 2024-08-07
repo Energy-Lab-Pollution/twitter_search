@@ -35,6 +35,7 @@ def main():
             "politicians",
             "researcher",
             "environment",
+            "manually_added",
             "all",
         ],
     )
@@ -55,6 +56,12 @@ def main():
             lists_handler.list_expansion_all_account_types()
             # csv_converter = CSVConverter(args.location)
             # csv_converter.run()
+
+    # This is executed when you want to run list expansions
+    # on the manually added file
+    elif account_type == "manually_added":
+        lists_handler.manual_list_expansion()
+
     else:
         lists_handler.perform_list_expansion()
 

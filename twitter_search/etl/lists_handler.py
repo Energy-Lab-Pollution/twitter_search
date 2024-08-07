@@ -42,20 +42,31 @@ class ListsHandler:
         Args:
             count (int): The current iteration count.
         """
-        self.paths = {
-            "input_file_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_users_filtered_1.json",
-            "output_file_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists.json",
-            "input_file_filter_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists.json",
-            "output_file_filter_lists": self.base_dir
-            / f"{self.location}_{self.account_type}_lists_filtered.json",
-            "output_file_total": self.base_dir
-            / f"{self.location}_{self.account_type}_expanded_users.json",
-            "output_file_filter_total": self.base_dir
-            / f"{self.location}_{self.account_type}_expanded_users_filtered.json",
-        }
+        if self.account_type == "manually_added":
+            self.paths = {
+                "output_file_filter_lists": self.base_dir
+                / f"{self.account_type}_lists.json",
+                "output_file_total": self.base_dir
+                / f"{self.account_type}_expanded_users.json",
+                "output_file_filter_total": self.base_dir
+                / f"{self.account_type}_expanded_users_filtered.json",
+            }
+
+        else:
+            self.paths = {
+                "input_file_lists": self.base_dir
+                / f"{self.location}_{self.account_type}_users_filtered_1.json",
+                "output_file_lists": self.base_dir
+                / f"{self.location}_{self.account_type}_lists.json",
+                "input_file_filter_lists": self.base_dir
+                / f"{self.location}_{self.account_type}_lists.json",
+                "output_file_filter_lists": self.base_dir
+                / f"{self.location}_{self.account_type}_lists_filtered.json",
+                "output_file_total": self.base_dir
+                / f"{self.account_type}_expanded_users.json",
+                "output_file_filter_total": self.base_dir
+                / f"{self.location}_{self.account_type}_expanded_users_filtered.json",
+            }
 
     def filter_users(self):
         """
@@ -148,6 +159,20 @@ class ListsHandler:
             print(f" =============== CITY: {city} ======================")
             self.location = city
             self.list_expansion_all_account_types()
+
+    def manual_list_expansion(self):
+        """
+        This function performs the list expansion for a
+        manually added file
+        """
+
+        user_getter = UserGetter(
+            self.location,
+            self.paths["output_file_filter_lists"],
+            self.paths["output_file_total"],
+            self.paths["output_file_filter_total"],
+        )
+        user_getter.get_users()
 
     def filter_twitter_lists(self):
         """

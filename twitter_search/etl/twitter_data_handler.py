@@ -124,7 +124,7 @@ class TwitterDataHandler:
 
         self.filter_users()
 
-        if not self.user_filter.filtered_user:
+        if not self.user_filter.filtered_users:
             print("No relevant users were found.")
             return
 

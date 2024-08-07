@@ -16,7 +16,6 @@ class TweetProcessor:
         self.output_file = output_file
         self.STATE_CAPITALS = constants.STATE_CAPITALS
 
-    @staticmethod
     def get_coordinates(self, location):
         """
         Get the latitude and longitude coordinates of a location.

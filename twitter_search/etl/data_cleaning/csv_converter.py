@@ -85,11 +85,19 @@ class CSVConverter:
         self.user_files = [
             file
             for file in self.filtered_files
-            if "users" in file.lower() and "filtered" in file.lower()
+            if "users" in file.lower()
+            and "filtered" in file.lower()
+            and "expanded" not in file.lower()
         ]
 
         self.list_files = [
             file for file in self.filtered_files if "list" in file.lower()
+        ]
+
+        self.expanded_user_files = [
+            file
+            for file in self.filtered_files
+            if "expanded" in file.lower() and "filtered" in file.lower()
         ]
 
     @staticmethod
@@ -257,7 +265,10 @@ class CSVConverter:
             input_file = self.RAW_DATA_PATH / file
             input_df = self.convert_lists_to_df(input_file)
 
-            if self.file_type_column[file_type] in input_df.columns:
+            if self.location == "manually_added":
+                df = pd.concat([df, input_df], ignore_index=True)
+
+            elif self.file_type_column[file_type] in input_df.columns:
                 df = pd.concat([df, input_df], ignore_index=True)
 
                 print(f"Data loaded successfully from {file}")
@@ -265,6 +276,53 @@ class CSVConverter:
         df.loc[:, "search_location"] = self.location
 
         return df
+
+    def parse_user_df(self, user_type):
+        """
+        Pre-processes, parses and savees the users dataframe
+
+        Args:
+            - user_type: can either be "normal" or "expanded"
+
+        Note that the expanded users were obtained via list expansion
+        """
+
+        if user_type == "normal":
+            user_df = self.concat_user_dataframes(
+                self.user_files, file_type="user"
+            )
+            expanded = False
+            filename = f"{self.location}_unique_users.csv"
+            unique_filename = f"{self.location}_user_data.csv"
+        else:
+            user_df = self.concat_user_dataframes(
+                self.expanded_user_files, file_type="user"
+            )
+            expanded = True
+            filename = f"{self.location}_expanded_unique_users.csv"
+            unique_filename = f"{self.location}_expanded_user_data.csv"
+
+        # Drop columns that are not needed
+        # Get the user URL
+        user_df.dropna(subset=["user_id"], inplace=True)
+        user_df.dropna(subset=["content_is_relevant"], inplace=True)
+        user_df.loc[:, "user_url"] = user_df["username"].apply(
+            lambda x: self.create_user_url(x)
+        )
+        user_df.loc[:, "list_expansion"] = expanded
+
+        unique_users = user_df.drop_duplicates(subset=["user_id"])
+        unique_users.to_csv(
+            self.CLEAN_DATA_PATH / unique_filename,
+            index=False,
+            encoding="utf-8-sig",
+        )
+
+        user_df.to_csv(
+            self.CLEAN_DATA_PATH / filename,
+            index=False,
+            encoding="utf-8-sig",
+        )
 
     def run(self):
         """
@@ -280,33 +338,12 @@ class CSVConverter:
             None
         """
         if self.user_files:
-            user_df = self.concat_user_dataframes(
-                self.user_files, file_type="user"
-            )
-            # Drop columns that are not needed
-            # Get the user URL
-            user_df.dropna(subset=["user_id"], inplace=True)
-            user_df.dropna(subset=["content_is_relevant"], inplace=True)
-            user_df.loc[:, "user_url"] = user_df["username"].apply(
-                lambda x: self.create_user_url(x)
-            )
+            self.parse_user_df(user_type="normal")
+            print(f"Normal users found for {self.location}")
 
-            unique_users = user_df.drop_duplicates(subset=["user_id"])
-            unique_users.to_csv(
-                self.CLEAN_DATA_PATH / f"{self.location}_unique_users.csv",
-                index=False,
-                encoding="utf-8-sig",
-            )
-
-            user_df.to_csv(
-                self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv",
-                index=False,
-                encoding="utf-8-sig",
-            )
-            print(f"User data saved successfully for {self.location}")
-
-        else:
-            print(f"No user data found for {self.location}")
+        if self.expanded_user_files:
+            self.parse_user_df(user_type="expanded")
+            print(f"Expanded users found for {self.location}")
 
         if self.list_files:
             list_df = self.concat_list_dataframes(
