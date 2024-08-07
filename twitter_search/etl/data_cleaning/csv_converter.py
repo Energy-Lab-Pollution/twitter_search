@@ -274,7 +274,7 @@ class CSVConverter:
 
     def parse_user_df(self, user_type):
         """
-        Pre-processes and parses the users dataframe
+        Pre-processes, parses and savees the users dataframe
 
         Args:
             - user_type: can either be "normal" or "expanded"
@@ -287,11 +287,16 @@ class CSVConverter:
                 self.user_files, file_type="user"
             )
             expanded = False
+            filename = f"{self.location}_unique_users.csv"
+            unique_filename = f"{self.location}_user_data.csv"
         else:
             user_df = self.concat_user_dataframes(
                 self.expanded_user_files, file_type="user"
             )
             expanded = True
+            filename = f"{self.location}_expanded_unique_users.csv"
+            unique_filename = f"{self.location}_expanded_user_data.csv"
+
         # Drop columns that are not needed
         # Get the user URL
         user_df.dropna(subset=["user_id"], inplace=True)
@@ -303,13 +308,13 @@ class CSVConverter:
 
         unique_users = user_df.drop_duplicates(subset=["user_id"])
         unique_users.to_csv(
-            self.CLEAN_DATA_PATH / f"{self.location}_unique_users.csv",
+            self.CLEAN_DATA_PATH / unique_filename,
             index=False,
             encoding="utf-8-sig",
         )
 
         user_df.to_csv(
-            self.CLEAN_DATA_PATH / f"{self.location}_user_data.csv",
+            self.CLEAN_DATA_PATH / filename,
             index=False,
             encoding="utf-8-sig",
         )
