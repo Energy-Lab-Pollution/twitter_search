@@ -51,7 +51,9 @@ class TwitterDataHandler:
         """
         account_types = self.QUERIES
         for account_type in account_types:
-            print(f" =============== PROCESSING: {account_type} ======================")
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
             self.account_type = account_type
             self.run()
 
@@ -211,6 +213,8 @@ class TwitterDataHandler:
         """
         account_types = self.QUERIES
         for account_type in account_types:
-            print(f" =============== PROCESSING: {account_type} ======================")
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
             self.account_type = account_type
             self.reclassify_users()
