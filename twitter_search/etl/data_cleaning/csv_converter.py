@@ -92,6 +92,12 @@ class CSVConverter:
             file for file in self.filtered_files if "list" in file.lower()
         ]
 
+        self.expanded_user_files = [
+            file
+            for file in self.json_files
+            if "expanded" in file.lower() and "filtered" in file.lower()
+        ]
+
     @staticmethod
     def flatten_and_remove_empty(input_list):
         """
