@@ -85,7 +85,9 @@ class CSVConverter:
         self.user_files = [
             file
             for file in self.filtered_files
-            if "users" in file.lower() and "filtered" in file.lower()
+            if "users" in file.lower()
+            and "filtered" in file.lower()
+            and "expanded" not in file.lower()
         ]
 
         self.list_files = [
@@ -263,7 +265,10 @@ class CSVConverter:
             input_file = self.RAW_DATA_PATH / file
             input_df = self.convert_lists_to_df(input_file)
 
-            if self.file_type_column[file_type] in input_df.columns:
+            if self.location == "manually_added":
+                df = pd.concat([df, input_df], ignore_index=True)
+
+            elif self.file_type_column[file_type] in input_df.columns:
                 df = pd.concat([df, input_df], ignore_index=True)
 
                 print(f"Data loaded successfully from {file}")
@@ -336,12 +341,9 @@ class CSVConverter:
             self.parse_user_df(user_type="normal")
             print(f"Normal users found for {self.location}")
 
-        elif self.expanded_user_files:
+        if self.expanded_user_files:
             self.parse_user_df(user_type="expanded")
             print(f"Expanded users found for {self.location}")
-
-        else:
-            print(f"No user data found for {self.location}")
 
         if self.list_files:
             list_df = self.concat_list_dataframes(
