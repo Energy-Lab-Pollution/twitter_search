@@ -56,13 +56,6 @@ def main():
     if args.skip_media:
         skip_media = strtobool(args.skip_media)
 
-    if args.num_iterations:
-        print(
-            f"""Running search  for {location} and {account_type} account type"""
-        )
-        num_iterations = args.num_iterations
-        twitter_data_handler.num_iterations = num_iterations
-
     if args.account_type == "all":
         if args.location == "all":
             if args.skip_media:

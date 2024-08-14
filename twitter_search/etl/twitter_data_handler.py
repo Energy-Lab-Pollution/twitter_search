@@ -140,6 +140,10 @@ class TwitterDataHandler:
 
         self.filter_users()
 
+        if not hasattr(self.user_filter, "filtered_users"):
+            print("No relevant users were found.")
+            return
+
         if not self.user_filter.filtered_users:
             print("No relevant users were found.")
             return
