@@ -43,7 +43,7 @@ def main():
         "--skip_media",
         type=str,
         help="Specify if the media accounts should be skipped",
-        options=["True", "False"],
+        choices=["True", "False"],
     )
 
     args = parser.parse_args()
@@ -79,7 +79,6 @@ def main():
                 twitter_data_handler.run_all_account_types(skip_media)
             else:
                 twitter_data_handler.run_all_account_types()
-            twitter_data_handler.run_all_account_types()
             csv_converter = CSVConverter(args.location)
             csv_converter.run()
     else:
