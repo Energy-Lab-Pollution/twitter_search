@@ -34,22 +34,38 @@ class TwitterDataHandler:
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
 
-    def run_all_locations_accounts(self):
+    def run_all_locations_accounts(self, skip_media=False):
         """
         Runs the entire process for all the available locations
         and cities
+
+        Args
+        ----------
+            skip_media: str
+            Determines if we should skip the search for media accounts
+            (there are tons of them)
+
         """
         for city in CITIES:
             print(f" =============== CITY: {city} ======================")
             self.location = city
-            self.run_all_account_types()
+            self.run_all_account_types(skip_media)
 
-    def run_all_account_types(self):
+    def run_all_account_types(self, skip_media=False):
         """
         Runs the entire process for all the available
         account types for a particular location.
+
+        Args
+        ----------
+            skip_media: str
+            Determines if we should skip the search for media accounts
+            (there are tons of them)
+
         """
         account_types = self.QUERIES
+        if skip_media:
+            del account_types["media"]
         for account_type in account_types:
             print(
                 f" =============== PROCESSING: {account_type} ======================"
@@ -123,6 +139,10 @@ class TwitterDataHandler:
         # self.get_extra_tweets()
 
         self.filter_users()
+
+        if not hasattr(self.user_filter, "filtered_users"):
+            print("No relevant users were found.")
+            return
 
         if not self.user_filter.filtered_users:
             print("No relevant users were found.")

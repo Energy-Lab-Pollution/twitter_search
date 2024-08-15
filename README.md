@@ -45,7 +45,7 @@ python3 twitter_search location(str) industry_type(str) --num_interations (int)
 For example:
 
 ```bash
-python3 twitter_search "Kolkata" "media" --num_iterations 1
+python3 twitter_search "Kolkata" "media"
 ```
 
 gets users from Kolkata in the media industry (note that you do not need to use the quotation marks). The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.
@@ -73,7 +73,21 @@ If you want to get all the account types for a given location, you can use the f
 ```bash
 python3 twitter_search "Kolkata" "all"
 ```
+
 Which will output all the account types for the given location (in this case, Kolkata). This will also generate the corresponding csv file for "Kolkata".
+
+
+### For a given location, get all the account types at once, but skip _media_ account type.
+
+During the project, we found that the _media_ account type outputs the most number of accounts, but it also captures a lot of irrelevant users. Therefore, to save resources and Twitter API calls, we added a skip_media parameter.
+
+If you want to get all the account types for a given location, but skip the _media_ account type, you can use the following command:
+
+```bash
+python3 twitter_search "Kolkata" "all" --skip_media "True"
+```
+
+Which will output all the account types for the given location (in this case, Kolkata), but skip the _media_ account type. This will also generate the corresponding csv file for "Kolkata".
 
 
 ## For all locations, get all the account types at once
@@ -82,6 +96,11 @@ If you want to get all the account types for all locations, you can use the foll
 
 ```bash
 python3 twitter_search "all" "all"
+```
+Note that you can also use the `--skip_media` parameter for this command.
+
+```bash
+python3 twitter_search "all" "all" --skip_media "True"
 ```
 
 ## Get more users by using list expansion.

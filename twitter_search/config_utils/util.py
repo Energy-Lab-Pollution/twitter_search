@@ -50,10 +50,10 @@ def strtobool(val):
     'val' is anything else.
     """
     val = val.lower()
-    if val in ("y", "yes", "t", "true", "on", "1"):
-        return 1
-    elif val in ("n", "no", "f", "false", "off", "0"):
-        return 0
+    if val in ("y", "yes", "t", "true", "True", "on", "1"):
+        return True
+    elif val in ("n", "no", "f", "false", "False", "off", "0"):
+        return False
     else:
         raise ValueError("invalid truth value %r" % (val,))
 
