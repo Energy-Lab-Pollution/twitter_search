@@ -45,7 +45,7 @@ python3 twitter_search location(str) industry_type(str) --num_interations (int)
 For example:
 
 ```bash
-python3 twitter_search "Kolkata" "media" --num_iterations 1
+python3 twitter_search "Kolkata" "media"
 ```
 
 gets users from Kolkata in the media industry (note that you do not need to use the quotation marks). The optional argument number of iterations tells the script how many snowballing iterations are needed. Each iteration fetches lists, gets all users from the lists and filters the users based on location and content relevance.
