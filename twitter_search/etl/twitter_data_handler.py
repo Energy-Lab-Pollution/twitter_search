@@ -65,7 +65,8 @@ class TwitterDataHandler:
         """
         account_types = self.QUERIES
         if skip_media:
-            del account_types["media"]
+            if "media" in account_types:
+                del account_types["media"]
         for account_type in account_types:
             print(
                 f" =============== PROCESSING: {account_type} ======================"
