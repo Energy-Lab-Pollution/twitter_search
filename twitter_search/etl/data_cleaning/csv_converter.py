@@ -293,13 +293,13 @@ class CSVConverter:
             )
             expanded = False
             filename = f"{self.location}_user_data.csv"
-            unique_filename = f"{self.location}_unique_filename.csv"
+            unique_filename = f"{self.location}_unique_users.csv"
         else:
             user_df = self.concat_user_dataframes(
                 self.expanded_user_files, file_type="user"
             )
             expanded = True
-            filename = f"{self.location}_expanded_users_filename.csv"
+            filename = f"{self.location}_expanded_user_data.csv"
             unique_filename = f"{self.location}_expanded_unique_user.csv"
 
         # Drop columns that are not needed
