@@ -292,15 +292,15 @@ class CSVConverter:
                 self.user_files, file_type="user"
             )
             expanded = False
-            filename = f"{self.location}_unique_users.csv"
-            unique_filename = f"{self.location}_user_data.csv"
+            filename = f"{self.location}_user_data.csv"
+            unique_filename = f"{self.location}_unique_users.csv"
         else:
             user_df = self.concat_user_dataframes(
                 self.expanded_user_files, file_type="user"
             )
             expanded = True
-            filename = f"{self.location}_expanded_unique_users.csv"
-            unique_filename = f"{self.location}_expanded_user_data.csv"
+            filename = f"{self.location}_expanded_user_data.csv"
+            unique_filename = f"{self.location}_expanded_unique_user.csv"
 
         # Drop columns that are not needed
         # Get the user URL

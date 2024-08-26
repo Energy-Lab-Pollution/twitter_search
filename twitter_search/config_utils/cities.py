@@ -12,3 +12,6 @@ CITIES = [
     "phuket",
     "mumbai",
 ]
+
+
+PILOT_CITIES = ["chiang mai", "kigali", "kanpur", "kolkata"]
