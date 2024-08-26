@@ -11,7 +11,7 @@ QUERIES = {
     "policymaker": """(member of parliament OR minister OR magistrate OR
                     District magistrate OR IAS OR officer OR cabinet OR mayor
                     OR councillor OR localgovernment OR city official OR MLA OR MP)
-                    (location OR location government  OR location council OR location 
+                    (location OR location government  OR location council OR location
                     municipality) (#MP OR #MLA OR #cabinet OR #minister
                     OR #secretary OR #IAS OR #IPS) -is:retweet""",
     "politicians": """(politics OR politicians) (location
