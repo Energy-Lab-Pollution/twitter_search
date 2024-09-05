@@ -20,10 +20,11 @@ QUERIES = {
                     OR (environmental researcher) OR health OR science OR academic
                     OR research OR university) (#science OR #research OR #academic))
                     -is:retweet""",
-    "environment": """(air pollution location OR location air
-                    OR location pollution OR location public health
-                    OR bad air location OR location asthma OR location
-                    polluted OR pollution control board OR location smog)
+    "environment": """((air pollution location) OR (location air)
+                    OR (location pollution) OR (location public health)
+                    OR (bad air location) OR (location asthma) OR (location
+                    polluted) OR (pollution control board) OR (location smog)
+                    OR (air quality location))
                     (#pollution OR #environment OR #cleanair OR #airquality
                     # OR #smog) -is:retweet""",
 }
