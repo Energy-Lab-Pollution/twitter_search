@@ -2,14 +2,15 @@
 This script will upload the resulting files to AWS
 """
 
-# Local imports
-from config_utils.constants import BUCKET_NAME, REGION_NAME
-
 import logging
 
 # Global imports
 import boto3
 import botocore
+
+# Local imports
+from config_utils.constants import BUCKET_NAME, REGION_NAME
+
 
 # Set logger
 logger = logging.getLogger()
