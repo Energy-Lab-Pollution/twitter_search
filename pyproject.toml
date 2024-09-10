@@ -17,6 +17,8 @@ transformers = "^4.40.2"
 torch = "^2.3.0"
 geopy = "^2.4.1"
 tqdm = "^4.66.4"
+boto3 = "^1.35.15"
+botocore = "^1.35.15"
 
 [build-system]
 requires = ["poetry-core"]

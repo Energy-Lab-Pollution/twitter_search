@@ -1,29 +1,22 @@
 # QUERY DICTIONARY
 QUERIES = {
-    "media": """(location)(media OR press OR coverage OR broadcasting
-                OR alert OR breaking OR journalism OR journalist
-                OR local OR news OR patrika)
-                        -is:retweet""",
-    "organizations": """(NGO location OR organization location
-                       OR non-profit location OR location OR location institution OR
-                       non-governmental organization)
-                       (#non-profit OR #NGO OR #NPO) -is:retweet""",
-    "policymaker": """(member of parliament OR governor OR minister OR magistrate OR
-                    District magistrate OR IAS OR officer OR cabinet OR mayor
-                    OR councillor OR localgovernment OR city official OR MLA OR MP)
-                    (location OR location government  OR location council OR location
-                    municipality) (#MP OR #MLA OR #cabinet OR #minister
-                    OR #secretary OR #IAS OR #IPS) -is:retweet""",
-    "politicians": """(politics OR politicians) (location
-                    OR location politics OR location government)
-                    (#politics OR #politician OR #election) -is:retweet""",
-    "researcher": """location ((public health) OR (environmental research)
-                    OR (environmental researcher) OR health OR science OR academic
-                    OR research OR university) (#science OR #research OR #academic)
+    "media": """location (media OR press OR coverage OR broadcasting
+                OR breaking news OR journalism OR journalist
+                OR local OR news OR patrika) -is:retweet""",
+    "organizations": """((NGO location) OR (organization location)
+                       OR (non-profit location) OR (location institution) OR
+                       (non-governmental organization location) OR (nonprofit location))
+                       -is:retweet""",
+    "policymaker": """location ((member of parliament) OR governor OR minister
+                    OR magistrate OR (district magistrate) OR IAS OR officer
+                    OR cabinet OR mayor OR councillor OR (local government)
+                    OR (city official) OR (MLA) OR (MP) OR governmment OR municipality)
                     -is:retweet""",
-    "environment": """(air pollution location OR location air
-            OR location pollution OR location public health
-            OR bad air location OR location asthma OR location
-            polluted OR pollution control board) (#pollution OR #environment
-            OR #cleanair OR #airquality) -is:retweet""",
+    "politicians": """location (politics OR politicians OR politician) -is:retweet""",
+    "researcher": """location ((environmental research) OR (environmental researcher)
+                    OR science OR academic OR research OR university)
+                    -is:retweet""",
+    "environment": """location ((air pollution) OR pollution OR (public health)
+                OR (poor air) OR asthma OR polluted OR (pollution control board)
+                OR smog OR (air quality)) -is:retweet""",
 }

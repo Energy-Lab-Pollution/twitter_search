@@ -20,12 +20,12 @@ class TweetProcessor:
         """
         Get the latitude and longitude coordinates of a location.
         """
-        if location is None:
-            return (None, None)
-            # Geocode the location using Geopy
-        else:
-            lat, lng = util.geocode_address(location, self.geolocator)
-            return (lat, lng)
+        # if location is None:
+        return (None, None)
+        # Geocode the location using Geopy
+        # else:
+        #     lat, lng = util.geocode_address(location, self.geolocator)
+        #     return (lat, lng)
 
     def process_tweets_for_users(self):
         """

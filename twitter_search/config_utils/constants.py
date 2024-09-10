@@ -12,6 +12,10 @@ from pathlib import Path
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
 
+# S3 Constants
+BUCKET_NAME = "global-rct-users"
+REGION_NAME = "us-west-1"
+
 # Construct the path to the cleaned_data directory
 RAW_DATA_PATH = project_root / "data" / "raw_data"
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
