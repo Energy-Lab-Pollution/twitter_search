@@ -11,6 +11,7 @@ from pathlib import Path
 import boto3
 import botocore
 
+
 # Local imports
 BUCKET_NAME = "global-rct-users"
 REGION_NAME = "us-west-1"
@@ -61,9 +62,9 @@ def upload_directory(directory_path):
 
 
 if __name__ == "__main__":
-
     raw_dir = Path(__file__).parent.parent.parent / "data/raw_data"
     clean_dir = Path(__file__).parent.parent.parent / "data/cleaned_data"
 
     upload_directory(raw_dir)
+    time.sleep(2)
     upload_directory(clean_dir)
