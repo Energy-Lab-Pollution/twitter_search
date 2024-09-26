@@ -68,7 +68,7 @@ USER_FIELDS = [
 # TODO change the labels to more relevant stuff.
 RELEVANT_LABELS = [
     "environment or pollution",
-    "research",
+    "environmental research",
     "politics",
     "policymaker",
     "nonprofit organization",
