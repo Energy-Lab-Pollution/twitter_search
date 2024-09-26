@@ -72,6 +72,7 @@ RELEVANT_LABELS = [
     "politics",
     "policymaker",
     "nonprofit organization",
+    "other"
 ]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
 # Dictionary mapping Indian state capitals to their respective states
