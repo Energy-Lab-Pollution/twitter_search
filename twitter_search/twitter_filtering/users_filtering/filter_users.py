@@ -140,16 +140,20 @@ class UserFilter:
             classification = self.classifier(
                 user["token"], candidate_labels=self.RELEVANT_LABELS
             )
+
+            max_score = max(classification["scores"])
+
             relevant_labels = [
                 label
                 for label, score in zip(
                     classification["labels"], classification["scores"]
                 )
-                if score > self.SCORE_THRESHOLD
+                if score == max_score
             ]
 
-            user["content_is_relevant"] = bool(relevant_labels)
-            user["content_labels"] = relevant_labels
+
+            user["content_is_relevant"] = False if relevant_labels == "other" else True
+            user["content_labels"] = relevant_labels[0]
 
         except Exception as error:
             print(f"Error classifying user: {error}")
