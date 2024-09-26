@@ -67,13 +67,10 @@ USER_FIELDS = [
 
 # TODO change the labels to more relevant stuff.
 RELEVANT_LABELS = [
-    "pollution",
-    "environment",
-    "public health",
-    "climate",
+    "environment or pollution",
     "research",
     "politics",
-    "policy maker",
+    "policymaker",
     "nonprofit organization",
 ]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
