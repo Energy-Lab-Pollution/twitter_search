@@ -68,19 +68,6 @@ class ListsHandler:
                 / f"{self.location}_{self.account_type}_expanded_users_filtered.json",
             }
 
-    def filter_users(self):
-        """
-        Filter Twitter users based on location and
-        relevance.
-        """
-        print("Filtering Twitter users based on location...")
-        self.user_filter = UserFilter(
-            self.location,
-            self.paths["input_file_filter"],
-            self.paths["output_file_filter"],
-        )
-        self.user_filter.run_filtering()
-
     def perform_list_expansion(self):
         """
         Handle the lists associated with the filtered users.
@@ -187,3 +174,26 @@ class ListsHandler:
             list_filter.keep_relevant_lists()
         else:
             print("No lists found")
+
+    def reclassify_users(self):
+        """
+        Reclassify expanded twitter users.
+        """
+        print("Reclassifying expanded users based on location...")
+        self.setup_file_paths()
+        self.user_filter = UserFilter(
+            self.location,
+            self.paths["output_file_total"],
+            self.paths["output_file_filter_total"],
+        )
+        self.user_filter.run_filtering()
+
+    def reclassify_all_locations_accounts(self):
+        """
+        Runs the entire process for all the available locations
+        and cities
+        """
+        for city in CITIES:
+            print(f" =============== CITY: {city} ======================")
+            self.location = city
+            self.reclassify_users()
