@@ -111,29 +111,7 @@ class ListsHandler:
 
             # Set account types and paths accordingly
             self.account_type = account_type
-
-            self.paths["input_file_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists.json"
-            )
-            self.paths["output_file_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists.json"
-            )
-
-            self.paths["input_file_filter_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists_filtered.json"
-            )
-            self.paths["output_file_filter_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists_filtered.json"
-            )
-            self.paths["output_file_total"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_all_expanded_users.json"
-            )
-
+            self.setup_file_paths()
             self.perform_list_expansion()
 
     def list_expansion_all_locations(self):
@@ -196,4 +174,16 @@ class ListsHandler:
         for city in CITIES:
             print(f" =============== CITY: {city} ======================")
             self.location = city
+            self.reclassify_all_accounts()
+
+    def reclassify_all_accounts(self):
+        """
+        Performs the re-classification process fir all accounts
+        """
+        account_types = self.QUERIES
+        for account_type in account_types:
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
+            self.account_type = account_type
             self.reclassify_users()
