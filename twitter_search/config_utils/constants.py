@@ -69,10 +69,10 @@ USER_FIELDS = [
 RELEVANT_LABELS = [
     "environment or pollution",
     "environmental research",
-    "politics",
-    "policymaker",
+    "politician or policymaker",
     "nonprofit organization",
-    "other"
+    "news outlet or journalist",
+    "other",
 ]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
 # Dictionary mapping Indian state capitals to their respective states
