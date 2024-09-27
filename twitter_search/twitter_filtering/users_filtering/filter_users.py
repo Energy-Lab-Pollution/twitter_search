@@ -151,8 +151,8 @@ class UserFilter:
                 if score == max_score
             ]
 
-
-            user["content_is_relevant"] = False if relevant_labels == "other" else True
+            user["content_is_relevant"] = (False if relevant_labels[0] == "other"
+                                           else True)
             user["content_labels"] = relevant_labels[0]
 
         except Exception as error:
