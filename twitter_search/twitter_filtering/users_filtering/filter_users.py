@@ -39,6 +39,7 @@ class UserFilter:
             constants.HUGGINGFACE_PIPELINE,
             model=constants.HUGGINGFACE_MODEL,
             device=device,
+            batch_size=constants.BATCH_SIZE
         )
         # TODO, based on location, select the appropriate shape file.
         self.shapefile_path = (
