@@ -34,14 +34,12 @@ class UserFilter:
         self.input_file = input_file
         self.output_file = output_file
 
-
         # Setting up NLP classifier
         device = 0 if torch.cuda.is_available() else -1
         self.classifier = pipeline(
             constants.HUGGINGFACE_PIPELINE,
             model=constants.HUGGINGFACE_MODEL,
             device=device,
-            batch_size=self.BATCH_SIZE
         )
         # TODO, based on location, select the appropriate shape file.
         self.shapefile_path = (
@@ -165,31 +163,31 @@ class UserFilter:
 
         return user
 
-    def classify_users_in_batches(self, users):
+    def classify_users_in_batches(self, users, batch_size):
         """
-        Batches the eusers for later processing
+        Batches the users for later processing
         """
 
-        tokens = [user["token"] for user in tokens]
+        tokens = [user["token"] for user in users]
         results = []
 
-        for index in tqdm(range(0, len(tokens), self.BATCH_SIZE)):
-            batch_tokens = tokens[index: index + self.BATCH_SIZE]
+        for index in tqdm(range(0, len(tokens), batch_size)):
+            batch_tokens = tokens[index: index + batch_size]
             try:
                 classifications = self.classifier(
                     batch_tokens,
                     candidate_labels=self.RELEVANT_LABELS,
-                    batch_size=self.BATCH_SIZE,
+                    batch_size=batch_size,
                     truncation=True
                 )
             except Exception as error:
                 print(f"Error during batch classification {error}")
-                for user in users[index: index + self.BATCH_SIZE]:
+                for user in users[index: index + batch_size]:
                     user["content_is_relevant"] = False
                     user["content_labels"] = []
                 continue
 
-            for user, classification in zip(users[index: index + self.BATCH_SIZE],
+            for user, classification in zip(users[index: index + batch_size],
                                             classifications):
                 try:
                     max_score = max(classification["scores"])
@@ -247,8 +245,8 @@ class UserFilter:
             map(self.add_token_field, self.unclassified_users)
         )
 
-        self.unclassified_users = self.classify_users_concurrently(
-            self.unclassified_users
+        self.unclassified_users = self.classify_users_in_batches(
+            self.unclassified_users, batch_size=self.BATCH_SIZE
         )
 
     def determine_location_relevance(self):
@@ -381,11 +379,11 @@ class UserFilter:
                     step 3 done"""
             )
 
-            if self.location in self.STATE_CAPITALS:
-                self.determine_location_relevance()
-                print(f"relevant users for {self.location} tagged step 4 done")
-            else:
-                print(f"Location {self.location} not found in STATE_CAPITALS")
+            # if self.location in self.STATE_CAPITALS:
+            #     self.determine_location_relevance()
+            #     print(f"relevant users for {self.location} tagged step 4 done")
+            # else:
+            #     print(f"Location {self.location} not found in STATE_CAPITALS")
 
             # Paste both classified and unclassified users
             self.all_users = []
