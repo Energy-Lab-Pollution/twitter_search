@@ -123,7 +123,6 @@ class ListsHandler:
         for city in self.CITIES:
             print(f" =============== CITY: {city} ======================")
             self.location = city
-            print(self.paths)
             self.list_expansion_all_account_types()
 
     def manual_list_expansion(self):
@@ -178,13 +177,22 @@ class ListsHandler:
             self.location = city
             self.reclassify_all_accounts()
 
+        self.reclassify_manually_added_accounts()
+
+    def reclassify_manually_added_accounts(self):
+        """
+        Performs the re-classification process for the manually_added accounts
+        """
+
+        self.account_type = "manually_added"
+        self.reclassify_users()
+
     def reclassify_all_accounts(self):
         """
-        Performs the re-classification process fir all accounts
+        Performs the re-classification process for all accounts
         """
-        account_types = list(self.QUERIES.keys())
+        account_types = self.QUERIES
         # Added manually added account types
-        account_types.append('manually_added')
         for account_type in account_types:
             print(
                 f" =============== PROCESSING: {account_type} ======================"
