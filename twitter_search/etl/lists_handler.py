@@ -63,7 +63,7 @@ class ListsHandler:
                 "output_file_filter_lists": self.base_dir
                 / f"{self.location}_{self.account_type}_lists_filtered.json",
                 "output_file_total": self.base_dir
-                / f"{self.account_type}_expanded_users.json",
+                / f"{self.location}_{self.account_type}_expanded_users.json",
                 "output_file_filter_total": self.base_dir
                 / f"{self.location}_{self.account_type}_expanded_users_filtered.json",
             }
@@ -123,6 +123,7 @@ class ListsHandler:
         for city in self.CITIES:
             print(f" =============== CITY: {city} ======================")
             self.location = city
+            print(self.paths)
             self.list_expansion_all_account_types()
 
     def manual_list_expansion(self):
@@ -159,12 +160,13 @@ class ListsHandler:
         """
         print("Reclassifying expanded users based on location...")
         self.setup_file_paths()
+        print(self.paths)
         self.user_filter = UserFilter(
             self.location,
             self.paths["output_file_total"],
             self.paths["output_file_filter_total"],
         )
-        self.user_filter.run_filtering()
+        self.user_filter.reclassify_all_users()
 
     def reclassify_all_locations_accounts(self):
         """
