@@ -17,6 +17,10 @@ from transformers import pipeline
 
 class UserFilter:
     SCORE_THRESHOLD = constants.SCORE_THRESHOLD
+    RELEVANT_LABELS = constants.RELEVANT_LABELS
+    STATE_CAPITALS = constants.STATE_CAPITALS
+    NUM_WORKERS = constants.NUM_WORKERS
+    BATCH_SIZE = constants.BATCH_SIZE
 
     def __init__(self, location, input_file, output_file):
         """
@@ -27,11 +31,9 @@ class UserFilter:
         """
 
         self.location = location
-        self.RELEVANT_LABELS = constants.RELEVANT_LABELS
         self.input_file = input_file
         self.output_file = output_file
-        self.STATE_CAPITALS = constants.STATE_CAPITALS
-        self.NUM_WORKERS = constants.NUM_WORKERS
+
 
         # Setting up NLP classifier
         device = 0 if torch.cuda.is_available() else -1
@@ -39,7 +41,7 @@ class UserFilter:
             constants.HUGGINGFACE_PIPELINE,
             model=constants.HUGGINGFACE_MODEL,
             device=device,
-            batch_size=constants.BATCH_SIZE
+            batch_size=self.BATCH_SIZE
         )
         # TODO, based on location, select the appropriate shape file.
         self.shapefile_path = (
@@ -162,6 +164,55 @@ class UserFilter:
             user["content_labels"] = []
 
         return user
+
+    def classify_users_in_batches(self, users):
+        """
+        Batches the eusers for later processing
+        """
+
+        tokens = [user["token"] for user in tokens]
+        results = []
+
+        for index in tqdm(range(0, len(tokens), self.BATCH_SIZE)):
+            batch_tokens = tokens[index: index + self.BATCH_SIZE]
+            try:
+                classifications = self.classifier(
+                    batch_tokens,
+                    candidate_labels=self.RELEVANT_LABELS,
+                    batch_size=self.BATCH_SIZE,
+                    truncation=True
+                )
+            except Exception as error:
+                print(f"Error during batch classification {error}")
+                for user in users[index: index + self.BATCH_SIZE]:
+                    user["content_is_relevant"] = False
+                    user["content_labels"] = []
+                continue
+
+            for user, classification in zip(users[index: index + self.BATCH_SIZE],
+                                            classifications):
+                try:
+                    max_score = max(classification["scores"])
+                    relevant_labels = [
+                        label
+                        for label, score in zip(
+                            classification["labels"], classification["scores"]
+                        )
+                        if score == max_score
+                    ]
+
+                    user["content_is_relevant"] = (
+                        False if relevant_labels[0] == "other" else True
+                    )
+                    user["content_labels"] = relevant_labels[0]
+                except Exception as e:
+                    print(f"Error processing classification for a user: {e}")
+                    user["content_is_relevant"] = False
+                    user["content_labels"] = []
+
+                results.append(user)
+
+        return results
 
     def classify_users_concurrently(self, users):
         """
