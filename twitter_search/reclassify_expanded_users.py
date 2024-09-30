@@ -1,5 +1,5 @@
 """
-Main function to run the List Expansion collection process.
+Script that runs the reclassification process for the expanded accounts
 """
 
 from argparse import ArgumentParser

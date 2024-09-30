@@ -180,7 +180,9 @@ class ListsHandler:
         """
         Performs the re-classification process fir all accounts
         """
-        account_types = self.QUERIES
+        account_types = list(self.QUERIES.keys())
+        # Added manually added account types
+        account_types.append('manually_added')
         for account_type in account_types:
             print(
                 f" =============== PROCESSING: {account_type} ======================"
