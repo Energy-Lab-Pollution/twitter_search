@@ -159,7 +159,6 @@ class ListsHandler:
         """
         print("Reclassifying expanded users based on location...")
         self.setup_file_paths()
-        print(self.paths)
         self.user_filter = UserFilter(
             self.location,
             self.paths["output_file_total"],
