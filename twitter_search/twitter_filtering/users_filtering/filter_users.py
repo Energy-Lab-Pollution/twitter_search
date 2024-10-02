@@ -152,8 +152,9 @@ class UserFilter:
                 if score == max_score
             ]
 
-            user["content_is_relevant"] = (False if relevant_labels[0] == "other"
-                                           else True)
+            user["content_is_relevant"] = (
+                False if relevant_labels[0] == "other" else True
+            )
             user["content_labels"] = relevant_labels[0]
 
         except Exception as error:
@@ -172,23 +173,24 @@ class UserFilter:
         results = []
 
         for index in tqdm(range(0, len(tokens), batch_size)):
-            batch_tokens = tokens[index: index + batch_size]
+            batch_tokens = tokens[index : index + batch_size]
             try:
                 classifications = self.classifier(
                     batch_tokens,
                     candidate_labels=self.RELEVANT_LABELS,
                     batch_size=batch_size,
-                    truncation=True
+                    truncation=True,
                 )
             except Exception as error:
                 print(f"Error during batch classification {error}")
-                for user in users[index: index + batch_size]:
+                for user in users[index : index + batch_size]:
                     user["content_is_relevant"] = False
                     user["content_labels"] = []
                 continue
 
-            for user, classification in zip(users[index: index + batch_size],
-                                            classifications):
+            for user, classification in zip(
+                users[index : index + batch_size], classifications
+            ):
                 try:
                     max_score = max(classification["scores"])
                     relevant_labels = [
