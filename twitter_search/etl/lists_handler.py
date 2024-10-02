@@ -63,23 +63,10 @@ class ListsHandler:
                 "output_file_filter_lists": self.base_dir
                 / f"{self.location}_{self.account_type}_lists_filtered.json",
                 "output_file_total": self.base_dir
-                / f"{self.account_type}_expanded_users.json",
+                / f"{self.location}_{self.account_type}_expanded_users.json",
                 "output_file_filter_total": self.base_dir
                 / f"{self.location}_{self.account_type}_expanded_users_filtered.json",
             }
-
-    def filter_users(self):
-        """
-        Filter Twitter users based on location and
-        relevance.
-        """
-        print("Filtering Twitter users based on location...")
-        self.user_filter = UserFilter(
-            self.location,
-            self.paths["input_file_filter"],
-            self.paths["output_file_filter"],
-        )
-        self.user_filter.run_filtering()
 
     def perform_list_expansion(self):
         """
@@ -124,29 +111,7 @@ class ListsHandler:
 
             # Set account types and paths accordingly
             self.account_type = account_type
-
-            self.paths["input_file_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists.json"
-            )
-            self.paths["output_file_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists.json"
-            )
-
-            self.paths["input_file_filter_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists_filtered.json"
-            )
-            self.paths["output_file_filter_lists"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_lists_filtered.json"
-            )
-            self.paths["output_file_total"] = (
-                self.base_dir
-                / f"{self.location}_{self.account_type}_all_expanded_users.json"
-            )
-
+            self.setup_file_paths()
             self.perform_list_expansion()
 
     def list_expansion_all_locations(self):
@@ -187,3 +152,49 @@ class ListsHandler:
             list_filter.keep_relevant_lists()
         else:
             print("No lists found")
+
+    def reclassify_users(self):
+        """
+        Reclassify expanded twitter users.
+        """
+        print("Reclassifying expanded users based on location...")
+        self.setup_file_paths()
+        self.user_filter = UserFilter(
+            self.location,
+            self.paths["output_file_total"],
+            self.paths["output_file_filter_total"],
+        )
+        self.user_filter.reclassify_all_users()
+
+    def reclassify_all_locations_accounts(self):
+        """
+        Runs the entire process for all the available locations
+        and cities
+        """
+        for city in CITIES:
+            print(f" =============== CITY: {city} ======================")
+            self.location = city
+            self.reclassify_all_accounts()
+
+        self.reclassify_manually_added_accounts()
+
+    def reclassify_manually_added_accounts(self):
+        """
+        Performs the re-classification process for the manually_added accounts
+        """
+
+        self.account_type = "manually_added"
+        self.reclassify_users()
+
+    def reclassify_all_accounts(self):
+        """
+        Performs the re-classification process for all accounts
+        """
+        account_types = self.QUERIES
+        # Added manually added account types
+        for account_type in account_types:
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
+            self.account_type = account_type
+            self.reclassify_users()

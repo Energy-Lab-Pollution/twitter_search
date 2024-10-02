@@ -17,6 +17,10 @@ from transformers import pipeline
 
 class UserFilter:
     SCORE_THRESHOLD = constants.SCORE_THRESHOLD
+    RELEVANT_LABELS = constants.RELEVANT_LABELS
+    STATE_CAPITALS = constants.STATE_CAPITALS
+    NUM_WORKERS = constants.NUM_WORKERS
+    BATCH_SIZE = constants.BATCH_SIZE
 
     def __init__(self, location, input_file, output_file):
         """
@@ -27,11 +31,8 @@ class UserFilter:
         """
 
         self.location = location
-        self.RELEVANT_LABELS = constants.RELEVANT_LABELS
         self.input_file = input_file
         self.output_file = output_file
-        self.STATE_CAPITALS = constants.STATE_CAPITALS
-        self.NUM_WORKERS = constants.NUM_WORKERS
 
         # Setting up NLP classifier
         device = 0 if torch.cuda.is_available() else -1
@@ -140,16 +141,21 @@ class UserFilter:
             classification = self.classifier(
                 user["token"], candidate_labels=self.RELEVANT_LABELS
             )
+
+            max_score = max(classification["scores"])
+
             relevant_labels = [
                 label
                 for label, score in zip(
                     classification["labels"], classification["scores"]
                 )
-                if score > self.SCORE_THRESHOLD
+                if score == max_score
             ]
 
-            user["content_is_relevant"] = bool(relevant_labels)
-            user["content_labels"] = relevant_labels
+            user["content_is_relevant"] = (
+                False if relevant_labels[0] == "other" else True
+            )
+            user["content_labels"] = relevant_labels[0]
 
         except Exception as error:
             print(f"Error classifying user: {error}")
@@ -157,6 +163,56 @@ class UserFilter:
             user["content_labels"] = []
 
         return user
+
+    def classify_users_in_batches(self, users, batch_size):
+        """
+        Batches the users for later processing
+        """
+
+        tokens = [user["token"] for user in users]
+        results = []
+
+        for index in tqdm(range(0, len(tokens), batch_size)):
+            batch_tokens = tokens[index : index + batch_size]
+            try:
+                classifications = self.classifier(
+                    batch_tokens,
+                    candidate_labels=self.RELEVANT_LABELS,
+                    batch_size=batch_size,
+                    truncation=True,
+                )
+            except Exception as error:
+                print(f"Error during batch classification {error}")
+                for user in users[index : index + batch_size]:
+                    user["content_is_relevant"] = False
+                    user["content_labels"] = []
+                continue
+
+            for user, classification in zip(
+                users[index : index + batch_size], classifications
+            ):
+                try:
+                    max_score = max(classification["scores"])
+                    relevant_labels = [
+                        label
+                        for label, score in zip(
+                            classification["labels"], classification["scores"]
+                        )
+                        if score == max_score
+                    ]
+
+                    user["content_is_relevant"] = (
+                        False if relevant_labels[0] == "other" else True
+                    )
+                    user["content_labels"] = relevant_labels[0]
+                except Exception as e:
+                    print(f"Error processing classification for a user: {e}")
+                    user["content_is_relevant"] = False
+                    user["content_labels"] = []
+
+                results.append(user)
+
+        return results
 
     def classify_users_concurrently(self, users):
         """
@@ -191,8 +247,8 @@ class UserFilter:
             map(self.add_token_field, self.unclassified_users)
         )
 
-        self.unclassified_users = self.classify_users_concurrently(
-            self.unclassified_users
+        self.unclassified_users = self.classify_users_in_batches(
+            self.unclassified_users, batch_size=self.BATCH_SIZE
         )
 
     def determine_location_relevance(self):
@@ -325,11 +381,11 @@ class UserFilter:
                     step 3 done"""
             )
 
-            if self.location in self.STATE_CAPITALS:
-                self.determine_location_relevance()
-                print(f"relevant users for {self.location} tagged step 4 done")
-            else:
-                print(f"Location {self.location} not found in STATE_CAPITALS")
+            # if self.location in self.STATE_CAPITALS:
+            #     self.determine_location_relevance()
+            #     print(f"relevant users for {self.location} tagged step 4 done")
+            # else:
+            #     print(f"Location {self.location} not found in STATE_CAPITALS")
 
             # Paste both classified and unclassified users
             self.all_users = []

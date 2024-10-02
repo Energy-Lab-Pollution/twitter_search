@@ -22,7 +22,7 @@ class CSVConcat:
             "user_data": "all_users",
             "unique_users": "all_distinct_users",
             "expanded_user_data": "expanded_all_users",
-            "expanded_unique_users": "expanded_distinct_users",
+            "expanded_unique_user": "expanded_distinct_users",
         }
 
         # Dictionary with strings to avoid when looking for
@@ -31,7 +31,7 @@ class CSVConcat:
             "user_data": "expanded",
             "unique_users": "expanded",
             "expanded_user_data": None,
-            "expanded_unique_users": None,
+            "expanded_unique_user": None,
         }
 
     def concat_files(self, str_to_look, str_to_avoid, final_file):

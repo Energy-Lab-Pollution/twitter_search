@@ -44,6 +44,7 @@ HUGGINGFACE_PIPELINE = "zero-shot-classification"
 HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
 SCORE_THRESHOLD = 0.4
 NUM_WORKERS = 8
+BATCH_SIZE = 8
 
 
 # OTHER CONSTANTS
@@ -67,14 +68,12 @@ USER_FIELDS = [
 
 # TODO change the labels to more relevant stuff.
 RELEVANT_LABELS = [
-    "pollution",
-    "environment",
-    "public health",
-    "climate",
-    "research",
-    "politics",
-    "policy maker",
+    "environment or pollution",
+    "environmental research",
+    "politician or policymaker",
     "nonprofit organization",
+    "news outlet or journalist",
+    "other",
 ]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
 # Dictionary mapping Indian state capitals to their respective states
