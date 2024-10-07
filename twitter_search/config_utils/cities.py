@@ -14,4 +14,5 @@ CITIES = [
 ]
 
 
-PILOT_CITIES = ["chiang mai", "kigali", "kanpur", "kolkata"]
+PILOT_CITIES = ["chiang mai", "guatemala", "kanpur",
+                "kigali", "kolkata"]

@@ -6,19 +6,24 @@ from argparse import ArgumentParser
 
 from data_cleaning.csv_converter import CSVConverter
 
-
 CITIES = [
     "bangalore",
     "bangkok",
     "chennai",
     "chiang mai",
+    "chicago",
     "delhi",
     "guatemala",
     "kanpur",
     "kigali",
     "kolkata",
+    "phuket",
     "mumbai",
 ]
+
+
+PILOT_CITIES = ["chiang mai", "guatemala", "kanpur",
+                "kigali", "kolkata"]
 
 
 parser = ArgumentParser(
@@ -35,6 +40,10 @@ args = parser.parse_args()
 if __name__ == "__main__":
     if args.location == "all":
         for city in CITIES:
+            converter = CSVConverter(city)
+            converter.run()
+    elif args.location == "pilot_cities":
+        for city in PILOT_CITIES:
             converter = CSVConverter(city)
             converter.run()
     else:
