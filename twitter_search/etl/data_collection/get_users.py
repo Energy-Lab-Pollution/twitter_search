@@ -66,7 +66,7 @@ class UserGetter:
             except Exception as e:
                 print(f"Error fetching users for list {list}: {e}")
                 continue
- 
+
     def get_coordinates(self, bio_location):
         """
         Uses google maps to determine a location

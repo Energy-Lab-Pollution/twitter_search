@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 
 from data_cleaning.csv_converter import CSVConverter
 
+
 CITIES = [
     "bangalore",
     "bangkok",
@@ -22,8 +23,7 @@ CITIES = [
 ]
 
 
-PILOT_CITIES = ["chiang mai", "guatemala", "kanpur",
-                "kigali", "kolkata"]
+PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
 
 
 parser = ArgumentParser(
