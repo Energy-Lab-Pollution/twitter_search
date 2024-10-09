@@ -1,4 +1,6 @@
-import time
+"""
+This script gets users from a given set of lists
+"""
 
 # Local imports
 from config_utils import util
@@ -65,7 +67,6 @@ class UserGetter:
                 print(f"Error fetching users for list {list}: {e}")
                 continue
  
-
     def get_coordinates(self, bio_location):
         """
         Uses google maps to determine a location
