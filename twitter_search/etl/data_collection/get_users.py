@@ -45,7 +45,6 @@ class UserGetter:
             _description_, by default None
         """
         unique = set()
-        count = 0
         for list in lists_data:
             try:
                 list_id = list["list_id"]
@@ -59,19 +58,13 @@ class UserGetter:
                     )
                     user_dicts = util.user_dictmaker(users.data)
                     for user in user_dicts:
-                        user["geo_location"] = self.get_coordinates(
-                            user["location"]
-                        )
+                        user["geo_location"] = (None, None)
                     util.json_maker(self.output_file, user_dicts)
 
             except Exception as e:
                 print(f"Error fetching users for list {list}: {e}")
                 continue
-            count += 1
-            if count > self.COUNT_THRESHOLD:
-                print("Sleeping..")
-                time.sleep(self.SLEEP_TIME)
-                count = 0
+ 
 
     def get_coordinates(self, bio_location):
         """
