@@ -1,4 +1,5 @@
 CITIES = [
+    "abuja",
     "bangalore",
     "bangkok",
     "chennai",
@@ -8,10 +9,12 @@ CITIES = [
     "guatemala",
     "kanpur",
     "kigali",
+    "kinshasa",
     "kolkata",
+    "london",
     "phuket",
     "mumbai",
 ]
 
 
-PILOT_CITIES = ["chiang mai", "kigali", "kanpur", "kolkata"]
+PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]

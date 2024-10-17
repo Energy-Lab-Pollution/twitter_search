@@ -4,7 +4,7 @@ Main function to run the Twitter search and data collection process.
 
 from argparse import ArgumentParser
 
-from config_utils.cities import CITIES
+from config_utils.cities import CITIES, PILOT_CITIES
 from config_utils.util import strtobool
 
 # Local imports
@@ -64,6 +64,16 @@ def main():
                 twitter_data_handler.run_all_locations_accounts()
 
             for city in CITIES:
+                csv_converter = CSVConverter(city)
+                csv_converter.run()
+
+        elif args.location == "pilot_cities":
+            if args.skip_media:
+                twitter_data_handler.run_pilot_locations_accounts(skip_media)
+            else:
+                twitter_data_handler.run_pilot_locations_accounts()
+
+            for city in PILOT_CITIES:
                 csv_converter = CSVConverter(city)
                 csv_converter.run()
 

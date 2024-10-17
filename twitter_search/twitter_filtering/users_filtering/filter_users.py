@@ -61,8 +61,6 @@ class UserFilter:
             self.total_user_dict
         )
 
-        print("users look like this:", self.total_user_dict[0])
-
         self.get_already_classified_users()
 
         print(f"Already classified {len(self.classified_users)} users")

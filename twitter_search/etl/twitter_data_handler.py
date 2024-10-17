@@ -6,7 +6,7 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
-from config_utils.cities import CITIES
+from config_utils.cities import CITIES, PILOT_CITIES
 from config_utils.queries import QUERIES
 from etl.data_collection.get_extra_tweets import TweetGetter
 from etl.data_collection.search_users import UserSearcher
@@ -47,6 +47,23 @@ class TwitterDataHandler:
 
         """
         for city in CITIES:
+            print(f" =============== CITY: {city} ======================")
+            self.location = city
+            self.run_all_account_types(skip_media)
+
+    def run_pilot_locations_accounts(self, skip_media=False):
+        """
+        Runs the entire process for all the available locations
+        and cities
+
+        Args
+        ----------
+            skip_media: str
+            Determines if we should skip the search for media accounts
+            (there are tons of them)
+
+        """
+        for city in PILOT_CITIES:
             print(f" =============== CITY: {city} ======================")
             self.location = city
             self.run_all_account_types(skip_media)
