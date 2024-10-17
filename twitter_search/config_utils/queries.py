@@ -15,7 +15,7 @@ QUERIES = {
     "politicians": """location (politics OR politicians OR politician) -is:retweet""",
     "researcher": """location ((environmental research) OR (environmental researcher)
                     OR science OR academic OR research OR university OR professor OR
-                    postdoc OR postdoctoral OR doctor OR PhD)
+                    postdoc OR postdoctoral OR PhD)
                     -is:retweet""",
     "environment": """location ((air pollution) OR pollution OR (public health)
                 OR (poor air) OR asthma OR polluted OR (pollution control board)
