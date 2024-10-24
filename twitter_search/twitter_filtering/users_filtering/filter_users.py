@@ -99,35 +99,11 @@ class UserFilter:
             print("No previously classified users")
             self.unclassified_users = self.total_user_dict.copy()
 
-    @staticmethod
-    def create_token(user):
-        """
-        This function will create the token to
-        classify the user using the HF model
-        """
-
-        token = " ".join(
-            [
-                (
-                    user["description"]
-                    if user["description"] is not None
-                    else ""
-                ),
-                (
-                    " ".join(user["tweets"])
-                    if user["tweets"] is not None
-                    else ""
-                ),
-            ]
-        )
-
-        return token
-
     def add_token_field(self, user):
         """
         Uses the 'create_token' function to add a new field
         """
-        user["token"] = self.create_token(user)
+        user["token"] = util.create_token(user)
         return user
 
     def classify_single_user(self, user):
