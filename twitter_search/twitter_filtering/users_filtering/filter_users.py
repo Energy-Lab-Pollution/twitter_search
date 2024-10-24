@@ -99,7 +99,7 @@ class UserFilter:
             print("No previously classified users")
             self.unclassified_users = self.total_user_dict.copy()
 
-    @staticmethod        
+    @staticmethod
     def create_token(user):
         """
         This function will create the token to
@@ -127,7 +127,7 @@ class UserFilter:
         """
         Uses the 'create_token' function to add a new field
         """
-        user["token"] = util.create_token(user)
+        user["token"] = self.create_token(user)
         return user
 
     def classify_single_user(self, user):

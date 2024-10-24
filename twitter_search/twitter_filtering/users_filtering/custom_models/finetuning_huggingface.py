@@ -34,8 +34,10 @@ def labeled_data_to_csv():
     labeled_data = pd.read_excel(f"{CLEAN_DATA_PATH}/users_to_label.xlsx",
                                  sheet_name="Random Sample")
     labeled_data.loc[:, "tweets"] = labeled_data.loc[:, "tweets"].apply(lambda x: clean_tweet(x))
-    
-    labeled_data.loc[:, "token"] = labeled_data.apply(lambda x: create_token(x))
+
+    labeled_data.loc[:, "token"] = (labeled_data.loc[:, "description"]
+                                    + labeled_data.loc[:, "description"])
+
     labeled_data.to_csv(f"{CLEAN_DATA_PATH}/users_to_label.csv", index=False)
     return labeled_data
 
