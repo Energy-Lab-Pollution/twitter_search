@@ -379,27 +379,3 @@ def excel_maker(dict_list, file_path):
     df = pd.DataFrame(dict_list)
     new_df = df.drop_duplicates()
     new_df.to_excel(file_path, index=False)
-
-
-def create_token(user):
-    """
-    This function will create the token to
-    classify the user using the HF model
-    """
-
-    token = " ".join(
-        [
-            (
-                user["description"]
-                if user["description"] is not None
-                else ""
-            ),
-            (
-                " ".join(user["tweets"])
-                if user["tweets"] is not None
-                else ""
-            ),
-        ]
-    )
-
-    return token

@@ -4,8 +4,8 @@ Adding script to finetune the HF NLP model
 from pathlib import Path
 
 import pandas as pd
-from config_utils.constants import HUGGINGFACE_MODEL, RELEVANT_LABELS
-from config_utils.util import create_token
+# from twitter_search.config_utils.constants import HUGGINGFACE_MODEL, RELEVANT_LABELS
+# from twitter_search.config_utils.util import create_token
 from transformers import BartTokenizer
 
 script_path = Path(__file__).resolve()
@@ -13,8 +13,18 @@ project_root = script_path.parents[3]
 CLEAN_DATA_PATH = project_root / "data" / "labeled_data"
 
 
-tokenizer = BartTokenizer.from_pretrained(HUGGINGFACE_MODEL)
+# tokenizer = BartTokenizer.from_pretrained(HUGGINGFACE_MODEL)
 
+
+def clean_tweet(tweet):
+    """
+    Cleans a given tweet
+    """
+
+    clean_tweet = tweet.replace("[", "")
+    clean_tweet = clean_tweet.replace("]", "")
+
+    return clean_tweet
 
 def labeled_data_to_csv():
     """
@@ -23,10 +33,9 @@ def labeled_data_to_csv():
 
     labeled_data = pd.read_excel(f"{CLEAN_DATA_PATH}/users_to_label.xlsx",
                                  sheet_name="Random Sample")
+    labeled_data.loc[:, "tweets"] = labeled_data.loc[:, "tweets"].apply(lambda x: clean_tweet(x))
     
-    labeled_data.loc[:, ""]
-    
-    # labeled_data.loc[:, "token"] = labeled_data.apply(lambda x: create_token(x))
+    labeled_data.loc[:, "token"] = labeled_data.apply(lambda x: create_token(x))
     labeled_data.to_csv(f"{CLEAN_DATA_PATH}/users_to_label.csv", index=False)
     return labeled_data
 
