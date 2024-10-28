@@ -5,8 +5,12 @@ from pathlib import Path
 
 import pandas as pd
 from datasets import Dataset
-from transformers import (BartForSequenceClassification, BartTokenizer,
-                          Trainer, TrainingArguments)
+from transformers import (
+    BartForSequenceClassification,
+    BartTokenizer,
+    Trainer,
+    TrainingArguments,
+)
 
 # from config_utils.constants import (HUGGINGFACE_MODEL,
 #                                     HUGGINGFACE_PIPELINE,
@@ -41,27 +45,21 @@ class ModelFinetuner:
         # Load tokenizer and pre-trained model
         self.tokenizer = BartTokenizer.from_pretrained(self.HUGGINGFACE_MODEL)
         self.model = BartForSequenceClassification.from_pretrained(
-            self.HUGGINGFACE_MODEL, num_labels=len(self.RELEVANT_LABELS),
-            ignore_mismatched_sizes=True
+            self.HUGGINGFACE_MODEL,
+            num_labels=len(self.RELEVANT_LABELS),
+            ignore_mismatched_sizes=True,
         )
 
         # Define training arguments
         self.training_args = TrainingArguments(
-            output_dir=f'{self.FINETUNING_PATH}/results',
-            evaluation_strategy='epoch',
-            save_strategy='epoch',
-            logging_dir=f'{self.FINETUNING_PATH}/logs',
+            output_dir=f"{self.FINETUNING_PATH}/results",
+            eval_strategy="epoch",
+            save_strategy="epoch",
+            logging_dir=f"{self.FINETUNING_PATH}/logs",
             per_device_train_batch_size=8,
             num_train_epochs=self.NUM_EPOCHS,  # Adjust according to your needs
             learning_rate=self.LEARNING_RATE,
             weight_decay=self.WEIGHT_DECAY,
-        )
-
-        # Create the Trainer
-        self.trainer = Trainer(
-            model=self.model,
-            args=self.training_args,
-            train_dataset=self.tokenized_dataset['train'],
         )
 
     def clean_tweet(self, tweet):
@@ -97,6 +95,12 @@ class ModelFinetuner:
         labeled_data = pd.read_excel(
             f"{self.CLEAN_DATA_PATH}/users_to_label.xlsx", sheet_name="Random Sample"
         )
+
+        # Replace data
+        labeled_data.loc[
+            labeled_data["manual classification"] == "Researchers"
+        ] = "environmental research"
+
         labeled_data.loc[:, "tweets"] = labeled_data.loc[:, "tweets"].apply(
             lambda x: self.clean_tweet(x)
         )
@@ -137,7 +141,7 @@ class ModelFinetuner:
 
         # Map labels to numeric values
         label_to_id = {label: i for i, label in enumerate(self.RELEVANT_LABELS)}
-        labeled_data["labels"] = labeled_data["label_column"].map(label_to_id)
+        labeled_data["labels"] = labeled_data["manual classification"].map(label_to_id)
 
         return labeled_data[["input_ids", "attention_mask", "labels"]]
 
