@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 from transformers import (BartForSequenceClassification, BartTokenizer,
                           Trainer, TrainingArguments)
+from datasets import Dataset
 
 
 class ModelFinetuner:
@@ -97,7 +98,7 @@ class ModelFinetuner:
     def preprocess_function(self, token):
         """
         Preprocesses labeled data with HF and Transformers
-        library
+        library using a pre-trained tokenizer
         """
         preprocessed_data = self.tokenizer(
             token, truncation=True, padding="max_length", max_length=512
@@ -127,3 +128,34 @@ class ModelFinetuner:
         labeled_data["labels"] = labeled_data["label_column"].map(label_to_id)
 
         return labeled_data[["input_ids", "attention_mask", "labels"]]
+
+    def split_data(self, data, test_size=0.2):
+        """
+        Transform pandas df to dataset and split
+        into train and test
+        """
+        dataset = Dataset.from_pandas(data)
+        split_dataset = dataset.train_test_split(test_size=test_size)
+        return split_dataset["train"], split_dataset["test"]
+
+    def train(self):
+        """
+        Preporceses the labeled data and finetunes the model
+        """
+        labeled_data = self.preprocess_labeled_data()
+        train_dataset, test_dataset = self.split_data(labeled_data)
+
+        # Initialize the Trainer with train and eval datasets
+        trainer = Trainer(
+            model=self.model,
+            args=self.training_args,
+            train_dataset=train_dataset,
+            eval_dataset=test_dataset,
+        )
+
+        # Fine-tune the model
+        trainer.train()
+
+        # Evaluate the model on the test set
+        eval_results = trainer.evaluate()
+        print("Evaluation Results:", eval_results)
