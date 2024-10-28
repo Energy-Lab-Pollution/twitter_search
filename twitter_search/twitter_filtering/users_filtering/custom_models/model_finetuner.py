@@ -1,30 +1,38 @@
 """
-Adding script to finetune the HF NLP model
+Adding script to finetune the HuggingFace NLP model
 """
 from pathlib import Path
 
 import pandas as pd
+from datasets import Dataset
 from transformers import (BartForSequenceClassification, BartTokenizer,
                           Trainer, TrainingArguments)
-from datasets import Dataset
+
+from twitter_search.config_utils.constants import (HUGGINGFACE_MODEL,
+                                                   HUGGINGFACE_PIPELINE,
+                                                   RELEVANT_LABELS)
 
 
 class ModelFinetuner:
-    HUGGINGFACE_PIPELINE = "zero-shot-classification"
-    HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
-    RELEVANT_LABELS = [
-        "environment or pollution",
-        "environmental research",
-        "politician or policymaker",
-        "nonprofit organization",
-        "news outlet or journalist",
-        "other",
-    ]
+    # HUGGINGFACE_PIPELINE = "zero-shot-classification"
+    # HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
+    # RELEVANT_LABELS = [
+    #     "environment or pollution",
+    #     "environmental research",
+    #     "politician or policymaker",
+    #     "nonprofit organization",
+    #     "news outlet or journalist",
+    #     "other",
+    # ]
+    HUGGINGFACE_PIPELINE = HUGGINGFACE_PIPELINE
+    HUGGINGFACE_MODEL = HUGGINGFACE_MODEL
+    RELEVANT_LABELS = RELEVANT_LABELS
     UNDESIRED_CHARS = ["[", "]", "\n", "  "]
 
     script_path = Path(__file__).resolve()
     project_root = script_path.parents[3]
     CLEAN_DATA_PATH = project_root / "data" / "labeled_data"
+    FINETUNING_PATH = project_root / "finetuning_results"
 
     def __init__(self):
         # Load tokenizer and pre-trained model
@@ -34,11 +42,11 @@ class ModelFinetuner:
         )
 
         # Define training arguments
-        training_args = TrainingArguments(
-            output_dir='./results',
+        self.training_args = TrainingArguments(
+            output_dir=f'{self.FINETUNING_PATH}/results',
             evaluation_strategy='epoch',
             save_strategy='epoch',
-            logging_dir='./logs',
+            logging_dir=f'{self.FINETUNING_PATH}/logs',
             per_device_train_batch_size=8,
             num_train_epochs=3,  # Adjust according to your needs
             learning_rate=2e-5,
@@ -48,7 +56,7 @@ class ModelFinetuner:
         # Create the Trainer
         self.trainer = Trainer(
             model=self.model,
-            args=training_args,
+            args=self.training_args,
             train_dataset=self.tokenized_dataset['train'],
         )
 
