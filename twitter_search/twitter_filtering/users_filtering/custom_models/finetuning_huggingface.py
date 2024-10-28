@@ -4,12 +4,8 @@ Adding script to finetune the HF NLP model
 from pathlib import Path
 
 import pandas as pd
-from transformers import (
-    BartTokenizer,
-    BartForSequenceClassification,
-    Trainer,
-    TrainingArguments,
-)
+from transformers import (BartForSequenceClassification, BartTokenizer,
+                          Trainer, TrainingArguments)
 
 
 class ModelFinetuner:
@@ -34,6 +30,25 @@ class ModelFinetuner:
         self.tokenizer = BartTokenizer.from_pretrained(self.HUGGINGFACE_MODEL)
         self.model = BartForSequenceClassification.from_pretrained(
             self.HUGGINGFACE_MODEL, num_labels=len(self.RELEVANT_LABELS)
+        )
+
+        # Define training arguments
+        training_args = TrainingArguments(
+            output_dir='./results',
+            evaluation_strategy='epoch',
+            save_strategy='epoch',
+            logging_dir='./logs',
+            per_device_train_batch_size=8,
+            num_train_epochs=3,  # Adjust according to your needs
+            learning_rate=2e-5,
+            weight_decay=0.01,
+        )
+
+        # Create the Trainer
+        self.trainer = Trainer(
+            model=self.model,
+            args=training_args,
+            train_dataset=self.tokenized_dataset['train'],
         )
 
     def clean_tweet(self, tweet):
