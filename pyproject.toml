@@ -21,6 +21,7 @@ boto3 = "^1.35.15"
 botocore = "^1.35.15"
 datasets = "^3.0.2"
 openpyxl = "^3.1.5"
+accelerate = "^1.0.1"
 
 [build-system]
 requires = ["poetry-core"]
