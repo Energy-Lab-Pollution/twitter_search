@@ -120,7 +120,10 @@ class ModelFinetuner:
         # 'input_ids' and 'attention_mask'
         tokenized_columns = labeled_data["tokenized"].apply(pd.Series)
         labeled_data = pd.concat([labeled_data, tokenized_columns], axis=1)
-
-        # Drop the original 'tokenized' column
         labeled_data.drop(columns=["tokenized"], inplace=True)
-        print(labeled_data[["tokenized", "input_ids", "attention_mask"]].head())
+
+        # Map labels to numeric values
+        label_to_id = {label: i for i, label in enumerate(self.RELEVANT_LABELS)}
+        labeled_data["labels"] = labeled_data["label_column"].map(label_to_id)
+
+        return labeled_data[["input_ids", "attention_mask", "labels"]]
