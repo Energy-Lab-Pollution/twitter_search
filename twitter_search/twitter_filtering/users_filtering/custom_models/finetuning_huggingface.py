@@ -4,7 +4,8 @@ Adding script to finetune the HF NLP model
 from pathlib import Path
 
 import pandas as pd
-from transformers import BartTokenizer
+from transformers import BartTokenizer, BartForSequenceClassification, Trainer, TrainingArguments
+
 
 
 script_path = Path(__file__).resolve()
@@ -25,7 +26,10 @@ RELEVANT_LABELS = [
 
 UNDESIRED_CHARS = ["[", "]", "\n", "  "]
 
+# Load tokenizer and pre-trained model
 tokenizer = BartTokenizer.from_pretrained(HUGGINGFACE_MODEL)
+model = BartForSequenceClassification.from_pretrained(HUGGINGFACE_MODEL,
+                                                      num_labels=len(RELEVANT_LABELS))
 
 
 def clean_tweet(tweet):
@@ -50,11 +54,11 @@ def create_token(description, tweets):
         if description:
             token = str(description)
         else:
-            token = None
+            token = ""
     return token
 
 
-def labeled_data_to_csv():
+def parsing_labeled_data():
     """
     Converts excel file to csv file
     """
@@ -70,21 +74,30 @@ def labeled_data_to_csv():
         lambda x: create_token(x.description, x.tweets), axis=1
     )
 
-    # labeled_data.to_csv(f"{CLEAN_DATA_PATH}/users_to_label.csv", index=False)
     return labeled_data
 
 
-def preprocess_function(examples):
+def preprocess_function(token):
     """
     Preprocesses labeled data with HF and Transformers
     library
     """
-    tokens = list(examples.loc[:, "token"])
-    preprocessed_data = tokenizer(tokens, truncation=True, padding="max_length")
+    preprocessed_data = tokenizer(token, truncation=True,
+                                  padding="max_length", max_length=512)
 
     return preprocessed_data
 
 
-labeled_data = labeled_data_to_csv()
-preprocessed_data = preprocess_function(labeled_data)
-print(preprocessed_data)
+labeled_data = parsing_labeled_data()
+# Apply the tokenizer to each 'token' entry and store the tokenized data
+labeled_data["tokenized"] = labeled_data["token"].apply(lambda x:
+                                                        preprocess_function(x))
+
+# Expand 'tokenized' column into separate columns for 'input_ids' and 'attention_mask'
+tokenized_columns = labeled_data["tokenized"].apply(pd.Series)
+labeled_data = pd.concat([labeled_data, tokenized_columns], axis=1)
+
+# Drop the original 'tokenized' column if no longer needed
+labeled_data.drop(columns=["tokenized"], inplace=True)
+print(labeled_data[["tokenized",
+                    "input_ids", "attention_mask"]].head())
