@@ -13,7 +13,7 @@ class CSVConcat:
         self.script_path = Path(__file__).resolve()
         self.project_root = self.script_path.parents[1]
         self.CLEAN_DATA_PATH = self.project_root / "data" / "cleaned_data"
-
+        self.MASTER_DATA_PATH = self.project_root / "data" / "master_dataset"
         self.csv_files = os.listdir(self.CLEAN_DATA_PATH)
 
         # The dict contains a string to look for in the csv files
@@ -66,6 +66,33 @@ class CSVConcat:
         )
 
         print("Successfully concatenated all csv files")
+
+    def generate_master_dataset(self):
+        """
+        Concatenates distinct users
+        """
+        normal_distinct_users = pd.read_csv(
+            f"{self.CLEAN_DATA_PATH}/all_distinct_users.csv",
+            encoding="utf-8-sig",
+        )
+        expanded_distinct_users = pd.read_csv(
+            f"{self.CLEAN_DATA_PATH}/expanded_distinct_users.csv",
+            encoding="utf-8-sig",
+        )
+
+        master_dataset = pd.concat(
+            [normal_distinct_users, expanded_distinct_users], ignore_index=True
+        )
+
+        if os.path.exists(self.MASTER_DATA_PATH):
+            print("Creating path for master dataset...")
+            os.makedirs(self.MASTER_DATA_PATH)
+
+        master_dataset.to_csv(
+            f"{self.MASTER_DATA_PATH}/master_dataset.csv",
+            ignore_index=True,
+        )
+        print("Saved master dataset")
 
     def run(self):
         """

@@ -1,8 +1,11 @@
 config.py
 __pycache__
 .DS_Store
+
+# Folders with data to use
 raw_data
 cleaned_data
+labeled_data
 
 # IDE files and misc.
 .idea
@@ -167,3 +170,6 @@ cython_debug/
 
 # Ruff cache
 .ruff_cache
+
+# Model results
+finetuning_results/

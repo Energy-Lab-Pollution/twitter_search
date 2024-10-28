@@ -187,6 +187,9 @@ class UserSearcher:
         print("Total number of tweets:", len(self.unique_tweets_dict))
 
     def run_search_all(self):
+        """
+        Runs the entire search pipeline
+        """
         self.search_users_tweets()
         if not self.total_users:
             return
