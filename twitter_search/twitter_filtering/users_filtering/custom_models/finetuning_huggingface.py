@@ -22,6 +22,9 @@ RELEVANT_LABELS = [
     "other",
 ]
 
+
+UNDESIRED_CHARS = ["[", "]", "\n", "  "]
+
 tokenizer = BartTokenizer.from_pretrained(HUGGINGFACE_MODEL)
 
 
@@ -30,10 +33,10 @@ def clean_tweet(tweet):
     Cleans a given tweet
     """
 
-    clean_tweet = tweet.replace("[", "")
-    clean_tweet = clean_tweet.replace("]", "")
+    for undesired_char in UNDESIRED_CHARS:
+        tweet = tweet.replace(undesired_char, "")
 
-    return clean_tweet
+    return tweet
 
 
 def create_token(description, tweets):
@@ -44,7 +47,10 @@ def create_token(description, tweets):
     if tweets:
         token = f"{description} {tweets}"
     else:
-        token = description
+        if description:
+            token = str(description)
+        else:
+            token = None
     return token
 
 
@@ -81,4 +87,7 @@ def preprocess_function(examples):
 
 
 labeled_data = labeled_data_to_csv()
+
+print(labeled_data)
+
 preprocessed_data = preprocess_function(labeled_data)
