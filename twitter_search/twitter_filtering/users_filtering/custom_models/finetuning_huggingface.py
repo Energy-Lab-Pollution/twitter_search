@@ -79,15 +79,12 @@ def preprocess_function(examples):
     Preprocesses labeled data with HF and Transformers
     library
     """
-    preprocessed_data = tokenizer(
-        examples["token"], truncation=True, padding="max_length"
-    )
+    tokens = list(examples.loc[:, "token"])
+    preprocessed_data = tokenizer(tokens, truncation=True, padding="max_length")
 
     return preprocessed_data
 
 
 labeled_data = labeled_data_to_csv()
-
-print(labeled_data)
-
 preprocessed_data = preprocess_function(labeled_data)
+print(preprocessed_data)
