@@ -12,6 +12,7 @@ from transformers import (
     TrainingArguments,
 )
 
+
 # from config_utils.constants import (HUGGINGFACE_MODEL,
 #                                     HUGGINGFACE_PIPELINE,
 #                                     RELEVANT_LABELS)
@@ -93,7 +94,8 @@ class ModelFinetuner:
         """
 
         labeled_data = pd.read_excel(
-            f"{self.CLEAN_DATA_PATH}/users_to_label.xlsx", sheet_name="Random Sample"
+            f"{self.CLEAN_DATA_PATH}/users_to_label.xlsx",
+            sheet_name="Random Sample",
         )
 
         # Replace data
@@ -141,7 +143,9 @@ class ModelFinetuner:
 
         # Map labels to numeric values
         label_to_id = {label: i for i, label in enumerate(self.RELEVANT_LABELS)}
-        labeled_data["labels"] = labeled_data["manual classification"].map(label_to_id)
+        labeled_data["labels"] = labeled_data["manual classification"].map(
+            label_to_id
+        )
 
         return labeled_data[["input_ids", "attention_mask", "labels"]]
 

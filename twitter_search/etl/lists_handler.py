@@ -105,7 +105,9 @@ class ListsHandler:
 
         account_types = self.QUERIES
         for account_type in account_types:
-            print(f" =============== PROCESSING: {account_type} ======================")
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
 
             # Set account types and paths accordingly
             self.account_type = account_type
@@ -191,6 +193,8 @@ class ListsHandler:
         account_types = self.QUERIES
         # Added manually added account types
         for account_type in account_types:
-            print(f" =============== PROCESSING: {account_type} ======================")
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
             self.account_type = account_type
             self.reclassify_users()
