@@ -8,25 +8,25 @@ from datasets import Dataset
 from transformers import (BartForSequenceClassification, BartTokenizer,
                           Trainer, TrainingArguments)
 
-from twitter_search.config_utils.constants import (HUGGINGFACE_MODEL,
-                                                   HUGGINGFACE_PIPELINE,
-                                                   RELEVANT_LABELS)
+# from config_utils.constants import (HUGGINGFACE_MODEL,
+#                                     HUGGINGFACE_PIPELINE,
+#                                     RELEVANT_LABELS)
 
 
 class ModelFinetuner:
-    # HUGGINGFACE_PIPELINE = "zero-shot-classification"
-    # HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
-    # RELEVANT_LABELS = [
-    #     "environment or pollution",
-    #     "environmental research",
-    #     "politician or policymaker",
-    #     "nonprofit organization",
-    #     "news outlet or journalist",
-    #     "other",
-    # ]
-    HUGGINGFACE_PIPELINE = HUGGINGFACE_PIPELINE
-    HUGGINGFACE_MODEL = HUGGINGFACE_MODEL
-    RELEVANT_LABELS = RELEVANT_LABELS
+    HUGGINGFACE_PIPELINE = "zero-shot-classification"
+    HUGGINGFACE_MODEL = "facebook/bart-large-mnli"
+    RELEVANT_LABELS = [
+        "environment or pollution",
+        "environmental research",
+        "politician or policymaker",
+        "nonprofit organization",
+        "news outlet or journalist",
+        "other",
+    ]
+    # HUGGINGFACE_PIPELINE = HUGGINGFACE_PIPELINE
+    # HUGGINGFACE_MODEL = HUGGINGFACE_MODEL
+    # RELEVANT_LABELS = RELEVANT_LABELS
     UNDESIRED_CHARS = ["[", "]", "\n", "  "]
     NUM_EPOCHS = 3
     LEARNING_RATE = 2e-5
@@ -41,7 +41,8 @@ class ModelFinetuner:
         # Load tokenizer and pre-trained model
         self.tokenizer = BartTokenizer.from_pretrained(self.HUGGINGFACE_MODEL)
         self.model = BartForSequenceClassification.from_pretrained(
-            self.HUGGINGFACE_MODEL, num_labels=len(self.RELEVANT_LABELS)
+            self.HUGGINGFACE_MODEL, num_labels=len(self.RELEVANT_LABELS),
+            ignore_mismatched_sizes=True
         )
 
         # Define training arguments
