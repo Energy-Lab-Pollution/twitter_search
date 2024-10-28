@@ -28,6 +28,9 @@ class ModelFinetuner:
     HUGGINGFACE_MODEL = HUGGINGFACE_MODEL
     RELEVANT_LABELS = RELEVANT_LABELS
     UNDESIRED_CHARS = ["[", "]", "\n", "  "]
+    NUM_EPOCHS = 3
+    LEARNING_RATE = 2e-5
+    WEIGHT_DECAY = 0.01
 
     script_path = Path(__file__).resolve()
     project_root = script_path.parents[3]
@@ -48,9 +51,9 @@ class ModelFinetuner:
             save_strategy='epoch',
             logging_dir=f'{self.FINETUNING_PATH}/logs',
             per_device_train_batch_size=8,
-            num_train_epochs=3,  # Adjust according to your needs
-            learning_rate=2e-5,
-            weight_decay=0.01,
+            num_train_epochs=self.NUM_EPOCHS,  # Adjust according to your needs
+            learning_rate=self.LEARNING_RATE,
+            weight_decay=self.WEIGHT_DECAY,
         )
 
         # Create the Trainer

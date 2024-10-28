@@ -170,3 +170,6 @@ cython_debug/
 
 # Ruff cache
 .ruff_cache
+
+# Model results 
+finetuning_results/
