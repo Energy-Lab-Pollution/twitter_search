@@ -12,6 +12,7 @@ CITIES = [
     "kinshasa",
     "kolkata",
     "london",
+    "mexico city",
     "phuket",
     "mumbai",
 ]
