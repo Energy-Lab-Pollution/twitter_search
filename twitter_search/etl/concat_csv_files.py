@@ -49,9 +49,7 @@ class CSVConcat:
             ]
 
         else:
-            user_files = [
-                file for file in self.csv_files if str_to_look in file
-            ]
+            user_files = [file for file in self.csv_files if str_to_look in file]
 
         all_users = pd.DataFrame()
 
@@ -101,9 +99,7 @@ class CSVConcat:
 
         for str_to_look in self.file_dict.keys():
             str_to_avoid = self.str_to_avoid_dict[str_to_look]
-            self.concat_files(
-                str_to_look, str_to_avoid, self.file_dict[str_to_look]
-            )
+            self.concat_files(str_to_look, str_to_avoid, self.file_dict[str_to_look])
 
         self.generate_master_dataset()
 

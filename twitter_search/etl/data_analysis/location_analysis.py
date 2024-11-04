@@ -2,20 +2,29 @@
 First location analysis try
 """
 
+import re
 from pathlib import Path
 
 import pandas as pd
-
 
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
-# Read both to create a single file
+
+def check_location(raw_location, target_location):
+    """
+    Uses regex to see if the raw location matches
+    the target location
+    """
+    raw_location = target_location.strip()
+
+    pass
+
 
 default_users = pd.read_csv(
     f"{CLEAN_DATA_PATH}/all_distinct_users.csv", encoding="utf-8-sig"
 )
 
 
-default_users
+target_locations = list(default_users.loc[:, "search_locations"].unique())
