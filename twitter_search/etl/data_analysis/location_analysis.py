@@ -17,11 +17,5 @@ default_users = pd.read_csv(
     f"{CLEAN_DATA_PATH}/all_distinct_users.csv", encoding="utf-8-sig"
 )
 
-expanded_users = pd.read_csv(
-    f"{CLEAN_DATA_PATH}/expanded_distinct_users.csv", encoding="utf-8-sig"
-)
 
-
-all_users = pd.concat([default_users, expanded_users], ignore_index=True)
-
-print(all_users.head())
+default_users

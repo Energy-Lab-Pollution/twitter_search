@@ -90,7 +90,7 @@ class CSVConcat:
 
         master_dataset.to_csv(
             f"{self.MASTER_DATA_PATH}/master_dataset.csv",
-            ignore_index=True,
+            index=False,
         )
         print("Saved master dataset")
 
