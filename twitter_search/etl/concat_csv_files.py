@@ -105,6 +105,8 @@ class CSVConcat:
                 str_to_look, str_to_avoid, self.file_dict[str_to_look]
             )
 
+        self.generate_master_dataset()
+
 
 if __name__ == "__main__":
     csv_concat = CSVConcat()
