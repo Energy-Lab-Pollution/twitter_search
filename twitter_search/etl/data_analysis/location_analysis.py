@@ -18,8 +18,12 @@ def check_location(raw_location, target_location):
     the target location
     """
     raw_location = target_location.strip()
+    target_location = target_location.lower().strip()
 
-    pass
+    if target_location in raw_location:
+        return True
+    else:
+        return False
 
 
 default_users = pd.read_csv(
@@ -27,4 +31,7 @@ default_users = pd.read_csv(
 )
 
 
-target_locations = list(default_users.loc[:, "search_locations"].unique())
+target_locations = list(default_users.loc[:, "search_location"].unique())
+raw_locations = list(default_users.loc[:, "location"].unique())
+
+print(raw_locations)
