@@ -84,7 +84,7 @@ class CSVConcat:
             [normal_distinct_users, expanded_distinct_users], ignore_index=True
         )
 
-        if os.path.exists(self.MASTER_DATA_PATH):
+        if not os.path.exists(self.MASTER_DATA_PATH):
             print("Creating path for master dataset...")
             os.makedirs(self.MASTER_DATA_PATH)
 
