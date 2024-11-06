@@ -20,3 +20,9 @@ CITIES = [
 
 
 PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
+
+
+CITIES_DICT = {
+    "mexico city": ["cdmx", "ciudad de mexico"],
+    "texas": ["tx"],
+}
