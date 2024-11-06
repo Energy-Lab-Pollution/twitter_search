@@ -38,10 +38,10 @@ QUERIES_ES = {
     "politicians": """location (politica OR politicos OR politico OR politicas)
                       -is:retweet""",
     "researcher": """location ((investigacion ambiental) OR (investigador ambiental)
-                    OR ciencia OR academico OR investigacion OR universidad OR profesor
+                    OR (investigadora ambiental) OR ciencia OR academico OR
+                    OR academica OR investigacion OR universidad OR profesor
                     OR postdoc OR postdoctoral OR PhD OR doctorado OR investigador
-                    OR investigadora)
-                    -is:retweet""",
+                    OR investigadora) -is:retweet""",
     "environment": """location ((contaminacion del aire) OR contaminacion OR
                     (salud publica) OR (poor air) OR asma OR contaminado OR contaminada
                     OR smog OR (calidad del aire) OR (medio ambiente)) -is:retweet""",
