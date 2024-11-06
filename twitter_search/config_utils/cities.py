@@ -13,8 +13,9 @@ CITIES = [
     "kolkata",
     "london",
     "mexico city",
-    "phuket",
     "mumbai",
+    "phuket",
+    "texas",
 ]
 
 
