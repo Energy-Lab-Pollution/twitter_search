@@ -143,7 +143,9 @@ class ModelFinetuner:
 
         # Map labels to numeric values
         label_to_id = {label: i for i, label in enumerate(self.RELEVANT_LABELS)}
-        labeled_data["labels"] = labeled_data["manual classification"].map(label_to_id)
+        labeled_data["labels"] = labeled_data["manual classification"].map(
+            label_to_id
+        )
 
         return labeled_data[["input_ids", "attention_mask", "labels"]]
 

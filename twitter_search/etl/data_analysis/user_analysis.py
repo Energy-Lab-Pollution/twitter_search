@@ -34,7 +34,9 @@ def get_user_types_by_city(all_users_df):
     ).count()
     user_types.reset_index(drop=False, inplace=True)
     user_types.rename(columns={"user_id": "count"}, inplace=True)
-    user_types = user_types.loc[:, ["search_location", "search_account_type", "count"]]
+    user_types = user_types.loc[
+        :, ["search_location", "search_account_type", "count"]
+    ]
 
     return user_types
 
@@ -43,10 +45,14 @@ def get_user_classifications_by_city(all_users_df):
     """
     Gets total number of users, distinguished by type and city
     """
-    user_types = all_users_df.groupby(by=["search_location", "content_labels"]).count()
+    user_types = all_users_df.groupby(
+        by=["search_location", "content_labels"]
+    ).count()
     user_types.reset_index(drop=False, inplace=True)
     user_types.rename(columns={"user_id": "count"}, inplace=True)
-    user_types = user_types.loc[:, ["search_location", "content_labels", "count"]]
+    user_types = user_types.loc[
+        :, ["search_location", "content_labels", "count"]
+    ]
 
     return user_types
 
@@ -68,7 +74,9 @@ def get_percentages(user_types, user_cities, filename):
     """
     Gets percentages of user type per city
     """
-    final_df = pd.merge(user_types, user_cities, how="left", on="search_location")
+    final_df = pd.merge(
+        user_types, user_cities, how="left", on="search_location"
+    )
 
     final_df.loc[:, "percentage"] = (
         final_df.loc[:, "count"] / final_df.loc[:, "total_count"]
@@ -97,7 +105,6 @@ def generate_random_sample(all_users_df):
 
 
 if __name__ == "__main__":
-
     datasets = [all_users_df, master_df]
     filenames = ["user_analysis.csv", "user_analysis_with_expansionss.csv"]
 
@@ -105,5 +112,6 @@ if __name__ == "__main__":
         user_classifications = get_user_classifications_by_city(dataset)
         user_cities = get_users_per_city(dataset)
 
-        final_classification_df = get_percentages(user_classifications, user_cities,
-                                                  filename)
+        final_classification_df = get_percentages(
+            user_classifications, user_cities, filename
+        )
