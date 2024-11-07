@@ -17,11 +17,18 @@ def check_location(raw_location, target_location):
     Uses regex to see if the raw location matches
     the target location
     """
-    raw_location = target_location.strip()
+    raw_location = target_location.lower().strip()
     target_location = target_location.lower().strip()
 
-    if target_location in raw_location:
-        return True
+    location_regex = re.findall(r"[a-zA-Z]", raw_location)
+
+    if location_regex[0]:
+        raw_location = location_regex[0]
+
+        if target_location in raw_location:
+            return True
+        else:
+            return False
     else:
         return False
 
