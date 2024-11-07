@@ -28,12 +28,34 @@ def check_location(raw_location, target_location):
         if location_regex:
             if target_location in location_regex:
                 return True
+            elif target_location in raw_location:
+                return True
             else:
                 return False
         else:
             return False
     else:
         return False
+
+
+def user_counting(users_df):
+    """
+    Counts the number of matched users per location
+    and classification
+    """
+
+    match_group = users_df.groupby(by=["location_match",
+                                       "search_location"]).count()
+    match_group.reset_index(drop=False, inplace=True)
+    match_group = match_group.loc[:, ["user_id", "search_location", "location_match"]]
+    match_group.sort_values(by="search_location", inplace=True)
+    match_group.rename(columns={"user_id": "user_count"}, inplace=True)
+
+    match_pivot = match_group.pivot_table(index="search_location",
+                                          columns="location_match",
+                                          values="user_count")
+
+    print(match_pivot)
 
 
 if __name__ == "__main__":
@@ -48,4 +70,7 @@ if __name__ == "__main__":
 
     print(default_users.loc[:, ["location", "search_location", "location_match"]])
 
-    default_users.to_csv()
+    default_users.to_csv(f"{ANALYSIS_OUTPUT}/location_matches.csv",
+                         encoding="utf-8-sig", index=False)
+    
+    user_counting(default_users)
