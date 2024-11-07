@@ -75,6 +75,5 @@ if __name__ == "__main__":
 
     user_counting = user_counting(default_users)
 
-    default_users.to_csv(f"{ANALYSIS_OUTPUT}/location_matches.csv",
+    default_users.to_csv(f"{ANALYSIS_OUTPUT}/location_matches_counts.csv",
                          encoding="utf-8-sig", index=False)
-
