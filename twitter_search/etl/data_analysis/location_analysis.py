@@ -10,6 +10,7 @@ import pandas as pd
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
+ANALYSIS_OUTPUT = project_root / "data" / "analysis_outputs"
 
 
 def check_location(raw_location, target_location):
@@ -46,3 +47,5 @@ if __name__ == "__main__":
     )
 
     print(default_users.loc[:, ["location", "search_location", "location_match"]])
+
+    default_users.to_csv()

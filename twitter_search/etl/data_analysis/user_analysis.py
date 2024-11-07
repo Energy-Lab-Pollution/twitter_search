@@ -10,6 +10,7 @@ import pandas as pd
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
+ANALYSIS_OUTPUT = project_root / "data" / "analysis_outputs"
 NUM_SAMPLE = 1200
 RANDOM_STATE = 1236
 
@@ -72,7 +73,7 @@ def get_percentages(user_types, user_cities):
         index="content_labels", values="count", columns="search_location"
     )
     final_df.reset_index(drop=False, inplace=True)
-    final_df.to_csv(f"{CLEAN_DATA_PATH}/analysis.csv", index=False)
+    final_df.to_csv(f"{ANALYSIS_OUTPUT}/user_analysis.csv", index=False)
 
     return final_df
 
@@ -84,7 +85,7 @@ def generate_random_sample(all_users_df):
 
     random_sample = all_users_df.sample(n=NUM_SAMPLE, random_state=RANDOM_STATE)
     random_sample.to_csv(
-        f"{CLEAN_DATA_PATH}/random_sample.csv",
+        f"{ANALYSIS_OUTPUT}/random_sample.csv",
         index=False,
         encoding="utf-8-sig",
     )
@@ -98,5 +99,3 @@ if __name__ == "__main__":
     # final_df = get_percentages(user_types, user_cities)
     final_classification_df = get_percentages(user_classifications, user_cities)
     generate_random_sample(all_users_df)
-
-    print(final_classification_df)
