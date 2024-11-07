@@ -55,7 +55,7 @@ def user_counting(users_df):
                                           columns="location_match",
                                           values="user_count")
 
-    print(match_pivot)
+    return match_pivot
 
 
 if __name__ == "__main__":
@@ -72,5 +72,9 @@ if __name__ == "__main__":
 
     default_users.to_csv(f"{ANALYSIS_OUTPUT}/location_matches.csv",
                          encoding="utf-8-sig", index=False)
-    
-    user_counting(default_users)
+
+    user_counting = user_counting(default_users)
+
+    default_users.to_csv(f"{ANALYSIS_OUTPUT}/location_matches.csv",
+                         encoding="utf-8-sig", index=False)
+
