@@ -12,9 +12,17 @@ CITIES = [
     "kinshasa",
     "kolkata",
     "london",
-    "phuket",
+    "mexico city",
     "mumbai",
+    "phuket",
+    "texas",
 ]
 
 
 PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
+
+
+CITIES_DICT = {
+    "mexico city": ["cdmx", "ciudad de mexico"],
+    "texas": ["tx"],
+}

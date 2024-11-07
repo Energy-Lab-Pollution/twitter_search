@@ -84,13 +84,13 @@ class CSVConcat:
             [normal_distinct_users, expanded_distinct_users], ignore_index=True
         )
 
-        if os.path.exists(self.MASTER_DATA_PATH):
+        if not os.path.exists(self.MASTER_DATA_PATH):
             print("Creating path for master dataset...")
             os.makedirs(self.MASTER_DATA_PATH)
 
         master_dataset.to_csv(
             f"{self.MASTER_DATA_PATH}/master_dataset.csv",
-            ignore_index=True,
+            index=False,
         )
         print("Saved master dataset")
 
@@ -104,6 +104,8 @@ class CSVConcat:
             self.concat_files(
                 str_to_look, str_to_avoid, self.file_dict[str_to_look]
             )
+
+        self.generate_master_dataset()
 
 
 if __name__ == "__main__":

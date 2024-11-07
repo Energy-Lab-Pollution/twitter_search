@@ -6,6 +6,8 @@ __pycache__
 raw_data
 cleaned_data
 labeled_data
+master_dataset
+analysis_outputs
 
 # IDE files and misc.
 .idea
