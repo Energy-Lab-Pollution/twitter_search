@@ -17,28 +17,32 @@ def check_location(raw_location, target_location):
     Uses regex to see if the raw location matches
     the target location
     """
-    raw_location = target_location.lower().strip()
-    target_location = target_location.lower().strip()
+    if isinstance(raw_location, str):
 
-    location_regex = re.findall(r"[a-zA-Z]", raw_location)
+        raw_location = raw_location.lower().strip()
+        target_location = target_location.lower().strip()
 
-    if location_regex[0]:
-        raw_location = location_regex[0]
+        location_regex = re.findall(r"\w+", raw_location)
 
-        if target_location in raw_location:
-            return True
+        if location_regex:
+            if target_location in location_regex:
+                return True
+            else:
+                return False
         else:
             return False
     else:
         return False
 
 
-default_users = pd.read_csv(
-    f"{CLEAN_DATA_PATH}/all_distinct_users.csv", encoding="utf-8-sig"
-)
+if __name__ == "__main__":
 
+    default_users = pd.read_csv(
+        f"{CLEAN_DATA_PATH}/all_distinct_users.csv", encoding="utf-8-sig"
+    )
 
-target_locations = list(default_users.loc[:, "search_location"].unique())
-raw_locations = list(default_users.loc[:, "location"].unique())
+    default_users.loc[:, "location_match"] = default_users.apply(
+        lambda x: check_location(x.location, x.search_location), axis=1
+    )
 
-print(raw_locations)
+    print(default_users.loc[:, ["location", "search_location", "location_match"]])
