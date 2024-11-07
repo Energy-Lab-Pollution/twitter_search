@@ -68,12 +68,13 @@ if __name__ == "__main__":
         lambda x: check_location(x.location, x.search_location), axis=1
     )
 
-    print(default_users.loc[:, ["location", "search_location", "location_match"]])
+    default_users = default_users.loc[:, ["user_id", "location", "search_location",
+                                          "location_match"]]
 
     default_users.to_csv(f"{ANALYSIS_OUTPUT}/location_matches.csv",
                          encoding="utf-8-sig", index=False)
 
-    user_counting = user_counting(default_users)
+    user_counts = user_counting(default_users)
 
-    default_users.to_csv(f"{ANALYSIS_OUTPUT}/location_matches_counts.csv",
-                         encoding="utf-8-sig", index=False)
+    user_counts.to_csv(f"{ANALYSIS_OUTPUT}/location_matches_counts.csv",
+                       encoding="utf-8-sig")
