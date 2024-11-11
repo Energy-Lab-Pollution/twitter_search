@@ -112,19 +112,19 @@ class TwitterDataHandler:
         print("Checking if city is in secondary cities dictionary")
         if self.location in CITIES_DICT:
             print(f"{self.location} found in alias dict")
-            self.location = CITIES_DICT[self.location]
+            file_city = CITIES_DICT[self.location]
 
         self.paths = {
             "output_file_users": self.base_dir
-            / f"{self.location}_{self.account_type}_users_test.json",
+            / f"{file_city}_{self.account_type}_users_test.json",
             "output_file_tweets": self.base_dir
-            / f"{self.location}_{self.account_type}_tweets_test.json",
+            / f"{file_city}_{self.account_type}_tweets_test.json",
             "output_file_processing": self.base_dir
-            / f"{self.location}_{self.account_type}_processed_users.json",
+            / f"{file_city}_{self.account_type}_processed_users.json",
             "output_file_filter": self.base_dir
-            / f"{self.location}_{self.account_type}_users_filtered_{count}.json",
+            / f"{file_city}_{self.account_type}_users_filtered_{count}.json",
             "output_file_tweet_add": self.base_dir
-            / f"{self.location}_{self.account_type}_users_tweet_added",
+            / f"{file_city}_{self.account_type}_users_tweet_added",
         }
 
         input_file_processing = (
@@ -141,7 +141,7 @@ class TwitterDataHandler:
         else:
             self.paths["input_file_filter"] = (
                 self.base_dir
-                / f"{self.location}_{self.account_type}_totalusers_{count - 1}.json"
+                / f"{file_city}_{self.account_type}_totalusers_{count - 1}.json"
             )
 
     def process_iteration(self, count):
