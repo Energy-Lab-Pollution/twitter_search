@@ -247,7 +247,7 @@ class TwitterDataHandler:
 
     def reclassify_all_accounts(self):
         """
-        Performs the re-classification process fir all accounts
+        Performs the re-classification process for all accounts
         """
         account_types = self.QUERIES
         for account_type in account_types:

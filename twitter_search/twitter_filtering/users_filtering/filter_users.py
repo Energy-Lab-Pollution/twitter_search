@@ -5,12 +5,9 @@ Script in charge of filtering users based on their location and content relevanc
 import concurrent.futures
 import json
 import os
-from pathlib import Path
 
-import geopandas as gpd
 import torch
 from config_utils import constants, util
-from shapely.geometry import Point
 from tqdm import tqdm
 from transformers import pipeline
 
@@ -18,7 +15,6 @@ from transformers import pipeline
 class UserFilter:
     SCORE_THRESHOLD = constants.SCORE_THRESHOLD
     RELEVANT_LABELS = constants.RELEVANT_LABELS
-    STATE_CAPITALS = constants.STATE_CAPITALS
     NUM_WORKERS = constants.NUM_WORKERS
     BATCH_SIZE = constants.BATCH_SIZE
 
@@ -40,11 +36,6 @@ class UserFilter:
             constants.HUGGINGFACE_PIPELINE,
             model=constants.HUGGINGFACE_MODEL,
             device=device,
-        )
-        # TODO, based on location, select the appropriate shape file.
-        self.shapefile_path = (
-            Path(__file__).parent.parent
-            / "utils/shape_files/geoBoundaries-IND-ADM1-all/geoBoundaries-IND-ADM1_simplified.shp"
         )
 
     def load_and_preprocess_data(self):
@@ -248,64 +239,6 @@ class UserFilter:
         self.unclassified_users = self.classify_users_in_batches(
             self.unclassified_users, batch_size=self.BATCH_SIZE
         )
-
-    def determine_location_relevance(self):
-        """Determine the relevance of
-        user location"""
-
-        for user in self.unclassified_users:
-            if "geo_location" not in user:
-                raise ValueError(
-                    f"User geo_location not found, present fields are: {user.keys()}"
-                )
-            else:
-                if (
-                    user["geo_location"] is not None
-                    and None not in user["geo_location"]
-                ):
-                    # Assuming user['geo_location'] is always a list
-                    # with two elements (latitude and longitude)
-                    # latitude, longitude = user['geo_location']
-                    user_location = gpd.GeoDataFrame(
-                        {
-                            "geometry": [
-                                Point(
-                                    user["geo_location"][1],
-                                    user["geo_location"][0],
-                                )
-                            ]
-                        },
-                        crs="EPSG:4326",
-                    )
-
-                    shapefile = gpd.read_file(self.shapefile_path)
-                    joined_data = gpd.sjoin(
-                        user_location, shapefile, how="left", predicate="within"
-                    )
-                    try:
-                        subnational = joined_data["shapeName"].iloc[0]
-                        if isinstance(subnational, float):
-                            print(
-                                f"Subnational is float, skipping user: {user['username']}"
-                            )
-                            subnational = None
-                            user["location_relevance"] = False
-                            continue
-                        else:
-                            subnational = subnational.lower()
-                    except Exception as e:
-                        print(f"Error determining subnational location: {e}")
-                        subnational = None
-                    print(subnational, "subnational")
-                    desired_locations = self.STATE_CAPITALS.get(
-                        self.location, []
-                    )
-                    print("desired locations", desired_locations)
-                    user["location_relevance"] = (
-                        subnational in desired_locations
-                    )
-                else:
-                    user["location_relevance"] = False
 
     def remove_users(self):
         """

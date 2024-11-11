@@ -41,7 +41,6 @@ class UserSearcher:
 
         print("Clients initiated")
 
-
     def search_tweets(self, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS):
         """
         Search for recent tweets based on a query.
