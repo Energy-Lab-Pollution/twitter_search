@@ -7,6 +7,7 @@ CITIES = [
     "chicago",
     "delhi",
     "guatemala",
+    "houston",
     "kanpur",
     "kigali",
     "kinshasa",
@@ -15,7 +16,6 @@ CITIES = [
     "mexico city",
     "mumbai",
     "phuket",
-    "texas",
 ]
 
 

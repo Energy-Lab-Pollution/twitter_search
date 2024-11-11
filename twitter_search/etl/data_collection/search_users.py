@@ -26,10 +26,8 @@ class UserSearcher:
     def __init__(
         self, location, output_file_users, output_file_tweets, query=None
     ):
-        if query is None:
-            self.query = self.query_builder(location)
-        else:
-            self.query = query
+
+        self.query = query
         self.location = location
         self.total_tweets = []
         self.total_users = []
@@ -43,11 +41,6 @@ class UserSearcher:
 
         print("Clients initiated")
 
-    def query_builder(self, location):
-        return f"(air pollution {location} OR {location} air OR {location} \
-            pollution OR {location} public health OR bad air {location} OR \
-            {location} asthma OR {location} polluted OR pollution control board) \
-            (#pollution OR #environment OR #cleanair OR #airquality) -is:retweet"
 
     def search_tweets(self, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS):
         """
