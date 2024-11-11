@@ -3,11 +3,13 @@ This script is used to create class Query. Query class' attributes help in build
 the query for the required use-case
 """
 
-from config_utils.queries import QUERIES
-
+from config_utils.queries import QUERIES, QUERIES_DICT
+from config_utils.cities import CITIES_DICT, CITIES_LANGS
 
 class Query:
     QUERIES = QUERIES
+    QUERIES_DICT = QUERIES_DICT
+    CITIES_LANGS
 
     def __init__(self, location, account_type):
         self.location = location
