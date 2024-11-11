@@ -46,3 +46,7 @@ QUERIES_ES = {
                     (salud publica) OR (poor air) OR asma OR contaminado OR contaminada
                     OR smog OR (calidad del aire) OR (medio ambiente)) -is:retweet""",
 }
+
+
+QUERIES_DICT = {"en": QUERIES,
+                "es": QUERIES_ES}
