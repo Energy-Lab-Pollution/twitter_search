@@ -3,18 +3,15 @@ This script processes and parses the tweets corresponding to each user
 """
 
 # Local imports
-from config_utils import constants, util
-from geopy.geocoders import Nominatim
+from config_utils import util
 
 
 class TweetProcessor:
     def __init__(self, location, account_type, input_file_tuple, output_file):
         self.location = location
         self.account_type = account_type
-        self.geolocator = Nominatim(user_agent="EnergyLab")
         self.input_file_tweets, self.input_file_users = input_file_tuple
         self.output_file = output_file
-        self.STATE_CAPITALS = constants.STATE_CAPITALS
 
     def get_coordinates(self, location):
         """
@@ -45,7 +42,8 @@ class TweetProcessor:
             #     print(domain_name)
             #     entity_name = annotation["entity"].get("name", "").lower()
             #     print(entity_name)
-            #     relevant_categories = constants.category_dict.get(self.account_type,[])
+            #     relevant_categories = constants.category_dict.get(self.account_type,
+            #      [])
             #     if domain_name in relevant_categories:
             #     entity_list.append({domain_name:entity_name})
             #     is_relevant = (domain_name in relevant_categories ) and \
