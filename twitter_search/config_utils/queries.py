@@ -31,9 +31,9 @@ QUERIES_ES = {
                        OR (non-profit location) OR (location institucion) OR
                        (non-governmental organization location) OR (nonprofit location))
                        -is:retweet""",
-    "policymaker": """location ((member of parliament) OR gobernador OR ministro
-                    OR magistrado OR diputado OR senador OR cabinete OR (gobierno local)
-                    OR (MLA) OR (MP) OR gobierno OR municipio OR delegacion)
+    "policymaker": """location (OR gobernador OR ministro OR magistrado OR diputado
+                    OR senador OR gabinete OR (gobierno local) OR gobierno OR
+                    municipio OR delegacion OR ministerio)
                     -is:retweet""",
     "politicians": """location (politica OR politicos OR politico OR politicas)
                       -is:retweet""",
