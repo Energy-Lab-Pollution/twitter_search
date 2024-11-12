@@ -6,7 +6,7 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
-from config_utils.cities import CITIES, PILOT_CITIES
+from config_utils.cities import ALIAS_DICT, CITIES, PILOT_CITIES
 from config_utils.queries import QUERIES
 from etl.data_collection.get_extra_tweets import TweetGetter
 from etl.data_collection.search_users import UserSearcher
@@ -106,18 +106,29 @@ class TwitterDataHandler:
 
         Args:
             count (int): The current iteration count.
+
+        We check if the current location is an alias of a main city
+        and set the files accordingly
         """
+
+        print("Checking if city is in secondary cities dictionary")
+        if self.location in ALIAS_DICT:
+            print(f"{self.location} found in alias dict")
+            file_city = ALIAS_DICT[self.location]
+        else:
+            file_city = self.location
+
         self.paths = {
             "output_file_users": self.base_dir
-            / f"{self.location}_{self.account_type}_users_test.json",
+            / f"{file_city}_{self.account_type}_users_test.json",
             "output_file_tweets": self.base_dir
-            / f"{self.location}_{self.account_type}_tweets_test.json",
+            / f"{file_city}_{self.account_type}_tweets_test.json",
             "output_file_processing": self.base_dir
-            / f"{self.location}_{self.account_type}_processed_users.json",
+            / f"{file_city}_{self.account_type}_processed_users.json",
             "output_file_filter": self.base_dir
-            / f"{self.location}_{self.account_type}_users_filtered_{count}.json",
+            / f"{file_city}_{self.account_type}_users_filtered_{count}.json",
             "output_file_tweet_add": self.base_dir
-            / f"{self.location}_{self.account_type}_users_tweet_added",
+            / f"{file_city}_{self.account_type}_users_tweet_added",
         }
 
         input_file_processing = (
@@ -134,7 +145,7 @@ class TwitterDataHandler:
         else:
             self.paths["input_file_filter"] = (
                 self.base_dir
-                / f"{self.location}_{self.account_type}_totalusers_{count - 1}.json"
+                / f"{file_city}_{self.account_type}_totalusers_{count - 1}.json"
             )
 
     def process_iteration(self, count):
@@ -178,7 +189,6 @@ class TwitterDataHandler:
         print(query.text)
 
         user_searcher = UserSearcher(
-            self.location,
             self.paths["output_file_users"],
             self.paths["output_file_tweets"],
             query.text,
@@ -188,7 +198,6 @@ class TwitterDataHandler:
             print("No users found.")
             return
         processor = TweetProcessor(
-            self.location,
             self.account_type,
             self.paths["input_file_processing"],
             self.paths["output_file_processing"],
@@ -201,7 +210,6 @@ class TwitterDataHandler:
         we deemed relevant.
         """
         self.tweet_getter = TweetGetter(
-            self.location,
             self.paths["output_file_processing"],
             self.paths["output_file_tweet_add"],
         )
@@ -214,7 +222,6 @@ class TwitterDataHandler:
         """
         print("Filtering Twitter users based on location...")
         self.user_filter = UserFilter(
-            self.location,
             self.paths["input_file_filter"],
             self.paths["output_file_filter"],
         )
@@ -229,7 +236,6 @@ class TwitterDataHandler:
         self.setup_file_paths(COUNT)
         print("Reclassifying Twitter users based on location...")
         self.user_filter = UserFilter(
-            self.location,
             self.paths["input_file_filter"],
             self.paths["output_file_filter"],
         )
@@ -247,7 +253,7 @@ class TwitterDataHandler:
 
     def reclassify_all_accounts(self):
         """
-        Performs the re-classification process fir all accounts
+        Performs the re-classification process for all accounts
         """
         account_types = self.QUERIES
         for account_type in account_types:

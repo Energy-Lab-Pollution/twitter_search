@@ -15,7 +15,6 @@ class UserSearcher:
     A class for searching users based on location and optional query.
 
     Attributes:
-        location (str): The location for which users are being searched.
         query (str): The optional query string. If not provided, a default
         query is generated based on the location.
         search_tweets_result: Placeholder for storing search results.
@@ -23,14 +22,8 @@ class UserSearcher:
         client: tweepy client
     """
 
-    def __init__(
-        self, location, output_file_users, output_file_tweets, query=None
-    ):
-        if query is None:
-            self.query = self.query_builder(location)
-        else:
-            self.query = query
-        self.location = location
+    def __init__(self, output_file_users, output_file_tweets, query=None):
+        self.query = query
         self.total_tweets = []
         self.total_users = []
         self.twitter_client = util.client_creator()
@@ -42,12 +35,6 @@ class UserSearcher:
         self.date_digits = 10
 
         print("Clients initiated")
-
-    def query_builder(self, location):
-        return f"(air pollution {location} OR {location} air OR {location} \
-            pollution OR {location} public health OR bad air {location} OR \
-            {location} asthma OR {location} polluted OR pollution control board) \
-            (#pollution OR #environment OR #cleanair OR #airquality) -is:retweet"
 
     def search_tweets(self, MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS):
         """

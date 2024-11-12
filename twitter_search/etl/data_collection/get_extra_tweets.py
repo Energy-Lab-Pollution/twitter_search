@@ -21,8 +21,7 @@ class TweetGetter:
     This class is in charge of getting tweets for any user.
     """
 
-    def __init__(self, location, input_file, output_file):
-        self.location = location
+    def __init__(self, input_file, output_file):
         self.input_file = input_file
         self.output_file = output_file
         self.MAX_RESULTS = MAX_TWEETS_FROM_USERS

@@ -7,6 +7,7 @@ CITIES = [
     "chicago",
     "delhi",
     "guatemala",
+    "houston",
     "kanpur",
     "kigali",
     "kinshasa",
@@ -15,14 +16,36 @@ CITIES = [
     "mexico city",
     "mumbai",
     "phuket",
-    "texas",
 ]
 
 
 PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
 
 
-CITIES_DICT = {
-    "mexico city": ["cdmx", "ciudad de mexico"],
-    "texas": ["tx"],
+ALIAS_DICT = {
+    "cdmx": "mexico city",
+    "ciudad de mexico": "mexico city",
+    "distrito federal": "mexico city",
+    "mexico df": "mexico city",
+    "bengaluru": "bangalore",
+}
+
+CITIES_LANGS = {
+    "abuja": "en",
+    "bangalore": "en",
+    "bangkok": "en",
+    "chennai": "en",
+    "chiang mai": "en",
+    "chicago": "en",
+    "delhi": "en",
+    "guatemala": "es",
+    "houston": "es",
+    "kanpur": "en",
+    "kigali": "en",
+    "kinshasa": "en",
+    "kolkata": "en",
+    "london": "en",
+    "mexico city": "es",
+    "mumbai": "en",
+    "phuket": "en",
 }

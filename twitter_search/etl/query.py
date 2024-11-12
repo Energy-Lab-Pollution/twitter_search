@@ -3,11 +3,13 @@ This script is used to create class Query. Query class' attributes help in build
 the query for the required use-case
 """
 
-from config_utils.queries import QUERIES
+from config_utils.cities import ALIAS_DICT, CITIES_LANGS
+from config_utils.queries import QUERIES_DICT
 
 
 class Query:
-    QUERIES = QUERIES
+    QUERIES_DICT = QUERIES_DICT
+    CITIES_LANGS = CITIES_LANGS
 
     def __init__(self, location, account_type):
         self.location = location
@@ -29,8 +31,23 @@ class Query:
         The function extracts the query from the QUERIES dictionary,
         and also replaces the location with the appropiate one
         """
-        if self.account_type in QUERIES.keys():
-            query = QUERIES[self.account_type]
+
+        print("Checking if given city is in alias dictionary")
+        if self.location in ALIAS_DICT:
+            print(f"{self.location} found in alias dict")
+            main_city = ALIAS_DICT[self.location]
+
+            print(
+                f"Getting language and queries for {self.location}- {main_city}"
+            )
+            language = self.CITIES_LANGS[main_city]
+            queries = QUERIES_DICT[language]
+
+        else:
+            queries = QUERIES_DICT["en"]
+
+        if self.account_type in queries.keys():
+            query = queries[self.account_type]
             query = query.replace("location", self.location)
             return query
         else:
