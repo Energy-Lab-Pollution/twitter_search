@@ -15,7 +15,6 @@ class UserSearcher:
     A class for searching users based on location and optional query.
 
     Attributes:
-        location (str): The location for which users are being searched.
         query (str): The optional query string. If not provided, a default
         query is generated based on the location.
         search_tweets_result: Placeholder for storing search results.
