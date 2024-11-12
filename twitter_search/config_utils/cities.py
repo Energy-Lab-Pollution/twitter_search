@@ -22,7 +22,7 @@ CITIES = [
 PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
 
 
-CITIES_DICT = {
+ALIAS_DICT = {
     "cdmx": "mexico city",
     "ciudad de mexico": "mexico city"
 }

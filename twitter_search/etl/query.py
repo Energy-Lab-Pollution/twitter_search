@@ -3,7 +3,7 @@ This script is used to create class Query. Query class' attributes help in build
 the query for the required use-case
 """
 
-from config_utils.cities import CITIES_DICT, CITIES_LANGS
+from config_utils.cities import ALIAS_DICT, CITIES_LANGS
 from config_utils.queries import QUERIES_DICT
 
 
@@ -32,10 +32,10 @@ class Query:
         and also replaces the location with the appropiate one
         """
 
-        print("Checking if city is in secondary cities dictionary")
-        if self.location in CITIES_DICT:
+        print("Checking if given city is in alias dictionary")
+        if self.location in ALIAS_DICT:
             print(f"{self.location} found in alias dict")
-            main_city = CITIES_DICT[self.location]
+            main_city = ALIAS_DICT[self.location]
 
             print(f"Getting language and queries for  {self.location}- {main_city}")
             language = self.CITIES_LANGS[main_city]

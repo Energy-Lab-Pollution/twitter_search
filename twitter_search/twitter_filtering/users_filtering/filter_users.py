@@ -18,7 +18,7 @@ class UserFilter:
     NUM_WORKERS = constants.NUM_WORKERS
     BATCH_SIZE = constants.BATCH_SIZE
 
-    def __init__(self, location, input_file, output_file):
+    def __init__(self, input_file, output_file):
         """
         Initialize UserFilter with a specific location.
 
@@ -26,7 +26,6 @@ class UserFilter:
             location (str): The location to filter users from.
         """
 
-        self.location = location
         self.input_file = input_file
         self.output_file = output_file
 

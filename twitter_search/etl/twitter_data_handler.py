@@ -6,8 +6,8 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
-from config_utils.cities import CITIES, PILOT_CITIES, CITIES_DICT, CITIES_LANGS
-from config_utils.queries import QUERIES, QUERIES_DICT
+from config_utils.cities import CITIES, PILOT_CITIES, ALIAS_DICT
+from config_utils.queries import QUERIES
 from etl.data_collection.get_extra_tweets import TweetGetter
 from etl.data_collection.search_users import UserSearcher
 from etl.data_collection.tweet_processor import TweetProcessor
@@ -33,7 +33,6 @@ class TwitterDataHandler:
         self.account_type = account_type
         self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/raw_data"
-        self.city_language = CITIES_LANGS[self.location]
 
     def run_all_locations_accounts(self, skip_media=False):
         """
@@ -110,9 +109,9 @@ class TwitterDataHandler:
         """
 
         print("Checking if city is in secondary cities dictionary")
-        if self.location in CITIES_DICT:
+        if self.location in ALIAS_DICT:
             print(f"{self.location} found in alias dict")
-            file_city = CITIES_DICT[self.location]
+            file_city = ALIAS_DICT[self.location]
 
         self.paths = {
             "output_file_users": self.base_dir
