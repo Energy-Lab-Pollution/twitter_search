@@ -8,7 +8,6 @@ import os
 import googlemaps
 import pandas as pd
 import tweepy
-
 # Local imports
 from config_utils import config
 from config_utils.constants import GEOCODE_TIMEOUT
