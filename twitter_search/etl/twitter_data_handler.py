@@ -6,7 +6,7 @@ This script runs the Twitter search, data collection and filtering process.
 
 from pathlib import Path
 
-from config_utils.cities import CITIES, PILOT_CITIES, ALIAS_DICT
+from config_utils.cities import ALIAS_DICT, CITIES, PILOT_CITIES
 from config_utils.queries import QUERIES
 from etl.data_collection.get_extra_tweets import TweetGetter
 from etl.data_collection.search_users import UserSearcher
@@ -112,6 +112,8 @@ class TwitterDataHandler:
         if self.location in ALIAS_DICT:
             print(f"{self.location} found in alias dict")
             file_city = ALIAS_DICT[self.location]
+        else:
+            file_city = self.location
 
         self.paths = {
             "output_file_users": self.base_dir
@@ -184,7 +186,6 @@ class TwitterDataHandler:
         print(query.text)
 
         user_searcher = UserSearcher(
-            self.location,
             self.paths["output_file_users"],
             self.paths["output_file_tweets"],
             query.text,

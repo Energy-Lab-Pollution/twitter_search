@@ -24,11 +24,10 @@ class UserSearcher:
     """
 
     def __init__(
-        self, location, output_file_users, output_file_tweets, query=None
+        self, output_file_users, output_file_tweets, query=None
     ):
 
         self.query = query
-        self.location = location
         self.total_tweets = []
         self.total_users = []
         self.twitter_client = util.client_creator()
