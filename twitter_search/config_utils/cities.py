@@ -24,7 +24,10 @@ PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
 
 ALIAS_DICT = {
     "cdmx": "mexico city",
-    "ciudad de mexico": "mexico city"
+    "ciudad de mexico": "mexico city",
+    "distrito federal": "mexico city",
+    "mexico df": "mexico city",
+    "bengaluru": "bangalore",
 }
 
 CITIES_LANGS = {

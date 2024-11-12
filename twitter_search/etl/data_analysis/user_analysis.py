@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
+
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"

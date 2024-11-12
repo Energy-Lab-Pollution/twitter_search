@@ -37,12 +37,14 @@ class Query:
             print(f"{self.location} found in alias dict")
             main_city = ALIAS_DICT[self.location]
 
-            print(f"Getting language and queries for  {self.location}- {main_city}")
+            print(
+                f"Getting language and queries for {self.location}- {main_city}"
+            )
             language = self.CITIES_LANGS[main_city]
             queries = QUERIES_DICT[language]
 
         else:
-            queries = QUERIES_DICT['en']
+            queries = QUERIES_DICT["en"]
 
         if self.account_type in queries.keys():
             query = queries[self.account_type]

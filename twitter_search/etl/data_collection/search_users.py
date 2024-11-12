@@ -22,10 +22,7 @@ class UserSearcher:
         client: tweepy client
     """
 
-    def __init__(
-        self, output_file_users, output_file_tweets, query=None
-    ):
-
+    def __init__(self, output_file_users, output_file_tweets, query=None):
         self.query = query
         self.total_tweets = []
         self.total_users = []

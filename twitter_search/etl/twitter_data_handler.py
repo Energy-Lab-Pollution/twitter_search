@@ -106,6 +106,9 @@ class TwitterDataHandler:
 
         Args:
             count (int): The current iteration count.
+
+        We check if the current location is an alias of a main city
+        and set the files accordingly
         """
 
         print("Checking if city is in secondary cities dictionary")

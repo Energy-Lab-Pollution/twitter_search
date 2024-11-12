@@ -48,5 +48,4 @@ QUERIES_ES = {
 }
 
 
-QUERIES_DICT = {"en": QUERIES,
-                "es": QUERIES_ES}
+QUERIES_DICT = {"en": QUERIES, "es": QUERIES_ES}
