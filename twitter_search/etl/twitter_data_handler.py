@@ -207,7 +207,6 @@ class TwitterDataHandler:
         we deemed relevant.
         """
         self.tweet_getter = TweetGetter(
-            self.location,
             self.paths["output_file_processing"],
             self.paths["output_file_tweet_add"],
         )
@@ -220,7 +219,6 @@ class TwitterDataHandler:
         """
         print("Filtering Twitter users based on location...")
         self.user_filter = UserFilter(
-            self.location,
             self.paths["input_file_filter"],
             self.paths["output_file_filter"],
         )
@@ -235,7 +233,6 @@ class TwitterDataHandler:
         self.setup_file_paths(COUNT)
         print("Reclassifying Twitter users based on location...")
         self.user_filter = UserFilter(
-            self.location,
             self.paths["input_file_filter"],
             self.paths["output_file_filter"],
         )
