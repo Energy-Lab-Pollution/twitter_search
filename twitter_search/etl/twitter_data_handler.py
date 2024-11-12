@@ -194,7 +194,6 @@ class TwitterDataHandler:
             print("No users found.")
             return
         processor = TweetProcessor(
-            self.location,
             self.account_type,
             self.paths["input_file_processing"],
             self.paths["output_file_processing"],

@@ -7,8 +7,7 @@ from config_utils import util
 
 
 class TweetProcessor:
-    def __init__(self, location, account_type, input_file_tuple, output_file):
-        self.location = location
+    def __init__(self, account_type, input_file_tuple, output_file):
         self.account_type = account_type
         self.input_file_tweets, self.input_file_users = input_file_tuple
         self.output_file = output_file
