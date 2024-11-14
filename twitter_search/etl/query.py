@@ -40,11 +40,11 @@ class Query:
             print(
                 f"Getting language and queries for {self.location}- {main_city}"
             )
-            language = self.CITIES_LANGS[main_city]
-            queries = QUERIES_DICT[language]
-
         else:
-            queries = QUERIES_DICT["en"]
+            main_city = self.location
+
+        language = self.CITIES_LANGS[main_city]
+        queries = QUERIES_DICT[language]
 
         if self.account_type in queries.keys():
             query = queries[self.account_type]

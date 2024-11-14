@@ -39,7 +39,7 @@ CITIES_LANGS = {
     "chicago": "en",
     "delhi": "en",
     "guatemala": "es",
-    "houston": "es",
+    "houston": "en",
     "kanpur": "en",
     "kigali": "en",
     "kinshasa": "en",
