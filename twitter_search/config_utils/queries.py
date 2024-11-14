@@ -1,3 +1,6 @@
+"""
+Dictionary with the current queries for searching users
+"""
 # QUERY DICTIONARY
 QUERIES = {
     "media": """location (media OR press OR coverage OR broadcasting
@@ -32,9 +35,10 @@ QUERIES_ES = {
                         (location institucion) OR
                         (non-governmental organization location)
                         OR (nonprofit location)) -is:retweet""",
-    "policymaker": """location (OR gobernador OR ministro OR magistrado OR diputado
+    "policymaker": """location (gobernador OR ministro OR magistrado OR diputado
                     OR senador OR gabinete OR (gobierno local) OR gobierno OR
-                    municipio OR delegacion OR ministerio)
+                    municipio OR delegacion OR ministerio OR legislador OR legisladores
+                    OR legislacion OR legisladora)
                     -is:retweet""",
     "politicians": """location (politica OR politicos OR politico OR politicas)
                       -is:retweet""",

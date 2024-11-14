@@ -1,3 +1,7 @@
+"""
+Script with constants for the cities to look for
+"""
+
 CITIES = [
     "abuja",
     "bangalore",
@@ -28,6 +32,7 @@ ALIAS_DICT = {
     "distrito federal": "mexico city",
     "mexico df": "mexico city",
     "bengaluru": "bangalore",
+    "ciudad de guatemala": "guatemala",
 }
 
 CITIES_LANGS = {
@@ -39,7 +44,7 @@ CITIES_LANGS = {
     "chicago": "en",
     "delhi": "en",
     "guatemala": "es",
-    "houston": "es",
+    "houston": "en",
     "kanpur": "en",
     "kigali": "en",
     "kinshasa": "en",
