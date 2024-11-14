@@ -32,7 +32,7 @@ ALIAS_DICT = {
     "distrito federal": "mexico city",
     "mexico df": "mexico city",
     "bengaluru": "bangalore",
-    "ciudad de guatemala": "guatemala"
+    "ciudad de guatemala": "guatemala",
 }
 
 CITIES_LANGS = {
