@@ -217,8 +217,7 @@ class TwitterDataHandler:
 
     def filter_users(self):
         """
-        Filter Twitter users based on location and
-        relevance.
+        Filter Twitter users based on content relevance.
         """
         print("Filtering Twitter users based on location...")
         self.user_filter = UserFilter(

@@ -1,3 +1,7 @@
+"""
+Script with constants for the cities to look for
+"""
+
 CITIES = [
     "abuja",
     "bangalore",
