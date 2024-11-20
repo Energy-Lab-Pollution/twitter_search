@@ -166,7 +166,7 @@ class ModelFinetuner:
         train_dataset, test_dataset = self.split_data(labeled_data)
 
         # Initialize the Trainer with train and eval datasets
-        trainer = Trainer(
+        self.trainer = Trainer(
             model=self.model,
             args=self.training_args,
             train_dataset=train_dataset,
@@ -174,8 +174,8 @@ class ModelFinetuner:
         )
 
         # Fine-tune the model
-        trainer.train()
+        self.trainer.train()
 
         # Evaluate the model on the test set
-        eval_results = trainer.evaluate()
+        eval_results = self.trainer.evaluate()
         print("Evaluation Results:", eval_results)
