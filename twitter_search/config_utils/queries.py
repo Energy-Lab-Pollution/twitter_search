@@ -30,11 +30,10 @@ QUERIES_ES = {
     "media": """location (media OR prensa OR periodico OR transmision
                           OR periodismo OR periodista
                           OR local OR noticias) -is:retweet""",
-    "organizations": """((NGO location) OR (organizacion location) OR (organizaciones)
-                        OR (organizacion civil location) OR (non-profit location) OR
-                        (location institucion) OR
-                        (non-governmental organization location)
-                        OR (nonprofit location)) -is:retweet""",
+    "organizations": """location ("NGO" OR "organizacion" OR "organizaciones" OR
+                     "organizacion civil" OR "non-profit" OR "institucion" OR
+                     "sin fines de lucro" OR "non-governmental organization" OR
+                     "nonprofit") -is:retweet""",
     "policymaker": """location (gobernador OR ministro OR magistrado OR diputado
                     OR senador OR gabinete OR (gobierno local) OR gobierno OR
                     municipio OR delegacion OR ministerio OR legislador OR legisladores

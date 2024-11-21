@@ -42,6 +42,9 @@ class ModelFinetuner:
     CLEAN_DATA_PATH = project_root / "data" / "labeled_data"
     FINETUNING_PATH = project_root / "finetuning_results"
 
+    # Model repo name
+    REPO_NAME = "twitter-finetuned-bart"
+
     def __init__(self):
         # Load tokenizer and pre-trained model
         self.tokenizer = BartTokenizer.from_pretrained(self.HUGGINGFACE_MODEL)
@@ -166,7 +169,7 @@ class ModelFinetuner:
         train_dataset, test_dataset = self.split_data(labeled_data)
 
         # Initialize the Trainer with train and eval datasets
-        trainer = Trainer(
+        self.trainer = Trainer(
             model=self.model,
             args=self.training_args,
             train_dataset=train_dataset,
@@ -174,8 +177,15 @@ class ModelFinetuner:
         )
 
         # Fine-tune the model
-        trainer.train()
+        self.trainer.train()
 
         # Evaluate the model on the test set
-        eval_results = trainer.evaluate()
+        eval_results = self.trainer.evaluate()
+        # Save the model locally
+        self.model.save_pretrained(f"{self.FINETUNING_PATH}/model")
+        self.tokenizer.save_pretrained(f"{self.FINETUNING_PATH}/model")
         print("Evaluation Results:", eval_results)
+
+        # Push to the Hugging Face model hub
+        # self.model.push_to_hub(self.REPO_NAME)
+        # self.tokenizer.push_to_hub(self.REPO_NAME)
