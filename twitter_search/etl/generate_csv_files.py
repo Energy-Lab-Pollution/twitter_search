@@ -8,6 +8,7 @@ from data_cleaning.csv_converter import CSVConverter
 
 
 CITIES = [
+    "abuja",
     "bangalore",
     "bangkok",
     "chennai",
@@ -15,11 +16,15 @@ CITIES = [
     "chicago",
     "delhi",
     "guatemala",
+    "houston",
     "kanpur",
     "kigali",
+    "kinshasa",
     "kolkata",
-    "phuket",
+    "london",
+    "mexico city",
     "mumbai",
+    "phuket",
 ]
 
 
