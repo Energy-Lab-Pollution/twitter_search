@@ -85,9 +85,9 @@ def get_percentages(user_types, user_cities, filename):
     final_df = final_df.pivot_table(
         index="content_labels", values="count", columns="search_location"
     )
-    final_df.reset_index(drop=False, inplace=True)
+    # final_df.reset_index(drop=False, inplace=True)
     final_df = final_df.transpose()
-    final_df.to_csv(f"{ANALYSIS_OUTPUT}/{filename}", index=False)
+    final_df.to_csv(f"{ANALYSIS_OUTPUT}/{filename}", index=True)
 
     return final_df
 
