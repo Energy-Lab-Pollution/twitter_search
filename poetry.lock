@@ -168,6 +168,26 @@ files = [
 frozenlist = ">=1.1.0"
 
 [[package]]
+name = "anyio"
+version = "4.6.2.post1"
+description = "High level compatibility layer for multiple asynchronous event loop implementations"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "anyio-4.6.2.post1-py3-none-any.whl", hash = "sha256:6d170c36fba3bdd840c73d3868c1e777e33676a69c3a72cf0a0d5d6d8009b61d"},
+    {file = "anyio-4.6.2.post1.tar.gz", hash = "sha256:4c8bc31ccdb51c7f7bd251f51c609e038d63e34219b44aa86e47576389880b4c"},
+]
+
+[package.dependencies]
+idna = ">=2.8"
+sniffio = ">=1.1"
+
+[package.extras]
+doc = ["Sphinx (>=7.4,<8.0)", "packaging", "sphinx-autodoc-typehints (>=1.2.0)", "sphinx-rtd-theme"]
+test = ["anyio[trio]", "coverage[toml] (>=7)", "exceptiongroup (>=1.2.0)", "hypothesis (>=4.0)", "psutil (>=5.9)", "pytest (>=7.0)", "pytest-mock (>=3.6.1)", "trustme", "truststore (>=0.9.1)", "uvloop (>=0.21.0b1)"]
+trio = ["trio (>=0.26.1)"]
+
+[[package]]
 name = "attrs"
 version = "23.2.0"
 description = "Classes Without Boilerplate"
@@ -254,17 +274,6 @@ python-versions = ">=3.6"
 files = [
     {file = "certifi-2024.2.2-py3-none-any.whl", hash = "sha256:dc383c07b76109f368f6106eee2b593b04a011ea4d55f652c6ca24a754d1cdd1"},
     {file = "certifi-2024.2.2.tar.gz", hash = "sha256:0569859f95fc761b18b45ef421b1290a0f65f147e92a1e5eb3e635f9a5e4e66f"},
-]
-
-[[package]]
-name = "chardet"
-version = "3.0.4"
-description = "Universal encoding detector for Python 2 and 3"
-optional = false
-python-versions = "*"
-files = [
-    {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
-    {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
 ]
 
 [[package]]
@@ -776,101 +785,61 @@ files = [
 requests = ">=2.20.0,<3.0"
 
 [[package]]
-name = "googletrans"
-version = "3.0.0"
-description = "Free Google Translate API for Python. Translates totally free of charge."
-optional = false
-python-versions = "*"
-files = [
-    {file = "googletrans-3.0.0.tar.gz", hash = "sha256:44caeea42d91ff6ead5c2d49db2b88de66c45c2fe874c8ec03eb9b4ceb3a533d"},
-]
-
-[package.dependencies]
-httpx = "0.13.3"
-
-[[package]]
 name = "h11"
-version = "0.9.0"
+version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 files = [
-    {file = "h11-0.9.0-py2.py3-none-any.whl", hash = "sha256:4bc6d6a1238b7615b266ada57e0618568066f57dd6fa967d1290ec9309b2f2f1"},
-    {file = "h11-0.9.0.tar.gz", hash = "sha256:33d4bca7be0fa039f4e84d50ab00531047e53d6ee8ffbc83501ea602c169cae1"},
-]
-
-[[package]]
-name = "h2"
-version = "3.2.0"
-description = "HTTP/2 State-Machine based protocol implementation"
-optional = false
-python-versions = "*"
-files = [
-    {file = "h2-3.2.0-py2.py3-none-any.whl", hash = "sha256:61e0f6601fa709f35cdb730863b4e5ec7ad449792add80d1410d4174ed139af5"},
-    {file = "h2-3.2.0.tar.gz", hash = "sha256:875f41ebd6f2c44781259005b157faed1a5031df3ae5aa7bcb4628a6c0782f14"},
-]
-
-[package.dependencies]
-hpack = ">=3.0,<4"
-hyperframe = ">=5.2.0,<6"
-
-[[package]]
-name = "hpack"
-version = "3.0.0"
-description = "Pure-Python HPACK header compression"
-optional = false
-python-versions = "*"
-files = [
-    {file = "hpack-3.0.0-py2.py3-none-any.whl", hash = "sha256:0edd79eda27a53ba5be2dfabf3b15780928a0dff6eb0c60a3d6767720e970c89"},
-    {file = "hpack-3.0.0.tar.gz", hash = "sha256:8eec9c1f4bfae3408a3f30500261f7e6a65912dc138526ea054f9ad98892e9d2"},
-]
-
-[[package]]
-name = "hstspreload"
-version = "2024.5.1"
-description = "Chromium HSTS Preload list as a Python package"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "hstspreload-2024.5.1-py3-none-any.whl", hash = "sha256:937520fa094804c2e66cffab7eb33ae543edb2e05db845bcbb4ac578ce7cddb8"},
-    {file = "hstspreload-2024.5.1.tar.gz", hash = "sha256:b16c79acc0bd1dc345e4e70c975591ff1ad8ebda3da4356af571b86810c7e0dd"},
+    {file = "h11-0.14.0-py3-none-any.whl", hash = "sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761"},
+    {file = "h11-0.14.0.tar.gz", hash = "sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d"},
 ]
 
 [[package]]
 name = "httpcore"
-version = "0.9.1"
+version = "1.0.7"
 description = "A minimal low-level HTTP client."
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 files = [
-    {file = "httpcore-0.9.1-py3-none-any.whl", hash = "sha256:9850fe97a166a794d7e920590d5ec49a05488884c9fc8b5dba8561effab0c2a0"},
-    {file = "httpcore-0.9.1.tar.gz", hash = "sha256:ecc5949310d9dae4de64648a4ce529f86df1f232ce23dcfefe737c24d21dfbe9"},
-]
-
-[package.dependencies]
-h11 = ">=0.8,<0.10"
-h2 = "==3.*"
-sniffio = "==1.*"
-
-[[package]]
-name = "httpx"
-version = "0.13.3"
-description = "The next generation HTTP client."
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "httpx-0.13.3-py3-none-any.whl", hash = "sha256:32d930858eab677bc29a742aaa4f096de259f1c78c68a90ad11f5c3c04f08335"},
-    {file = "httpx-0.13.3.tar.gz", hash = "sha256:3642bd13e90b80ba8a243a730275eb10a4c26ec96f5fc16b87e458d4ab21efae"},
+    {file = "httpcore-1.0.7-py3-none-any.whl", hash = "sha256:a3fff8f43dc260d5bd363d9f9cf1830fa3a458b332856f34282de498ed420edd"},
+    {file = "httpcore-1.0.7.tar.gz", hash = "sha256:8551cb62a169ec7162ac7be8d4817d561f60e08eaa485234898414bb5a8a0b4c"},
 ]
 
 [package.dependencies]
 certifi = "*"
-chardet = "==3.*"
-hstspreload = "*"
-httpcore = "==0.9.*"
-idna = "==2.*"
-rfc3986 = ">=1.3,<2"
-sniffio = "*"
+h11 = ">=0.13,<0.15"
+
+[package.extras]
+asyncio = ["anyio (>=4.0,<5.0)"]
+http2 = ["h2 (>=3,<5)"]
+socks = ["socksio (==1.*)"]
+trio = ["trio (>=0.22.0,<1.0)"]
+
+[[package]]
+name = "httpx"
+version = "0.28.0"
+description = "The next generation HTTP client."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "httpx-0.28.0-py3-none-any.whl", hash = "sha256:dc0b419a0cfeb6e8b34e85167c0da2671206f5095f1baa9663d23bcfd6b535fc"},
+    {file = "httpx-0.28.0.tar.gz", hash = "sha256:0858d3bab51ba7e386637f22a61d8ccddaeec5f3fe4209da3a6168dbb91573e0"},
+]
+
+[package.dependencies]
+anyio = "*"
+certifi = "*"
+httpcore = "==1.*"
+idna = "*"
+socksio = {version = "==1.*", optional = true, markers = "extra == \"socks\""}
+
+[package.extras]
+brotli = ["brotli", "brotlicffi"]
+cli = ["click (==8.*)", "pygments (==2.*)", "rich (>=10,<14)"]
+http2 = ["h2 (>=3,<5)"]
+socks = ["socksio (==1.*)"]
+zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "huggingface-hub"
@@ -905,17 +874,6 @@ tensorflow-testing = ["keras (<3.0)", "tensorflow"]
 testing = ["InquirerPy (==0.3.4)", "Jinja2", "Pillow", "aiohttp", "fastapi", "gradio (>=4.0.0)", "jedi", "numpy", "pytest (>=8.1.1,<8.2.2)", "pytest-asyncio", "pytest-cov", "pytest-env", "pytest-mock", "pytest-rerunfailures", "pytest-vcr", "pytest-xdist", "soundfile", "urllib3 (<2.0)"]
 torch = ["safetensors[torch]", "torch"]
 typing = ["types-PyYAML", "types-requests", "types-simplejson", "types-toml", "types-tqdm", "types-urllib3", "typing-extensions (>=4.8.0)"]
-
-[[package]]
-name = "hyperframe"
-version = "5.2.0"
-description = "HTTP/2 framing layer for Python"
-optional = false
-python-versions = "*"
-files = [
-    {file = "hyperframe-5.2.0-py2.py3-none-any.whl", hash = "sha256:5187962cb16dcc078f23cb5a4b110098d546c3f41ff2d4038a9896893bbd0b40"},
-    {file = "hyperframe-5.2.0.tar.gz", hash = "sha256:a9f5c17f2cc3c719b917c4f33ed1c61bd1f8dfac4b1bd23b7c80b3400971b41f"},
-]
 
 [[package]]
 name = "idna"
@@ -2136,20 +2094,6 @@ requests = ">=2.0.0"
 rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 
 [[package]]
-name = "rfc3986"
-version = "1.5.0"
-description = "Validating URI References per RFC 3986"
-optional = false
-python-versions = "*"
-files = [
-    {file = "rfc3986-1.5.0-py2.py3-none-any.whl", hash = "sha256:a86d6e1f5b1dc238b218b012df0aa79409667bb209e58da56d0b94704e712a97"},
-    {file = "rfc3986-1.5.0.tar.gz", hash = "sha256:270aaf10d87d0d4e095063c65bf3ddbc6ee3d0b226328ce21e036f946e421835"},
-]
-
-[package.extras]
-idna2008 = ["idna"]
-
-[[package]]
 name = "s3transfer"
 version = "0.10.2"
 description = "An Amazon S3 Transfer Manager"
@@ -2365,6 +2309,17 @@ python-versions = ">=3.7"
 files = [
     {file = "sniffio-1.3.1-py3-none-any.whl", hash = "sha256:2f6da418d1f1e0fddd844478f41680e794e6051915791a034ff65e5f100525a2"},
     {file = "sniffio-1.3.1.tar.gz", hash = "sha256:f4324edc670a0f49750a81b895f35c3adb843cca46f0530f79fc1babb23789dc"},
+]
+
+[[package]]
+name = "socksio"
+version = "1.0.0"
+description = "Sans-I/O implementation of SOCKS4, SOCKS4A, and SOCKS5."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "socksio-1.0.0-py3-none-any.whl", hash = "sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3"},
+    {file = "socksio-1.0.0.tar.gz", hash = "sha256:f88beb3da5b5c38b9890469de67d0cb0f9d494b78b106ca1845f96c10b91c4ac"},
 ]
 
 [[package]]
@@ -2686,13 +2641,13 @@ test = ["vcrpy (>=1.10.3)"]
 
 [[package]]
 name = "twikit"
-version = "2.1.3"
+version = "2.2.0"
 description = "Twitter API wrapper for python with **no API key required**."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "twikit-2.1.3-py3-none-any.whl", hash = "sha256:3f3e83bd577f7a24e36727498dac62d832a33e9695fa7256d63850e4ff563055"},
-    {file = "twikit-2.1.3.tar.gz", hash = "sha256:5c4dde34d86769293af5b260a212dca80da2c04cb063d42e13e4eed8e96895fa"},
+    {file = "twikit-2.2.0-py3-none-any.whl", hash = "sha256:8d70b4a9fb87a6753c2c2eebacc757fb113908d6e9c45e04dd1b374a6fc15766"},
+    {file = "twikit-2.2.0.tar.gz", hash = "sha256:fac9221fcc070ec26191e6b024fd5ac2ff929f0ea4d9175964635fc123faf52a"},
 ]
 
 [package.dependencies]
@@ -2972,4 +2927,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "6e49339a6e3c249e4eb1d4283ca046cd4b5526119e4b2333150ead469ca5c641"
+content-hash = "2abb0633d39b89b9af917532e1bc058bc6cced64b9fd3c3774202bab595dbcbd"
