@@ -4,8 +4,9 @@ Twikit testing script
 
 # import asyncio
 
-from twitter_search.config_utils.config import EMAIL, PASSWORD, USERNAME
 from twikit import Client
+
+from twitter_search.config_utils.config import EMAIL, PASSWORD, USERNAME
 
 
 client = Client("en-US")
