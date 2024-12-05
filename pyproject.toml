@@ -10,7 +10,6 @@ python = "^3.12"
 pandas = "^2.2.0"
 tweepy = "^4.14.0"
 googlemaps = "^4.10.0"
-googletrans= "^3.0.0"
 langdetect = "^1.0.9"
 geopandas = "^0.14.4"
 transformers = "^4.40.2"
@@ -23,6 +22,8 @@ datasets = "^3.0.2"
 openpyxl = "^3.1.5"
 accelerate = "^1.0.1"
 huggingface-hub = "^0.26.2"
+twikit = "^2.2.0"
+httpx = "^0.28.0"
 
 [build-system]
 requires = ["poetry-core"]

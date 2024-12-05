@@ -61,7 +61,7 @@ class ModelFinetuner:
             save_strategy="epoch",
             logging_dir=f"{self.FINETUNING_PATH}/logs",
             per_device_train_batch_size=8,
-            num_train_epochs=self.NUM_EPOCHS,  # Adjust according to your needs
+            num_train_epochs=self.NUM_EPOCHS,
             learning_rate=self.LEARNING_RATE,
             weight_decay=self.WEIGHT_DECAY,
         )
