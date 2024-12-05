@@ -3,7 +3,8 @@ Adding script to play with the finetuned model
 """
 
 import torch
-from transformers import AutoTokenizer, pipeline
+from transformers import pipeline
+
 
 # from config_utils.config import HF_TOKEN
 
@@ -22,10 +23,10 @@ device = 0 if torch.cuda.is_available() else -1
 # tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large")
 
 classifier = pipeline(
-            "zero-shot-classification",
-            model="federdm/twitter-finetuned-bart",
-            hf_token="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",
-            # tokenizer=tokenizer,
+    "zero-shot-classification",
+    model="federdm/twitter-finetuned-bart",
+    hf_token="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",
+    # tokenizer=tokenizer,
 )
 
 text = "Pollution"
