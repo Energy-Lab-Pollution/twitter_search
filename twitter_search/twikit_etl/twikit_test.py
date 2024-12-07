@@ -31,12 +31,12 @@ async def main():
         tweet_dict["author_id"] = tweet.user.id
 
         user_dict = {}
-        user_dict["user_id"]: tweet.user.id
-        user_dict["username"]: tweet.user.name
-        user_dict["description"]: tweet.user.name
-        user_dict["location"]: tweet.user.name
-        user_dict["name"]: tweet.user.screen_name
-        user_dict["url"]: tweet.user.screen_name
+        user_dict["user_id"] = tweet.user.id
+        user_dict["username"] = tweet.user.name
+        user_dict["description"] = tweet.user.name
+        user_dict["location"] = tweet.user.name
+        user_dict["name"] = tweet.user.screen_name
+        user_dict["url"] = tweet.user.screen_name
         user_dict["tweets"] = [tweet.text]
         user_dict["geo_code"] = []
 
