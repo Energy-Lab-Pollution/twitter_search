@@ -13,6 +13,7 @@ class TwikitDataHandler:
     """
     Class that handles the Twikit search and data collection process
     """
+
     QUERIES = QUERIES
     CITIES = CITIES
     PILOT_CITIES = PILOT_CITIES

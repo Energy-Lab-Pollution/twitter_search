@@ -18,9 +18,7 @@ async def main():
     client.load_cookies("twitter_search/config_utils/cookies.json")
 
     # Search Latest Tweets
-    tweets = await client.search_tweet(
-        "New York AND Pollution", "Latest", count=100
-    )
+    tweets = await client.search_tweet("New York AND Pollution", "Latest", count=100)
     tweets_list = []
     for tweet in tweets:
         tweet_dict = {}
@@ -32,4 +30,3 @@ async def main():
         tweets_list.append(tweet_dict)
 
     print(tweets_list)
-

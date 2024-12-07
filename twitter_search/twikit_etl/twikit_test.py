@@ -20,9 +20,7 @@ async def main():
     client.load_cookies("twitter_search/config_utils/cookies.json")
 
     # Search Latest Tweets
-    tweets = await client.search_tweet(
-        "New York AND Pollution", "Latest", count=100
-    )
+    tweets = await client.search_tweet("New York AND Pollution", "Latest", count=100)
     tweets_list = []
     users_list = []
     for tweet in tweets:
@@ -45,23 +43,21 @@ async def main():
         tweets_list.append(tweet_dict)
         users_list.append(user_dict)
 
-
     # Specify the file name
     tweets_filename = "twikit-tweets-test.json"
     users_filename = "twikit-users-test"
 
     # Open the file in write mode ('w')
-    with open(tweets_filename, 'w') as file:
+    with open(tweets_filename, "w") as file:
         # Dump the data to the file with indentation for readability
         json.dump(tweets_list, file, indent=4)
 
         # Open the file in write mode ('w')
-    with open(users_filename, 'w') as file:
+    with open(users_filename, "w") as file:
         # Dump the data to the file with indentation for readability
-        json.dump(tweets_list, file, indent=4)
+        json.dump(users_list, file, indent=4)
 
-
-    # # Search more tweets
+    # Search more tweets
     # more_tweets = await tweets.next()
 
 
