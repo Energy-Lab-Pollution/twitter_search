@@ -6,6 +6,7 @@ from pathlib import Path
 
 from config_utils.cities import ALIAS_DICT, CITIES, PILOT_CITIES
 from config_utils.queries import QUERIES
+from etl.query import Query
 
 
 class TwikitDataHandler:
@@ -14,6 +15,7 @@ class TwikitDataHandler:
     """
     QUERIES = QUERIES
     CITIES = CITIES
+    PILOT_CITIES = PILOT_CITIES
 
     def __init__(self, location, account_type, num_iterations=1):
         self.location = location.lower()
@@ -77,3 +79,14 @@ class TwikitDataHandler:
                 self.base_dir
                 / f"{file_city}_{self.account_type}_totalusers_{count - 1}.json"
             )
+
+    def perform_initial_search(self):
+        """
+        This function runs the initial search for Twitter users, and
+        it is only done in the first iteration.
+        """
+        print("Searching for Twitter users...")
+        query = Query(self.location, self.account_type)
+        query.query_builder()
+
+        print(query.text)
