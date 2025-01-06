@@ -34,7 +34,7 @@ class TwikitDataHandler:
             if count == self.num_iterations:
                 break
 
-    def setup_file_paths(self, count):
+    def setup_file_paths(self):
         """
         Set up file paths for the current iteration.
 
@@ -54,13 +54,13 @@ class TwikitDataHandler:
 
         self.paths = {
             "output_file_users": self.base_dir
-            / f"{file_city}_{self.account_type}_users_test.json",
+            / f"{file_city}_{self.account_type}_users.json",
             "output_file_tweets": self.base_dir
-            / f"{file_city}_{self.account_type}_tweets_test.json",
+            / f"{file_city}_{self.account_type}_tweets.json",
             "output_file_processing": self.base_dir
             / f"{file_city}_{self.account_type}_processed_users.json",
             "output_file_filter": self.base_dir
-            / f"{file_city}_{self.account_type}_users_filtered_{count}.json",
+            / f"{file_city}_{self.account_type}_users_filtered.json",
             "output_file_tweet_add": self.base_dir
             / f"{file_city}_{self.account_type}_users_tweet_added",
         }
@@ -72,15 +72,9 @@ class TwikitDataHandler:
 
         self.paths["input_file_processing"] = input_file_processing
 
-        if count == 1:
-            output_file_processing = self.paths["output_file_processing"]
-            self.paths["input_file_filter"] = output_file_processing
+        output_file_processing = self.paths["output_file_processing"]
+        self.paths["input_file_filter"] = output_file_processing
 
-        else:
-            self.paths["input_file_filter"] = (
-                self.base_dir
-                / f"{file_city}_{self.account_type}_totalusers_{count - 1}.json"
-            )
 
     def perform_initial_search(self):
         """
