@@ -4,7 +4,6 @@ Pipeline to search twikit users
 
 import time
 import asyncio
-import json
 
 from twikit import Client
 
@@ -52,7 +51,7 @@ class TwikitUserSearcher:
 
         return tweets_list, users_list
 
-    async def search_tweets(self):
+    async def search_tweets_and_users(self):
         """
         Method used to search for tweets with the given query
         """
@@ -95,6 +94,14 @@ class TwikitUserSearcher:
         util.json_maker(self.output_file_tweets, self.users_list)
         
 
+    def run_search(self):
+        """
+        Runs the entire search pipeline
+        """
+        self.search_tweets_and_users()
+        if not self.users_list:
+            return
+        self.store_users_and_tweets()
         
 
 # async def main():

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from config_utils.cities import ALIAS_DICT, CITIES, PILOT_CITIES
 from config_utils.queries import QUERIES
+from twikit_etl.data_collection.search_twikit_users import TwikitUserSearcher
 from etl.query import Query
 
 
@@ -89,5 +90,15 @@ class TwikitDataHandler:
         print("Searching for Twitter users...")
         query = Query(self.location, self.account_type)
         query.query_builder()
+
+        user_searcher = TwikitUserSearcher(
+            self.paths["output_file_users"],
+            self.paths["output_file_tweets"],
+            query.text,
+        )
+        user_searcher.run_search()
+        if not user_searcher.users_list:
+            print("No users found.")
+            return
 
         print(query.text)
