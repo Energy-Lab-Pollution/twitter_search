@@ -1,8 +1,6 @@
 """
 Pipeline to search twikit users
 """
-
-import time
 import asyncio
 
 from twikit import Client
@@ -21,6 +19,7 @@ class TwikitUserSearcher:
         
         self.client = Client("en-US")
         self.client.load_cookies("../../twitter_search/config_utils/cookies.json")
+        self.threshold = 25
 
     @staticmethod
     def parse_tweets_and_users(tweets):
@@ -83,6 +82,9 @@ class TwikitUserSearcher:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} batches")
 
+            if num_iter == self.threshold:
+                break
+
             num_iter += 1
 
 
@@ -98,53 +100,15 @@ class TwikitUserSearcher:
         """
         Runs the entire search pipeline
         """
-        self.search_tweets_and_users()
+        asyncio.run(self.search_tweets_and_users())
         if not self.users_list:
             return
         self.store_users_and_tweets()
         
 
-# async def main():
-    # # Asynchronous client methods are coroutines and
-    # # must be called using `await`.
-
-    # client.load_cookies("../../twitter_search/config_utils/cookies.json")
-
-    # # Search Latest Tweets
-    # query = QUERY.replace("location", "New York")
-    # tweets = await client.search_tweet(query, "Latest", count=20)
-    # tweets_list, users_list = parse_tweets_and_users(tweets)
-    # print(tweets_list)
-
-    # more_tweets_available = True
-    # num_iter = 1
-
-
-    # next_tweets = await tweets.next()
-    # if next_tweets:
-    #     next_tweets_list, next_users_list = parse_tweets_and_users(next_tweets)
-    #     tweets_list.extend(next_tweets_list)
-    #     users_list.extend(next_users_list)
-    # else:
-    #     more_tweets_available = False
-
-    # while more_tweets_available:
-    #     next_tweets = await next_tweets.next()
-    #     if next_tweets:
-    #         next_tweets_list, next_users_list = parse_tweets_and_users(next_tweets)
-    #         tweets_list.extend(next_tweets_list)
-    #         users_list.extend(next_users_list)
-
-    #     else:
-    #         more_tweets_available = False
-
-    #     if num_iter % 5 == 0:
-    #         print(f"Processed {num_iter} batches")
-
-    #     num_iter += 1
-
-        
-
-
-# if __name__ == "__main__":
-#     asyncio.run(main())
+if __name__ == "__main__":
+    query = QUERY.replace("location", "New York")
+    twikit_searcher = TwikitUserSearcher("twikit-users.json", "twikit-tweets.json",
+                                         query=QUERY)
+    
+    twikit_searcher.run_search()
