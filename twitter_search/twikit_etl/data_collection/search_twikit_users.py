@@ -40,7 +40,7 @@ def parse_tweets_and_users(tweets):
         tweets_list.append(tweet_dict)
         users_list.append(user_dict)
 
-        return tweets_list, users_list
+    return tweets_list, users_list
 
 
 
@@ -56,14 +56,31 @@ async def main():
     tweets_list, users_list = parse_tweets_and_users(tweets)
     print(tweets_list)
 
-    previous_tweets = await tweets.previous()
-    if previous_tweets:
-        previous_tweets_list, previous_users_list = parse_tweets_and_users(previous_tweets)
+    more_tweets_available = True
+    num_iter = 1
+
 
     next_tweets = await tweets.next()
     if next_tweets:
-        next_tweets_list, next_users_list = parse_tweets_and_users(previous_tweets)
-        print(next_tweets_list)
+        next_tweets_list, next_users_list = parse_tweets_and_users(next_tweets)
+        tweets_list.extend(next_tweets_list)
+        users_list.extend(next_users_list)
+    else:
+        more_tweets_available = False
+
+    while more_tweets_available:
+        next_tweets = await next_tweets.next()
+        if next_tweets:
+            next_tweets_list, next_users_list = parse_tweets_and_users(next_tweets)
+            tweets_list.extend(next_tweets_list)
+            users_list.extend(next_users_list)
+
+        else:
+            more_tweets_available = False
+
+        num_iter += 1
+
+        
 
 
     
