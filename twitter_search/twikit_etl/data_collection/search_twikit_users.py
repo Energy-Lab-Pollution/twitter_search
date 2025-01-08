@@ -2,30 +2,32 @@
 Pipeline to search twikit users
 """
 import asyncio
-
 from datetime import datetime
+
+from config_utils import util
 from twikit import Client
 
-from config_utils import constants, util
 
 QUERY = """location ((air pollution) OR pollution OR (public health)
                 OR (poor air) OR asthma OR polluted OR (pollution control board)
                 OR smog OR (air quality)) -is:retweet"""
 
-class TwikitUserSearcher:
 
+class TwikitUserSearcher:
     def __init__(self, output_file_users, output_file_tweets, query=None):
         self.output_file_users = output_file_users
         self.output_file_tweets = output_file_tweets
-        
+
         self.client = Client("en-US")
-        self.client.load_cookies("../../twitter_search/config_utils/cookies.json")
+        self.client.load_cookies(
+            "../../twitter_search/config_utils/cookies.json"
+        )
         self.threshold = 25
 
     @staticmethod
     def convert_to_yyyy_mm_dd(date_string):
         """
-        Converts a date string in the format "Fri Dec 06 18:09:05 +0000 2024" 
+        Converts a date string in the format "Fri Dec 06 18:09:05 +0000 2024"
         to the "yyyy-mm-dd" format.
 
         Args:
@@ -44,7 +46,7 @@ class TwikitUserSearcher:
     def parse_tweets_and_users(self, tweets):
         """
         Parses tweets and users from twikit into dictionaries
-        
+
         Args:
             tweets: Array of twikit.tweet.Tweet objects
 
@@ -96,7 +98,9 @@ class TwikitUserSearcher:
 
         next_tweets = await tweets.next()
         if next_tweets:
-            next_tweets_list, next_users_list = self.parse_tweets_and_users(next_tweets)
+            next_tweets_list, next_users_list = self.parse_tweets_and_users(
+                next_tweets
+            )
             self.tweets_list.extend(next_tweets_list)
             self.users_list.extend(next_users_list)
         else:
@@ -105,7 +109,9 @@ class TwikitUserSearcher:
         while more_tweets_available:
             next_tweets = await next_tweets.next()
             if next_tweets:
-                next_tweets_list, next_users_list = self.parse_tweets_and_users(next_tweets)
+                next_tweets_list, next_users_list = self.parse_tweets_and_users(
+                    next_tweets
+                )
                 self.tweets_list.extend(next_tweets_list)
                 self.users_list.extend(next_users_list)
 
@@ -120,14 +126,12 @@ class TwikitUserSearcher:
 
             num_iter += 1
 
-
     def store_users_and_tweets(self):
         """
         Stores users and tweets into the provided path
         """
         util.json_maker(self.output_file_users, self.users_list)
         util.json_maker(self.output_file_tweets, self.users_list)
-        
 
     def run_search(self):
         """
@@ -137,11 +141,12 @@ class TwikitUserSearcher:
         if not self.users_list:
             return
         self.store_users_and_tweets()
-        
+
 
 if __name__ == "__main__":
     query = QUERY.replace("location", "New York")
-    twikit_searcher = TwikitUserSearcher("twikit-users.json", "twikit-tweets.json",
-                                         query=QUERY)
-    
+    twikit_searcher = TwikitUserSearcher(
+        "twikit-users.json", "twikit-tweets.json", query=QUERY
+    )
+
     twikit_searcher.run_search()

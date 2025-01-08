@@ -76,7 +76,6 @@ class TwikitDataHandler:
         output_file_processing = self.paths["output_file_processing"]
         self.paths["input_file_filter"] = output_file_processing
 
-
     def perform_initial_search(self):
         """
         This function runs the initial search for Twitter users, and
