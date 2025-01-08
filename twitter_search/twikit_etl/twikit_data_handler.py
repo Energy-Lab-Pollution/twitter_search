@@ -1,9 +1,11 @@
 """
 Script that runs the Twitter Search Pipeline by using Twikit
 """
-
+import os
+from datetime import datetime
 from pathlib import Path
 
+import pytz
 from config_utils.cities import ALIAS_DICT, CITIES, PILOT_CITIES
 from config_utils.queries import QUERIES
 from etl.query import Query
@@ -24,7 +26,10 @@ class TwikitDataHandler:
         self.location = location.lower()
         self.account_type = account_type
         self.num_iterations = num_iterations
-        self.base_dir = Path(__file__).parent.parent / "data/raw_data"
+        self.base_dir = Path(__file__).parent.parent / "data/twikit_raw_data"
+
+        self.todays_date = datetime.now(pytz.timezone("America/Chicago"))
+        self.todays_date_str = datetime.strftime(self.todays_date, "%Y-%m-%d")
 
     def run(self):
         """
@@ -52,6 +57,13 @@ class TwikitDataHandler:
             file_city = ALIAS_DICT[self.location]
         else:
             file_city = self.location
+
+        # Will create a new folder per day
+        if os.path.exists(f"{self.base_dir}/{self.todays_date_str}"):
+            os.makedirs(f"{self.base_dir}/{self.todays_date_str}")
+
+        else:
+            print("Dir already exists")
 
         self.paths = {
             "output_file_users": self.base_dir
