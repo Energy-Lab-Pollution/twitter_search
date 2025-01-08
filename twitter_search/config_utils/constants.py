@@ -133,3 +133,5 @@ PUNCTUATIONS = ["!" "," "." "," '"' "?" ":"]
 PUNC = ""
 for char in PUNCTUATIONS:
     PUNC += char
+
+TWIKIT_COOKIES_DIR = "../../twitter_search/config_utils/cookies.json"
