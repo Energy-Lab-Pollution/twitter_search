@@ -22,7 +22,7 @@ class TwikitUserSearcher:
         self.client.load_cookies(
             constants.TWIKIT_COOKIES_DIR
         )
-        self.threshold = 25
+        self.threshold = constants.TWIKIT_THRESHOLD
 
     @staticmethod
     def convert_to_yyyy_mm_dd(date_string):
