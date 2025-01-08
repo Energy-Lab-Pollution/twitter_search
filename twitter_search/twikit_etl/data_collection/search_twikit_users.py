@@ -43,7 +43,14 @@ class TwikitUserSearcher:
 
     def parse_tweets_and_users(self, tweets):
         """
-        Parses tweets and users from twikit
+        Parses tweets and users from twikit into dictionaries
+        
+        Args:
+            tweets: Array of twikit.tweet.Tweet objects
+
+        Returns:
+            tweets_list: Array of dictionaries with tweets' data
+            users_list: Array of dictionaries with users' data
         """
         tweets_list = []
         users_list = []
@@ -63,6 +70,9 @@ class TwikitUserSearcher:
             user_dict["location"] = tweet.user.location
             user_dict["name"] = tweet.user.screen_name
             user_dict["url"] = tweet.user.url
+            user_dict["followers_count"] = tweet.user.followers_count
+            user_dict["following_count"] = tweet.user.following_count
+            user_dict["listed_count"] = tweet.user.listed_count
             user_dict["tweets"] = [tweet.text]
             user_dict["tweet_date"] = parsed_date
             user_dict["user_date_id"] = f"{tweet.user.id}-{parsed_date}"
