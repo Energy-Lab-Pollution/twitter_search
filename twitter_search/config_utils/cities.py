@@ -17,9 +17,10 @@ CITIES = [
     "kinshasa",
     "kolkata",
     "london",
+    "madrid",
     "mexico city",
     "mumbai",
-    "phuket",
+    "nairobi" "phuket",
 ]
 
 
@@ -50,7 +51,9 @@ CITIES_LANGS = {
     "kinshasa": "en",
     "kolkata": "en",
     "london": "en",
+    "madrid": "es",
     "mexico city": "es",
     "mumbai": "en",
+    "nairobi": "en",
     "phuket": "en",
 }

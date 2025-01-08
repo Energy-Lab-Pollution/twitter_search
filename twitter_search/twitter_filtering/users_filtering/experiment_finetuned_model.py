@@ -25,7 +25,7 @@ device = 0 if torch.cuda.is_available() else -1
 classifier = pipeline(
     "zero-shot-classification",
     model="federdm/twitter-finetuned-bart",
-    hf_token="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",
+    hf_token="hf_token",
     # tokenizer=tokenizer,
 )
 

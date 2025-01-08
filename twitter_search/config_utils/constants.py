@@ -133,3 +133,7 @@ PUNCTUATIONS = ["!" "," "." "," '"' "?" ":"]
 PUNC = ""
 for char in PUNCTUATIONS:
     PUNC += char
+
+# Twikit Constants
+TWIKIT_COOKIES_DIR = "../../twitter_search/config_utils/cookies.json"
+TWIKIT_THRESHOLD = 25
