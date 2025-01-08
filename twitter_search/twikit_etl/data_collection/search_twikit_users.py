@@ -129,6 +129,9 @@ class TwikitUserSearcher:
     def store_users_and_tweets(self):
         """
         Stores users and tweets into the provided path
+
+        The util function checks for any existing dictionaries and
+        only adds the newer data
         """
         util.json_maker(self.output_file_users, self.users_list)
         util.json_maker(self.output_file_tweets, self.users_list)
