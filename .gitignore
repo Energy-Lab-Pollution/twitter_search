@@ -175,4 +175,8 @@ cython_debug/
 
 # Model results
 finetuning_results/
+
+# Twikit results and cookies
 cookies.json
+twikit-tweets-test.json
+twikit-users.json
