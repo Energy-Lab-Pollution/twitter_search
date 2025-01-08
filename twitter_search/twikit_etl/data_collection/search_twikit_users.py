@@ -4,7 +4,7 @@ Pipeline to search twikit users
 import asyncio
 from datetime import datetime
 
-from config_utils import util, constants
+from config_utils import constants, util
 from twikit import Client
 
 
@@ -19,9 +19,7 @@ class TwikitUserSearcher:
         self.output_file_tweets = output_file_tweets
 
         self.client = Client("en-US")
-        self.client.load_cookies(
-            constants.TWIKIT_COOKIES_DIR
-        )
+        self.client.load_cookies(constants.TWIKIT_COOKIES_DIR)
         self.threshold = constants.TWIKIT_THRESHOLD
 
     @staticmethod
