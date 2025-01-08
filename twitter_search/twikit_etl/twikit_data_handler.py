@@ -6,8 +6,9 @@ from pathlib import Path
 
 from config_utils.cities import ALIAS_DICT, CITIES, PILOT_CITIES
 from config_utils.queries import QUERIES
-from twikit_etl.data_collection.search_twikit_users import TwikitUserSearcher
 from etl.query import Query
+from twikit_etl.data_collection.search_twikit_users import TwikitUserSearcher
+from twitter_filtering.users_filtering.filter_users import UserFilter
 
 
 class TwikitDataHandler:
@@ -96,3 +97,14 @@ class TwikitDataHandler:
             return
 
         print(query.text)
+
+    def filter_users(self):
+        """
+        Filter Twitter users based on content relevance.
+        """
+        print("Filtering Twitter users based on location...")
+        self.user_filter = UserFilter(
+            self.paths["input_file_filter"],
+            self.paths["output_file_filter"],
+        )
+        self.user_filter.run_filtering()
