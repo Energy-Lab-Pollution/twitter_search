@@ -3,6 +3,7 @@ Pipeline to search twikit users
 """
 import asyncio
 
+from datetime import datetime
 from twikit import Client
 
 from config_utils import constants, util
@@ -22,7 +23,25 @@ class TwikitUserSearcher:
         self.threshold = 25
 
     @staticmethod
-    def parse_tweets_and_users(tweets):
+    def convert_to_yyyy_mm_dd(date_string):
+        """
+        Converts a date string in the format "Fri Dec 06 18:09:05 +0000 2024" 
+        to the "yyyy-mm-dd" format.
+
+        Args:
+            date_string: The input date string.
+
+        Returns:
+            The date string in the "yyyy-mm-dd" format.
+        """
+        try:
+            date_obj = datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
+            return date_obj.strftime("%Y-%m-%d")
+        except ValueError:
+            print(f"Invalid date format: {date_string}")
+            return None
+
+    def parse_tweets_and_users(self, tweets):
         """
         Parses tweets and users from twikit
         """
@@ -35,6 +54,8 @@ class TwikitUserSearcher:
             tweet_dict["created_at"] = tweet.created_at
             tweet_dict["author_id"] = tweet.user.id
 
+            parsed_date = self.convert_to_yyyy_mm_dd(tweet.created_at)
+
             user_dict = {}
             user_dict["user_id"] = tweet.user.id
             user_dict["username"] = tweet.user.name
@@ -43,6 +64,8 @@ class TwikitUserSearcher:
             user_dict["name"] = tweet.user.screen_name
             user_dict["url"] = tweet.user.url
             user_dict["tweets"] = [tweet.text]
+            user_dict["tweet_date"] = parsed_date
+            user_dict["user_date_id"] = f"{tweet.user.id}-{parsed_date}"
             user_dict["geo_code"] = []
 
             tweets_list.append(tweet_dict)
