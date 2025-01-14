@@ -119,3 +119,46 @@ class TwikitDataHandler:
             self.paths["output_file_filter"],
         )
         self.user_filter.run_filtering()
+
+    def run_iteration(self):
+        """
+        Process an iteration of the Twitter search and data collection process.
+        """
+
+        self.setup_file_paths()
+        self.perform_initial_search()
+        # TODO: Add a check to see if we need to get extra tweets
+        # self.get_extra_tweets()
+
+        self.filter_users()
+
+        if not hasattr(self.user_filter, "filtered_users"):
+            print("No relevant users were found.")
+            return
+
+        if not self.user_filter.filtered_users:
+            print("No relevant users were found.")
+            return
+
+    def run_all_account_types(self, skip_media=False):
+        """
+        Runs the entire process for all the available
+        account types for a particular location.
+
+        Args
+        ----------
+            skip_media: str
+            Determines if we should skip the search for media accounts
+            (there are tons of them)
+
+        """
+        account_types = self.QUERIES
+        if skip_media:
+            if "media" in account_types:
+                del account_types["media"]
+        for account_type in account_types:
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
+            self.account_type = account_type
+            self.run_iteration()
