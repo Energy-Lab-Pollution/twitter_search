@@ -20,7 +20,8 @@ CITIES = [
     "madrid",
     "mexico city",
     "mumbai",
-    "nairobi" "phuket",
+    "nairobi",
+    "phuket",
 ]
 
 
