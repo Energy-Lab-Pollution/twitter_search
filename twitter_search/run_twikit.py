@@ -10,7 +10,6 @@ from config_utils.util import strtobool
 
 # Local imports
 from etl.data_cleaning.csv_converter import CSVConverter
-from etl.twitter_data_handler import TwitterDataHandler
 from twikit_etl.twikit_data_handler import TwikitDataHandler
 
 

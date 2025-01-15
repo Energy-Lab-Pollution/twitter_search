@@ -59,22 +59,24 @@ class TwikitDataHandler:
             file_city = self.location
 
         # Will create a new folder per day
-        if os.path.exists(f"{self.base_dir}/{self.todays_date_str}"):
-            os.makedirs(f"{self.base_dir}/{self.todays_date_str}")
+        self.date_dir = f"{self.base_dir}/{self.todays_date_str}"
+
+        if os.path.exists(self.date_dir):
+            os.makedirs(self.date_dir)
 
         else:
             print("Dir already exists")
 
         self.paths = {
-            "output_file_users": self.base_dir
+            "output_file_users": self.date_dir
             / f"{file_city}_{self.account_type}_users.json",
-            "output_file_tweets": self.base_dir
+            "output_file_tweets": self.date_dir
             / f"{file_city}_{self.account_type}_tweets.json",
-            "output_file_processing": self.base_dir
+            "output_file_processing": self.date_dir
             / f"{file_city}_{self.account_type}_processed_users.json",
-            "output_file_filter": self.base_dir
+            "output_file_filter": self.date_dir
             / f"{file_city}_{self.account_type}_users_filtered.json",
-            "output_file_tweet_add": self.base_dir
+            "output_file_tweet_add": self.date_dir
             / f"{file_city}_{self.account_type}_users_tweet_added",
         }
 
