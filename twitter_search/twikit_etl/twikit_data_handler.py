@@ -49,9 +49,10 @@ class TwikitDataHandler:
         remainder_requests = self.TWIKIT_THRESHOLD % num_cities
 
         if city_requests < self.num_accounts:
-            print("Not enough requests to extract all accounts per city")
+            print("City requests: Not enough requests to extract all accounts")
             return None
         
+        # Create list of num requests per city
         requests_list = []
         for _ in range(0, num_cities):
             requests_list.append(city_requests)
@@ -75,14 +76,14 @@ class TwikitDataHandler:
         Args:
             city_requests: int determining the number of requests per city
         """
-
         account_requests = city_requests / self.num_accounts
         remainder_requests = city_requests % self.num_accounts
 
-        if city_requests < self.num_accounts:
-            print("Not enough requests to extract all accounts per city")
+        if account_requests < 1:
+            print("Account requests: Not enough requests to extract all accounts")
             return None
         
+        # Create list of num requests per account 
         requests_list = []
         for _ in range(0, self.num_accounts):
             requests_list.append(account_requests)
