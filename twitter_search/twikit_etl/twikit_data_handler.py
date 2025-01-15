@@ -42,7 +42,7 @@ class TwikitDataHandler:
         how many requests each city will get. 
 
         Args:
-            num_items: int determining the number of cities to be processed
+            num_cities: int determining the number of cities to be processed
         """
         # Get number of accounts needed per city
         city_requests = self.TWIKIT_THRESHOLD / num_cities
@@ -77,7 +77,23 @@ class TwikitDataHandler:
         """
 
         account_requests = city_requests / self.num_accounts
+        remainder_requests = city_requests % self.num_accounts
 
+        if city_requests < self.num_accounts:
+            print("Not enough requests to extract all accounts per city")
+            return None
+        
+        requests_list = []
+        for _ in range(0, self.num_accounts):
+            requests_list.append(account_requests)
+
+        # If remainder exists, add to last account
+        if remainder_requests > 0:
+            num_requests = requests_list[-1]
+            num_requests += remainder_requests
+            requests_list[-1] = num_requests
+
+        return requests_list
 
 
     def setup_file_paths(self):
@@ -201,6 +217,8 @@ class TwikitDataHandler:
         if skip_media:
             if "media" in account_types:
                 del account_types["media"]
+                # Number of account types 
+                self.num_accounts = len(self.QUERIES) - 1
         for account_type in account_types:
             print(
                 f" =============== PROCESSING: {account_type} ======================"
