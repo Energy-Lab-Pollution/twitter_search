@@ -24,28 +24,61 @@ class TwikitDataHandler:
     PILOT_CITIES = PILOT_CITIES
     TWIKIT_THRESHOLD = TWIKIT_THRESHOLD
 
-    def __init__(self, location, account_type, num_iterations=1):
+    def __init__(self, location, account_type):
         self.location = location.lower()
         self.account_type = account_type
-        self.num_iterations = num_iterations
         self.base_dir = Path(__file__).parent.parent / "data/twikit_raw_data"
 
         self.todays_date = datetime.now(pytz.timezone("America/Chicago"))
         self.todays_date_str = datetime.strftime(self.todays_date, "%Y-%m-%d")
+        self.num_accounts = len(self.QUERIES)
 
-    def get_threshold_per_city(self, threshold, num_items):
+    def get_city_num_requests(self, num_cities):
         """
-        Gets each city's particular threshold
+        Gets each cities' particular threshold
         
         Twikit can only process 50 requests to get tweets in a 15 min
         interval. Therefore, for several cities, we need to determine
         how many requests each city will get. 
 
         Args:
-            num_cities: int determining the number of cities to be processed
+            num_items: int determining the number of cities to be processed
+        """
+        # Get number of accounts needed per city
+        city_requests = self.TWIKIT_THRESHOLD / num_cities
+        remainder_requests = self.TWIKIT_THRESHOLD % num_cities
+
+        if city_requests < self.num_accounts:
+            print("Not enough requests to extract all accounts per city")
+            return None
+        
+        requests_list = []
+        for _ in range(0, num_cities):
+            requests_list.append(city_requests)
+
+        # If remainder exists, add to last city
+        if remainder_requests > 0:
+            num_requests = requests_list[-1]
+            num_requests += remainder_requests
+            requests_list[-1] = num_requests
+
+        return requests_list
+
+    def get_account_num_requests(self, city_requests):
+        """
+        Gets number of requests for each particular account.
+        
+        Twikit can only process 50 requests to get tweets in a 15 min
+        interval. Therefore, for several cities, we need to determine
+        how many requests each city will get. 
+
+        Args:
+            city_requests: int determining the number of requests per city
         """
 
-        pass
+        account_requests = city_requests / self.num_accounts
+
+
 
     def setup_file_paths(self):
         """
@@ -118,8 +151,6 @@ class TwikitDataHandler:
             print("No users found.")
             return
 
-        print(query.text)
-
     def filter_users(self):
         """
         Filter Twitter users based on content relevance.
@@ -166,6 +197,7 @@ class TwikitDataHandler:
 
         """
         account_types = self.QUERIES
+        self.skip_media = skip_media
         if skip_media:
             if "media" in account_types:
                 del account_types["media"]
