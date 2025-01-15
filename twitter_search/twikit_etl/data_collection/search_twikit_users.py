@@ -14,13 +14,15 @@ QUERY = """location ((air pollution) OR pollution OR (public health)
 
 
 class TwikitUserSearcher:
-    def __init__(self, output_file_users, output_file_tweets, query=None):
+    def __init__(self, output_file_users, output_file_tweets, twikit_threshold, query=None):
         self.output_file_users = output_file_users
         self.output_file_tweets = output_file_tweets
+        
+        # Threshold for this particular city
+        self.twikit_threshold = twikit_threshold
 
         self.client = Client("en-US")
         self.client.load_cookies(constants.TWIKIT_COOKIES_DIR)
-        self.threshold = constants.TWIKIT_THRESHOLD
 
     @staticmethod
     def convert_to_yyyy_mm_dd(date_string):
@@ -119,7 +121,7 @@ class TwikitUserSearcher:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} batches")
 
-            if num_iter == self.threshold:
+            if num_iter == self.twikit_threshold:
                 break
 
             num_iter += 1

@@ -8,6 +8,7 @@ from pathlib import Path
 import pytz
 from config_utils.cities import ALIAS_DICT, CITIES, PILOT_CITIES
 from config_utils.queries import QUERIES
+from config_utils.constants import TWIKIT_THRESHOLD
 from etl.query import Query
 from twikit_etl.data_collection.search_twikit_users import TwikitUserSearcher
 from twitter_filtering.users_filtering.filter_users import UserFilter
@@ -21,6 +22,7 @@ class TwikitDataHandler:
     QUERIES = QUERIES
     CITIES = CITIES
     PILOT_CITIES = PILOT_CITIES
+    TWIKIT_THRESHOLD = TWIKIT_THRESHOLD
 
     def __init__(self, location, account_type, num_iterations=1):
         self.location = location.lower()
