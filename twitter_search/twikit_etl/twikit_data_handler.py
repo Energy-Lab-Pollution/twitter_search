@@ -116,7 +116,7 @@ class TwikitDataHandler:
             file_city = self.location
 
         # Will create a new folder per day
-        self.date_dir = f"{self.base_dir}/{self.todays_date_str}"
+        self.date_dir = self.base_dir / f"{self.todays_date_str}"
 
         if os.path.exists(self.date_dir):
             os.makedirs(self.date_dir)

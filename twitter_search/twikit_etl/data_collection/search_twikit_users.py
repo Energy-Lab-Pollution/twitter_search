@@ -17,6 +17,7 @@ class TwikitUserSearcher:
     def __init__(self, output_file_users, output_file_tweets, twikit_threshold, query=None):
         self.output_file_users = output_file_users
         self.output_file_tweets = output_file_tweets
+        self.query = query
         
         # Threshold for this particular city
         self.twikit_threshold = twikit_threshold

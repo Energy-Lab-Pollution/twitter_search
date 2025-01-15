@@ -64,9 +64,9 @@ def main():
             else:
                 twikit_data_handler.run_all_locations_accounts()
 
-            for city in CITIES:
-                csv_converter = CSVConverter(city)
-                csv_converter.run()
+            # for city in CITIES:
+            #     csv_converter = CSVConverter(city)
+            #     csv_converter.run()
 
         elif args.location == "pilot_cities":
             if args.skip_media:
@@ -74,16 +74,19 @@ def main():
             else:
                 twikit_data_handler.run_pilot_locations_accounts()
 
-            for city in PILOT_CITIES:
-                csv_converter = CSVConverter(city)
-                csv_converter.run()
+            # for city in PILOT_CITIES:
+            #     csv_converter = CSVConverter(city)
+            #     csv_converter.run()
 
         else:
             if args.skip_media:
                 twikit_data_handler.run_all_account_types(skip_media)
             else:
                 twikit_data_handler.run_all_account_types()
-            csv_converter = CSVConverter(args.location)
-            csv_converter.run()
+            # csv_converter = CSVConverter(args.location)
+            # csv_converter.run()
     else:
         twikit_data_handler.run()
+
+if __name__ == "__main__":
+    main()
