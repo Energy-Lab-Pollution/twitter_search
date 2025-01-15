@@ -52,7 +52,7 @@ def main():
     account_type = args.account_type
     print("Building query...")
 
-    twitter_data_handler = TwikitDataHandler(location, account_type)
+    twikit_data_handler = TwikitDataHandler(location, account_type)
 
     if args.skip_media:
         skip_media = strtobool(args.skip_media)
@@ -60,9 +60,9 @@ def main():
     if args.account_type == "all":
         if args.location == "all":
             if args.skip_media:
-                twitter_data_handler.run_all_locations_accounts(skip_media)
+                twikit_data_handler.run_all_locations_accounts(skip_media)
             else:
-                twitter_data_handler.run_all_locations_accounts()
+                twikit_data_handler.run_all_locations_accounts()
 
             for city in CITIES:
                 csv_converter = CSVConverter(city)
@@ -70,9 +70,9 @@ def main():
 
         elif args.location == "pilot_cities":
             if args.skip_media:
-                twitter_data_handler.run_pilot_locations_accounts(skip_media)
+                twikit_data_handler.run_pilot_locations_accounts(skip_media)
             else:
-                twitter_data_handler.run_pilot_locations_accounts()
+                twikit_data_handler.run_pilot_locations_accounts()
 
             for city in PILOT_CITIES:
                 csv_converter = CSVConverter(city)
@@ -80,10 +80,10 @@ def main():
 
         else:
             if args.skip_media:
-                twitter_data_handler.run_all_account_types(skip_media)
+                twikit_data_handler.run_all_account_types(skip_media)
             else:
-                twitter_data_handler.run_all_account_types()
+                twikit_data_handler.run_all_account_types()
             csv_converter = CSVConverter(args.location)
             csv_converter.run()
     else:
-        twitter_data_handler.run()
+        twikit_data_handler.run()

@@ -33,14 +33,19 @@ class TwikitDataHandler:
         self.todays_date = datetime.now(pytz.timezone("America/Chicago"))
         self.todays_date_str = datetime.strftime(self.todays_date, "%Y-%m-%d")
 
-    def run(self):
+    def get_threshold_per_city(self, threshold, num_items):
         """
-        Runs the entire process
+        Gets each city's particular threshold
+        
+        Twikit can only process 50 requests to get tweets in a 15 min
+        interval. Therefore, for several cities, we need to determine
+        how many requests each city will get. 
+
+        Args:
+            num_cities: int determining the number of cities to be processed
         """
-        for count in range(1, self.num_iterations + 1):
-            self.process_iteration(count)
-            if count == self.num_iterations:
-                break
+
+        pass
 
     def setup_file_paths(self):
         """
@@ -92,7 +97,7 @@ class TwikitDataHandler:
         output_file_processing = self.paths["output_file_processing"]
         self.paths["input_file_filter"] = output_file_processing
 
-    def perform_initial_search(self):
+    def perform_initial_search(self, threshold):
         """
         This function runs the initial search for Twitter users, and
         it is only done in the first iteration.
@@ -104,8 +109,10 @@ class TwikitDataHandler:
         user_searcher = TwikitUserSearcher(
             self.paths["output_file_users"],
             self.paths["output_file_tweets"],
+            threshold,
             query.text,
         )
+
         user_searcher.run_search()
         if not user_searcher.users_list:
             print("No users found.")
@@ -124,16 +131,18 @@ class TwikitDataHandler:
         )
         self.user_filter.run_filtering()
 
-    def run_iteration(self):
+    def run(self, threshold=None):
         """
-        Process an iteration of the Twitter search and data collection process.
+        Process an iteration of the Twitter search and 
+        data collection process.
+
+        Args:
+            threshold: int with the number of requests for the current
+                       search
         """
 
         self.setup_file_paths()
-        self.perform_initial_search()
-        # TODO: Add a check to see if we need to get extra tweets
-        # self.get_extra_tweets()
-
+        self.perform_initial_search(threshold)
         self.filter_users()
 
         if not hasattr(self.user_filter, "filtered_users"):
@@ -165,7 +174,7 @@ class TwikitDataHandler:
                 f" =============== PROCESSING: {account_type} ======================"
             )
             self.account_type = account_type
-            self.run_iteration()
+            self.run()
 
 
     def run_pilot_locations_accounts(self, skip_media=False):
@@ -180,6 +189,7 @@ class TwikitDataHandler:
             (there are tons of them)
 
         """
+
         for city in PILOT_CITIES:
             print(f" =============== CITY: {city} ======================")
             self.location = city
