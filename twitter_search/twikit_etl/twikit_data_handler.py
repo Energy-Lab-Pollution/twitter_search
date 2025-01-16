@@ -65,7 +65,7 @@ class TwikitDataHandler:
 
         return requests_list
 
-    def get_account_num_requests(self, city_requests, skip_media):
+    def get_account_num_requests(self, city_requests):
         """
         Gets number of requests for each particular account.
         
