@@ -86,6 +86,8 @@ class TwikitDataHandler:
         # Create list of num requests per account 
         requests_list = []
         for _ in range(0, self.num_accounts):
+            # round to nearest int
+            account_requests = round(account_requests)
             requests_list.append(account_requests)
 
         # If remainder exists, add to last account
@@ -118,7 +120,7 @@ class TwikitDataHandler:
         # Will create a new folder per day
         self.date_dir = self.base_dir / f"{self.todays_date_str}"
 
-        if os.path.exists(self.date_dir):
+        if not os.path.exists(self.date_dir):
             os.makedirs(self.date_dir)
 
         else:
@@ -189,6 +191,8 @@ class TwikitDataHandler:
                        search
         """
 
+        print(f"Threshold is {threshold}")
+
         self.setup_file_paths()
         self.perform_initial_search(threshold)
         self.filter_users()
@@ -224,6 +228,7 @@ class TwikitDataHandler:
                 self.num_accounts = len(self.QUERIES) - 1
     
         accounts_requests = self.get_account_num_requests(city_requests)
+
         for account_type, account_requests in zip(account_types, accounts_requests):
             print(
                 f" =============== PROCESSING: {account_type} ======================"
