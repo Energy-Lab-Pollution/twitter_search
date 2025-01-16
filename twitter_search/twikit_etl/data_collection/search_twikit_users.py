@@ -7,11 +7,6 @@ from datetime import datetime
 import twikit
 from config_utils import constants, util
 
-QUERY = """location ((air pollution) OR pollution OR (public health)
-                OR (poor air) OR asthma OR polluted OR (pollution control board)
-                OR smog OR (air quality)) -is:retweet"""
-
-
 class TwikitUserSearcher:
     def __init__(self, output_file_users, output_file_tweets, twikit_threshold, query=None):
         self.output_file_users = output_file_users
@@ -87,7 +82,11 @@ class TwikitUserSearcher:
 
     async def search_tweets_and_users(self):
         """
-        Method used to search for tweets with the given query
+        Method used to search for tweets, with twikit 
+        with the given query
+
+        This method uses twikit's "await next" function
+        to get more tweets with the given query.
         """
 
         tweets = await self.client.search_tweet(self.query, "Latest", count=20)
