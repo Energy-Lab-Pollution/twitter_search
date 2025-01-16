@@ -4,23 +4,27 @@ Pipeline to search twikit users
 import asyncio
 from datetime import datetime
 
+import twikit
 from config_utils import constants, util
-from twikit import Client
-
-
-QUERY = """location ((air pollution) OR pollution OR (public health)
-                OR (poor air) OR asthma OR polluted OR (pollution control board)
-                OR smog OR (air quality)) -is:retweet"""
 
 
 class TwikitUserSearcher:
-    def __init__(self, output_file_users, output_file_tweets, query=None):
+    def __init__(
+        self,
+        output_file_users,
+        output_file_tweets,
+        twikit_threshold,
+        query=None,
+    ):
         self.output_file_users = output_file_users
         self.output_file_tweets = output_file_tweets
+        self.query = query
 
-        self.client = Client("en-US")
+        # Threshold for this particular city
+        self.twikit_threshold = twikit_threshold
+
+        self.client = twikit.Client("en-US")
         self.client.load_cookies(constants.TWIKIT_COOKIES_DIR)
-        self.threshold = constants.TWIKIT_THRESHOLD
 
     @staticmethod
     def convert_to_yyyy_mm_dd(date_string):
@@ -85,7 +89,11 @@ class TwikitUserSearcher:
 
     async def search_tweets_and_users(self):
         """
-        Method used to search for tweets with the given query
+        Method used to search for tweets, with twikit
+        with the given query
+
+        This method uses twikit's "await next" function
+        to get more tweets with the given query.
         """
 
         tweets = await self.client.search_tweet(self.query, "Latest", count=20)
@@ -119,7 +127,7 @@ class TwikitUserSearcher:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} batches")
 
-            if num_iter == self.threshold:
+            if num_iter == self.twikit_threshold:
                 break
 
             num_iter += 1
@@ -138,16 +146,11 @@ class TwikitUserSearcher:
         """
         Runs the entire search pipeline
         """
-        asyncio.run(self.search_tweets_and_users())
+        try:
+            asyncio.run(self.search_tweets_and_users())
+        except twikit.errors.TooManyRequests:
+            print("Too many requests, stopping...")
+
         if not self.users_list:
             return
         self.store_users_and_tweets()
-
-
-if __name__ == "__main__":
-    query = QUERY.replace("location", "New York")
-    twikit_searcher = TwikitUserSearcher(
-        "twikit-users.json", "twikit-tweets.json", query=QUERY
-    )
-
-    twikit_searcher.run_search()
