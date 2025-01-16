@@ -5,12 +5,12 @@ using the Twikit Library
 
 from argparse import ArgumentParser
 
-from config_utils.cities import CITIES, PILOT_CITIES
+# from config_utils.cities import CITIES, PILOT_CITIES
 from config_utils.constants import TWIKIT_THRESHOLD
 from config_utils.util import strtobool
 
 # Local imports
-from etl.data_cleaning.csv_converter import CSVConverter
+# from etl.data_cleaning.csv_converter import CSVConverter
 from twikit_etl.twikit_data_handler import TwikitDataHandler
 
 
