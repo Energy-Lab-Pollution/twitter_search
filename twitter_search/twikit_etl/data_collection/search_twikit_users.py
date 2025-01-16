@@ -4,9 +4,8 @@ Pipeline to search twikit users
 import asyncio
 from datetime import datetime
 
+import twikit
 from config_utils import constants, util
-from twikit import Client
-
 
 QUERY = """location ((air pollution) OR pollution OR (public health)
                 OR (poor air) OR asthma OR polluted OR (pollution control board)
@@ -22,7 +21,7 @@ class TwikitUserSearcher:
         # Threshold for this particular city
         self.twikit_threshold = twikit_threshold
 
-        self.client = Client("en-US")
+        self.client = twikit.Client("en-US")
         self.client.load_cookies(constants.TWIKIT_COOKIES_DIR)
 
     @staticmethod
@@ -141,16 +140,12 @@ class TwikitUserSearcher:
         """
         Runs the entire search pipeline
         """
-        asyncio.run(self.search_tweets_and_users())
+        try:
+            asyncio.run(self.search_tweets_and_users())
+        except twikit.errors.TooManyRequests:
+            print("Too many requests, stopping...")
+
         if not self.users_list:
             return
         self.store_users_and_tweets()
 
-
-if __name__ == "__main__":
-    query = QUERY.replace("location", "New York")
-    twikit_searcher = TwikitUserSearcher(
-        "twikit-users.json", "twikit-tweets.json", query=QUERY
-    )
-
-    twikit_searcher.run_search()
