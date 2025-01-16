@@ -55,6 +55,7 @@ class TwikitDataHandler:
         # Create list of num requests per city
         requests_list = []
         for _ in range(0, num_cities):
+            city_requests = round(city_requests)
             requests_list.append(city_requests)
 
         # If remainder exists, add to last city
@@ -131,23 +132,11 @@ class TwikitDataHandler:
             / f"{file_city}_{self.account_type}_users.json",
             "output_file_tweets": self.date_dir
             / f"{file_city}_{self.account_type}_tweets.json",
-            "output_file_processing": self.date_dir
-            / f"{file_city}_{self.account_type}_processed_users.json",
+            "input_file_filter": self.date_dir
+            / f"{file_city}_{self.account_type}_users.json",
             "output_file_filter": self.date_dir
             / f"{file_city}_{self.account_type}_users_filtered.json",
-            "output_file_tweet_add": self.date_dir
-            / f"{file_city}_{self.account_type}_users_tweet_added",
         }
-
-        input_file_processing = (
-            self.paths["output_file_tweets"],
-            self.paths["output_file_users"],
-        )
-
-        self.paths["input_file_processing"] = input_file_processing
-
-        output_file_processing = self.paths["output_file_processing"]
-        self.paths["input_file_filter"] = output_file_processing
 
     def perform_initial_search(self, threshold):
         """
@@ -228,6 +217,7 @@ class TwikitDataHandler:
                 self.num_accounts = len(self.QUERIES) - 1
     
         accounts_requests = self.get_account_num_requests(city_requests)
+        print(accounts_requests)
 
         for account_type, account_requests in zip(account_types, accounts_requests):
             print(
