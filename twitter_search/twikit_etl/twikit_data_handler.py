@@ -35,7 +35,7 @@ class TwikitDataHandler:
 
     def get_city_num_requests(self, num_cities):
         """
-        Gets each cities' particular threshold
+        Gets each cities' particular num of requests
         
         Twikit can only process 50 requests to get tweets in a 15 min
         interval. Therefore, for several cities, we need to determine
@@ -65,7 +65,7 @@ class TwikitDataHandler:
 
         return requests_list
 
-    def get_account_num_requests(self, city_requests):
+    def get_account_num_requests(self, city_requests, skip_media):
         """
         Gets number of requests for each particular account.
         
@@ -201,31 +201,35 @@ class TwikitDataHandler:
             print("No relevant users were found.")
             return
 
-    def run_all_account_types(self, skip_media=False):
+    def run_all_account_types(self, city_requests, skip_media=False):
         """
         Runs the entire process for all the available
         account types for a particular location.
 
         Args
         ----------
+            city_requests: int with max number of requests for a given city
             skip_media: str
-            Determines if we should skip the search for media accounts
-            (there are tons of them)
+                Determines if we should skip the search for media accounts
+                (there are tons of them)
 
         """
         account_types = self.QUERIES
         self.skip_media = skip_media
+
         if skip_media:
             if "media" in account_types:
                 del account_types["media"]
                 # Number of account types 
                 self.num_accounts = len(self.QUERIES) - 1
-        for account_type in account_types:
+    
+        accounts_requests = self.get_account_num_requests(city_requests)
+        for account_type, account_requests in zip(account_types, accounts_requests):
             print(
                 f" =============== PROCESSING: {account_type} ======================"
             )
             self.account_type = account_type
-            self.run()
+            self.run(account_requests)
 
 
     def run_pilot_locations_accounts(self, skip_media=False):
@@ -240,11 +244,12 @@ class TwikitDataHandler:
             (there are tons of them)
 
         """
-
-        for city in PILOT_CITIES:
+        # Get available number of requests per city
+        cities_requests = self.get_city_num_requests(len(PILOT_CITIES))
+        for city, city_requests in zip(PILOT_CITIES, cities_requests):
             print(f" =============== CITY: {city} ======================")
             self.location = city
-            self.run_all_account_types(skip_media)
+            self.run_all_account_types(city_requests, skip_media)
 
 
     def run_all_locations_accounts(self, skip_media=False):
@@ -259,7 +264,9 @@ class TwikitDataHandler:
             (there are tons of them)
 
         """
-        for city in CITIES:
+        # Get available number of requests per city
+        cities_requests = self.get_city_num_requests(len(CITIES))
+        for city, city_requests in zip(CITIES, cities_requests):
             print(f" =============== CITY: {city} ======================")
             self.location = city
-            self.run_all_account_types(skip_media)
+            self.run_all_account_types(skip_media, city_requests)
