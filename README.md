@@ -2,9 +2,7 @@
 
 The repository contains the code for searching users on Twitter based on a given type of account and location. The process searches for tweets related to the account type and location, extracts the users, and filters them based on relevance by using a zero-shot model.
 
-## How to Use
-
-For the extraction part:
+## Setting up the repository
 
 1. Clone the repository
 
@@ -32,30 +30,43 @@ poetry shell
 ```
 **Note:**  Receive the secret keys from the authors, go to twitter_search/config_utils, and create a file called config.py. You then need to paste all of the access keys there.
 
-5. Execute the project from the command line:
+## Extracting and classificating users
+
+As of now, we can extract users from Twitter in two ways:
+
+1. Use (Twitter's)[https://docs.x.com/x-api/introduction] official API.
+2. Use the (Twikit)[https://github.com/d60/twikit] library for scraping.
+
+We are keeping both options open in case Twikit stops working or Twitter's API becomes more restrictive.
+
+If you use twitter's API, you can execute the project from the command line:
 
 ```bash
 python3 twitter_search location(str) account_type(str)
 ```
 
+If you use Twikit, you can execute the project from the command line:
 
-For example:
+```bash
+python3 twitter_search/run_twikit.py location(str) account_type(str)
+```
+
+For example, if you want to get users from Kolkata in the "media" category with Twitter's official API, you can use the following command:
 
 ```bash
 python3 twitter_search "kolkata" "media"
 ```
 
-gets users from Kolkata in the media industry (note that you do not need to use the quotation marks).
 
-6. The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
+The project will search Twitter based on the specified query and location, collecting user data and saving it in the raw data directory.
 
-7. If you want, it is also possible to generate csv files for a particular location. The command for generating Kolkata's csv files  would be:
+If you want, it is also possible to generate csv files for a particular location. The command for generating Kolkata's csv files  would be:
 
 ```bash
 python3 twitter_search/etl/generate_csv_files.py "kolkata"
 ```
 
-8. Concatenate all .csv files
+#### Concatenate all .csv files (WIP: adapt method to work with Twikit)
 
 There is another command we can use to concatenate all of the .csv files in the `cleaned_data` directory into a single file. This command is:
 
@@ -63,7 +74,7 @@ There is another command we can use to concatenate all of the .csv files in the 
 python3 twitter_search/etl/concat_csv_files.py
 ```
 
-### For a given location, get all the account types at once
+#### For a given location, get all the account types at once
 
 If you want to get all the account types for a given location, you can use the following command:
 
@@ -87,7 +98,7 @@ python3 twitter_search "Kolkata" "all" --skip_media "True"
 Which will output all the account types for the given location (in this case, Kolkata), but skip the _media_ account type. This will also generate the corresponding csv file for "Kolkata".
 
 
-## For all locations, get all the account types at once
+## For all locations, get all the account types at once (not advisable since it will consume lots of tokens)
 
 If you want to get all the account types for all locations, you can use the following command:
 
@@ -100,7 +111,7 @@ Note that you can also use the `--skip_media` parameter for this command.
 python3 twitter_search "all" "all" --skip_media "True"
 ```
 
-## Get more users by using list expansion.
+## Get more users by using list expansion (WIP: create Twikit methods)
 
 ```bash
 python3 twitter_search/list_expansion.py "bangalore" "researcher"
