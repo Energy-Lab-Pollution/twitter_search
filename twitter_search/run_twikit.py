@@ -6,8 +6,8 @@ using the Twikit Library
 from argparse import ArgumentParser
 
 from config_utils.cities import CITIES, PILOT_CITIES
-from config_utils.util import strtobool
 from config_utils.constants import TWIKIT_THRESHOLD
+from config_utils.util import strtobool
 
 # Local imports
 from etl.data_cleaning.csv_converter import CSVConverter
@@ -82,13 +82,16 @@ def main():
         # Since extracting one city, we can use a given number of requests
         else:
             if args.skip_media:
-                twikit_data_handler.run_all_account_types(TWIKIT_THRESHOLD, skip_media)
+                twikit_data_handler.run_all_account_types(
+                    TWIKIT_THRESHOLD, skip_media
+                )
             else:
                 twikit_data_handler.run_all_account_types(TWIKIT_THRESHOLD)
             # csv_converter = CSVConverter(args.location)
             # csv_converter.run()
     else:
         twikit_data_handler.run()
+
 
 if __name__ == "__main__":
     main()

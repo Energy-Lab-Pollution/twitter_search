@@ -7,12 +7,19 @@ from datetime import datetime
 import twikit
 from config_utils import constants, util
 
+
 class TwikitUserSearcher:
-    def __init__(self, output_file_users, output_file_tweets, twikit_threshold, query=None):
+    def __init__(
+        self,
+        output_file_users,
+        output_file_tweets,
+        twikit_threshold,
+        query=None,
+    ):
         self.output_file_users = output_file_users
         self.output_file_tweets = output_file_tweets
         self.query = query
-        
+
         # Threshold for this particular city
         self.twikit_threshold = twikit_threshold
 
@@ -82,7 +89,7 @@ class TwikitUserSearcher:
 
     async def search_tweets_and_users(self):
         """
-        Method used to search for tweets, with twikit 
+        Method used to search for tweets, with twikit
         with the given query
 
         This method uses twikit's "await next" function
@@ -147,4 +154,3 @@ class TwikitUserSearcher:
         if not self.users_list:
             return
         self.store_users_and_tweets()
-

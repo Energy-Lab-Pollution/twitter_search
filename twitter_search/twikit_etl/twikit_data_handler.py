@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytz
 from config_utils.cities import ALIAS_DICT, CITIES, PILOT_CITIES
-from config_utils.queries import QUERIES
 from config_utils.constants import TWIKIT_THRESHOLD
+from config_utils.queries import QUERIES
 from etl.query import Query
 from twikit_etl.data_collection.search_twikit_users import TwikitUserSearcher
 from twitter_filtering.users_filtering.filter_users import UserFilter
@@ -36,10 +36,10 @@ class TwikitDataHandler:
     def get_city_num_requests(self, num_cities):
         """
         Gets each cities' particular num of requests
-        
+
         Twikit can only process 50 requests to get tweets in a 15 min
         interval. Therefore, for several cities, we need to determine
-        how many requests each city will get. 
+        how many requests each city will get.
 
         Args:
             num_cities: int determining the number of cities to be processed
@@ -51,7 +51,7 @@ class TwikitDataHandler:
         if city_requests < self.num_accounts:
             print("City requests: Not enough requests to extract all accounts")
             return None
-        
+
         # Create list of num requests per city
         requests_list = []
         for _ in range(0, num_cities):
@@ -69,10 +69,10 @@ class TwikitDataHandler:
     def get_account_num_requests(self, city_requests):
         """
         Gets number of requests for each particular account.
-        
+
         Twikit can only process 50 requests to get tweets in a 15 min
         interval. Therefore, for several cities, we need to determine
-        how many requests each city will get. 
+        how many requests each city will get.
 
         Args:
             city_requests: int determining the number of requests per city
@@ -81,10 +81,12 @@ class TwikitDataHandler:
         remainder_requests = city_requests % self.num_accounts
 
         if account_requests < 1:
-            print("Account requests: Not enough requests to extract all accounts")
+            print(
+                "Account requests: Not enough requests to extract all accounts"
+            )
             return None
-        
-        # Create list of num requests per account 
+
+        # Create list of num requests per account
         requests_list = []
         for _ in range(0, self.num_accounts):
             # round to nearest int
@@ -98,7 +100,6 @@ class TwikitDataHandler:
             requests_list[-1] = num_requests
 
         return requests_list
-
 
     def setup_file_paths(self):
         """
@@ -172,7 +173,7 @@ class TwikitDataHandler:
 
     def run(self, threshold=None):
         """
-        Process an iteration of the Twitter search and 
+        Process an iteration of the Twitter search and
         data collection process.
 
         Args:
@@ -213,19 +214,20 @@ class TwikitDataHandler:
         if skip_media:
             if "media" in account_types:
                 del account_types["media"]
-                # Number of account types 
+                # Number of account types
                 self.num_accounts = len(self.QUERIES) - 1
-    
+
         accounts_requests = self.get_account_num_requests(city_requests)
         print(accounts_requests)
 
-        for account_type, account_requests in zip(account_types, accounts_requests):
+        for account_type, account_requests in zip(
+            account_types, accounts_requests
+        ):
             print(
                 f" =============== PROCESSING: {account_type} ======================"
             )
             self.account_type = account_type
             self.run(account_requests)
-
 
     def run_pilot_locations_accounts(self, skip_media=False):
         """
@@ -245,7 +247,6 @@ class TwikitDataHandler:
             print(f" =============== CITY: {city} ======================")
             self.location = city
             self.run_all_account_types(city_requests, skip_media)
-
 
     def run_all_locations_accounts(self, skip_media=False):
         """

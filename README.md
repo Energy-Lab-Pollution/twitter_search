@@ -1,6 +1,6 @@
 # Twitter Search
 
-The repository contains the code for searching users on Twitter based on a given type of account and location. The process searches for tweets related to the account type and location, extracts the users, and filters them based on relevance by using a zero-shot model. 
+The repository contains the code for searching users on Twitter based on a given type of account and location. The process searches for tweets related to the account type and location, extracts the users, and filters them based on relevance by using a zero-shot model.
 
 ## How to Use
 
