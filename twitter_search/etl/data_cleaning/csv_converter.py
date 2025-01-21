@@ -70,7 +70,7 @@ class CSVConverter:
             str: The URL of the user.
         """
         return f"https://twitter.com/{username}"
-    
+
     def build_paths(self):
         """
         Builds the according paths depeding on if the
@@ -85,7 +85,6 @@ class CSVConverter:
             self.raw_data_path = project_root / "data" / "raw_data"
             self.clean_data_path = project_root / "data" / "cleaned_data"
 
-
     def get_json_files(self):
         """
         Method that gets the json files, depending on whether
@@ -98,8 +97,8 @@ class CSVConverter:
             directories = os.listdir(self.raw_data_path)
             for directory in directories:
                 files = os.listdir(self.raw_data_path / directory)
-                files = [self.raw_data_path / directory / file for file in files]
-            self.json_files.extend(files)
+                files = [f"{directory}/{file}" for file in files]
+                self.json_files.extend(files)
 
     def filter_json_files(self):
         """
