@@ -349,13 +349,13 @@ class CSVConverter:
 
         unique_users = user_df.drop_duplicates(subset=["user_id"])
         unique_users.to_csv(
-            self.CLEAN_DATA_PATH / unique_filename,
+            self.clean_data_path / unique_filename,
             index=False,
             encoding="utf-8-sig",
         )
 
         user_df.to_csv(
-            self.CLEAN_DATA_PATH / filename,
+            self.clean_data_path / filename,
             index=False,
             encoding="utf-8-sig",
         )
@@ -387,7 +387,7 @@ class CSVConverter:
             )
             list_df.dropna(subset=["relevant"], inplace=True)
             list_df.to_csv(
-                self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",
+                self.clean_data_path / f"{self.location}_list_data.csv",
                 index=False,
                 encoding="utf-8-sig",
             )
