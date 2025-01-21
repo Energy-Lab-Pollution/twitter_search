@@ -12,9 +12,17 @@ class CSVConcat:
     def __init__(self):
         self.script_path = Path(__file__).resolve()
         self.project_root = self.script_path.parents[1]
+        
+        # Configure paths
         self.CLEAN_DATA_PATH = self.project_root / "data" / "cleaned_data"
+        self.TWIKIT_CLEAN_DATA_PATH = self.project_root / "data" / "twikit_cleaned_data"
         self.MASTER_DATA_PATH = self.project_root / "data" / "master_dataset"
+
+        # Gather csv files
         self.csv_files = os.listdir(self.CLEAN_DATA_PATH)
+        self.twikit_csv_files = os.listdir(self.TWIKIT_CLEAN_DATA_PATH)
+
+        self.csv_files.extend(self.twikit_csv_files)
 
         # The dict contains a string to look for in the csv files
         # and the final name of the concatenated csv file
