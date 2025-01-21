@@ -40,6 +40,13 @@ parser.add_argument(
     help="Specify the location to look for its JSON files.",
 )
 
+parser.add_argument(
+    "--twikit",
+    type=str,
+    help="Specify if Twikit is being used or not",
+    choices=["True", "False"],
+)
+
 args = parser.parse_args()
 
 if __name__ == "__main__":
