@@ -66,7 +66,7 @@ If you want, it is also possible to generate csv files for a particular location
 python3 twitter_search/etl/generate_csv_files.py "kolkata"
 ```
 
-#### Concatenate all .csv files (WIP: adapt method to work with Twikit)
+#### Concatenate all .csv files
 
 There is another command we can use to concatenate all of the .csv files in the `cleaned_data` directory into a single file. This command is:
 
@@ -92,7 +92,7 @@ During the project, we found that the _media_ account type outputs the most numb
 If you want to get all the account types for a given location, but skip the _media_ account type, you can use the following command:
 
 ```bash
-python3 twitter_search "Kolkata" "all" --skip_media "True"
+python3 twitter_search "kolkata" "all" --skip_media "True"
 ```
 
 Which will output all the account types for the given location (in this case, Kolkata), but skip the _media_ account type. This will also generate the corresponding csv file for "Kolkata".
