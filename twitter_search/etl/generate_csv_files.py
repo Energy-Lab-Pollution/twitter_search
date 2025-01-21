@@ -3,14 +3,15 @@ Detects JSON files in a specified location and converts them into CSV files.
 """
 
 from argparse import ArgumentParser
-
 from data_cleaning.csv_converter import CSVConverter
+from config_utils.util import strtobool
 
 
 CITIES = [
     "abuja",
     "bangalore",
     "bangkok",
+    "bogota",
     "chennai",
     "chiang mai",
     "chicago",
@@ -22,11 +23,12 @@ CITIES = [
     "kinshasa",
     "kolkata",
     "london",
+    "madrid",
     "mexico city",
     "mumbai",
+    "nairobi",
     "phuket",
 ]
-
 
 PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
 
@@ -41,7 +43,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--twikit",
+    "twikit",
     type=str,
     help="Specify if Twikit is being used or not",
     choices=["True", "False"],
@@ -50,14 +52,15 @@ parser.add_argument(
 args = parser.parse_args()
 
 if __name__ == "__main__":
+    use_twikit = strtobool(args.twikit)
     if args.location == "all":
         for city in CITIES:
-            converter = CSVConverter(city)
+            converter = CSVConverter(city, use_twikit)
             converter.run()
     elif args.location == "pilot_cities":
         for city in PILOT_CITIES:
-            converter = CSVConverter(city)
+            converter = CSVConverter(city, use_twikit)
             converter.run()
     else:
-        converter = CSVConverter(args.location)
+        converter = CSVConverter(args.location, use_twikit)
         converter.run()
