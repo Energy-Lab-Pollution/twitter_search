@@ -6,6 +6,8 @@ __pycache__
 raw_data
 cleaned_data
 labeled_data
+twikit_raw_data
+twikit_cleaned_data
 master_dataset
 analysis_outputs
 

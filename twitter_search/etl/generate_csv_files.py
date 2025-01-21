@@ -4,7 +4,6 @@ Detects JSON files in a specified location and converts them into CSV files.
 
 from argparse import ArgumentParser
 from data_cleaning.csv_converter import CSVConverter
-from config_utils.util import strtobool
 
 
 CITIES = [
@@ -52,7 +51,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    use_twikit = strtobool(args.twikit)
+    use_twikit = True if args.twikit == "True" else False
     if args.location == "all":
         for city in CITIES:
             converter = CSVConverter(city, use_twikit)
