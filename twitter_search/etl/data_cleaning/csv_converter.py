@@ -35,13 +35,16 @@ class CSVConverter:
     # Construct the path to the cleaned_data directory
     RAW_DATA_PATH = project_root / "data" / "raw_data"
     CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
+    TWIKIT_RAW_DATA_PATH = project_root / "data" / "twikit_raw_data"
+    CLEAN_DATA_PATH = project_root / "data" / "twikit_cleaned_data"
+
     FILETYPE_INDEX = 4
     ACCOUNT_TYPE_COL = "search_account_type"
 
-    def __init__(self, location) -> None:
+    def __init__(self, location, twikit=False) -> None:
         # See which JSON files are available
-        self.json_files = os.listdir(self.RAW_DATA_PATH)
         self.location = location
+        self.twikit = twikit
         self.filter_json_files()
 
         self.file_type_column = {
@@ -63,6 +66,29 @@ class CSVConverter:
             str: The URL of the user.
         """
         return f"https://twitter.com/{username}"
+    
+    def build_paths(self):
+        """
+        Builds the according paths depeding on if the
+        Twikit extraction is being used or not
+        """
+
+        if self.twikit:
+            self.raw_data_path = project_root / "data" / "twikit_raw_data"
+            self.clean_data_path = project_root / "data" / "twikit_cleaned_data"
+
+        else:
+            self.raw_data_path = project_root / "data" / "raw_data"
+            self.clean_data_path = project_root / "data" / "cleaned_data"
+
+
+    def get_json_files(self):
+        """
+        Method that gets the json files, depending on whether
+        Twikit is being used or not
+        """
+        self.json_files = os.listdir(self.RAW_DATA_PATH)
+
 
     def filter_json_files(self):
         """
