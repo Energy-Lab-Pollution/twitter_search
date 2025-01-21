@@ -5,12 +5,12 @@ using the Twikit Library
 
 from argparse import ArgumentParser
 
-# from config_utils.cities import CITIES, PILOT_CITIES
+from config_utils.cities import CITIES, PILOT_CITIES
 from config_utils.constants import TWIKIT_THRESHOLD
 from config_utils.util import strtobool
 
 # Local imports
-# from etl.data_cleaning.csv_converter import CSVConverter
+from etl.data_cleaning.csv_converter import CSVConverter
 from twikit_etl.twikit_data_handler import TwikitDataHandler
 
 
@@ -65,9 +65,9 @@ def main():
             else:
                 twikit_data_handler.run_all_locations_accounts()
 
-            # for city in CITIES:
-            #     csv_converter = CSVConverter(city)
-            #     csv_converter.run()
+            for city in CITIES:
+                csv_converter = CSVConverter(city, twikit=True)
+                csv_converter.run()
 
         elif args.location == "pilot_cities":
             if args.skip_media:
@@ -75,9 +75,9 @@ def main():
             else:
                 twikit_data_handler.run_pilot_locations_accounts()
 
-            # for city in PILOT_CITIES:
-            #     csv_converter = CSVConverter(city)
-            #     csv_converter.run()
+            for city in PILOT_CITIES:
+                csv_converter = CSVConverter(city, twikit=True)
+                csv_converter.run()
 
         # Since extracting one city, we can use a given number of requests
         else:
@@ -87,8 +87,8 @@ def main():
                 )
             else:
                 twikit_data_handler.run_all_account_types(TWIKIT_THRESHOLD)
-            # csv_converter = CSVConverter(args.location)
-            # csv_converter.run()
+            csv_converter = CSVConverter(args.location, twikit=True)
+            csv_converter.run()
     else:
         twikit_data_handler.run()
 

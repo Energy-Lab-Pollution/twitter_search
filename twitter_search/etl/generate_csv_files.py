@@ -11,6 +11,7 @@ CITIES = [
     "abuja",
     "bangalore",
     "bangkok",
+    "bogota",
     "chennai",
     "chiang mai",
     "chicago",
@@ -22,11 +23,12 @@ CITIES = [
     "kinshasa",
     "kolkata",
     "london",
+    "madrid",
     "mexico city",
     "mumbai",
+    "nairobi",
     "phuket",
 ]
-
 
 PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
 
@@ -40,17 +42,25 @@ parser.add_argument(
     help="Specify the location to look for its JSON files.",
 )
 
+parser.add_argument(
+    "twikit",
+    type=str,
+    help="Specify if Twikit is being used or not",
+    choices=["True", "False"],
+)
+
 args = parser.parse_args()
 
 if __name__ == "__main__":
+    use_twikit = True if args.twikit == "True" else False
     if args.location == "all":
         for city in CITIES:
-            converter = CSVConverter(city)
+            converter = CSVConverter(city, use_twikit)
             converter.run()
     elif args.location == "pilot_cities":
         for city in PILOT_CITIES:
-            converter = CSVConverter(city)
+            converter = CSVConverter(city, use_twikit)
             converter.run()
     else:
-        converter = CSVConverter(args.location)
+        converter = CSVConverter(args.location, use_twikit)
         converter.run()

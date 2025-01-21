@@ -32,16 +32,17 @@ USER_COLUMNS = [
 
 
 class CSVConverter:
-    # Construct the path to the cleaned_data directory
-    RAW_DATA_PATH = project_root / "data" / "raw_data"
-    CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
     FILETYPE_INDEX = 4
     ACCOUNT_TYPE_COL = "search_account_type"
 
-    def __init__(self, location) -> None:
+    def __init__(self, location, twikit=False) -> None:
         # See which JSON files are available
-        self.json_files = os.listdir(self.RAW_DATA_PATH)
         self.location = location
+        self.twikit = twikit
+
+        # JSON files parsing
+        self.build_paths()
+        self.get_json_files()
         self.filter_json_files()
 
         self.file_type_column = {
@@ -63,6 +64,36 @@ class CSVConverter:
             str: The URL of the user.
         """
         return f"https://twitter.com/{username}"
+
+    def build_paths(self):
+        """
+        Builds the according paths depeding on if the
+        Twikit extraction is being used or not
+        """
+
+        if self.twikit:
+            self.raw_data_path = project_root / "data" / "twikit_raw_data"
+            self.clean_data_path = project_root / "data" / "twikit_cleaned_data"
+
+        else:
+            self.raw_data_path = project_root / "data" / "raw_data"
+            self.clean_data_path = project_root / "data" / "cleaned_data"
+
+    def get_json_files(self):
+        """
+        Method that gets the json files, depending on whether
+        Twikit is being used or not
+        """
+        if not self.twikit:
+            self.json_files = os.listdir(self.raw_data_path)
+        else:
+            # Twikit has a subdirectory per date
+            self.json_files = []
+            directories = os.listdir(self.raw_data_path)
+            for directory in directories:
+                files = os.listdir(self.raw_data_path / directory)
+                files = [f"{directory}/{file}" for file in files]
+                self.json_files.extend(files)
 
     def filter_json_files(self):
         """
@@ -213,13 +244,16 @@ class CSVConverter:
         df = pd.DataFrame()
 
         for file in files:
-            input_file = self.RAW_DATA_PATH / file
+            input_file = self.raw_data_path / file
             input_df = self.convert_users_to_df(input_file)
 
             if self.file_type_column[file_type] in input_df.columns:
                 # Add date column if not available
                 if "tweet_date" not in input_df.columns:
                     input_df.loc[:, "tweet_date"] = None
+                if "tweet_count" not in input_df.columns:
+                    input_df.loc[:, "tweet_count"] = None
+
                 input_df = input_df.loc[:, self.user_columns]
                 df = pd.concat([df, input_df], ignore_index=True)
 
@@ -279,7 +313,7 @@ class CSVConverter:
 
     def parse_user_df(self, user_type):
         """
-        Pre-processes, parses and savees the users dataframe
+        Pre-processes, parses and saves the users dataframe
 
         Args:
             - user_type: can either be "normal" or "expanded"
@@ -313,13 +347,13 @@ class CSVConverter:
 
         unique_users = user_df.drop_duplicates(subset=["user_id"])
         unique_users.to_csv(
-            self.CLEAN_DATA_PATH / unique_filename,
+            self.clean_data_path / unique_filename,
             index=False,
             encoding="utf-8-sig",
         )
 
         user_df.to_csv(
-            self.CLEAN_DATA_PATH / filename,
+            self.clean_data_path / filename,
             index=False,
             encoding="utf-8-sig",
         )
@@ -351,7 +385,7 @@ class CSVConverter:
             )
             list_df.dropna(subset=["relevant"], inplace=True)
             list_df.to_csv(
-                self.CLEAN_DATA_PATH / f"{self.location}_list_data.csv",
+                self.clean_data_path / f"{self.location}_list_data.csv",
                 index=False,
                 encoding="utf-8-sig",
             )

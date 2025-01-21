@@ -12,9 +12,25 @@ class CSVConcat:
     def __init__(self):
         self.script_path = Path(__file__).resolve()
         self.project_root = self.script_path.parents[1]
+
+        # Configure paths
         self.CLEAN_DATA_PATH = self.project_root / "data" / "cleaned_data"
+        self.TWIKIT_CLEAN_DATA_PATH = (
+            self.project_root / "data" / "twikit_cleaned_data"
+        )
         self.MASTER_DATA_PATH = self.project_root / "data" / "master_dataset"
-        self.csv_files = os.listdir(self.CLEAN_DATA_PATH)
+
+        # Gather csv files
+        csv_files = os.listdir(self.CLEAN_DATA_PATH)
+        twikit_csv_files = os.listdir(self.TWIKIT_CLEAN_DATA_PATH)
+
+        self.csv_files = [self.CLEAN_DATA_PATH / file for file in csv_files]
+        twikit_csv_files = [
+            self.TWIKIT_CLEAN_DATA_PATH / file for file in twikit_csv_files
+        ]
+
+        # All files are now in a single list
+        self.csv_files.extend(twikit_csv_files)
 
         # The dict contains a string to look for in the csv files
         # and the final name of the concatenated csv file
@@ -45,20 +61,21 @@ class CSVConcat:
             user_files = [
                 file
                 for file in self.csv_files
-                if str_to_look in file and str_to_avoid not in file
+                if str_to_look in str(file) and str_to_avoid not in str(file)
             ]
 
         else:
             user_files = [
-                file for file in self.csv_files if str_to_look in file
+                file for file in self.csv_files if str_to_look in str(file)
             ]
 
         all_users = pd.DataFrame()
 
         for csv_file in user_files:
-            df = pd.read_csv(f"{self.CLEAN_DATA_PATH}/{csv_file}")
+            df = pd.read_csv(csv_file)
             all_users = pd.concat([all_users, df], ignore_index=True)
 
+        # For now, saving the csv files in the 'CLEAN_DATA_PATH' folder
         all_users.to_csv(
             f"{self.CLEAN_DATA_PATH}/{final_file}.csv",
             index=False,
@@ -90,6 +107,7 @@ class CSVConcat:
 
         master_dataset.to_csv(
             f"{self.MASTER_DATA_PATH}/master_dataset.csv",
+            encoding="utf-8-sig",
             index=False,
         )
         print("Saved master dataset")
