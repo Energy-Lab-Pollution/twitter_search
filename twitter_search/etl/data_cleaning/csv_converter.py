@@ -251,6 +251,9 @@ class CSVConverter:
                 # Add date column if not available
                 if "tweet_date" not in input_df.columns:
                     input_df.loc[:, "tweet_date"] = None
+                if "tweet_count" not in input_df.columns:
+                    input_df.loc[:, "tweet_count"] = None
+
                 input_df = input_df.loc[:, self.user_columns]
                 df = pd.concat([df, input_df], ignore_index=True)
 
