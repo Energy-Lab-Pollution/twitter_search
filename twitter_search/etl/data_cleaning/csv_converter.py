@@ -45,6 +45,10 @@ class CSVConverter:
         # See which JSON files are available
         self.location = location
         self.twikit = twikit
+
+        # JSON files parsing
+        self.build_paths()
+        self.get_json_files()
         self.filter_json_files()
 
         self.file_type_column = {
@@ -87,8 +91,15 @@ class CSVConverter:
         Method that gets the json files, depending on whether
         Twikit is being used or not
         """
-        self.json_files = os.listdir(self.RAW_DATA_PATH)
-
+        if not self.twikit:
+            self.json_files = os.listdir(self.raw_data_path)
+        else:
+            self.json_files = []
+            directories = os.listdir(self.raw_data_path)
+            for directory in directories:
+                files = os.listdir(self.raw_data_path / directory)
+                files = [self.raw_data_path / directory / file for file in files]
+            self.json_files.extend(files)
 
     def filter_json_files(self):
         """
@@ -239,7 +250,7 @@ class CSVConverter:
         df = pd.DataFrame()
 
         for file in files:
-            input_file = self.RAW_DATA_PATH / file
+            input_file = self.raw_data_path / file
             input_df = self.convert_users_to_df(input_file)
 
             if self.file_type_column[file_type] in input_df.columns:
@@ -305,7 +316,7 @@ class CSVConverter:
 
     def parse_user_df(self, user_type):
         """
-        Pre-processes, parses and savees the users dataframe
+        Pre-processes, parses and saves the users dataframe
 
         Args:
             - user_type: can either be "normal" or "expanded"
