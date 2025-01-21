@@ -57,12 +57,12 @@ class CSVConcat:
             user_files = [
                 file
                 for file in self.csv_files
-                if str_to_look in file and str_to_avoid not in file
+                if str_to_look in str(file) and str_to_avoid not in str(file)
             ]
 
         else:
             user_files = [
-                file for file in self.csv_files if str_to_look in file
+                file for file in self.csv_files if str_to_look in str(file)
             ]
 
         all_users = pd.DataFrame()
@@ -103,6 +103,7 @@ class CSVConcat:
 
         master_dataset.to_csv(
             f"{self.MASTER_DATA_PATH}/master_dataset.csv",
+            encoding='utf-8-sig',
             index=False,
         )
         print("Saved master dataset")
