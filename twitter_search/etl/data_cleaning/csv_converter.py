@@ -32,12 +32,6 @@ USER_COLUMNS = [
 
 
 class CSVConverter:
-    # Construct the path to the cleaned_data directory
-    RAW_DATA_PATH = project_root / "data" / "raw_data"
-    CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
-    TWIKIT_RAW_DATA_PATH = project_root / "data" / "twikit_raw_data"
-    CLEAN_DATA_PATH = project_root / "data" / "twikit_cleaned_data"
-
     FILETYPE_INDEX = 4
     ACCOUNT_TYPE_COL = "search_account_type"
 
@@ -93,6 +87,7 @@ class CSVConverter:
         if not self.twikit:
             self.json_files = os.listdir(self.raw_data_path)
         else:
+            # Twikit has a subdirectory per date
             self.json_files = []
             directories = os.listdir(self.raw_data_path)
             for directory in directories:
