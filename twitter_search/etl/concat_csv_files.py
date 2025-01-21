@@ -19,11 +19,15 @@ class CSVConcat:
         self.MASTER_DATA_PATH = self.project_root / "data" / "master_dataset"
 
         # Gather csv files
-        self.csv_files = os.listdir(self.CLEAN_DATA_PATH)
-        self.twikit_csv_files = os.listdir(self.TWIKIT_CLEAN_DATA_PATH)
+        csv_files = os.listdir(self.CLEAN_DATA_PATH)
+        twikit_csv_files = os.listdir(self.TWIKIT_CLEAN_DATA_PATH)
+    
+        self.csv_files = [self.CLEAN_DATA_PATH / file for file in csv_files]
+        twikit_csv_files = [self.TWIKIT_CLEAN_DATA_PATH / file for file in twikit_csv_files]
 
-        self.csv_files.extend(self.twikit_csv_files)
-
+        # All files are now in a single list
+        self.csv_files.extend(twikit_csv_files)
+    
         # The dict contains a string to look for in the csv files
         # and the final name of the concatenated csv file
         self.file_dict = {
@@ -64,9 +68,10 @@ class CSVConcat:
         all_users = pd.DataFrame()
 
         for csv_file in user_files:
-            df = pd.read_csv(f"{self.CLEAN_DATA_PATH}/{csv_file}")
+            df = pd.read_csv(csv_file)
             all_users = pd.concat([all_users, df], ignore_index=True)
 
+        # For now, saving the csv files in the 'CLEAN_DATA_PATH' folder
         all_users.to_csv(
             f"{self.CLEAN_DATA_PATH}/{final_file}.csv",
             index=False,
