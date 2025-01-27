@@ -12,6 +12,7 @@ CITIES = [
     "bangalore",
     "bangkok",
     "bogota",
+    "buenos aires",
     "chennai",
     "chiang mai",
     "chicago",
@@ -28,6 +29,7 @@ CITIES = [
     "mumbai",
     "nairobi",
     "phuket",
+    "tegucigalpa"
 ]
 
 PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]

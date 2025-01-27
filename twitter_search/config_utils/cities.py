@@ -7,6 +7,7 @@ CITIES = [
     "bangalore",
     "bangkok",
     "bogota",
+    "buenos aires",
     "chennai",
     "chiang mai",
     "chicago",
@@ -23,6 +24,7 @@ CITIES = [
     "mumbai",
     "nairobi",
     "phuket",
+    "tegucigalpa",
 ]
 
 
@@ -43,6 +45,7 @@ CITIES_LANGS = {
     "bangalore": "en",
     "bangkok": "en",
     "bogota": "es",
+    "buenos aires": "en",
     "chennai": "en",
     "chiang mai": "en",
     "chicago": "en",
@@ -59,4 +62,5 @@ CITIES_LANGS = {
     "mumbai": "en",
     "nairobi": "en",
     "phuket": "en",
+    "tegucigalpa": "es",
 }
