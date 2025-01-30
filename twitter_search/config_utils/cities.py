@@ -23,6 +23,7 @@ CITIES = [
     "mexico city",
     "mumbai",
     "nairobi",
+    "new york",
     "phuket",
     "tegucigalpa",
 ]
