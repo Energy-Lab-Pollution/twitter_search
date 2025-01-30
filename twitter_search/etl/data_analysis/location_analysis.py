@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
+# TODO: get this constants from general utils folder
 
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
@@ -27,7 +28,6 @@ def check_location(raw_location, target_location):
     if target_location in ALIAS_DICT:
         target_locations = ALIAS_DICT[target_location]
         target_locations.append(target_location)
-
     else:
         target_locations = [target_location]
 
