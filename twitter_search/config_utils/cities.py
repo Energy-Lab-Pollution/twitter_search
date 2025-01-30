@@ -39,6 +39,7 @@ ALIAS_DICT = {
     "mexico df": "mexico city",
     "bengaluru": "bangalore",
     "ciudad de guatemala": "guatemala",
+    "new delhi": "delhi"
 }
 
 CITIES_LANGS = {
