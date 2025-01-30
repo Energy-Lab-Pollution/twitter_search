@@ -63,6 +63,7 @@ CITIES_LANGS = {
     "mexico city": "es",
     "mumbai": "en",
     "nairobi": "en",
+    "new york": "en",
     "phuket": "en",
     "tegucigalpa": "es",
 }
