@@ -76,7 +76,7 @@ class LocationAnalyzer:
         and classification
         """
 
-        match_group = self.users_df.groupby(
+        match_group = self.users.groupby(
             by=["location_match", "search_location"]
         ).count()
         match_group.reset_index(drop=False, inplace=True)
@@ -100,18 +100,17 @@ class LocationAnalyzer:
         self.users.loc[:, "location_match"] = self.users.apply(
             lambda x: self.check_location(x.location, x.search_location), axis=1
         )
-
-        default_users = default_users.loc[
+        self.users = self.users.loc[
             :, ["user_id", "location", "search_location", "location_match"]
         ]
 
-        default_users.to_csv(
+        self.users.to_csv(
             f"{ANALYSIS_OUTPUT}/location_matches.csv",
             encoding="utf-8-sig",
             index=False,
         )
 
-        user_counts = self.user_counting(default_users)
+        user_counts = self.user_counting()
 
         user_counts.to_csv(
             f"{ANALYSIS_OUTPUT}/location_matches_counts.csv", encoding="utf-8-sig"
