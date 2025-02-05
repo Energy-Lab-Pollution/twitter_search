@@ -24,6 +24,7 @@ ALIAS_DICT = {
     ],
     "bangalore": ["bengaluru"],
     "guatemala": ["ciudad de guatemala"],
+    "new delhi": ["delhi"]
 }
 
 
