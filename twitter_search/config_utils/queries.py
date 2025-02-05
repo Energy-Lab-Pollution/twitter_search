@@ -76,5 +76,4 @@ QUERIES_FR = {
 }
 
 
-
 QUERIES_DICT = {"en": QUERIES, "es": QUERIES_ES, "fr": QUERIES_FR}

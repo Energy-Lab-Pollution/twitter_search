@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
+
 # TODO: get this constants from general utils folder
 
 script_path = Path(__file__).resolve()
@@ -15,10 +16,16 @@ CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 ANALYSIS_OUTPUT = project_root / "data" / "analysis_outputs"
 
 ALIAS_DICT = {
-    "mexico city": ["cdmx", "ciudad de mexico", "distrito federal", "mexico df"],
+    "mexico city": [
+        "cdmx",
+        "ciudad de mexico",
+        "distrito federal",
+        "mexico df",
+    ],
     "bangalore": ["bengaluru"],
-    "guatemala": ["ciudad de guatemala"]
- }
+    "guatemala": ["ciudad de guatemala"],
+}
+
 
 def check_location(raw_location, target_location):
     """
