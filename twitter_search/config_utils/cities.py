@@ -7,6 +7,7 @@ CITIES = [
     "bangalore",
     "bangkok",
     "bogota",
+    "buenos aires",
     "chennai",
     "chiang mai",
     "chicago",
@@ -18,11 +19,15 @@ CITIES = [
     "kinshasa",
     "kolkata",
     "london",
+    "los angeles",
     "madrid",
     "mexico city",
     "mumbai",
     "nairobi",
+    "new york",
+    "paris",
     "phuket",
+    "tegucigalpa",
 ]
 
 
@@ -36,6 +41,7 @@ ALIAS_DICT = {
     "mexico df": "mexico city",
     "bengaluru": "bangalore",
     "ciudad de guatemala": "guatemala",
+    "new delhi": "delhi",
 }
 
 CITIES_LANGS = {
@@ -43,6 +49,7 @@ CITIES_LANGS = {
     "bangalore": "en",
     "bangkok": "en",
     "bogota": "es",
+    "buenos aires": "en",
     "chennai": "en",
     "chiang mai": "en",
     "chicago": "en",
@@ -54,9 +61,13 @@ CITIES_LANGS = {
     "kinshasa": "en",
     "kolkata": "en",
     "london": "en",
+    "los angeles": "en",
     "madrid": "es",
     "mexico city": "es",
     "mumbai": "en",
     "nairobi": "en",
+    "new york": "en",
+    "paris": "fr",
     "phuket": "en",
+    "tegucigalpa": "es",
 }

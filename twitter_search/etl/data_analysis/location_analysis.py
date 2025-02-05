@@ -8,10 +8,24 @@ from pathlib import Path
 import pandas as pd
 
 
+# TODO: get this constants from general utils folder
+
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 ANALYSIS_OUTPUT = project_root / "data" / "analysis_outputs"
+
+ALIAS_DICT = {
+    "mexico city": [
+        "cdmx",
+        "ciudad de mexico",
+        "distrito federal",
+        "mexico df",
+    ],
+    "bangalore": ["bengaluru"],
+    "guatemala": ["ciudad de guatemala"],
+    "new delhi": ["delhi"],
+}
 
 
 def check_location(raw_location, target_location):
@@ -19,17 +33,22 @@ def check_location(raw_location, target_location):
     Uses regex to see if the raw location matches
     the target location
     """
+    if target_location in ALIAS_DICT:
+        target_locations = ALIAS_DICT[target_location]
+        target_locations.append(target_location)
+    else:
+        target_locations = [target_location]
+
     if isinstance(raw_location, str):
         raw_location = raw_location.lower().strip()
-        target_location = target_location.lower().strip()
-
         location_regex = re.findall(r"\w+", raw_location)
 
         if location_regex:
-            if target_location in location_regex:
-                return True
-            elif target_location in raw_location:
-                return True
+            for target_location in target_locations:
+                if target_location in location_regex:
+                    return True
+                elif target_location in raw_location:
+                    return True
             else:
                 return False
         else:
