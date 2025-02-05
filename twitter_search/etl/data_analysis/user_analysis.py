@@ -5,6 +5,8 @@ Does an analysis of the all the collected users
 from pathlib import Path
 
 import pandas as pd
+
+
 class UserAnalyzer:
     NUM_SAMPLE = 1200
     RANDOM_STATE = 1236
@@ -17,16 +19,18 @@ class UserAnalyzer:
         self.MASTER_DATASET_PATH = project_root / "data" / "master_dataset"
 
         self.all_users_df = pd.read_csv(
-            f"{self.CLEAN_DATA_PATH}/all_distinct_users.csv", encoding="utf-8-sig"
+            f"{self.CLEAN_DATA_PATH}/all_distinct_users.csv",
+            encoding="utf-8-sig",
         )
 
         self.master_df = pd.read_csv(
-            f"{self.MASTER_DATASET_PATH}/master_dataset.csv", encoding="utf-8-sig"
+            f"{self.MASTER_DATASET_PATH}/master_dataset.csv",
+            encoding="utf-8-sig",
         )
 
     @staticmethod
     # Analyze user types
-    def get_user_types_by_city(self, users_df):
+    def get_user_types_by_city(users_df):
         """
         Gets total number of users, distinguished by type and city
         """
@@ -57,7 +61,6 @@ class UserAnalyzer:
 
         return user_types
 
-
     @staticmethod
     # Get totals by city
     def get_users_per_city(users_df):
@@ -70,7 +73,6 @@ class UserAnalyzer:
         user_cities = user_cities.loc[:, ["search_location", "total_count"]]
 
         return user_cities
-
 
     def get_percentages(self, user_types, user_cities, filename):
         """
@@ -93,13 +95,14 @@ class UserAnalyzer:
 
         return final_df
 
-
     def generate_random_sample(self, all_users_df):
         """
         Generates a random sample of the users dataframe
         """
 
-        random_sample = all_users_df.sample(n=self.NUM_SAMPLE, random_state=self.RANDOM_STATE)
+        random_sample = all_users_df.sample(
+            n=self.NUM_SAMPLE, random_state=self.RANDOM_STATE
+        )
         random_sample.to_csv(
             f"{self.ANALYSIS_OUTPUT}/random_sample.csv",
             index=False,
@@ -115,9 +118,9 @@ class UserAnalyzer:
         filenames = ["user_analysis.csv", "user_analysis_with_expansionss.csv"]
 
         for dataset, filename in zip(datasets, filenames):
-            user_classifications = self.get_user_classifications_by_city(dataset)
+            user_classifications = self.get_user_classifications_by_city(
+                dataset
+            )
             user_cities = self.get_users_per_city(dataset)
 
-            final_classification_df = self.get_percentages(
-                user_classifications, user_cities, filename
-            )
+            self.get_percentages(user_classifications, user_cities, filename)

@@ -27,8 +27,8 @@ ALIAS_DICT = {
     "new delhi": ["delhi"],
 }
 
-class LocationAnalyzer:
 
+class LocationAnalyzer:
     def __init__(self):
         self.script_path = Path(__file__).resolve()
         self.project_root = script_path.parents[2]
@@ -36,10 +36,9 @@ class LocationAnalyzer:
         self.ANALYSIS_OUTPUT = project_root / "data" / "analysis_outputs"
 
         self.users = pd.read_csv(
-        f"{CLEAN_DATA_PATH}/all_distinct_users.csv", encoding="utf-8-sig"
-    )
+            f"{CLEAN_DATA_PATH}/all_distinct_users.csv", encoding="utf-8-sig"
+        )
 
-    
     @staticmethod
     def check_location(raw_location, target_location):
         """
@@ -69,7 +68,6 @@ class LocationAnalyzer:
         else:
             return False
 
-
     def user_counting(self):
         """
         Counts the number of matched users per location
@@ -87,11 +85,12 @@ class LocationAnalyzer:
         match_group.rename(columns={"user_id": "user_count"}, inplace=True)
 
         match_pivot = match_group.pivot_table(
-            index="search_location", columns="location_match", values="user_count"
+            index="search_location",
+            columns="location_match",
+            values="user_count",
         )
 
         return match_pivot
-    
 
     def run(self):
         """
@@ -113,7 +112,6 @@ class LocationAnalyzer:
         user_counts = self.user_counting()
 
         user_counts.to_csv(
-            f"{ANALYSIS_OUTPUT}/location_matches_counts.csv", encoding="utf-8-sig"
+            f"{ANALYSIS_OUTPUT}/location_matches_counts.csv",
+            encoding="utf-8-sig",
         )
-
-
