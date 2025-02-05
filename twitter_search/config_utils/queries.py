@@ -13,7 +13,7 @@ QUERIES = {
     "policymaker": """location ((member of parliament) OR governor OR minister
                     OR magistrate OR (district magistrate) OR IAS OR officer
                     OR cabinet OR mayor OR councillor OR (local government)
-                    OR (city official) OR (MLA) OR (MP) OR governmment OR municipality)
+                    OR (city official) OR (MLA) OR (MP) OR government OR municipality)
                     -is:retweet""",
     "politicians": """location (politics OR politicians OR politician) -is:retweet""",
     "researcher": """location ((environmental research) OR (environmental researcher)
@@ -52,4 +52,29 @@ QUERIES_ES = {
 }
 
 
-QUERIES_DICT = {"en": QUERIES, "es": QUERIES_ES}
+QUERIES_FR = {
+    "media": """location (média OR presse OR couverture OR diffusion
+                OR (flash info) OR journalisme OR journaliste
+                OR local OR actualités) -is:retweet""",
+    "organizations": """((ONG location) OR (organisation location)
+                       OR (non lucratif location) OR (location institution) OR
+                       (organisation non gouvernementale location) OR (non lucratif location))
+                       -is:retweet""",
+    "policymaker": """location ((membre du parlement) OR gouverneur OR ministre
+                    OR magistrat OR (magistrat de district) OR IAS OR officier
+                    OR cabinet OR maire OR conseiller municipal OR (gouvernement local)
+                    OR (fonctionnaire municipal) OR (MLA) OR (député) OR gouvernement OR municipalité)
+                    -is:retweet""",
+    "politicians": """location (politique OR politiciens OR politicien) -is:retweet""",
+    "researcher": """location ((recherche environnementale) OR (chercheur environnemental)
+                    OR science OR universitaire OR recherche OR université OR professeur OR
+                    postdoc OR postdoctoral OR doctorat)
+                    -is:retweet""",
+    "environment": """location ((pollution de l'air) OR pollution OR (santé publique)
+                OR (air de mauvaise qualité) OR asthme OR pollué OR (commission de contrôle de la pollution)
+                OR smog OR (qualité de l'air)) -is:retweet""",
+}
+
+
+
+QUERIES_DICT = {"en": QUERIES, "es": QUERIES_ES, "fr": QUERIES_FR}
