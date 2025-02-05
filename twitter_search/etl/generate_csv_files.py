@@ -6,7 +6,6 @@ from argparse import ArgumentParser
 
 from data_cleaning.csv_converter import CSVConverter
 
-
 CITIES = [
     "abuja",
     "bangalore",
