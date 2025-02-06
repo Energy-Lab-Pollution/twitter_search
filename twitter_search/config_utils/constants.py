@@ -11,6 +11,7 @@ from pathlib import Path
 
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
+analysis_project_root = script_path.parents[1]
 
 # S3 Constants
 BUCKET_NAME = "global-rct-users"

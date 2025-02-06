@@ -141,6 +141,14 @@ You can also get all the account types for a given location by using the "all" p
 python3 twitter_search/list_expansion.py "bangalore" "all"
 ```
 
+## Run exploratory user and location analysis
+
+The following command runs the exploratory analysis for the users and locations, which includes total number of users per location, total number of users per account type, etc.
+
+```bash
+python3 twitter_search/run_analysis.py
+```
+
 
 ## Make Commands and addtional information
 
