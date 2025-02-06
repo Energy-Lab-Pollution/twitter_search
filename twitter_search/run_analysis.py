@@ -11,4 +11,6 @@ if __name__ == "__main__":
     location_analyzer = LocationAnalyzer()
 
     user_analyzer.run()
+    print("Finished user analysis")
     location_analyzer.run()
+    print("Finished location analysis")
