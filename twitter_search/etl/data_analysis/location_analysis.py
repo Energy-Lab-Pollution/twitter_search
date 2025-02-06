@@ -3,40 +3,20 @@ First location analysis try
 """
 
 import re
-from pathlib import Path
 
 import pandas as pd
-
-
-# TODO: get this constants from general utils folder
-
-script_path = Path(__file__).resolve()
-project_root = script_path.parents[2]
-CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
-ANALYSIS_OUTPUT = project_root / "data" / "analysis_outputs"
-
-ALIAS_DICT = {
-    "mexico city": [
-        "cdmx",
-        "ciudad de mexico",
-        "distrito federal",
-        "mexico df",
-    ],
-    "bangalore": ["bengaluru"],
-    "guatemala": ["ciudad de guatemala"],
-    "new delhi": ["delhi"],
-}
+from config_utils.cities import ALIAS_DICT
+from config_utils.constants import project_root
 
 
 class LocationAnalyzer:
     def __init__(self):
-        self.script_path = Path(__file__).resolve()
-        self.project_root = script_path.parents[2]
         self.CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
         self.ANALYSIS_OUTPUT = project_root / "data" / "analysis_outputs"
 
         self.users = pd.read_csv(
-            f"{CLEAN_DATA_PATH}/all_distinct_users.csv", encoding="utf-8-sig"
+            f"{self.CLEAN_DATA_PATH}/all_distinct_users.csv",
+            encoding="utf-8-sig",
         )
 
     @staticmethod
@@ -104,7 +84,7 @@ class LocationAnalyzer:
         ]
 
         self.users.to_csv(
-            f"{ANALYSIS_OUTPUT}/location_matches.csv",
+            f"{self.ANALYSIS_OUTPUT}/location_matches.csv",
             encoding="utf-8-sig",
             index=False,
         )
@@ -112,6 +92,6 @@ class LocationAnalyzer:
         user_counts = self.user_counting()
 
         user_counts.to_csv(
-            f"{ANALYSIS_OUTPUT}/location_matches_counts.csv",
+            f"{self.ANALYSIS_OUTPUT}/location_matches_counts.csv",
             encoding="utf-8-sig",
         )

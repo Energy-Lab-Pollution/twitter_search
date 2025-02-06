@@ -2,9 +2,8 @@
 Does an analysis of the all the collected users
 """
 
-from pathlib import Path
-
 import pandas as pd
+from config_utils.constants import project_root
 
 
 class UserAnalyzer:
@@ -12,8 +11,6 @@ class UserAnalyzer:
     RANDOM_STATE = 1236
 
     def __init__(self):
-        script_path = Path(__file__).resolve()
-        project_root = script_path.parents[2]
         self.CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
         self.ANALYSIS_OUTPUT = project_root / "data" / "analysis_outputs"
         self.MASTER_DATASET_PATH = project_root / "data" / "master_dataset"
