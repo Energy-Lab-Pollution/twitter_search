@@ -15,7 +15,7 @@ import botocore
 # Local imports
 BUCKET_NAME = "global-rct-users"
 REGION_NAME = "us-west-1"
-FOLDERS = ["raw_data", "cleaned_data"]
+FOLDERS = ["raw_data", "cleaned_data", "twikit_cleaned_data", "twikit_cleaned_data",]
 
 
 # Set logger
