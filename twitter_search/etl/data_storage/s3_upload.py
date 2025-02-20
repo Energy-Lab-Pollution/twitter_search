@@ -6,17 +6,22 @@ import logging
 import os
 import time
 from pathlib import Path
-from tqdm import tqdm
 
 # Global imports
 import boto3
 import botocore
+from tqdm import tqdm
 
 
 # Local imports
 BUCKET_NAME = "global-rct-users"
 REGION_NAME = "us-west-1"
-FOLDERS = ["raw_data", "cleaned_data", "twikit_raw_data", "twikit_cleaned_data",]
+FOLDERS = [
+    "raw_data",
+    "cleaned_data",
+    "twikit_raw_data",
+    "twikit_cleaned_data",
+]
 
 
 # Set logger
@@ -48,10 +53,13 @@ def upload_directory(directory_path):
     """
     # Path of interest is from element 10 onwards
     PATH_INDEX = 10
-    # Took this bit from StackOverflow: 
+    # Took this bit from StackOverflow:
     # https://stackoverflow.com/questions/52338706/isadirectoryerror-errno-21-is-a-directory-it-is-a-file
-    data_paths = [os.path.join(path, file) 
-    for path, dirs, files in os.walk(directory_path) for file in files]
+    data_paths = [
+        os.path.join(path, file)
+        for path, dirs, files in os.walk(directory_path)
+        for file in files
+    ]
 
     # Should either be raw_data or clean_data
     for data_path in tqdm(data_paths):
@@ -60,12 +68,12 @@ def upload_directory(directory_path):
         upload_to_s3(data_path, s3_path)
 
 
-
 if __name__ == "__main__":
-
-    directories = [Path(__file__).parent.parent.parent / f"data/{folder}" for folder in FOLDERS]
+    directories = [
+        Path(__file__).parent.parent.parent / f"data/{folder}"
+        for folder in FOLDERS
+    ]
     for directory in directories:
         print(f"Uploading {directory} directory...")
         upload_directory(directory)
         time.sleep(2)
-
