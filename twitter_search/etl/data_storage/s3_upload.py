@@ -15,7 +15,7 @@ import botocore
 # Local imports
 BUCKET_NAME = "global-rct-users"
 REGION_NAME = "us-west-1"
-FOLDERS = ["raw_data", "cleaned_data", "twikit_cleaned_data", "twikit_cleaned_data",]
+FOLDERS = ["raw_data", "cleaned_data", "twikit_raw_data", "twikit_cleaned_data",]
 
 
 # Set logger
@@ -62,9 +62,10 @@ def upload_directory(directory_path):
 
 
 if __name__ == "__main__":
-    raw_dir = Path(__file__).parent.parent.parent / "data/raw_data"
-    clean_dir = Path(__file__).parent.parent.parent / "data/cleaned_data"
 
-    upload_directory(raw_dir)
-    time.sleep(2)
-    upload_directory(clean_dir)
+    directories = [Path(__file__).parent.parent.parent / f"data/{folder}" for folder in FOLDERS]
+    for directory in directories:
+        print(f"Uploading {directory} directory...")
+        upload_directory(directory)
+        time.sleep(2)
+
