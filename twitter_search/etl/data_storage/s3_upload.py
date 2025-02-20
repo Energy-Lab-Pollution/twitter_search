@@ -45,7 +45,10 @@ def upload_directory(directory_path):
     Uploads all the files in a single
     directory to S3
     """
-    files = os.listdir(directory_path)
+    # Took this bit from StackOverflow: 
+    # https://stackoverflow.com/questions/52338706/isadirectoryerror-errno-21-is-a-directory-it-is-a-file
+    data_paths = [os.path.join(path, file) 
+    for path, dirs, files in os.walk(directory_path) for file in files]
 
     # Should either be raw_data or clean_data
     s3_folder = str(directory_path).split("/")[-1]
@@ -55,8 +58,10 @@ def upload_directory(directory_path):
             f"Desired folder is not one of {FOLDERS} - please check"
         )
 
-    for file in files:
-        upload_to_s3(f"{directory_path}/{file}", f"{s3_folder}/{file}")
+    print(data_paths)
+
+    # for data_path in data_paths:
+    #     upload_to_s3(data_path, f"{s3_folder}/{data_path}")
 
     logger.info(f"Done uploading files to S3 folder: {s3_folder}")
 
