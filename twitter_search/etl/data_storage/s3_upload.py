@@ -6,6 +6,7 @@ import logging
 import os
 import time
 from pathlib import Path
+from tqdm import tqdm
 
 # Global imports
 import boto3
@@ -53,7 +54,7 @@ def upload_directory(directory_path):
     for path, dirs, files in os.walk(directory_path) for file in files]
 
     # Should either be raw_data or clean_data
-    for data_path in data_paths:
+    for data_path in tqdm(data_paths):
         split_path = data_path.split("/")
         s3_path = "/".join(split_path[PATH_INDEX:])
         upload_to_s3(data_path, s3_path)
