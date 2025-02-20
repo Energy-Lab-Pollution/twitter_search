@@ -29,6 +29,7 @@ CITIES = [
     "new york",
     "paris",
     "phuket",
+    "sydney",
     "tegucigalpa",
 ]
 
@@ -73,5 +74,6 @@ CITIES_LANGS = {
     "new york": "en",
     "paris": "fr",
     "phuket": "en",
+    "sydney": "en",
     "tegucigalpa": "es",
 }
