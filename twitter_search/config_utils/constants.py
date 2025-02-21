@@ -67,8 +67,6 @@ USER_FIELDS = [
     "username",
 ]
 
-# TODO change the labels to more relevant stuff.
-
 # NLP Model Classification Labels
 RELEVANT_LABELS = [
     "environment or pollution",

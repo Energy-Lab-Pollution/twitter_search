@@ -4,6 +4,7 @@ Script with constants for the cities to look for
 
 CITIES = [
     "abuja",
+    "accra",
     "bangalore",
     "bangkok",
     "bogota",
@@ -22,11 +23,13 @@ CITIES = [
     "los angeles",
     "madrid",
     "mexico city",
+    "melbourne",
     "mumbai",
     "nairobi",
     "new york",
     "paris",
     "phuket",
+    "sydney",
     "tegucigalpa",
 ]
 
@@ -46,6 +49,7 @@ ALIAS_DICT = {
 
 CITIES_LANGS = {
     "abuja": "en",
+    "accra": "en",
     "bangalore": "en",
     "bangkok": "en",
     "bogota": "es",
@@ -63,11 +67,13 @@ CITIES_LANGS = {
     "london": "en",
     "los angeles": "en",
     "madrid": "es",
+    "melbourne": "en",
     "mexico city": "es",
     "mumbai": "en",
     "nairobi": "en",
     "new york": "en",
     "paris": "fr",
     "phuket": "en",
+    "sydney": "en",
     "tegucigalpa": "es",
 }

@@ -2,6 +2,7 @@
 Does an analysis of the all the collected users
 """
 
+import numpy as np
 import pandas as pd
 from config_utils.constants import analysis_project_root
 
@@ -92,6 +93,7 @@ class UserAnalyzer:
         )
         # final_df.reset_index(drop=False, inplace=True)
         final_df = final_df.transpose()
+        final_df.loc[:, "total_per_city"] = final_df.apply(np.sum, axis=1)
         final_df.to_csv(f"{self.ANALYSIS_OUTPUT}/{filename}", index=True)
 
         return final_df
