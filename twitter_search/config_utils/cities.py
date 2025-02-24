@@ -31,6 +31,7 @@ CITIES = [
     "phuket",
     "sydney",
     "tegucigalpa",
+    "toronto",
 ]
 
 
@@ -76,4 +77,5 @@ CITIES_LANGS = {
     "phuket": "en",
     "sydney": "en",
     "tegucigalpa": "es",
+    "toronto": "en"
 }
