@@ -151,6 +151,6 @@ class TwikitUserSearcher:
         except twikit.errors.TooManyRequests:
             print("Too many requests, stopping...")
 
-        if not hasattr(self, 'users_list'):
+        if not hasattr(self, "users_list"):
             return
         self.store_users_and_tweets()
