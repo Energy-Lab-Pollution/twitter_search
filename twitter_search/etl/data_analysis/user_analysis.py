@@ -50,7 +50,16 @@ class UserAnalyzer:
     @staticmethod
     def get_user_classifications_by_city(users_df):
         """
-        Gets total number of users, distinguished by type and city
+        Gets total number of users, distinguished by location
+        and tbe classifications done by the model.
+
+        Args:
+            - users_df(pd.DataFrame): Disaggregated dataframe with a row
+            per classificated user
+
+        Returns:
+            - user_types: pd.DataFrame with three columns: city,
+            content_labels and count. 
         """
         user_types = users_df.groupby(
             by=["search_location", "content_labels"]
@@ -67,7 +76,14 @@ class UserAnalyzer:
     # Get totals by city
     def get_users_per_city(users_df):
         """
-        Get total number of users per city
+        Gets total number of users per city.
+        Args:
+            - users_df(pd.DataFrame): Disaggregated dataframe with a row
+            per classificated user
+
+        Returns:
+            - user_cities: pd.DataFrame with two columns: city and
+            total count
         """
         user_cities = users_df.groupby(by=["search_location"]).count()
         user_cities.reset_index(drop=False, inplace=True)
@@ -76,16 +92,17 @@ class UserAnalyzer:
 
         return user_cities
 
-    def get_percentages(self, user_types, user_cities, filename):
+    def get_users_count(self, user_types, user_cities, filename):
         """
-        Gets percentages of user type per city
+        Gets the total number of users per city and category. For example, 
+        we will get how many users belong in Chicago, and how many of those
+        users were classified in each category (researchers, etc.)
         """
+        print(user_types.head())
+        print(user_cities.head())
+        
         final_df = pd.merge(
             user_types, user_cities, how="left", on="search_location"
-        )
-
-        final_df.loc[:, "percentage"] = (
-            final_df.loc[:, "count"] / final_df.loc[:, "total_count"]
         )
 
         final_df = final_df.pivot_table(
@@ -125,5 +142,4 @@ class UserAnalyzer:
                 dataset
             )
             user_cities = self.get_users_per_city(dataset)
-
-            self.get_percentages(user_classifications, user_cities, filename)
+            self.get_users_count(user_classifications, user_cities, filename)
