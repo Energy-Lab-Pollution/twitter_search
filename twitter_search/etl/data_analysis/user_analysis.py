@@ -59,7 +59,7 @@ class UserAnalyzer:
 
         Returns:
             - user_types: pd.DataFrame with three columns: city,
-            content_labels and count. 
+            content_labels and count.
         """
         user_types = users_df.groupby(
             by=["search_location", "content_labels"]
@@ -94,13 +94,13 @@ class UserAnalyzer:
 
     def get_users_count(self, user_types, filename):
         """
-        Gets the total number of users per city and category. For example, 
+        Gets the total number of users per city and category. For example,
         we will get how many users belong in Chicago, and how many of those
         users were classified in each category (researchers, etc.)
 
         Args:
             - user_types: pd.DataFrame with three columns: city,
-            content_labels and count. 
+            content_labels and count.
         """
         # Have columns be the classifications and cities the rows
         final_df = user_types.pivot_table(
