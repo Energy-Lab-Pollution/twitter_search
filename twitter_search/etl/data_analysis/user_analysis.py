@@ -51,7 +51,7 @@ class UserAnalyzer:
     def get_user_classifications_by_city(users_df):
         """
         Gets total number of users, distinguished by location
-        and tbe classifications done by the model.
+        and the classifications done by the model.
 
         Args:
             - users_df(pd.DataFrame): Disaggregated dataframe with a row
