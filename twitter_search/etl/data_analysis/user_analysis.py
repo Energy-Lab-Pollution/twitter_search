@@ -92,25 +92,22 @@ class UserAnalyzer:
 
         return user_cities
 
-    def get_users_count(self, user_types, user_cities, filename):
+    def get_users_count(self, user_types, filename):
         """
         Gets the total number of users per city and category. For example, 
         we will get how many users belong in Chicago, and how many of those
         users were classified in each category (researchers, etc.)
-        """
-        print(user_types.head())
-        print(user_cities.head())
-        
-        final_df = pd.merge(
-            user_types, user_cities, how="left", on="search_location"
-        )
 
-        final_df = final_df.pivot_table(
-            index="content_labels", values="count", columns="search_location"
+        Args:
+            - user_types: pd.DataFrame with three columns: city,
+            content_labels and count. 
+        """
+        # Have columns be the classifications and cities the rows
+        final_df = user_types.pivot_table(
+            index="search_location", values="count", columns="content_labels"
         )
-        # final_df.reset_index(drop=False, inplace=True)
-        final_df = final_df.transpose()
         final_df.loc[:, "total_per_city"] = final_df.apply(np.sum, axis=1)
+        # Note that the indices are the cities
         final_df.to_csv(f"{self.ANALYSIS_OUTPUT}/{filename}", index=True)
 
         return final_df
