@@ -40,6 +40,8 @@ PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
 
 
 ALIAS_DICT = {
+    "new york city": "new york",
+    "nyc": "new york",
     "cdmx": "mexico city",
     "ciudad de mexico": "mexico city",
     "distrito federal": "mexico city",
