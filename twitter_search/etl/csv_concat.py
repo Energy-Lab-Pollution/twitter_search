@@ -124,4 +124,3 @@ class CSVConcat:
             )
 
         self.generate_master_dataset()
-
