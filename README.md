@@ -37,7 +37,7 @@ As of now, we can extract users from Twitter in two ways:
 1. Use the [Twikit](https://github.com/d60/twikit) library for scraping.
 2. Use [Twitter's](https://docs.x.com/x-api/introduction) official API.
 
-We are keeping both options open in case Twikit stops working or Twitter's API becomes more restrictive. However, **Twikit has become the default way to run the project**. 
+We are keeping both options open in case Twikit stops working or Twitter's API becomes more restrictive. However, **Twikit has become the default way to run the project**.
 
 If you use twitter's API, you can execute the project from the command line:
 
