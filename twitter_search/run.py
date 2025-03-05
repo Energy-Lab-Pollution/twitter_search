@@ -42,6 +42,7 @@ def main():
     parser.add_argument(
         "--skip_media",
         type=str,
+        const="False",
         help="Specify if the media accounts should be skipped",
         choices=["True", "False"],
     )
