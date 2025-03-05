@@ -7,33 +7,6 @@ from argparse import ArgumentParser
 from config_utils.cities import CITIES, PILOT_CITIES
 from etl.data_cleaning.csv_converter import CSVConverter
 
-CITIES = [
-    "abuja",
-    "bangalore",
-    "bangkok",
-    "bogota",
-    "buenos aires",
-    "chennai",
-    "chiang mai",
-    "chicago",
-    "delhi",
-    "guatemala",
-    "houston",
-    "kanpur",
-    "kigali",
-    "kinshasa",
-    "kolkata",
-    "london",
-    "madrid",
-    "mexico city",
-    "mumbai",
-    "nairobi",
-    "phuket",
-    "tegucigalpa",
-]
-
-PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
-
 
 parser = ArgumentParser(
     description="Specify location to convert JSON files into CSV files."
