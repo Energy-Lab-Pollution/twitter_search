@@ -4,8 +4,8 @@ Detects JSON files in a specified location and converts them into CSV files.
 
 from argparse import ArgumentParser
 
-from data_cleaning.csv_converter import CSVConverter
-
+from config_utils.cities import CITIES, PILOT_CITIES
+from etl.data_cleaning.csv_converter import CSVConverter
 
 CITIES = [
     "abuja",
