@@ -29,8 +29,10 @@ CITIES = [
     "new york",
     "paris",
     "phuket",
+    "san salvador",
     "sydney",
     "tegucigalpa",
+    "toronto",
 ]
 
 
@@ -38,10 +40,14 @@ PILOT_CITIES = ["chiang mai", "guatemala", "kanpur", "kigali", "kolkata"]
 
 
 ALIAS_DICT = {
+    "new york city": "new york",
+    "nyc": "new york",
     "cdmx": "mexico city",
     "ciudad de mexico": "mexico city",
+    "ciudad de méxico": "mexico city",
     "distrito federal": "mexico city",
     "mexico df": "mexico city",
+    "bogotá": "bogota",
     "bengaluru": "bangalore",
     "ciudad de guatemala": "guatemala",
     "new delhi": "delhi",
@@ -74,6 +80,8 @@ CITIES_LANGS = {
     "new york": "en",
     "paris": "fr",
     "phuket": "en",
+    "san salvador": "es",
     "sydney": "en",
     "tegucigalpa": "es",
+    "toronto": "en",
 }

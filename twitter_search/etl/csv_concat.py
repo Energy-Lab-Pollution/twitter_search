@@ -77,7 +77,7 @@ class CSVConcat:
 
         # For now, saving the csv files in the 'CLEAN_DATA_PATH' folder
         all_users.to_csv(
-            f"{self.CLEAN_DATA_PATH}/{final_file}.csv",
+            f"{self.MASTER_DATA_PATH}/{final_file}.csv",
             index=False,
             encoding="utf-8-sig",
         )
@@ -89,11 +89,11 @@ class CSVConcat:
         Concatenates distinct users
         """
         normal_distinct_users = pd.read_csv(
-            f"{self.CLEAN_DATA_PATH}/all_distinct_users.csv",
+            f"{self.MASTER_DATA_PATH}/all_distinct_users.csv",
             encoding="utf-8-sig",
         )
         expanded_distinct_users = pd.read_csv(
-            f"{self.CLEAN_DATA_PATH}/expanded_distinct_users.csv",
+            f"{self.MASTER_DATA_PATH}/expanded_distinct_users.csv",
             encoding="utf-8-sig",
         )
 
@@ -124,8 +124,3 @@ class CSVConcat:
             )
 
         self.generate_master_dataset()
-
-
-if __name__ == "__main__":
-    csv_concat = CSVConcat()
-    csv_concat.run()

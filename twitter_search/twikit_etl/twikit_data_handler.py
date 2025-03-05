@@ -156,7 +156,7 @@ class TwikitDataHandler:
         )
 
         user_searcher.run_search()
-        if not user_searcher.users_list:
+        if not hasattr(user_searcher, "users_list"):
             print("No users found.")
             return
 

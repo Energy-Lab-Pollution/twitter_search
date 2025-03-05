@@ -5,7 +5,7 @@ Dictionary with the current queries for searching users
 QUERIES = {
     "media": """location (media OR press OR coverage OR broadcasting
                 OR (breaking news) OR journalism OR journalist
-                OR local OR news OR patrika) -is:retweet""",
+                OR local OR news) -is:retweet""",
     "organizations": """((NGO location) OR (organization location)
                        OR (non-profit location) OR (location institution) OR
                        (non-governmental organization location) OR (nonprofit location))
