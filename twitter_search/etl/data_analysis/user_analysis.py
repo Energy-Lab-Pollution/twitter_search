@@ -71,26 +71,6 @@ class UserAnalyzer:
 
         return user_types
 
-    @staticmethod
-    # Get totals by city
-    def get_users_per_city(users_df):
-        """
-        Gets total number of users per city.
-        Args:
-            - users_df(pd.DataFrame): Disaggregated dataframe with a row
-            per classificated user
-
-        Returns:
-            - user_cities: pd.DataFrame with two columns: city and
-            total count
-        """
-        user_cities = users_df.groupby(by=["search_location"]).count()
-        user_cities.reset_index(drop=False, inplace=True)
-        user_cities.rename(columns={"user_id": "total_count"}, inplace=True)
-        user_cities = user_cities.loc[:, ["search_location", "total_count"]]
-
-        return user_cities
-
     def get_users_count(self, user_types, filename):
         """
         Gets the total number of users per city and category. For example,
@@ -137,5 +117,4 @@ class UserAnalyzer:
             user_classifications = self.get_user_classifications_by_city(
                 dataset
             )
-            user_cities = self.get_users_per_city(dataset)
-            self.get_users_count(user_classifications, user_cities, filename)
+            self.get_users_count(user_classifications, filename)
