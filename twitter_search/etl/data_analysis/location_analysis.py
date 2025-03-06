@@ -11,13 +11,14 @@ from config_utils.constants import analysis_project_root
 
 class LocationAnalyzer:
     def __init__(self):
-        self.CLEAN_DATA_PATH = analysis_project_root / "data" / "cleaned_data"
         self.ANALYSIS_OUTPUT = (
             analysis_project_root / "data" / "analysis_outputs"
         )
-
+        self.MASTER_DATASET_PATH = (
+            analysis_project_root / "data" / "master_dataset"
+        )
         self.users = pd.read_csv(
-            f"{self.CLEAN_DATA_PATH}/all_distinct_users.csv",
+            f"{self.MASTER_DATASET_PATH}/all_distinct_users.csv",
             encoding="utf-8-sig",
         )
 

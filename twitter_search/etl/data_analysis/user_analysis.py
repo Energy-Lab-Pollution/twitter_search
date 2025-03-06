@@ -12,7 +12,6 @@ class UserAnalyzer:
     RANDOM_STATE = 1236
 
     def __init__(self):
-        self.CLEAN_DATA_PATH = analysis_project_root / "data" / "cleaned_data"
         self.ANALYSIS_OUTPUT = (
             analysis_project_root / "data" / "analysis_outputs"
         )
@@ -21,7 +20,7 @@ class UserAnalyzer:
         )
 
         self.all_users_df = pd.read_csv(
-            f"{self.CLEAN_DATA_PATH}/all_distinct_users.csv",
+            f"{self.MASTER_DATASET_PATH}/all_distinct_users.csv",
             encoding="utf-8-sig",
         )
 
