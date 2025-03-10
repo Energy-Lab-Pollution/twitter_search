@@ -28,11 +28,13 @@ class LocationAnalyzer:
         Uses regex to see if the raw location matches
         the target location
         """
-        if target_location in ALIAS_DICT:
-            target_locations = ALIAS_DICT[target_location]
-            target_locations.append(target_location)
-        else:
-            target_locations = [target_location]
+        
+        target_locations = [target_location]
+
+        # alias is the key, target loc is the value
+        for alias, value in ALIAS_DICT:
+            if value == target_location:
+                target_locations.append(alias)
 
         if isinstance(raw_location, str):
             raw_location = raw_location.lower().strip()
