@@ -3,8 +3,6 @@ First location analysis try
 """
 
 import re
-
-import numpy as np
 import pandas as pd
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import analysis_project_root
@@ -113,5 +111,5 @@ class LocationAnalyzer:
         user_counts.to_csv(
             f"{self.ANALYSIS_OUTPUT}/location_matches_counts.csv",
             encoding="utf-8-sig",
-            index=False
+            index=False,
         )
