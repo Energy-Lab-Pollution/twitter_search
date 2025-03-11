@@ -4,6 +4,7 @@ First location analysis try
 
 import re
 
+import numpy as np
 import pandas as pd
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import analysis_project_root
@@ -74,6 +75,10 @@ class LocationAnalyzer:
             columns="location_match",
             values="user_count",
         )
+
+        match_pivot.loc[:, "TOTAL"] = match_pivot.apply(np.sum, apply=1)
+        match_pivot.loc[:, "MATCH_PERCENTAGE"] = match_pivot.loc[:, "TRUE"] / match_pivot.loc[:, "TOTAL"]
+        match_pivot.loc[:, "MATCH_PERCENTAGE"] = match_pivot.loc[:, "MATCH_PERCENTAGE"].apply(lambda x: round(x, 2))
 
         return match_pivot
 
