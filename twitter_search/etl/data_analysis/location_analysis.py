@@ -32,7 +32,7 @@ class LocationAnalyzer:
         target_locations = [target_location]
 
         # alias is the key, target loc is the value
-        for alias, value in ALIAS_DICT:
+        for alias, value in ALIAS_DICT.items():
             if value == target_location:
                 target_locations.append(alias)
 
