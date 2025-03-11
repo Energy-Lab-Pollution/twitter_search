@@ -29,7 +29,7 @@ class LocationAnalyzer:
         Uses regex to see if the raw location matches
         the target location
         """
-        
+
         target_locations = [target_location]
 
         # alias is the key, target loc is the value
@@ -77,8 +77,12 @@ class LocationAnalyzer:
         )
 
         match_pivot.loc[:, "TOTAL"] = match_pivot.apply(np.sum, apply=1)
-        match_pivot.loc[:, "MATCH_PERCENTAGE"] = match_pivot.loc[:, "TRUE"] / match_pivot.loc[:, "TOTAL"]
-        match_pivot.loc[:, "MATCH_PERCENTAGE"] = match_pivot.loc[:, "MATCH_PERCENTAGE"].apply(lambda x: round(x, 2))
+        match_pivot.loc[:, "MATCH_PERCENTAGE"] = (
+            match_pivot.loc[:, "TRUE"] / match_pivot.loc[:, "TOTAL"]
+        )
+        match_pivot.loc[:, "MATCH_PERCENTAGE"] = match_pivot.loc[
+            :, "MATCH_PERCENTAGE"
+        ].apply(lambda x: round(x, 2))
 
         return match_pivot
 
