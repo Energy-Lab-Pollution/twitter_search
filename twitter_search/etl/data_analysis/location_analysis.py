@@ -76,12 +76,13 @@ class LocationAnalyzer:
             values="user_count",
         )
 
-        match_pivot.loc[:, "TOTAL"] = match_pivot.apply(np.sum, axis=1)
+        match_pivot.loc[:, "Total"] = match_pivot.apply(np.sum, axis=1)
+        print(match_pivot.columns)
         match_pivot.loc[:, "MATCH_PERCENTAGE"] = (
-            match_pivot.loc[:, "TRUE"] / match_pivot.loc[:, "TOTAL"]
+            match_pivot.loc[:, "True"] / match_pivot.loc[:, "Total"]
         )
-        match_pivot.loc[:, "MATCH_PERCENTAGE"] = match_pivot.loc[
-            :, "MATCH_PERCENTAGE"
+        match_pivot.loc[:, "Match_Percentage"] = match_pivot.loc[
+            :, "Match_Percentage"
         ].apply(lambda x: round(x, 2))
 
         return match_pivot
