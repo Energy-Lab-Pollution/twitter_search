@@ -75,9 +75,10 @@ class LocationAnalyzer:
             columns="location_match",
             values="user_count",
         )
+
+        # Reset index and get additional calculations
         match_pivot.reset_index(drop=False, inplace=True)
         match_pivot.columns = ["Location", "False", "True"]
-
         match_pivot.loc[:, "Total"] = (
             match_pivot.loc[:, "True"] + match_pivot.loc[:, "False"]
         )
@@ -112,4 +113,5 @@ class LocationAnalyzer:
         user_counts.to_csv(
             f"{self.ANALYSIS_OUTPUT}/location_matches_counts.csv",
             encoding="utf-8-sig",
+            index=False
         )
