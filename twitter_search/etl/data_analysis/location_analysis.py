@@ -3,6 +3,7 @@ First location analysis try
 """
 
 import re
+
 import pandas as pd
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import analysis_project_root
