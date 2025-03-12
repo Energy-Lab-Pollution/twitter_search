@@ -8,7 +8,7 @@ from pathlib import Path
 
 # General imports
 import pandas as pd
-
+from config_utils.cities import ALIAS_DICT
 
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
@@ -39,6 +39,11 @@ class CSVConverter:
         # See which JSON files are available
         self.location = location
         self.twikit = twikit
+
+        print("Checking if city is in secondary cities dictionary")
+        if self.location in ALIAS_DICT:
+            print(f"{self.location} found in alias dict")
+            self.location = ALIAS_DICT[self.location]
 
         # JSON files parsing
         self.build_paths()
@@ -296,7 +301,7 @@ class CSVConverter:
         df = pd.DataFrame()
 
         for file in files:
-            input_file = self.RAW_DATA_PATH / file
+            input_file = self.raw_data_path / file
             input_df = self.convert_lists_to_df(input_file)
 
             if self.location == "manually_added":
