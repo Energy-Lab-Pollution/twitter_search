@@ -10,6 +10,7 @@ from pathlib import Path
 import pandas as pd
 from config_utils.cities import ALIAS_DICT
 
+
 script_path = Path(__file__).resolve()
 project_root = script_path.parents[2]
 
