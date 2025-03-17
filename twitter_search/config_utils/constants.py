@@ -2,10 +2,8 @@
 This script contains constants used across the project.
 """
 
-# CONSTANTS FOR THE UTIL SCRIPT
-
+from queries import QUERIES_EN
 from pathlib import Path
-
 
 # Lists_filtering constants
 
@@ -21,8 +19,11 @@ REGION_NAME = "us-west-1"
 RAW_DATA_PATH = project_root / "data" / "raw_data"
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
-# RELEVANT USER COLUMNS
+# ACCOUNT TYPES
+ACCOUNT_TYPES = list(QUERIES_EN.keys())
+ACCOUNT_TYPES.append("all")
 
+# RELEVANT USER COLUMNS
 USER_COLUMNS = [
     "user_id",
     "username",
@@ -47,6 +48,16 @@ SCORE_THRESHOLD = 0.4
 NUM_WORKERS = 8
 BATCH_SIZE = 8
 
+# NLP Model Classification Labels
+RELEVANT_LABELS = [
+    "environment or pollution",
+    "environmental research",
+    "politician or policymaker",
+    "nonprofit organization",
+    "news outlet or journalist",
+    "healthcare professional",
+    "other",
+]
 
 # OTHER CONSTANTS
 LIST_FIELDS = ["id", "name", "description"]
@@ -64,17 +75,6 @@ USER_FIELDS = [
     "public_metrics",
     "url",
     "username",
-]
-
-# NLP Model Classification Labels
-RELEVANT_LABELS = [
-    "environment or pollution",
-    "environmental research",
-    "politician or policymaker",
-    "nonprofit organization",
-    "news outlet or journalist",
-    "healthcare professional",
-    "other",
 ]
 
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
@@ -118,14 +118,10 @@ USER_FIELDS = [
     "username",
 ]
 
-
 # THRESHOLDS FOR GETTING LISTS
 COUNT_THRESHOLD = 240
 SLEEP_TIME = 120
 GEOCODE_TIMEOUT = 5
-
-
-# KEYWORD CONSTANTS
 
 # Creating punctuations to be removed
 PUNCTUATIONS = ["!" "," "." "," '"' "?" ":"]
