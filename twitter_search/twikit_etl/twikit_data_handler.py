@@ -76,7 +76,7 @@ class TwikitDataHandler:
 
         Args:
             city_requests: int determining the number of requests per city
-        """        
+        """
         account_requests = city_requests / self.num_accounts
         remainder_requests = city_requests % self.num_accounts
 
