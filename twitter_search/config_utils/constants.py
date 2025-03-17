@@ -2,7 +2,7 @@
 This script contains constants used across the project.
 """
 
-from queries import QUERIES_EN
+from config_utils.queries import QUERIES_EN
 from pathlib import Path
 
 # Lists_filtering constants
