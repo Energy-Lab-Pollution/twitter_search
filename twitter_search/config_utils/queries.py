@@ -42,7 +42,7 @@ QUERIES_ES = {
                     OR senador OR gabinete OR (gobierno local) OR gobierno OR
                     municipio OR delegacion OR ministerio OR legislador OR legisladores
                     OR legislacion OR legisladora) -is:retweet""",
-    "politicians": """location (politica OR politicos OR politico OR politicas) (near: location)
+    "politicians": """location (politica OR politicos OR politico OR politicas)
                       -is:retweet""",
     "researcher": """location ((investigacion ambiental) OR (investigador ambiental)
                     OR (investigadora ambiental) OR ciencia OR academico
@@ -52,7 +52,7 @@ QUERIES_ES = {
                     -is:retweet""",
     "environment": """location ((contaminacion del aire) OR contaminacion OR
                     (salud publica) OR (poor air) OR asma OR contaminado OR contaminada
-                    OR smog OR (calidad del aire) OR (medio ambiente)) (near: location)
+                    OR smog OR (calidad del aire) OR (medio ambiente))
                     -is:retweet""",
     "healthcare": """location ((MD OR doctor OR doctora OR médico OR médica OR cirujano OR cirujana OR cardiólogo
                     OR cardióloga OR neumólogo OR neumóloga OR pediatra OR enfermera OR enfermero
@@ -77,11 +77,11 @@ QUERIES_FR = {
                     OR cabinet OR maire OR conseiller municipal OR (gouvernement local)
                     OR (fonctionnaire municipal) OR (MLA) OR (député) OR gouvernement OR municipalité)
                     -is:retweet""",
-    "politicians": """location (politique OR politiciens OR politicien) (near: location)
+    "politicians": """location (politique OR politiciens OR politicien)
                       -is:retweet""",
     "researcher": """location ((recherche environnementale) OR (chercheur environnemental)
                     OR science OR universitaire OR recherche OR université OR professeur OR
-                    postdoc OR postdoctoral OR doctorat) (near: location)
+                    postdoc OR postdoctoral OR doctorat)
                     -is:retweet""",
     "environment": """location ((pollution de l'air) OR pollution OR (santé publique)
                 OR (air de mauvaise qualité) OR asthme OR pollué OR (commission de contrôle de la pollution)
