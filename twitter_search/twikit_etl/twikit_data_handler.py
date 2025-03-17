@@ -76,7 +76,7 @@ class TwikitDataHandler:
 
         Args:
             city_requests: int determining the number of requests per city
-        """
+        """        
         account_requests = city_requests / self.num_accounts
         remainder_requests = city_requests % self.num_accounts
 
@@ -215,10 +215,9 @@ class TwikitDataHandler:
             if "media" in account_types:
                 del account_types["media"]
                 # Number of account types
-                self.num_accounts = len(self.QUERIES) - 1
+                self.num_accounts = len(account_types)
 
         accounts_requests = self.get_account_num_requests(city_requests)
-        print(accounts_requests)
 
         for account_type, account_requests in zip(
             account_types, accounts_requests
