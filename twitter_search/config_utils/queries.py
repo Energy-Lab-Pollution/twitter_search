@@ -19,10 +19,10 @@ QUERIES_EN = {
     "researcher": """location ((environmental research) OR (environmental researcher)
                     OR science OR academic OR research OR university OR professor OR
                     postdoc OR postdoctoral OR PhD) -is:retweet""",
-    "environment": """location ((air pollution) OR pollution OR (poor air) 
+    "environment": """location ((air pollution) OR pollution OR (poor air)
                     OR asthma OR polluted OR (pollution control board)
                     OR smog OR (air quality)) -is:retweet""",
-        "healthcare": """location ((MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist
+    "healthcare": """location ((MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist
                         OR pediatrician OR nurse OR (healthcare professional) OR (medical expert) OR therapist
                         OR clinician OR specialist OR pharmacist OR pulmonologist OR (medical practitioner)
                         OR (health influencer) OR (board-certified) OR (medical doctor) OR (resident physician))
@@ -48,25 +48,25 @@ QUERIES_ES = {
                     OR (investigadora ambiental) OR ciencia OR academico
                     OR academica OR investigacion OR universidad OR profesor
                     OR postdoc OR postdoctoral OR PhD OR doctorado OR investigador
-                    OR investigadora OR universitario OR universitaria) 
+                    OR investigadora OR universitario OR universitaria)
                     -is:retweet""",
     "environment": """location ((contaminacion del aire) OR contaminacion OR
                     (salud publica) OR (poor air) OR asma OR contaminado OR contaminada
                     OR smog OR (calidad del aire) OR (medio ambiente)) (near: location)
                     -is:retweet""",
-    "healthcare": """location ((MD OR doctor OR doctora OR médico OR médica OR cirujano OR cirujana OR cardiólogo 
-                    OR cardióloga OR neumólogo OR neumóloga OR pediatra OR enfermera OR enfermero 
+    "healthcare": """location ((MD OR doctor OR doctora OR médico OR médica OR cirujano OR cirujana OR cardiólogo
+                    OR cardióloga OR neumólogo OR neumóloga OR pediatra OR enfermera OR enfermero
                     OR (profesional de la salud) OR terapeuta OR clínico OR clínica OR especialista
                     OR farmacéutico OR neumólogo OR (practicante médico) OR (influencer de salud) OR certificado
                     OR certificada OR (médico residente))
-                    -is:retweet"""
+                    -is:retweet""",
 }
 
 
 QUERIES_FR = {
     "media": """location (média OR presse OR couverture OR diffusion
                 OR (flash info) OR journalisme OR journaliste
-                OR local OR actualités) 
+                OR local OR actualités)
                 -is:retweet""",
     "organizations": """((ONG location) OR (organisation location)
                        OR (non lucratif location) OR (location institution) OR

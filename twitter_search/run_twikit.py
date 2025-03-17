@@ -6,7 +6,7 @@ using the Twikit Library
 from argparse import ArgumentParser
 
 from config_utils.cities import CITIES, PILOT_CITIES
-from config_utils.constants import TWIKIT_THRESHOLD, ACCOUNT_TYPES
+from config_utils.constants import ACCOUNT_TYPES, TWIKIT_THRESHOLD
 from config_utils.util import strtobool
 
 # Local imports
