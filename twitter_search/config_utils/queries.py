@@ -2,7 +2,7 @@
 Dictionary with the current queries for searching users
 """
 # QUERY DICTIONARY
-QUERIES = {
+QUERIES_EN = {
     "media": """location (media OR press OR coverage OR broadcasting
                 OR (breaking news) OR journalism OR journalist
                 OR local OR news) -is:retweet""",
@@ -18,11 +18,15 @@ QUERIES = {
     "politicians": """location (politics OR politicians OR politician) -is:retweet""",
     "researcher": """location ((environmental research) OR (environmental researcher)
                     OR science OR academic OR research OR university OR professor OR
-                    postdoc OR postdoctoral OR PhD)
-                    -is:retweet""",
-    "environment": """location ((air pollution) OR pollution OR (public health)
-                OR (poor air) OR asthma OR polluted OR (pollution control board)
-                OR smog OR (air quality)) -is:retweet""",
+                    postdoc OR postdoctoral OR PhD) -is:retweet""",
+    "environment": """location ((air pollution) OR pollution OR (poor air)
+                    OR asthma OR polluted OR (pollution control board)
+                    OR smog OR (air quality)) -is:retweet""",
+    "healthcare": """location ((MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist
+                        OR pediatrician OR nurse OR (healthcare professional) OR (medical expert) OR therapist
+                        OR clinician OR specialist OR pharmacist OR pulmonologist OR (medical practitioner)
+                        OR (health influencer) OR (board-certified) OR (medical doctor) OR (resident physician))
+                        -is:retweet""",
 }
 
 
@@ -37,25 +41,33 @@ QUERIES_ES = {
     "policymaker": """location (gobernador OR ministro OR magistrado OR diputado
                     OR senador OR gabinete OR (gobierno local) OR gobierno OR
                     municipio OR delegacion OR ministerio OR legislador OR legisladores
-                    OR legislacion OR legisladora)
-                    -is:retweet""",
+                    OR legislacion OR legisladora) -is:retweet""",
     "politicians": """location (politica OR politicos OR politico OR politicas)
                       -is:retweet""",
     "researcher": """location ((investigacion ambiental) OR (investigador ambiental)
                     OR (investigadora ambiental) OR ciencia OR academico
                     OR academica OR investigacion OR universidad OR profesor
                     OR postdoc OR postdoctoral OR PhD OR doctorado OR investigador
-                    OR investigadora OR universitario OR universitaria) -is:retweet""",
+                    OR investigadora OR universitario OR universitaria)
+                    -is:retweet""",
     "environment": """location ((contaminacion del aire) OR contaminacion OR
                     (salud publica) OR (poor air) OR asma OR contaminado OR contaminada
-                    OR smog OR (calidad del aire) OR (medio ambiente)) -is:retweet""",
+                    OR smog OR (calidad del aire) OR (medio ambiente))
+                    -is:retweet""",
+    "healthcare": """location ((MD OR doctor OR doctora OR médico OR médica OR cirujano OR cirujana OR cardiólogo
+                    OR cardióloga OR neumólogo OR neumóloga OR pediatra OR enfermera OR enfermero
+                    OR (profesional de la salud) OR terapeuta OR clínico OR clínica OR especialista
+                    OR farmacéutico OR neumólogo OR (practicante médico) OR (influencer de salud) OR certificado
+                    OR certificada OR (médico residente))
+                    -is:retweet""",
 }
 
 
 QUERIES_FR = {
     "media": """location (média OR presse OR couverture OR diffusion
                 OR (flash info) OR journalisme OR journaliste
-                OR local OR actualités) -is:retweet""",
+                OR local OR actualités)
+                -is:retweet""",
     "organizations": """((ONG location) OR (organisation location)
                        OR (non lucratif location) OR (location institution) OR
                        (organisation non gouvernementale location) OR (non lucratif location))
@@ -65,7 +77,8 @@ QUERIES_FR = {
                     OR cabinet OR maire OR conseiller municipal OR (gouvernement local)
                     OR (fonctionnaire municipal) OR (MLA) OR (député) OR gouvernement OR municipalité)
                     -is:retweet""",
-    "politicians": """location (politique OR politiciens OR politicien) -is:retweet""",
+    "politicians": """location (politique OR politiciens OR politicien)
+                      -is:retweet""",
     "researcher": """location ((recherche environnementale) OR (chercheur environnemental)
                     OR science OR universitaire OR recherche OR université OR professeur OR
                     postdoc OR postdoctoral OR doctorat)
@@ -73,7 +86,12 @@ QUERIES_FR = {
     "environment": """location ((pollution de l'air) OR pollution OR (santé publique)
                 OR (air de mauvaise qualité) OR asthme OR pollué OR (commission de contrôle de la pollution)
                 OR smog OR (qualité de l'air)) -is:retweet""",
+    "healthcare": """((MD OR médecin OR docteur OR docteure OR chirurgien OR chirurgienne OR cardiologue
+                OR pneumologue OR pédiatre OR infirmier OR infirmière OR (professionnel de santé) OR thérapeute
+                OR clinicien OR clinicienne OR spécialiste OR pharmacien OR pharmacie OR (praticien médical)
+                OR (influenceur santé) OR (certifié OR certifiée) OR (médecin résident))
+                -is:retweet""",
 }
 
 
-QUERIES_DICT = {"en": QUERIES, "es": QUERIES_ES, "fr": QUERIES_FR}
+QUERIES_DICT = {"en": QUERIES_EN, "es": QUERIES_ES, "fr": QUERIES_FR}

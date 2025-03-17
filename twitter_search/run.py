@@ -5,6 +5,7 @@ Main function to run the Twitter search and data collection process.
 from argparse import ArgumentParser
 
 from config_utils.cities import CITIES, PILOT_CITIES
+from config_utils.constants import ACCOUNT_TYPES
 from config_utils.util import strtobool
 
 # Local imports
@@ -28,15 +29,7 @@ def main():
         type=str,
         help="type of accounts that you want\
               [media,organizations,policymaker,politicians,researcher,environment,all]",
-        choices=[
-            "media",
-            "organizations",
-            "policymaker",
-            "politicians",
-            "researcher",
-            "environment",
-            "all",
-        ],
+        choices=ACCOUNT_TYPES,
     )
 
     parser.add_argument(

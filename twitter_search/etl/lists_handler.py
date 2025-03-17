@@ -7,7 +7,7 @@ This script runs the Twitter search, data collection and filtering process.
 from pathlib import Path
 
 from config_utils.cities import CITIES
-from config_utils.queries import QUERIES
+from config_utils.queries import QUERIES_EN
 from etl.data_collection.get_lists import ListGetter
 from etl.data_collection.get_users import UserGetter
 from twitter_filtering.lists_filtering.filter_lists import (
@@ -22,7 +22,7 @@ class ListsHandler:
     This class handles the Twitter search and data collection process.
     """
 
-    QUERIES = QUERIES
+    QUERIES = QUERIES_EN
     CITIES = CITIES
 
     def __init__(

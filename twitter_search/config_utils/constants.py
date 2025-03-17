@@ -2,9 +2,9 @@
 This script contains constants used across the project.
 """
 
-# CONSTANTS FOR THE UTIL SCRIPT
-
 from pathlib import Path
+
+from config_utils.queries import QUERIES_EN
 
 
 # Lists_filtering constants
@@ -21,8 +21,11 @@ REGION_NAME = "us-west-1"
 RAW_DATA_PATH = project_root / "data" / "raw_data"
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
 
-# RELEVANT USER COLUMNS
+# ACCOUNT TYPES
+ACCOUNT_TYPES = list(QUERIES_EN.keys())
+ACCOUNT_TYPES.append("all")
 
+# RELEVANT USER COLUMNS
 USER_COLUMNS = [
     "user_id",
     "username",
@@ -47,9 +50,18 @@ SCORE_THRESHOLD = 0.4
 NUM_WORKERS = 8
 BATCH_SIZE = 8
 
+# NLP Model Classification Labels
+RELEVANT_LABELS = [
+    "environment or pollution",
+    "environmental research",
+    "politician or policymaker",
+    "nonprofit organization",
+    "news outlet or journalist",
+    "healthcare professional",
+    "other",
+]
 
 # OTHER CONSTANTS
-
 LIST_FIELDS = ["id", "name", "description"]
 USER_FIELDS = [
     "created_at",
@@ -67,17 +79,7 @@ USER_FIELDS = [
     "username",
 ]
 
-# NLP Model Classification Labels
-RELEVANT_LABELS = [
-    "environment or pollution",
-    "environmental research",
-    "politician or policymaker",
-    "nonprofit organization",
-    "news outlet or journalist",
-    "other",
-]
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
-# Dictionary mapping Indian state capitals to their respective states
 MAX_RESULTS = 99
 MAX_TWEETS_FROM_USERS = 5
 MAX_RESULTS_LISTS = 24
@@ -118,14 +120,10 @@ USER_FIELDS = [
     "username",
 ]
 
-
 # THRESHOLDS FOR GETTING LISTS
 COUNT_THRESHOLD = 240
 SLEEP_TIME = 120
 GEOCODE_TIMEOUT = 5
-
-
-# KEYWORD CONSTANTS
 
 # Creating punctuations to be removed
 PUNCTUATIONS = ["!" "," "." "," '"' "?" ":"]
@@ -136,3 +134,4 @@ for char in PUNCTUATIONS:
 # Twikit Constants
 TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
 TWIKIT_THRESHOLD = 50
+SINGLE_ACCOUNT_THRESHOLD = 10

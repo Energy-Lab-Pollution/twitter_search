@@ -6,7 +6,11 @@ using the Twikit Library
 from argparse import ArgumentParser
 
 from config_utils.cities import CITIES, PILOT_CITIES
-from config_utils.constants import TWIKIT_THRESHOLD
+from config_utils.constants import (
+    ACCOUNT_TYPES,
+    SINGLE_ACCOUNT_THRESHOLD,
+    TWIKIT_THRESHOLD,
+)
 from config_utils.util import strtobool
 
 # Local imports
@@ -28,17 +32,8 @@ def main():
     parser.add_argument(
         "account_type",
         type=str,
-        help="type of accounts that you want\
-              [media,organizations,policymaker,politicians,researcher,environment,all]",
-        choices=[
-            "media",
-            "organizations",
-            "policymaker",
-            "politicians",
-            "researcher",
-            "environment",
-            "all",
-        ],
+        help="Desired account type to look users for",
+        choices=ACCOUNT_TYPES,
     )
 
     parser.add_argument(
@@ -90,7 +85,7 @@ def main():
             csv_converter = CSVConverter(args.location, twikit=True)
             csv_converter.run()
     else:
-        twikit_data_handler.run()
+        twikit_data_handler.run(SINGLE_ACCOUNT_THRESHOLD)
 
 
 if __name__ == "__main__":
