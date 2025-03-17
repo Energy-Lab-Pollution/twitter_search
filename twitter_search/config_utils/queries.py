@@ -19,9 +19,14 @@ QUERIES = {
     "researcher": """location ((environmental research) OR (environmental researcher)
                     OR science OR academic OR research OR university OR professor OR
                     postdoc OR postdoctoral OR PhD) -is:retweet""",
-    "environment": """location ((air pollution) OR pollution OR (public health)
-                OR (poor air) OR asthma OR polluted OR (pollution control board)
-                OR smog OR (air quality)) -is:retweet""",
+    "environment": """location ((air pollution) OR pollution OR (poor air) 
+                    OR asthma OR polluted OR (pollution control board)
+                    OR smog OR (air quality)) -is:retweet""",
+        "healthcare": """location ((MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist
+                        OR pediatrician OR nurse OR (healthcare professional) OR (medical expert) OR therapist
+                        OR clinician OR specialist OR pharmacist OR pulmonologist OR (medical practitioner)
+                        OR (health influencer) OR (board-certified) OR (medical doctor) OR (resident physician))
+                        -is:retweet""",
 }
 
 
@@ -49,6 +54,12 @@ QUERIES_ES = {
                     (salud publica) OR (poor air) OR asma OR contaminado OR contaminada
                     OR smog OR (calidad del aire) OR (medio ambiente)) (near: location)
                     -is:retweet""",
+    "healthcare": """location ((MD OR doctor OR doctora OR médico OR médica OR cirujano OR cirujana OR cardiólogo 
+                    OR cardióloga OR neumólogo OR neumóloga OR pediatra OR enfermera OR enfermero 
+                    OR (profesional de la salud) OR terapeuta OR clínico OR clínica OR especialista
+                    OR farmacéutico OR neumólogo OR (practicante médico) OR (influencer de salud) OR certificado
+                    OR certificada OR (médico residente))
+                    -is:retweet"""
 }
 
 
@@ -75,6 +86,11 @@ QUERIES_FR = {
     "environment": """location ((pollution de l'air) OR pollution OR (santé publique)
                 OR (air de mauvaise qualité) OR asthme OR pollué OR (commission de contrôle de la pollution)
                 OR smog OR (qualité de l'air)) -is:retweet""",
+    "healthcare": """((MD OR médecin OR docteur OR docteure OR chirurgien OR chirurgienne OR cardiologue
+                OR pneumologue OR pédiatre OR infirmier OR infirmière OR (professionnel de santé) OR thérapeute
+                OR clinicien OR clinicienne OR spécialiste OR pharmacien OR pharmacie OR (praticien médical)
+                OR (influenceur santé) OR (certifié OR certifiée) OR (médecin résident))
+                -is:retweet""",
 }
 
 
