@@ -6,7 +6,7 @@ using the Twikit Library
 from argparse import ArgumentParser
 
 from config_utils.cities import CITIES, PILOT_CITIES
-from config_utils.constants import TWIKIT_THRESHOLD
+from config_utils.constants import TWIKIT_THRESHOLD, ACCOUNT_TYPES
 from config_utils.util import strtobool
 
 # Local imports
@@ -28,17 +28,8 @@ def main():
     parser.add_argument(
         "account_type",
         type=str,
-        help="type of accounts that you want\
-              [media,organizations,policymaker,politicians,researcher,environment,all]",
-        choices=[
-            "media",
-            "organizations",
-            "policymaker",
-            "politicians",
-            "researcher",
-            "environment",
-            "all",
-        ],
+        help="Desired account type to look users for",
+        choices=ACCOUNT_TYPES,
     )
 
     parser.add_argument(
