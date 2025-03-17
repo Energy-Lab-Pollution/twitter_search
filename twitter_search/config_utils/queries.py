@@ -2,7 +2,7 @@
 Dictionary with the current queries for searching users
 """
 # QUERY DICTIONARY
-QUERIES = {
+QUERIES_EN = {
     "media": """location (media OR press OR coverage OR broadcasting
                 OR (breaking news) OR journalism OR journalist
                 OR local OR news) -is:retweet""",
@@ -94,4 +94,4 @@ QUERIES_FR = {
 }
 
 
-QUERIES_DICT = {"en": QUERIES, "es": QUERIES_ES, "fr": QUERIES_FR}
+QUERIES_DICT = {"en": QUERIES_EN, "es": QUERIES_ES, "fr": QUERIES_FR}
