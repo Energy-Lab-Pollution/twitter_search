@@ -36,8 +36,7 @@ QUERIES_ES = {
     "policymaker": """location (gobernador OR ministro OR magistrado OR diputado
                     OR senador OR gabinete OR (gobierno local) OR gobierno OR
                     municipio OR delegacion OR ministerio OR legislador OR legisladores
-                    OR legislacion OR legisladora) (near: location)
-                    -is:retweet""",
+                    OR legislacion OR legisladora) -is:retweet""",
     "politicians": """location (politica OR politicos OR politico OR politicas) (near: location)
                       -is:retweet""",
     "researcher": """location ((investigacion ambiental) OR (investigador ambiental)
