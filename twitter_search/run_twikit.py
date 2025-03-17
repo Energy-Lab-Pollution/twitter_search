@@ -6,7 +6,7 @@ using the Twikit Library
 from argparse import ArgumentParser
 
 from config_utils.cities import CITIES, PILOT_CITIES
-from config_utils.constants import ACCOUNT_TYPES, TWIKIT_THRESHOLD
+from config_utils.constants import ACCOUNT_TYPES, TWIKIT_THRESHOLD, SINGLE_ACCOUNT_THRESHOLD
 from config_utils.util import strtobool
 
 # Local imports
@@ -81,7 +81,7 @@ def main():
             csv_converter = CSVConverter(args.location, twikit=True)
             csv_converter.run()
     else:
-        twikit_data_handler.run()
+        twikit_data_handler.run(SINGLE_ACCOUNT_THRESHOLD)
 
 
 if __name__ == "__main__":
