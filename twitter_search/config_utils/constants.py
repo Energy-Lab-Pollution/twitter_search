@@ -49,7 +49,6 @@ BATCH_SIZE = 8
 
 
 # OTHER CONSTANTS
-
 LIST_FIELDS = ["id", "name", "description"]
 USER_FIELDS = [
     "created_at",
@@ -74,10 +73,11 @@ RELEVANT_LABELS = [
     "politician or policymaker",
     "nonprofit organization",
     "news outlet or journalist",
+    "healthcare professional",
     "other",
 ]
+
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
-# Dictionary mapping Indian state capitals to their respective states
 MAX_RESULTS = 99
 MAX_TWEETS_FROM_USERS = 5
 MAX_RESULTS_LISTS = 24
