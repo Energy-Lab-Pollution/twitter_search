@@ -8,8 +8,6 @@ import twikit
 
 
 # from config_utils.constants import TWIKIT_COOKIES_DIR
-
-city = "Kolkata"
 user_id = "1652537276"
 TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
 
@@ -64,3 +62,4 @@ def parse_retweeters(retweeters):
 
 if __name__ == "__main__":
     user_retweeters = asyncio.run(get_user_retweeters(client, user_id))
+    print(user_retweeters)
