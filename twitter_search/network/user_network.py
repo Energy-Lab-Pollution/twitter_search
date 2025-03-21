@@ -4,10 +4,12 @@ Script to pull tweets and retweeters from a particular user,
 import twikit
 import asyncio
 
-from config_utils.constants import TWIKIT_COOKIES_DIR
+# from config_utils.constants import TWIKIT_COOKIES_DIR
 
 city = "Kolkata"
 user_id = "1652537276"
+TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
+
 
 client = twikit.Client("en-US")
 client.load_cookies(TWIKIT_COOKIES_DIR)
@@ -23,7 +25,7 @@ async def get_users_tweets(client, user_id):
     Returns:
         - user_tweets: 
     """
-    user_tweets = await client.get_user_tweets(user_id)
+    user_tweets = await client.get_user_tweets(user_id, 'Tweets')
     
     return user_tweets
 
@@ -46,7 +48,7 @@ def parse_retweeters(retweeters):
     return retweeters_list
 
 
-def get_users_retweeters(tweets):
+async def get_users_retweeters(tweets):
     """
     Gets a list of retweeters given a list
     of tweets
@@ -55,10 +57,11 @@ def get_users_retweeters(tweets):
         - tweets: List of twikit.tweet objects
     """
     dict_list = []
-    for tweet in tweets:
+    for tweet in tweets[:10]:
         tweet_dict = {}
         tweet_id = tweet.id 
-        retweeters = tweet.get_retweeters()
+        retweeters = await tweet.get_retweeters()
+        retweeters = parse_retweeters(retweeters)
 
         tweet_dict[tweet_id] = retweeters
         dict_list.append(tweet_dict)
@@ -69,7 +72,11 @@ def get_users_retweeters(tweets):
 
 if __name__ == "__main__":
 
-    user_tweets = asyncio.run()
+    user_tweets = asyncio.run(get_users_tweets(client, user_id))
+    print(user_tweets)
+    user_retweeters = get_users_retweeters(user_tweets)
+    print(user_retweeters)
+
 
 
 
