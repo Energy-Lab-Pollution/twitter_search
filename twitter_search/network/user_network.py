@@ -15,7 +15,7 @@ TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
 client = twikit.Client("en-US")
 client.load_cookies(TWIKIT_COOKIES_DIR)
 
-async def get_tweets_retweeters(client, user_id):
+async def get_user_retweeters(client, user_id):
     """
     Get a user by id and then get his tweets
 
@@ -60,7 +60,7 @@ def parse_retweeters(retweeters):
 
 if __name__ == "__main__":
 
-    asyncio.run(get_users_tweets)
+    user_retweeters = asyncio.run(get_user_retweeters(client, user_id))
 
 
 
