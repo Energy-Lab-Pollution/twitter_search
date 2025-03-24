@@ -16,9 +16,9 @@ client = twikit.Client("en-US")
 client.load_cookies(TWIKIT_COOKIES_DIR)
 
 
-async def get_user_retweeters(client, user_id):
+async def get_retweeters_followers(client, user_id, extraction_type):
     """
-    Get a user by id and then get his tweets
+    For a given user, we extract their retweeters and followers
 
     Args
     -------
@@ -27,20 +27,28 @@ async def get_user_retweeters(client, user_id):
     Returns:
         - user_tweets:
     """
-    user_tweets = await client.get_user_tweets(user_id, "Tweets")
-    time.sleep(2)
-    dict_list = []
-    for tweet in user_tweets[:10]:
-        tweet_dict = {}
-        tweet_id = tweet.id
-        retweeters = await tweet.get_retweeters()
-        retweeters = parse_retweeters(retweeters)
 
-        tweet_dict[tweet_id] = retweeters
-        dict_list.append(tweet_dict)
+    dict_list = []
+    
+    if extraction_type == "retweeters":
+        user_tweets = await client.get_user_tweets(user_id, "Tweets")
+        time.sleep(2)
+        for tweet in user_tweets[:10]:
+            tweet_dict = {}
+            tweet_id = tweet.id
+            retweeters = await tweet.get_retweeters()
+            retweeters = parse_retweeters(retweeters)
+
+            tweet_dict[tweet_id] = retweeters
+            dict_list.append(tweet_dict)
+
+        user = await client.get_user_by_id(user_id)
+        user_followers = await user.get_followers()
+
+        if user_followers:
+            pass
 
     return dict_list
-
 
 def parse_retweeters(retweeters):
     """
