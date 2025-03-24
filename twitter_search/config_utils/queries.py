@@ -56,7 +56,7 @@ QUERIES_ES = {
                     -is:retweet""",
     "healthcare": """location ((doctor OR doctora OR medico OR medica OR cirujano OR cirujana OR cardiologo
                     OR cardiologa OR neumologo OR neumologa OR pediatra OR enfermera OR enfermero
-                    OR (profesional de la salud) OR terapeuta OR clinico OR clinica OR farmaceutico 
+                    OR (profesional de la salud) OR terapeuta OR clinico OR clinica OR farmaceutico
                     OR neumologo OR (médico residente))
                     -is:retweet""",
 }

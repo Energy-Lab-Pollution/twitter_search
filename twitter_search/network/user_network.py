@@ -12,20 +12,13 @@ user_id = "1652537276"
 TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
 
 
-client = twikit.Client("en-US")
-client.load_cookies(TWIKIT_COOKIES_DIR)
-
-
-
 class UserNetwork:
-
     def __init__(self):
         self.client = twikit.Client("en-US")
         self.client.load_cookies(TWIKIT_COOKIES_DIR)
 
-
     @staticmethod
-    def parse_retweeters(users):
+    def parse_users(users):
         """
         Parse retweeters (user objects) and
         put them into a list of dictionaries
@@ -45,7 +38,6 @@ class UserNetwork:
                 users_list.append(user_dict)
 
         return users_list
-    
 
     async def get_retweeters(self, client, user_id):
         """
@@ -60,7 +52,7 @@ class UserNetwork:
         """
 
         dict_list = []
-        
+
         user_tweets = await client.get_user_tweets(user_id, "Tweets")
         for tweet in user_tweets:
             tweet_dict = {}
@@ -77,11 +69,11 @@ class UserNetwork:
         """
         Gets a given user's followers
         """
-        
+
         user_followers = await client.get_followers(user_id)
 
         if user_followers:
-            pass
+            user_followers = self.parse_users(user_followers)
 
 
 if __name__ == "__main__":
