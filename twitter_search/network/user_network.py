@@ -25,27 +25,27 @@ class UserNetwork:
 
 
     @staticmethod
-    def parse_retweeters(retweeters):
+    def parse_retweeters(users):
         """
         Parse retweeters (user objects) and
         put them into a list of dictionaries
         """
-        retweeters_list = []
+        users_list = []
 
-        if retweeters:
-            for retweeter in retweeters:
-                retweeter_dict = {}
-                retweeter_dict["user_id"] = retweeter.id
-                retweeter_dict["username"] = retweeter.screen_name
-                retweeter_dict["description"] = retweeter.description
-                retweeter_dict["location"] = retweeter.location
-                retweeter_dict["followers_count"] = retweeter.followers_count
-                retweeter_dict["following_count"] = retweeter.following_count
+        if users:
+            for user in users:
+                user_dict = {}
+                user_dict["user_id"] = user.id
+                user_dict["username"] = user.screen_name
+                user_dict["description"] = user.description
+                user_dict["location"] = user.location
+                user_dict["followers_count"] = user.followers_count
+                user_dict["following_count"] = user.following_count
 
-                retweeters_list.append(retweeter_dict)
+                users_list.append(user_dict)
 
-        return retweeters_list
-
+        return users_list
+    
 
     async def get_retweeters(self, client, user_id):
         """
@@ -62,7 +62,6 @@ class UserNetwork:
         dict_list = []
         
         user_tweets = await client.get_user_tweets(user_id, "Tweets")
-        time.sleep(2)
         for tweet in user_tweets:
             tweet_dict = {}
             tweet_id = tweet.id
