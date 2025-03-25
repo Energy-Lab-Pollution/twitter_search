@@ -3,8 +3,8 @@ Script to pull tweets and retweeters from a particular user,
 """
 import asyncio
 import time
-import twikit
 
+import twikit
 from config_utils.constants import TWIKIT_COOKIES_DIR, TWIKIT_THRESHOLD
 
 
@@ -16,9 +16,11 @@ user_id = "1652537276"
 class UserNetwork:
     TWIKIT_THRESHOLD = TWIKIT_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
+
     def __init__(self):
         self.client = twikit.Client("en-US")
         self.client.load_cookies(self.TWIKIT_COOKIES_DIR)
+
     @staticmethod
     def parse_users(users):
         """
@@ -45,7 +47,7 @@ class UserNetwork:
         """
         Given a set of tweets, we get a list of dictionaries
         with the twees' and retweeters' information
-        
+
         Args:
             - tweets
         """
@@ -62,7 +64,6 @@ class UserNetwork:
 
         return dict_list
 
-
     async def get_user_retweeters(self, client, user_id):
         """
         For a given user, we extract the users who have retweeted them
@@ -76,7 +77,7 @@ class UserNetwork:
         Returns:
             - user_tweets:
         """
-        # We need to get tweets first 
+        # We need to get tweets first
         dict_list = []
         more_tweets_available = True
         num_iter = 1
@@ -84,7 +85,6 @@ class UserNetwork:
         user_tweets = await client.get_user_tweets(user_id, "Tweets")
         tweets_list = asyncio.run(self.get_user_retweeters)
         dict_list.extend(tweets_list)
-
 
         while more_tweets_available:
             next_tweets = await user_tweets.next()
@@ -100,7 +100,7 @@ class UserNetwork:
 
             if num_iter == self.TWIKIT_THRESHOLD:
                 break
-        
+
         return dict_list
 
     async def get_followers(self, client, user_id):
