@@ -70,10 +70,14 @@ class UserNetwork:
         Gets a given user's followers
         """
 
-        user_followers = await client.get_followers(user_id)
+        followers = await client.get_followers(user_id)
 
-        if user_followers:
-            user_followers = self.parse_users(user_followers)
+        if followers:
+            followers = self.parse_users(followers)
+
+        more_followers = await followers.next()
+        if more_followers:
+            more_followers = self.parse_users(more_followers)
 
 
 if __name__ == "__main__":
