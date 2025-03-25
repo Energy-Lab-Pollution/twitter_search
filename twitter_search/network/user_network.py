@@ -55,11 +55,14 @@ class UserNetwork:
         if tweets:
             for tweet in tweets:
                 tweet_dict = {}
-                tweet_id = tweet.id
                 retweeters = await tweet.get_retweeters()
                 retweeters = self.parse_users(retweeters)
 
-                tweet_dict[tweet_id] = retweeters
+                tweet_dict["tweet_id"] = tweet.id
+                tweet_dict["tweet_text"] = tweet.text
+                tweet_dict["created_at"] = tweet.created_at
+                tweet_dict["retweeters"] = retweeters
+
                 dict_list.append(tweet_dict)
 
         return dict_list
@@ -107,15 +110,17 @@ class UserNetwork:
         """
         Gets a given user's followers
         """
-
+        followers_list = []
         followers = await client.get_followers(user_id)
 
         if followers:
             followers = self.parse_users(followers)
+            followers_list.extend(followers)
 
         more_followers = await followers.next()
         if more_followers:
             more_followers = self.parse_users(more_followers)
+            followers_list.extend(more_followers)
 
 
 if __name__ == "__main__":
