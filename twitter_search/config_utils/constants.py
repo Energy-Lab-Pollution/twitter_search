@@ -134,4 +134,5 @@ for char in PUNCTUATIONS:
 # Twikit Constants
 TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
 TWIKIT_THRESHOLD = 50
+TWIKIT_FOLLOWERS_THRESHOLD = 50
 SINGLE_ACCOUNT_THRESHOLD = 10

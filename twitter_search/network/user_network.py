@@ -5,7 +5,7 @@ import asyncio
 import time
 
 import twikit
-from config_utils.constants import TWIKIT_COOKIES_DIR, TWIKIT_THRESHOLD
+from config_utils.constants import TWIKIT_COOKIES_DIR, TWIKIT_THRESHOLD, TWIKIT_FOLLOWERS_THRESHOLD
 
 
 # from config_utils.constants import TWIKIT_COOKIES_DIR
@@ -15,6 +15,7 @@ user_id = "1652537276"
 
 class UserNetwork:
     TWIKIT_THRESHOLD = TWIKIT_THRESHOLD
+    TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
 
     def __init__(self):
@@ -67,7 +68,7 @@ class UserNetwork:
 
         return dict_list
 
-    async def get_user_retweeters(self, client, user_id):
+    async def get_user_retweeters(self, user_id):
         """
         For a given user, we extract the users who have retweeted them
         in the past. We get the largest number of possible tweets and, for
@@ -85,7 +86,7 @@ class UserNetwork:
         more_tweets_available = True
         num_iter = 1
 
-        user_tweets = await client.get_user_tweets(user_id, "Tweets")
+        user_tweets = await self.client.get_user_tweets(user_id, "Tweets")
         tweets_list = self.get_tweets_retweeters(user_tweets)
         dict_list.extend(tweets_list)
 
@@ -106,12 +107,12 @@ class UserNetwork:
 
         return dict_list
 
-    async def get_followers(self, client, user_id):
+    async def get_followers(self, user_id):
         """
         Gets a given user's followers
         """
         followers_list = []
-        followers = await client.get_followers(user_id)
+        followers = await self.client.get_followers(user_id)
 
         if followers:
             followers = self.parse_users(followers)
@@ -121,6 +122,14 @@ class UserNetwork:
         if more_followers:
             more_followers = self.parse_users(more_followers)
             followers_list.extend(more_followers)
+
+    async def run(self, user_id):
+        """
+        Runs the pertinent functions by getting a user's retweeters and
+        followers        
+        """
+        user_dict = {}
+        
 
 
 if __name__ == "__main__":
