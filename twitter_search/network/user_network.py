@@ -83,13 +83,13 @@ class UserNetwork:
         num_iter = 1
 
         user_tweets = await client.get_user_tweets(user_id, "Tweets")
-        tweets_list = asyncio.run(self.get_user_retweeters)
+        tweets_list = self.get_tweets_retweeters(user_tweets)
         dict_list.extend(tweets_list)
 
         while more_tweets_available:
             next_tweets = await user_tweets.next()
             if next_tweets:
-                tweets_list = asyncio.run(self.get_user_retweeters)
+                tweets_list = self.get_user_retweeters(next_tweets)
                 dict_list.extend(tweets_list)
 
             else:
