@@ -79,7 +79,7 @@ class UserNetwork:
                 retweeters_list.extend(retweeters)
         except twikit.errors.TooManyRequests:
             print("Retweeters: Too Many Requests")
-            return 
+            return None
         
         while more_retweeters_available:
             self.retweeters_counter += 1
@@ -115,10 +115,10 @@ class UserNetwork:
                 tweet_dict["tweet_text"] = tweet.text
                 tweet_dict["created_at"] = tweet.created_at                
                 retweeters = await self.get_single_tweet_retweeters(tweet)
-                if retweeters:
+                # If retweeters, we add that field to the dict
+                if isinstance(retweeters, list):
                     retweeters = self.parse_users(retweeters)
                     tweet_dict["retweeters"] = retweeters
-                # If no retweeters, we 
                 dict_list.append(tweet_dict)
 
         return dict_list
