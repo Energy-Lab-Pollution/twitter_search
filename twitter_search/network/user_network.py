@@ -5,11 +5,12 @@ import asyncio
 import time
 
 import twikit
-from config_utils import util
+from config_utils.util import json_maker, load_json
 from config_utils.constants import (
     TWIKIT_COOKIES_DIR,
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_THRESHOLD,
+    SINGLE_ACCOUNT_THRESHOLD,
 )
 
 
@@ -49,13 +50,42 @@ class UserNetwork:
 
         return users_list
 
+    async def get_single_tweet_retweeters(self, tweet):
+        """
+        For a particular tweet, get a determined amount of retweeters
+
+        Args:
+        ---------
+            - tweet: twikit.Tweet object
+        """
+        num_iter = 1
+        retweeters_list = []
+        more_retweeters_available = True
+        
+        retweeters = await tweet.get_retweeters()
+        retweeters = self.parse_users(retweeters)
+        retweeters_list.extend(retweeters) 
+        
+        # We will only get 
+        while more_retweeters_available:
+            more_retweeters = await retweeters.next()
+
+            if more_retweeters:
+                more_retweeters = self.parse_users(more_retweeters)
+                retweeters_list.extend(retweeters_list)
+            else:
+                more_retweeters_available = False
+            
+            if num_iter % 5 == 0:
+                break
+
     async def get_tweets_retweeters(self, tweets):
         """
         Given a set of tweets, we get a list of dictionaries
         with the twees' and retweeters' information
 
         Args:
-            - tweets
+            - tweets: list of twikit.Tweet objects
         """
         dict_list = []
         if tweets:
@@ -76,9 +106,8 @@ class UserNetwork:
 
     async def get_user_retweeters(self, user_id):
         """
-        For a given user, we extract the users who have retweeted them
-        in the past. We get the largest number of possible tweets and, for
-        each tweet, we get the retweeters.
+        For a given user, we get as many of their tweets as possible.
+        Then, for each tweet, we get the corresponding retweeters.
 
         Args
         -------
@@ -108,6 +137,7 @@ class UserNetwork:
 
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} batches")
+
 
             if num_iter == self.TWIKIT_THRESHOLD:
                 break
