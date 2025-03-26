@@ -97,9 +97,7 @@ class UserNetwork:
         if tweets:
             for tweet in tweets:
                 tweet_dict = {}
-                # TODO: maybe get more retweeters
                 self.retweeters_counter += 1                    
-
                 tweet_dict["tweet_id"] = tweet.id
                 tweet_dict["tweet_text"] = tweet.text
                 tweet_dict["created_at"] = tweet.created_at
@@ -166,27 +164,28 @@ class UserNetwork:
         followers_list = []
         followers = await self.client.get_followers(user_id)
         more_followers_available = True
-        num_iter = 1
+        num_iter = 0
 
         followers = self.parse_users(followers)
         followers_list.extend(followers)
 
         while more_followers_available:
-            more_followers = await followers.next()
-            if more_followers:
-                more_followers = self.parse_users(more_followers)
-                followers_list.extend(more_followers)
-            else:
-                more_followers_available = False
-
+            num_iter += 1
+            try:
+                more_followers = await followers.next()
+                if more_followers:
+                    more_followers = self.parse_users(more_followers)
+                    followers_list.extend(more_followers)
+                else:
+                    more_followers_available = False
+            except twikit.errors.TooManyRequests:
+                    print("Retweeters: too many requests, stopping...")
+                    break
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} follower batches, sleeping...")
                 time.sleep(self.SLEEP_TIME)
-
             if num_iter == self.TWIKIT_FOLLOWERS_THRESHOLD:
                 break
-
-            num_iter += 1
 
     async def run(self, user_id):
         """
@@ -195,16 +194,10 @@ class UserNetwork:
         """
         user_dict = {}
         user_dict["user_id"] = user_id
-        try:
-            user_retweeters = self.get_user_retweeters(user_id)
-            user_dict["tweets"] = user_retweeters
-        except twikit.errors.TooManyRequests:
-            print("Retweeters: too many requests, stopping...")
 
-        try:
-            followers = self.get_followers(user_id)
-            user_dict["followers"] = followers
-        except twikit.errors.TooManyRequests:
-            print("Followers: too many requests, stopping...")
-            pass
+        user_retweeters = self.get_user_retweeters(user_id)
+        user_dict["tweets"] = user_retweeters
+        
+        followers = self.get_followers(user_id)
+        user_dict["followers"] = followers
 
