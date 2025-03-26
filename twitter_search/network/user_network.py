@@ -63,15 +63,17 @@ class UserNetwork:
         ---------
             - tweet: twikit.Tweet object
         """
-        num_iter = 1
         retweeters_list = []
         more_retweeters_available = True
         
-        retweeters = await tweet.get_retweeters()
-        retweeters = self.parse_users(retweeters)
-        retweeters_list.extend(retweeters) 
+        self.retweeters_counter += 1
+        try:                    
+            retweeters = await tweet.get_retweeters()
+            retweeters = self.parse_users(retweeters)
+            retweeters_list.extend(retweeters)
+        except twikit.errors.TooManyRequests:
+            return retweeters_list 
         
-        # We will only perform 5 requests for now
         while more_retweeters_available:
             more_retweeters = await retweeters.next()
 
@@ -81,9 +83,8 @@ class UserNetwork:
             else:
                 more_retweeters_available = False
             
-            if num_iter % 5 == 0:
-                print(f"Processed {num_iter} single tweet retweeters  batches")
                 
+        return retweeters_list
 
     async def get_tweets_retweeters(self, tweets):
         """
@@ -97,7 +98,6 @@ class UserNetwork:
         if tweets:
             for tweet in tweets:
                 tweet_dict = {}
-                self.retweeters_counter += 1                    
                 tweet_dict["tweet_id"] = tweet.id
                 tweet_dict["tweet_text"] = tweet.text
                 tweet_dict["created_at"] = tweet.created_at
@@ -106,12 +106,10 @@ class UserNetwork:
                     print("No more retweeter requests available...")
                     dict_list.append(tweet_dict)
                     break
-                try:
-                    retweeters = await tweet.get_retweeters()
+                else:
+                    retweeters = await self.get_single_tweet_retweeters(tweet)
                     retweeters = self.parse_users(retweeters)
                     tweet_dict["retweeters"] = retweeters
-                except twikit.errors.TooManyRequests:
-                    print("Retweeters: too many requests, stopping...")
                     dict_list.append(tweet_dict)
 
         return dict_list
