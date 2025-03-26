@@ -93,7 +93,8 @@ class UserNetwork:
         while more_tweets_available:
             next_tweets = await user_tweets.next()
             if next_tweets:
-                tweets_list = self.get_user_retweeters(next_tweets)
+                # Then, for each tweet, we get the retweeters
+                tweets_list = self.get_tweets_retweeters(next_tweets)
                 dict_list.extend(tweets_list)
 
             else:
@@ -143,6 +144,9 @@ class UserNetwork:
         followers        
         """
         user_dict = {}
+        user_dict['user_id']  = user_id
+
+        
         
 
 
