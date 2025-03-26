@@ -5,7 +5,12 @@ import asyncio
 import time
 
 import twikit
-from config_utils.constants import TWIKIT_COOKIES_DIR, TWIKIT_THRESHOLD, TWIKIT_FOLLOWERS_THRESHOLD
+from config_utils import util
+from config_utils.constants import (
+    TWIKIT_COOKIES_DIR,
+    TWIKIT_FOLLOWERS_THRESHOLD,
+    TWIKIT_THRESHOLD,
+)
 
 
 # from config_utils.constants import TWIKIT_COOKIES_DIR
@@ -56,6 +61,7 @@ class UserNetwork:
         if tweets:
             for tweet in tweets:
                 tweet_dict = {}
+                # TODO: maybe get more retweeters
                 retweeters = await tweet.get_retweeters()
                 retweeters = self.parse_users(retweeters)
 
@@ -137,17 +143,19 @@ class UserNetwork:
 
             num_iter += 1
 
-                
     async def run(self, user_id):
         """
         Runs the pertinent functions by getting a user's retweeters and
-        followers        
+        followers
         """
         user_dict = {}
-        user_dict['user_id']  = user_id
+        user_dict["user_id"] = user_id
 
-        
-        
+        user_retweeters = self.get_user_retweeters(user_id)
+        user_dict["tweets"] = user_retweeters
+
+        followers = self.get_followers(user_id)
+        user_dict["followers"] = followers
 
 
 if __name__ == "__main__":
