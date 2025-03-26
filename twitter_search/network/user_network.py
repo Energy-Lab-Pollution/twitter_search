@@ -57,7 +57,7 @@ class UserNetwork:
 
     async def get_single_tweet_retweeters(self, tweet):
         """
-        For a particular tweet, get a determined amount of retweeters
+        For a particular tweet, get all the possible retweeters
 
         Args:
         ---------
@@ -65,25 +65,38 @@ class UserNetwork:
         """
         retweeters_list = []
         more_retweeters_available = True
-        
         self.retweeters_counter += 1
+        
+        # Maxed out retweeters threshold
+        if self.retweeters_counter == self.TWIKIT_RETWEETERS_THRESHOLD:
+            print("Maxed out on retweeters threshold")
+            return []
+
         try:                    
             retweeters = await tweet.get_retweeters()
-            retweeters = self.parse_users(retweeters)
-            retweeters_list.extend(retweeters)
+            if retweeters:
+                retweeters = self.parse_users(retweeters)
+                retweeters_list.extend(retweeters)
         except twikit.errors.TooManyRequests:
-            return retweeters_list 
+            print("Retweeters: Too Many Requests")
+            return 
         
         while more_retweeters_available:
-            more_retweeters = await retweeters.next()
-
-            if more_retweeters:
-                more_retweeters = self.parse_users(more_retweeters)
-                retweeters_list.extend(retweeters_list)
+            self.retweeters_counter += 1
+            if self.retweeters_counter < self.TWIKIT_RETWEETERS_THRESHOLD:
+                try:
+                    more_retweeters = await retweeters.next()
+                except twikit.errors.TooManyRequests:
+                    print("Retweeters: Too Many Requests")
+                    break 
+                if more_retweeters:
+                    more_retweeters = self.parse_users(more_retweeters)
+                    retweeters_list.extend(retweeters_list)
+                else:
+                    more_retweeters_available = False
             else:
-                more_retweeters_available = False
-            
-                
+                print("Maxed out on retweeters threshold")
+               
         return retweeters_list
 
     async def get_tweets_retweeters(self, tweets):
@@ -100,17 +113,13 @@ class UserNetwork:
                 tweet_dict = {}
                 tweet_dict["tweet_id"] = tweet.id
                 tweet_dict["tweet_text"] = tweet.text
-                tweet_dict["created_at"] = tweet.created_at
-                
-                if self.retweeters_counter == self.TWIKIT_RETWEETERS_THRESHOLD:
-                    print("No more retweeter requests available...")
-                    dict_list.append(tweet_dict)
-                    break
-                else:
-                    retweeters = await self.get_single_tweet_retweeters(tweet)
+                tweet_dict["created_at"] = tweet.created_at                
+                retweeters = await self.get_single_tweet_retweeters(tweet)
+                if retweeters:
                     retweeters = self.parse_users(retweeters)
                     tweet_dict["retweeters"] = retweeters
-                    dict_list.append(tweet_dict)
+                # If no retweeters, we 
+                dict_list.append(tweet_dict)
 
         return dict_list
 
@@ -129,22 +138,22 @@ class UserNetwork:
         # We need to get tweets first
         dict_list = []
         more_tweets_available = True
-        num_iter = 1
+        num_iter = 0
 
+        # Parse tweets and get retweeters
         user_tweets = await self.client.get_user_tweets(user_id, "Tweets")
         tweets_list = self.get_tweets_retweeters(user_tweets)
         dict_list.extend(tweets_list)
 
         while more_tweets_available:
+            num_iter += 1
             next_tweets = await user_tweets.next()
             if next_tweets:
-                # Then, for each tweet, we get the retweeters
+                # Parse tweets and get retweeters
                 tweets_list = self.get_tweets_retweeters(next_tweets)
                 dict_list.extend(tweets_list)
-
             else:
                 more_tweets_available = False
-
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
 
