@@ -9,6 +9,7 @@ from config_utils.util import json_maker, load_json
 from config_utils.constants import (
     TWIKIT_COOKIES_DIR,
     TWIKIT_FOLLOWERS_THRESHOLD,
+    TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_THRESHOLD,
 )
 
@@ -20,6 +21,7 @@ user_id = "1652537276"
 class UserNetwork:
     TWIKIT_THRESHOLD = TWIKIT_THRESHOLD
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
+    TWIKIT_RETWEETERS_THRESHOLD = TWIKIT_RETWEETERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
     SLEEP_TIME = 10
 
@@ -27,6 +29,9 @@ class UserNetwork:
         self.client = twikit.Client("en-US")
         self.client.load_cookies(self.TWIKIT_COOKIES_DIR)
         self.city = city
+
+        # Setting retweeters counter at the top level
+        self.retweeters_counter = 0
 
     @staticmethod
     def parse_users(users):
@@ -77,7 +82,8 @@ class UserNetwork:
                 more_retweeters_available = False
             
             if num_iter % 5 == 0:
-                break
+                print(f"Processed {num_iter} single tweet retweeters  batches")
+                
 
     async def get_tweets_retweeters(self, tweets):
         """
@@ -92,15 +98,23 @@ class UserNetwork:
             for tweet in tweets:
                 tweet_dict = {}
                 # TODO: maybe get more retweeters
-                retweeters = await tweet.get_retweeters()
-                retweeters = self.parse_users(retweeters)
+                self.retweeters_counter += 1                    
 
                 tweet_dict["tweet_id"] = tweet.id
                 tweet_dict["tweet_text"] = tweet.text
                 tweet_dict["created_at"] = tweet.created_at
-                tweet_dict["retweeters"] = retweeters
-
-                dict_list.append(tweet_dict)
+                
+                if self.retweeters_counter == self.TWIKIT_RETWEETERS_THRESHOLD:
+                    print("No more retweeter requests available...")
+                    dict_list.append(tweet_dict)
+                    break
+                try:
+                    retweeters = await tweet.get_retweeters()
+                    retweeters = self.parse_users(retweeters)
+                    tweet_dict["retweeters"] = retweeters
+                except twikit.errors.TooManyRequests:
+                    print("Retweeters: too many requests, stopping...")
+                    dict_list.append(tweet_dict)
 
         return dict_list
 
@@ -136,7 +150,7 @@ class UserNetwork:
                 more_tweets_available = False
 
             if num_iter % 5 == 0:
-                print(f"Processed {num_iter} batches")
+                print(f"Processed {num_iter} user tweets batches")
 
             if num_iter == self.TWIKIT_THRESHOLD:
                 break
@@ -194,9 +208,3 @@ class UserNetwork:
             print("Followers: too many requests, stopping...")
             pass
 
-
-
-if __name__ == "__main__":
-    pass
-    # user_retweeters = asyncio.run(get_retweeters_followers(client, user_id))
-    # print(user_retweeters)
