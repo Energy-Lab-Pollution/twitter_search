@@ -10,7 +10,6 @@ from config_utils.constants import (
     TWIKIT_COOKIES_DIR,
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_THRESHOLD,
-    SINGLE_ACCOUNT_THRESHOLD,
 )
 
 
@@ -23,11 +22,12 @@ class UserNetwork:
     TWIKIT_THRESHOLD = TWIKIT_THRESHOLD
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
-    SLEEP_TIME = 60
+    SLEEP_TIME = 10
 
-    def __init__(self):
+    def __init__(self, city):
         self.client = twikit.Client("en-US")
         self.client.load_cookies(self.TWIKIT_COOKIES_DIR)
+        self.city = city
 
     @staticmethod
     def parse_users(users):
@@ -67,7 +67,7 @@ class UserNetwork:
         retweeters = self.parse_users(retweeters)
         retweeters_list.extend(retweeters) 
         
-        # We will only get 
+        # We will only perform 5 requests for now
         while more_retweeters_available:
             more_retweeters = await retweeters.next()
 
