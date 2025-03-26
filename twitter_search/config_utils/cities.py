@@ -56,6 +56,7 @@ ALIAS_DICT = {
     "calcutta": "kolkata",
     "kolkatta": "kolkata",
     "calcuta": "kolkata",
+    "bombay": "mumbai"
 }
 
 CITIES_LANGS = {
