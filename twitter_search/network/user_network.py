@@ -23,6 +23,7 @@ class UserNetwork:
     TWIKIT_THRESHOLD = TWIKIT_THRESHOLD
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
+    SLEEP_TIME = 60
 
     def __init__(self):
         self.client = twikit.Client("en-US")
@@ -138,7 +139,6 @@ class UserNetwork:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} batches")
 
-
             if num_iter == self.TWIKIT_THRESHOLD:
                 break
 
@@ -165,8 +165,10 @@ class UserNetwork:
                 followers_list.extend(more_followers)
             else:
                 more_followers_available = False
+
             if num_iter % 5 == 0:
-                print(f"Processed {num_iter} follower batches")
+                print(f"Processed {num_iter} follower batches, sleeping...")
+                time.sleep(self.SLEEP_TIME)
 
             if num_iter == self.TWIKIT_FOLLOWERS_THRESHOLD:
                 break
