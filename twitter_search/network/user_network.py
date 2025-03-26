@@ -15,7 +15,6 @@ from config_utils.constants import (
 
 # from config_utils.constants import TWIKIT_COOKIES_DIR
 user_id = "1652537276"
-# TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
 
 
 class UserNetwork:
@@ -182,12 +181,19 @@ class UserNetwork:
         """
         user_dict = {}
         user_dict["user_id"] = user_id
+        try:
+            user_retweeters = self.get_user_retweeters(user_id)
+            user_dict["tweets"] = user_retweeters
+        except twikit.errors.TooManyRequests:
+            print("Retweeters: too many requests, stopping...")
 
-        user_retweeters = self.get_user_retweeters(user_id)
-        user_dict["tweets"] = user_retweeters
+        try:
+            followers = self.get_followers(user_id)
+            user_dict["followers"] = followers
+        except twikit.errors.TooManyRequests:
+            print("Followers: too many requests, stopping...")
+            pass
 
-        followers = self.get_followers(user_id)
-        user_dict["followers"] = followers
 
 
 if __name__ == "__main__":
