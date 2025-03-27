@@ -120,7 +120,7 @@ class UserNetwork:
                
         return retweeters_list
     
-    async def get_retweeters(self, tweets_list):
+    async def add_retweeters(self, tweets_list):
         """
         For every tweet in a list of dictionaries, attempt to
         get all possible retweeters.
@@ -244,10 +244,8 @@ class UserNetwork:
 
         # First get tweets, without retweeters
         user_tweets = self.get_user_tweets(user_id)
-        
-
-        user_retweeters = self.get_user_retweeters(user_id)
-        self.user_dict["tweets"] = user_retweeters
+        user_tweets = self.add_retweeters(user_tweets)
+        self.user_dict["tweets"] = user_tweets
         
         followers = self.get_followers(user_id)
         self.user_dict["followers"] = followers
