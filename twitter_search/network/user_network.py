@@ -14,10 +14,6 @@ from config_utils.constants import (
 )
 
 
-# from config_utils.constants import TWIKIT_COOKIES_DIR
-user_id = "1652537276"
-
-
 class UserNetwork:
     TWIKIT_THRESHOLD = TWIKIT_THRESHOLD
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
@@ -86,9 +82,10 @@ class UserNetwork:
             if self.retweeters_counter < self.TWIKIT_RETWEETERS_THRESHOLD:
                 try:
                     more_retweeters = await retweeters.next()
+                # Stop here if failure and return what you had so far
                 except twikit.errors.TooManyRequests:
                     print("Retweeters: Too Many Requests")
-                    break 
+                    return retweeters_list
                 if more_retweeters:
                     more_retweeters = self.parse_users(more_retweeters)
                     retweeters_list.extend(retweeters_list)
@@ -140,20 +137,26 @@ class UserNetwork:
         more_tweets_available = True
         num_iter = 0
 
-        # Parse tweets and get retweeters
+        # Parse first set of tweets and get retweeters
         user_tweets = await self.client.get_user_tweets(user_id, "Tweets")
         tweets_list = self.get_tweets_retweeters(user_tweets)
         dict_list.extend(tweets_list)
 
         while more_tweets_available:
             num_iter += 1
-            next_tweets = await user_tweets.next()
-            if next_tweets:
-                # Parse tweets and get retweeters
-                tweets_list = self.get_tweets_retweeters(next_tweets)
-                dict_list.extend(tweets_list)
-            else:
-                more_tweets_available = False
+            try:
+                next_tweets = await user_tweets.next()
+                if next_tweets:
+                    # Parse next tweets and get retweeters
+                    tweets_list = self.get_tweets_retweeters(next_tweets)
+                    dict_list.extend(tweets_list)
+                else:
+                    more_tweets_available = False
+            # If errored out on requests, stop there
+            # Just return what you already have
+            except twikit.errors.TooManyRequests:
+                print("Followers: too many requests, stopping...")
+                return dict_list               
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
 
@@ -185,14 +188,15 @@ class UserNetwork:
                     followers_list.extend(more_followers)
                 else:
                     more_followers_available = False
+            # Stop here and just return what you got
             except twikit.errors.TooManyRequests:
-                    print("Retweeters: too many requests, stopping...")
-                    break
+                    print("Followers: too many requests, stopping...")
+                    return followers_list
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} follower batches, sleeping...")
                 time.sleep(self.SLEEP_TIME)
             if num_iter == self.TWIKIT_FOLLOWERS_THRESHOLD:
-                break
+                print("Followers: maxed out number of requests")
 
     async def run(self, user_id):
         """
