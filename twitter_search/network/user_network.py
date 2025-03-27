@@ -160,7 +160,7 @@ class UserNetwork:
         more_tweets_available = True
         num_iter = 0
 
-        # Parse first set of tweets and get retweeters
+        # Parse first set of tweets
         user_tweets = await self.client.get_user_tweets(user_id, "Tweets")
         tweets_list = self.parse_tweets(user_tweets)
         dict_list.extend(user_tweets)
@@ -170,13 +170,12 @@ class UserNetwork:
             try:
                 next_tweets = await user_tweets.next()
                 if next_tweets:
-                    # Parse next tweets and get retweeters
+                    # Parse next tweets
                     tweets_list = self.parse_tweets(next_tweets)
                     dict_list.extend(tweets_list)
                 else:
                     more_tweets_available = False
-            # If errored out on requests, stop there
-            # Just return what you already have
+            # If errored out on requests, just return what you already have
             except twikit.errors.TooManyRequests:
                 print("Tweets: too many requests, stopping...")
                 return dict_list
@@ -184,7 +183,7 @@ class UserNetwork:
                 print(f"Processed {num_iter} user tweets batches")
                 time.sleep(TWIKIT_THRESHOLD)
 
-            if num_iter == self.TWIKIT_THRESHOLD:
+            elif num_iter == self.TWIKIT_THRESHOLD:
                 print("Tweets: Maxed out on requests")
                 return dict_list
 
