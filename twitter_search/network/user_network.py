@@ -69,23 +69,18 @@ class UserNetwork:
                 tweet_dict["created_at"] = tweet.created_at
                 tweet_dict["retweet_count"] = tweet.retweet_count
                 tweet_dict["favorite_count"] = tweet.favorite_count
-                # retweeters = await self.get_single_tweet_retweeters(tweet)
-                # If retweeters, we add that field to the dict
-                # if isinstance(retweeters, list):
-                #     retweeters = self.parse_users(retweeters)
-                #     tweet_dict["retweeters"] = retweeters
                 dict_list.append(tweet_dict)
 
         return dict_list
 
 
-    async def get_single_tweet_retweeters(self, tweet):
+    async def get_single_tweet_retweeters(self, tweet_id):
         """
         For a particular tweet, get all the possible retweeters
 
         Args:
         ---------
-            - tweet: twikit.Tweet object
+            - tweet_id (str): String with tweet id
         """
         retweeters_list = []
         more_retweeters_available = True
@@ -97,7 +92,7 @@ class UserNetwork:
             return []
 
         try:                    
-            retweeters = await tweet.get_retweeters()
+            retweeters = await self.client.get_retweeters(tweet_id)
             if retweeters:
                 retweeters = self.parse_users(retweeters)
                 retweeters_list.extend(retweeters)
@@ -121,20 +116,43 @@ class UserNetwork:
                     more_retweeters_available = False
             else:
                 print("Maxed out on retweeters threshold")
+                return retweeters_list
                
         return retweeters_list
+    
+    async def get_retweeters(self, tweets_list):
+        """
+        For every tweet in a list of dictionaries, attempt to
+        get all possible retweeters.
+
+        Args
+        --------
+            tweets_list(list): List of dictionaries
+        """
+        new_tweets_list = []
+
+        for tweet_dict in tweets_list:
+            retweeters = await self.get_single_tweet_retweeters(tweet_dict["tweet_id"])
+            # If retweeters, we add that field to the dict
+            if isinstance(retweeters, list):
+                retweeters = self.parse_users(retweeters)
+                tweet_dict["retweeters"] = retweeters
+            
+            new_tweets_list.append(tweet_dict)
+
+        return new_tweets_list
 
     async def get_user_tweets(self, user_id):
         """
-        For a given user, we get as many of their tweets as possible.
-        Then, for each tweet, we get the corresponding retweeters.
-
+        For a given user, we get as many of their tweets as possible
+        and parse them into a list
+        
         Args
         -------
             - client: Twikit client obj
 
         Returns:
-            - user_tweets:
+            - list of dictionaries
         """
         # We need to get tweets first
         dict_list = []
@@ -225,7 +243,7 @@ class UserNetwork:
         self.user_dict["user_id"] = user_id
 
         # First get tweets, without retweeters
-        user_tweets = self.get
+        user_tweets = self.get_user_tweets(user_id)
         
 
         user_retweeters = self.get_user_retweeters(user_id)
