@@ -2,8 +2,7 @@
 Script that handles the 'user_network.py' script to
 generate a network from a particular city
 """
-
-import os
+import pandas as pd
 from datetime import datetime
 from pathlib import Path
 
@@ -16,4 +15,37 @@ class TwikitDataHandler:
 
     def __init__(self, location):
         self.location = location.lower()
-        self.base_dir = Path(__file__).parent.parent / "data/networks"
+        
+        self.base_dir = Path(__file__).parent.parent / "data/"
+        # Users .csv with location matching
+        self.users_file_path = self.base_dir / f"analysis_outputs/location_matches.csv"
+        # Building location output path
+        self.location_file_path = self.base_dir / f"networks/{self.location}.json"
+
+        # Instantiate user network class
+        self.user_network = UserNetwork(self.location_file_path)
+
+    def get_city_users(self):
+        """
+        Method to get users whose location match the desired
+        location
+        """
+        self.user_df = pd.read_csv(self.users_file_path)
+        self.user_df = self.user_df.loc[self.user_df.loc[:, "search_location"] == self.location]
+        self.user_df.reset_index(drop=True, inplace=True)
+
+    def get_user_network(self, num_users):
+        """
+        Gets the user network data for a given number of
+        users.
+
+        Args:
+            - num_users: Number of users to get data from
+        """
+        user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
+        for user_id in user_ids[:, 1]:
+            print(f"Processing user {user_id}...")
+            self.user_network.run(user_id)
+
+
+
