@@ -1,11 +1,11 @@
 """
 Script to pull tweets and retweeters from a particular user,
 """
-import asyncio
+import os
 import time
 
 import twikit
-from config_utils.util import json_maker, load_json
+from config_utils.util import json_maker
 from config_utils.constants import (
     TWIKIT_COOKIES_DIR,
     TWIKIT_FOLLOWERS_THRESHOLD,
@@ -21,10 +21,10 @@ class UserNetwork:
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
     SLEEP_TIME = 10
 
-    def __init__(self, city):
+    def __init__(self, output_file_path):
         self.client = twikit.Client("en-US")
         self.client.load_cookies(self.TWIKIT_COOKIES_DIR)
-        self.city = city
+        self.output_file_path = output_file_path
 
         # Setting retweeters counter at the top level
         self.retweeters_counter = 0
@@ -202,6 +202,15 @@ class UserNetwork:
         
         return followers_list
 
+    def store_user_data(self):
+        """
+        Stores user data in the provided path
+
+        The util function checks for any existing dictionaries and
+        only adds the newer data
+        """
+        json_maker(self.output_file_path, self.user_dict)
+
     async def run(self, user_id):
         """
         Runs the pertinent functions by getting a user's retweeters and
@@ -216,3 +225,4 @@ class UserNetwork:
         followers = self.get_followers(user_id)
         self.user_dict["followers"] = followers
 
+        self.store_user_data()
