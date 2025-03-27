@@ -5,13 +5,13 @@ import os
 import time
 
 import twikit
-from config_utils.util import json_maker
 from config_utils.constants import (
     TWIKIT_COOKIES_DIR,
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_THRESHOLD,
 )
+from config_utils.util import json_maker
 
 
 class UserNetwork:
@@ -50,7 +50,7 @@ class UserNetwork:
                 users_list.append(user_dict)
 
         return users_list
-    
+
     @staticmethod
     async def parse_tweets(tweets):
         """
@@ -73,7 +73,6 @@ class UserNetwork:
 
         return dict_list
 
-
     async def get_single_tweet_retweeters(self, tweet_id):
         """
         For a particular tweet, get all the possible retweeters
@@ -85,13 +84,13 @@ class UserNetwork:
         retweeters_list = []
         more_retweeters_available = True
         self.retweeters_counter += 1
-        
+
         # Maxed out retweeters threshold
         if self.retweeters_counter == self.TWIKIT_RETWEETERS_THRESHOLD:
             print("Maxed out on retweeters threshold")
             return []
 
-        try:                    
+        try:
             retweeters = await self.client.get_retweeters(tweet_id)
             if retweeters:
                 retweeters = self.parse_users(retweeters)
@@ -99,7 +98,7 @@ class UserNetwork:
         except twikit.errors.TooManyRequests:
             print("Retweeters: Too Many Requests")
             return None
-        
+
         while more_retweeters_available:
             self.retweeters_counter += 1
             if self.retweeters_counter < self.TWIKIT_RETWEETERS_THRESHOLD:
@@ -117,9 +116,9 @@ class UserNetwork:
             else:
                 print("Maxed out on retweeters threshold")
                 return retweeters_list
-               
+
         return retweeters_list
-    
+
     async def add_retweeters(self, tweets_list):
         """
         For every tweet in a list of dictionaries, attempt to
@@ -132,12 +131,14 @@ class UserNetwork:
         new_tweets_list = []
 
         for tweet_dict in tweets_list:
-            retweeters = await self.get_single_tweet_retweeters(tweet_dict["tweet_id"])
+            retweeters = await self.get_single_tweet_retweeters(
+                tweet_dict["tweet_id"]
+            )
             # If retweeters, we add that field to the dict
             if isinstance(retweeters, list):
                 retweeters = self.parse_users(retweeters)
                 tweet_dict["retweeters"] = retweeters
-            
+
             new_tweets_list.append(tweet_dict)
 
         return new_tweets_list
@@ -146,7 +147,7 @@ class UserNetwork:
         """
         For a given user, we get as many of their tweets as possible
         and parse them into a list
-        
+
         Args
         -------
             - client: Twikit client obj
@@ -178,7 +179,7 @@ class UserNetwork:
             # Just return what you already have
             except twikit.errors.TooManyRequests:
                 print("Tweets: too many requests, stopping...")
-                return dict_list               
+                return dict_list
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
                 time.sleep(TWIKIT_THRESHOLD)
@@ -214,15 +215,15 @@ class UserNetwork:
                     more_followers_available = False
             # Stop here and just return what you got
             except twikit.errors.TooManyRequests:
-                    print("Followers: too many requests, stopping...")
-                    return followers_list
+                print("Followers: too many requests, stopping...")
+                return followers_list
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} follower batches, sleeping...")
                 time.sleep(self.SLEEP_TIME)
             if num_iter == self.TWIKIT_FOLLOWERS_THRESHOLD:
                 print("Followers: maxed out number of requests")
                 return followers_list
-        
+
         return followers_list
 
     def store_user_data(self):
@@ -246,7 +247,7 @@ class UserNetwork:
         user_tweets = self.get_user_tweets(user_id)
         user_tweets = self.add_retweeters(user_tweets)
         self.user_dict["tweets"] = user_tweets
-        
+
         followers = self.get_followers(user_id)
         self.user_dict["followers"] = followers
 

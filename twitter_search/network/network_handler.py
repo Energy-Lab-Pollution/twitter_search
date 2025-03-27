@@ -2,11 +2,11 @@
 Script that handles the 'user_network.py' script to
 generate a network from a particular city
 """
-import pandas as pd
-from datetime import datetime
 from pathlib import Path
 
+import pandas as pd
 from network.user_network import UserNetwork
+
 
 class TwikitDataHandler:
     """
@@ -15,12 +15,16 @@ class TwikitDataHandler:
 
     def __init__(self, location):
         self.location = location.lower()
-        
+
         self.base_dir = Path(__file__).parent.parent / "data/"
         # Users .csv with location matching
-        self.users_file_path = self.base_dir / f"analysis_outputs/location_matches.csv"
+        self.users_file_path = (
+            self.base_dir / "analysis_outputs/location_matches.csv"
+        )
         # Building location output path
-        self.location_file_path = self.base_dir / f"networks/{self.location}.json"
+        self.location_file_path = (
+            self.base_dir / f"networks/{self.location}.json"
+        )
 
         # Instantiate user network class
         self.user_network = UserNetwork(self.location_file_path)
@@ -31,7 +35,9 @@ class TwikitDataHandler:
         location
         """
         self.user_df = pd.read_csv(self.users_file_path)
-        self.user_df = self.user_df.loc[self.user_df.loc[:, "search_location"] == self.location]
+        self.user_df = self.user_df.loc[
+            self.user_df.loc[:, "search_location"] == self.location
+        ]
         self.user_df.reset_index(drop=True, inplace=True)
 
     def get_user_network(self, num_users):
@@ -46,6 +52,3 @@ class TwikitDataHandler:
         for user_id in user_ids[:, 1]:
             print(f"Processing user {user_id}...")
             self.user_network.run(user_id)
-
-
-
