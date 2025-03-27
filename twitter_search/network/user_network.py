@@ -161,7 +161,8 @@ class UserNetwork:
                 print(f"Processed {num_iter} user tweets batches")
 
             if num_iter == self.TWIKIT_THRESHOLD:
-                break
+                print("Followers: Maxed out on requests")
+                return dict_list
 
             num_iter += 1
 
@@ -197,6 +198,9 @@ class UserNetwork:
                 time.sleep(self.SLEEP_TIME)
             if num_iter == self.TWIKIT_FOLLOWERS_THRESHOLD:
                 print("Followers: maxed out number of requests")
+                return followers_list
+        
+        return followers_list
 
     async def run(self, user_id):
         """
