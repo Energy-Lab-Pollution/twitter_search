@@ -207,12 +207,12 @@ class UserNetwork:
         Runs the pertinent functions by getting a user's retweeters and
         followers
         """
-        user_dict = {}
-        user_dict["user_id"] = user_id
+        self.user_dict = {}
+        self.user_dict["user_id"] = user_id
 
         user_retweeters = self.get_user_retweeters(user_id)
-        user_dict["tweets"] = user_retweeters
+        self.user_dict["tweets"] = user_retweeters
         
         followers = self.get_followers(user_id)
-        user_dict["followers"] = followers
+        self.user_dict["followers"] = followers
 
