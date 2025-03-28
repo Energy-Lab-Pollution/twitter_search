@@ -42,7 +42,7 @@ class NetworkHandler:
         ]
         self.user_df.reset_index(drop=True, inplace=True)
 
-    def run(self):
+    async def run(self):
         """
         Gets the user network data for a given number of
         users.
@@ -51,6 +51,6 @@ class NetworkHandler:
             - num_users: Number of users to get data from
         """
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
-        for user_id in user_ids[:, self.num_users]:
+        for user_id in user_ids[:self.num_users]:
             print(f"Processing user {user_id}...")
-            self.user_network.run(user_id)
+            await self.user_network.run(user_id)
