@@ -52,7 +52,7 @@ class UserNetwork:
         return users_list
 
     @staticmethod
-    async def parse_tweets(tweets):
+    def parse_tweets(tweets):
         """
         Given a set of tweets, we get a list of dictionaries
         with the twees' and retweeters' information
@@ -181,9 +181,9 @@ class UserNetwork:
                 return dict_list
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
-                time.sleep(TWIKIT_THRESHOLD)
+                time.sleep(self.SLEEP_TIME)
 
-            elif num_iter == self.TWIKIT_THRESHOLD:
+            if num_iter == self.TWIKIT_THRESHOLD:
                 print("Tweets: Maxed out on requests")
                 return dict_list
 
@@ -243,11 +243,11 @@ class UserNetwork:
         self.user_dict["user_id"] = user_id
 
         # First get tweets, without retweeters
-        user_tweets = self.get_user_tweets(user_id)
-        user_tweets = self.add_retweeters(user_tweets)
+        user_tweets = await self.get_user_tweets(user_id)
+        user_tweets = await self.add_retweeters(user_tweets)
         self.user_dict["tweets"] = user_tweets
 
-        followers = self.get_followers(user_id)
+        followers = await self.get_followers(user_id)
         self.user_dict["followers"] = followers
 
         self.store_user_data()
