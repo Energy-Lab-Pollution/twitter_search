@@ -42,7 +42,7 @@ class NetworkHandler:
         ]
         self.user_df.reset_index(drop=True, inplace=True)
 
-    def get_user_network(self):
+    def run(self):
         """
         Gets the user network data for a given number of
         users.
