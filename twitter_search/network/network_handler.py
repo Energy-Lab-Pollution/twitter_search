@@ -8,13 +8,14 @@ import pandas as pd
 from network.user_network import UserNetwork
 
 
-class TwikitDataHandler:
+class NetworkHandler:
     """
     Class that handles the Twikit search and data collection process
     """
 
-    def __init__(self, location):
+    def __init__(self, location, num_users):
         self.location = location.lower()
+        self.num_users = num_users
 
         self.base_dir = Path(__file__).parent.parent / "data/"
         # Users .csv with location matching
@@ -28,6 +29,7 @@ class TwikitDataHandler:
 
         # Instantiate user network class
         self.user_network = UserNetwork(self.location_file_path)
+        self.get_city_users()
 
     def get_city_users(self):
         """
@@ -40,7 +42,7 @@ class TwikitDataHandler:
         ]
         self.user_df.reset_index(drop=True, inplace=True)
 
-    def get_user_network(self, num_users):
+    def get_user_network(self):
         """
         Gets the user network data for a given number of
         users.
@@ -49,6 +51,6 @@ class TwikitDataHandler:
             - num_users: Number of users to get data from
         """
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
-        for user_id in user_ids[:, 1]:
+        for user_id in user_ids[:, self.num_users]:
             print(f"Processing user {user_id}...")
             self.user_network.run(user_id)

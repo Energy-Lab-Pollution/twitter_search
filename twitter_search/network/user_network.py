@@ -251,3 +251,4 @@ class UserNetwork:
         self.user_dict["followers"] = followers
 
         self.store_user_data()
+
