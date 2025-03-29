@@ -6,8 +6,8 @@ import time
 from pathlib import Path
 
 import pandas as pd
-from network.user_network import UserNetwork
 from config_utils.constants import FIFTEEN_MINUTES
+from network.user_network import UserNetwork
 
 
 class NetworkHandler:
@@ -53,7 +53,7 @@ class NetworkHandler:
             - num_users: Number of users to get data from
         """
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
-        for user_id in user_ids[:self.num_users]:
+        for user_id in user_ids[: self.num_users]:
             print(f"Processing user {user_id}...")
             await self.user_network.run(user_id)
             time.sleep(FIFTEEN_MINUTES)

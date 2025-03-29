@@ -1,7 +1,6 @@
 """
 Script to pull tweets and retweeters from a particular user,
 """
-import os
 import time
 
 import twikit
@@ -248,4 +247,3 @@ class UserNetwork:
         self.user_dict["followers"] = followers
 
         self.store_user_data()
-
