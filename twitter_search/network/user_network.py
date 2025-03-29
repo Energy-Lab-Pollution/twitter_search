@@ -196,16 +196,16 @@ class UserNetwork:
         more_followers_available = True
         num_iter = 0
 
-        followers = self.parse_users(followers)
-        followers_list.extend(followers)
+        parsed_followers = self.parse_users(followers)
+        followers_list.extend(parsed_followers)
 
         while more_followers_available:
             num_iter += 1
             try:
                 more_followers = await followers.next()
                 if more_followers:
-                    more_followers = self.parse_users(more_followers)
-                    followers_list.extend(more_followers)
+                    more_parsed_followers = self.parse_users(more_followers)
+                    followers_list.extend(more_parsed_followers)
                 else:
                     more_followers_available = False
             # Stop here and just return what you got
