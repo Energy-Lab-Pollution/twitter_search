@@ -19,7 +19,7 @@ class UserNetwork:
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_RETWEETERS_THRESHOLD = TWIKIT_RETWEETERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
-    SLEEP_TIME = 20
+    SLEEP_TIME = 5
 
     def __init__(self, output_file_path):
         self.client = twikit.Client("en-US")
@@ -93,8 +93,8 @@ class UserNetwork:
         try:
             retweeters = await self.client.get_retweeters(tweet_id)
             if retweeters:
-                retweeters = self.parse_users(retweeters)
-                retweeters_list.extend(retweeters)
+                parsed_retweeters = self.parse_users(retweeters)
+                retweeters_list.extend(parsed_retweeters)
         except twikit.errors.TooManyRequests:
             print("Retweeters: Too Many Requests")
             return None
@@ -109,8 +109,8 @@ class UserNetwork:
                     print("Retweeters: Too Many Requests")
                     return retweeters_list
                 if more_retweeters:
-                    more_retweeters = self.parse_users(more_retweeters)
-                    retweeters_list.extend(retweeters_list)
+                    more_parsed_retweeters = self.parse_users(more_retweeters)
+                    retweeters_list.extend(more_parsed_retweeters)
                 else:
                     more_retweeters_available = False
             else:
