@@ -136,7 +136,6 @@ class UserNetwork:
             )
             # If retweeters, we add that field to the dict
             if isinstance(retweeters, list):
-                retweeters = self.parse_users(retweeters)
                 tweet_dict["retweeters"] = retweeters
 
             new_tweets_list.append(tweet_dict)
