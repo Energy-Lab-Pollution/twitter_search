@@ -2,10 +2,12 @@
 Script that handles the 'user_network.py' script to
 generate a network from a particular city
 """
+import time
 from pathlib import Path
 
 import pandas as pd
 from network.user_network import UserNetwork
+from config_utils.constants import FIFTEEN_MINUTES
 
 
 class NetworkHandler:
@@ -54,3 +56,4 @@ class NetworkHandler:
         for user_id in user_ids[:self.num_users]:
             print(f"Processing user {user_id}...")
             await self.user_network.run(user_id)
+            time.sleep(FIFTEEN_MINUTES)
