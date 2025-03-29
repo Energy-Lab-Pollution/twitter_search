@@ -19,7 +19,7 @@ class UserNetwork:
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_RETWEETERS_THRESHOLD = TWIKIT_RETWEETERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
-    SLEEP_TIME = 10
+    SLEEP_TIME = 20
 
     def __init__(self, output_file_path):
         self.client = twikit.Client("en-US")
@@ -163,7 +163,7 @@ class UserNetwork:
         # Parse first set of tweets
         user_tweets = await self.client.get_user_tweets(user_id, "Tweets")
         tweets_list = self.parse_tweets(user_tweets)
-        dict_list.extend(user_tweets)
+        dict_list.extend(tweets_list)
 
         while more_tweets_available:
             num_iter += 1
@@ -183,11 +183,9 @@ class UserNetwork:
                 print(f"Processed {num_iter} user tweets batches")
                 time.sleep(self.SLEEP_TIME)
 
-            if num_iter == self.TWIKIT_THRESHOLD:
+            if num_iter >= self.TWIKIT_THRESHOLD:
                 print("Tweets: Maxed out on requests")
                 return dict_list
-
-            num_iter += 1
 
         return dict_list
 
