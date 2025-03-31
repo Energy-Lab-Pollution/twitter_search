@@ -31,8 +31,7 @@ class NetworkHandler:
             self.base_dir / f"networks/{self.location}.json"
         )
 
-        # Instantiate user network class
-        self.user_network = UserNetwork(self.location_file_path)
+        # Get city users
         self.get_city_users()
 
     def get_city_users(self):
@@ -56,6 +55,7 @@ class NetworkHandler:
         """
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
         for user_id in user_ids[: self.num_users]:
+            user_network = UserNetwork(self.location_file_path)
             print(f"Processing user {user_id}...")
-            await self.user_network.run(user_id)
+            await user_network.run(user_id)
             time.sleep(self.FIFTEEN_MINUTES)

@@ -363,6 +363,38 @@ def json_maker(file_path, data_to_append):
         json.dump(existing_data, f, indent=1)
 
 
+def network_json_maker(file_path, data_to_append):
+    """
+    Create a JSON file with the data provided, the
+    JSON is saved in the file path provided.
+
+    Parameters
+    ----------
+    file_path : str
+        The path where the JSON file will be saved.
+
+    data_to_append : dict
+        The data to be saved in the JSON file.
+    """
+    try:
+        with open(file_path, "r") as f:
+            existing_data = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        existing_data = []
+
+    # Extend the new data to the existing list
+    existing_data.extend(data_to_append)
+
+    # Check if the file path exists
+    if not os.path.exists(os.path.dirname(file_path)):
+        os.makedirs(os.path.dirname(file_path))
+        print("Created directory:", os.path.dirname(file_path))
+
+    # Write the updated list of dictionaries back to the file
+    with open(file_path, "w") as f:
+        json.dump(existing_data, f, indent=1)
+
+
 def excel_maker(dict_list, file_path):
     """
     Creates an Excel file with the data provided,
