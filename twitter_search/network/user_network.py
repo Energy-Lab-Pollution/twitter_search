@@ -200,7 +200,7 @@ class UserNetwork:
         Gets a given user's followers
         """
         followers_list = []
-        followers = await self.client.get_followers(user_id)
+        followers = await self.client.get_user_followers(user_id)
         more_followers_available = True
         num_iter = 0
 
