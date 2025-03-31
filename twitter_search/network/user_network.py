@@ -289,5 +289,9 @@ class UserNetwork:
         followers = await self.get_followers(user_id)
         user_dict["followers"] = followers
 
-        network_json_maker(self.output_file_path, user_dict)
+        # Will put the extracted data into a list
+        # Easier to extend future data
+        user_dict_list = [user_dict]
+
+        network_json_maker(self.output_file_path, user_dict_list)
         print(f"Stored {user_id} data")
