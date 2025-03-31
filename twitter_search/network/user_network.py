@@ -19,7 +19,7 @@ class UserNetwork:
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_RETWEETERS_THRESHOLD = TWIKIT_RETWEETERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
-    SLEEP_TIME = 2.5
+    SLEEP_TIME = 2
 
     def __init__(self, output_file_path):
         self.client = twikit.Client("en-US")
