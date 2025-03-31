@@ -43,6 +43,7 @@ class NetworkHandler:
         self.user_df = self.user_df.loc[
             self.user_df.loc[:, "search_location"] == self.location
         ]
+        self.user_df.loc[self.user_df.loc[:, "location_match"], :]
         self.user_df.reset_index(drop=True, inplace=True)
 
     async def run(self):
@@ -55,7 +56,10 @@ class NetworkHandler:
         """
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
         for user_id in user_ids[: self.num_users]:
-            user_network = UserNetwork(self.location_file_path)
-            print(f"Processing user {user_id}...")
-            await user_network.run(user_id)
-            time.sleep(self.FIFTEEN_MINUTES)
+            try:
+                user_network = UserNetwork(self.location_file_path)
+                print(f"Processing user {user_id}...")
+                await user_network.run(user_id)
+                time.sleep(self.FIFTEEN_MINUTES)
+            except Exception as error:
+                print(f"Error getting user: {error}")

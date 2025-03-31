@@ -382,8 +382,9 @@ def network_json_maker(file_path, data_to_append):
     except (json.JSONDecodeError, FileNotFoundError):
         existing_data = []
 
-    # Extend the new data to the existing list
-    existing_data.extend(data_to_append)
+    if not existing_data:
+        # Extend the new data to the existing list
+        existing_data = data_to_append
 
     # Check if the file path exists
     if not os.path.exists(os.path.dirname(file_path)):
