@@ -83,10 +83,13 @@ class UserNetwork:
         retweeters_list = []
         more_retweeters_available = True
         self.retweeters_counter += 1
+        # Variable to determine if no more requests on the retweeters
+        self.retweeters_maxed_out = False
 
         # Maxed out retweeters threshold
         if self.retweeters_counter == self.TWIKIT_RETWEETERS_THRESHOLD:
             print("Maxed out on retweeters threshold")
+            self.retweeters_maxed_out = True
             return []
 
         try:
@@ -96,6 +99,7 @@ class UserNetwork:
                 retweeters_list.extend(parsed_retweeters)
         except twikit.errors.TooManyRequests:
             print("Retweeters: Too Many Requests")
+            self.retweeters_maxed_out = True
             return None
 
         while more_retweeters_available:
@@ -106,6 +110,7 @@ class UserNetwork:
                 # Stop here if failure and return what you had so far
                 except twikit.errors.TooManyRequests:
                     print("Retweeters: Too Many Requests")
+                    self.retweeters_maxed_out = True
                     return retweeters_list
                 if more_retweeters:
                     more_parsed_retweeters = self.parse_users(more_retweeters)
@@ -114,6 +119,7 @@ class UserNetwork:
                     more_retweeters_available = False
             else:
                 print("Maxed out on retweeters threshold")
+                self.retweeters_maxed_out = True
                 return retweeters_list
 
         return retweeters_list
@@ -130,12 +136,13 @@ class UserNetwork:
         new_tweets_list = []
 
         for tweet_dict in tweets_list:
-            retweeters = await self.get_single_tweet_retweeters(
-                tweet_dict["tweet_id"]
-            )
-            # If retweeters, we add that field to the dict
-            if isinstance(retweeters, list):
-                tweet_dict["retweeters"] = retweeters
+            if not self.retweeters_maxed_out:
+                retweeters = await self.get_single_tweet_retweeters(
+                    tweet_dict["tweet_id"]
+                )
+                # If retweeters, we add that field to the dict
+                if isinstance(retweeters, list):
+                    tweet_dict["retweeters"] = retweeters
 
             new_tweets_list.append(tweet_dict)
 
@@ -240,9 +247,11 @@ class UserNetwork:
 
         # First get tweets, without retweeters
         user_tweets = await self.get_user_tweets(user_id)
+        time.sleep(300)
         user_tweets = await self.add_retweeters(user_tweets)
         self.user_dict["tweets"] = user_tweets
 
+        time.sleep(300)
         followers = await self.get_followers(user_id)
         self.user_dict["followers"] = followers
 

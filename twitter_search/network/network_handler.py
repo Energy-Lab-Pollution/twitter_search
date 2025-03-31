@@ -14,6 +14,7 @@ class NetworkHandler:
     """
     Class that handles the Twikit search and data collection process
     """
+    FIFTEEN_MINUTES = FIFTEEN_MINUTES
 
     def __init__(self, location, num_users):
         self.location = location.lower()
@@ -56,4 +57,4 @@ class NetworkHandler:
         for user_id in user_ids[: self.num_users]:
             print(f"Processing user {user_id}...")
             await self.user_network.run(user_id)
-            time.sleep(FIFTEEN_MINUTES)
+            time.sleep(self.FIFTEEN_MINUTES)
