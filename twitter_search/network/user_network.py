@@ -83,8 +83,6 @@ class UserNetwork:
         retweeters_list = []
         more_retweeters_available = True
         self.retweeters_counter += 1
-        # Variable to determine if no more requests on the retweeters
-        self.retweeters_maxed_out = False
 
         # Maxed out retweeters threshold
         if self.retweeters_counter == self.TWIKIT_RETWEETERS_THRESHOLD:
@@ -134,6 +132,9 @@ class UserNetwork:
             tweets_list(list): List of dictionaries
         """
         new_tweets_list = []
+        # Variable to determine if no more requests on the retweeters
+        self.retweeters_maxed_out = False
+
 
         for tweet_dict in tweets_list:
             if not self.retweeters_maxed_out:
@@ -247,11 +248,11 @@ class UserNetwork:
 
         # First get tweets, without retweeters
         user_tweets = await self.get_user_tweets(user_id)
-        time.sleep(300)
+        time.sleep(60)
         user_tweets = await self.add_retweeters(user_tweets)
         self.user_dict["tweets"] = user_tweets
 
-        time.sleep(300)
+        time.sleep(60)
         followers = await self.get_followers(user_id)
         self.user_dict["followers"] = followers
 
