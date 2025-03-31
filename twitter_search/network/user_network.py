@@ -5,6 +5,7 @@ import time
 
 import twikit
 from config_utils.constants import (
+    ONE_MINUTE,
     TWIKIT_COOKIES_DIR,
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
@@ -135,7 +136,6 @@ class UserNetwork:
         # Variable to determine if no more requests on the retweeters
         self.retweeters_maxed_out = False
 
-
         for tweet_dict in tweets_list:
             if not self.retweeters_maxed_out:
                 retweeters = await self.get_single_tweet_retweeters(
@@ -248,11 +248,11 @@ class UserNetwork:
 
         # First get tweets, without retweeters
         user_tweets = await self.get_user_tweets(user_id)
-        time.sleep(60)
+        time.sleep(ONE_MINUTE)
         user_tweets = await self.add_retweeters(user_tweets)
         self.user_dict["tweets"] = user_tweets
 
-        time.sleep(60)
+        time.sleep(ONE_MINUTE)
         followers = await self.get_followers(user_id)
         self.user_dict["followers"] = followers
 

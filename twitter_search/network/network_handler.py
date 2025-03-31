@@ -14,6 +14,7 @@ class NetworkHandler:
     """
     Class that handles the Twikit search and data collection process
     """
+
     FIFTEEN_MINUTES = FIFTEEN_MINUTES
 
     def __init__(self, location, num_users):
