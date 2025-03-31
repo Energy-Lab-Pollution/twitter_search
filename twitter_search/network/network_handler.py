@@ -62,7 +62,7 @@ class NetworkHandler:
             existing_data = []
         if existing_data:
             for user_dict in existing_data:
-                user_id = user_dict['user_id']
+                user_id = user_dict["user_id"]
                 users_list.append(user_id)
         return users_list
 
