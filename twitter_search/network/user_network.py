@@ -111,6 +111,9 @@ class UserNetwork:
                     print("Retweeters: Too Many Requests")
                     self.retweeters_maxed_out = True
                     return retweeters_list
+                except twikit.error.BadRequest:
+                    print("Retweeters: Bad Request")
+                    return retweeters_list
                 if more_retweeters:
                     more_parsed_retweeters = self.parse_users(more_retweeters)
                     retweeters_list.extend(more_parsed_retweeters)
