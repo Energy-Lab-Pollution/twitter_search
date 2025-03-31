@@ -63,3 +63,4 @@ class NetworkHandler:
                 time.sleep(self.FIFTEEN_MINUTES)
             except Exception as error:
                 print(f"Error getting user: {error}")
+                continue
