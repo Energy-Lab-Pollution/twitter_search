@@ -394,21 +394,3 @@ def network_json_maker(file_path, data_to_append):
     # Write the updated list of dictionaries back to the file
     with open(file_path, "w") as f:
         json.dump(existing_data, f, indent=1)
-
-
-def excel_maker(dict_list, file_path):
-    """
-    Creates an Excel file with the data provided,
-    and it is saved on a given path.
-
-    Parameters
-    ----------
-    dict_list : list
-        List of dictionaries with the data to be saved.
-
-    file_path : str
-        The path where the Excel file will be saved.
-    """
-    df = pd.DataFrame(dict_list)
-    new_df = df.drop_duplicates()
-    new_df.to_excel(file_path, index=False)
