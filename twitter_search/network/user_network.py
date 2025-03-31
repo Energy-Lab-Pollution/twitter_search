@@ -11,7 +11,7 @@ from config_utils.constants import (
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_THRESHOLD,
 )
-from config_utils.util import json_maker
+from config_utils.util import network_json_maker
 
 
 class UserNetwork:
@@ -250,7 +250,7 @@ class UserNetwork:
         followers = await self.get_followers(user_id)
         user_dict["followers"] = followers
 
-        json_maker(self.output_file_path, user_dict)
+        network_json_maker(self.output_file_path, user_dict)
         print(f"Stored {user_id} data")
 
 
