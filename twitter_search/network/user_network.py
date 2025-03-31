@@ -19,7 +19,7 @@ class UserNetwork:
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_RETWEETERS_THRESHOLD = TWIKIT_RETWEETERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
-    SLEEP_TIME = 5
+    SLEEP_TIME = 2.5
 
     def __init__(self, output_file_path):
         self.client = twikit.Client("en-US")
@@ -247,13 +247,17 @@ class UserNetwork:
         self.user_dict["user_id"] = user_id
 
         # First get tweets, without retweeters
+        print("Getting user tweets")
         user_tweets = await self.get_user_tweets(user_id)
         time.sleep(ONE_MINUTE)
+        print("Getting user retweeters")
         user_tweets = await self.add_retweeters(user_tweets)
         self.user_dict["tweets"] = user_tweets
 
         time.sleep(ONE_MINUTE)
+        print("Getting user followers...")
         followers = await self.get_followers(user_id)
         self.user_dict["followers"] = followers
 
+        print(f"Storing {user_id} data")
         self.store_user_data()
