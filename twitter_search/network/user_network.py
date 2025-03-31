@@ -32,8 +32,15 @@ class UserNetwork:
     @staticmethod
     def parse_users(users):
         """
-        Parse retweeters (user objects) and
-        put them into a list of dictionaries
+        Parse retweeters (user objects) and put them 
+        into a list of dictionaries
+
+        Args:
+        ----------
+            - tweets (list): list of twikit.User objects
+        Returns:
+        ----------
+            - dict_list (list): list of dictionaries with users' info
         """
         users_list = []
 
@@ -58,7 +65,11 @@ class UserNetwork:
         with the twees' and retweeters' information
 
         Args:
-            - tweets: list of twikit.Tweet objects
+        ----------
+            - tweets (list): list of twikit.Tweet objects
+        Returns:
+        ----------
+            - dict_list (list): list of dictionaries with tweets info
         """
         dict_list = []
         if tweets:
@@ -80,6 +91,9 @@ class UserNetwork:
         Args:
         ---------
             - tweet_id (str): String with tweet id
+        Returns:
+        ---------
+            - retweeters_list (list): List with retweeters info
         """
         retweeters_list = []
         more_retweeters_available = True
@@ -133,9 +147,13 @@ class UserNetwork:
         For every tweet in a list of dictionaries, attempt to
         get all possible retweeters.
 
-        Args
+        Args:
         --------
-            tweets_list(list): List of dictionaries
+            tweets_list (list): List of dictionaries
+        
+        Returns:
+        --------
+            new_tweets_list (list): List of dictionaries
         """
         new_tweets_list = []
         counter = 1
@@ -169,7 +187,8 @@ class UserNetwork:
             - client: Twikit client obj
 
         Returns:
-            - list of dictionaries
+        ---------
+            - dict_list (list): list of dictionaries
         """
         # We need to get tweets first
         dict_list = []
@@ -208,6 +227,13 @@ class UserNetwork:
     async def get_followers(self, user_id):
         """
         Gets a given user's followers
+
+        Args:
+        ---------
+            - user_id (str): User_id of user to look for
+        Returns:
+        ---------
+            - tweet_list(list): List of dicts with followers info
         """
         followers_list = []
         followers = await self.client.get_user_followers(user_id)
@@ -243,6 +269,9 @@ class UserNetwork:
         """
         Runs the pertinent functions by getting a user's retweeters and
         followers
+
+        Args:
+            - user_id (str): User id to get info from
         """
         user_dict = {}
         user_dict["user_id"] = user_id
