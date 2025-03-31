@@ -2,6 +2,7 @@
 Script that handles the 'user_network.py' script to
 generate a network from a particular city
 """
+import json
 import time
 from pathlib import Path
 
@@ -48,6 +49,23 @@ class NetworkHandler:
         ]
         self.user_df.reset_index(drop=True, inplace=True)
 
+    def get_already_processed_users(self):
+        """
+        Reads the location JSON file and gets the
+        set of users that have already been processed
+        """
+        users_list = []
+        try:
+            with open(self.location_file_path, "r") as f:
+                existing_data = json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            existing_data = []
+        if existing_data:
+            for user_dict in existing_data:
+                user_id = user_dict['user_id']
+                users_list.append(user_id)
+        return users_list
+
     async def run(self):
         """
         Gets the user network data for a given number of
@@ -56,13 +74,18 @@ class NetworkHandler:
         Args:
             - num_users: Number of users to get data from
         """
+        already_processed_users = self.get_already_processed_users()
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
+
         for user_id in user_ids[: self.num_users]:
-            try:
-                user_network = UserNetwork(self.location_file_path)
-                print(f"Processing user {user_id}...")
-                await user_network.run(user_id)
-                time.sleep(self.FIFTEEN_MINUTES)
-            except Exception as error:
-                print(f"Error getting user: {error}")
+            if user_id not in already_processed_users:
+                try:
+                    user_network = UserNetwork(self.location_file_path)
+                    print(f"Processing user {user_id}...")
+                    await user_network.run(user_id)
+                    time.sleep(self.FIFTEEN_MINUTES)
+                except Exception as error:
+                    print(f"Error getting user: {error}")
+                    continue
+            else:
                 continue
