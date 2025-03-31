@@ -109,6 +109,7 @@ class UserNetwork:
                 # Stop here if failure and return what you had so far
                 except twikit.errors.TooManyRequests:
                     print("Retweeters: Too Many Requests")
+                    print(f"Made {self.retweeters_counter} retweets requests")
                     self.retweeters_maxed_out = True
                     return retweeters_list
                 except twikit.error.BadRequest:
@@ -121,6 +122,7 @@ class UserNetwork:
                     more_retweeters_available = False
             else:
                 print("Maxed out on retweeters threshold")
+                print(f"Made {self.retweeters_counter} retweets requests")
                 self.retweeters_maxed_out = True
                 return retweeters_list
 
@@ -136,18 +138,23 @@ class UserNetwork:
             tweets_list(list): List of dictionaries
         """
         new_tweets_list = []
+        counter = 1
         # Variable to determine if no more requests on the retweeters
         self.retweeters_maxed_out = False
 
         for tweet_dict in tweets_list:
-            if not self.retweeters_maxed_out:
-                retweeters = await self.get_single_tweet_retweeters(
-                    tweet_dict["tweet_id"]
-                )
-                # If retweeters, we add that field to the dict
-                if isinstance(retweeters, list):
-                    tweet_dict["retweeters"] = retweeters
-
+            # Only get retweeters if retweet_count > 0
+            if tweet_dict["retweet_count"] > 0:
+                if not self.retweeters_maxed_out:
+                    retweeters = await self.get_single_tweet_retweeters(
+                        tweet_dict["tweet_id"]
+                    )
+                    # If retweeters, we add that field to the dict
+                    if isinstance(retweeters, list):
+                        tweet_dict["retweeters"] = retweeters
+            if counter % 200 == 0:
+                print(f"Processed {counter} tweets")
+            counter += 1
             new_tweets_list.append(tweet_dict)
 
         return new_tweets_list
