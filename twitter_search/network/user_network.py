@@ -32,7 +32,7 @@ class UserNetwork:
     @staticmethod
     def parse_users(users):
         """
-        Parse retweeters (user objects) and put them 
+        Parse retweeters (user objects) and put them
         into a list of dictionaries
 
         Args:
@@ -150,7 +150,7 @@ class UserNetwork:
         Args:
         --------
             tweets_list (list): List of dictionaries
-        
+
         Returns:
         --------
             new_tweets_list (list): List of dictionaries
@@ -291,5 +291,3 @@ class UserNetwork:
 
         network_json_maker(self.output_file_path, user_dict)
         print(f"Stored {user_id} data")
-
-

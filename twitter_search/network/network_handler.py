@@ -43,7 +43,9 @@ class NetworkHandler:
         self.user_df = self.user_df.loc[
             self.user_df.loc[:, "search_location"] == self.location
         ]
-        self.user_df = self.user_df.loc[self.user_df.loc[:, "location_match"], :]
+        self.user_df = self.user_df.loc[
+            self.user_df.loc[:, "location_match"], :
+        ]
         self.user_df.reset_index(drop=True, inplace=True)
 
     async def run(self):
