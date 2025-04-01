@@ -81,7 +81,9 @@ def main():
                     TWIKIT_TWEETS_THRESHOLD, skip_media
                 )
             else:
-                twikit_data_handler.run_all_account_types(TWIKIT_TWEETS_THRESHOLD)
+                twikit_data_handler.run_all_account_types(
+                    TWIKIT_TWEETS_THRESHOLD
+                )
             csv_converter = CSVConverter(args.location, twikit=True)
             csv_converter.run()
     else:
