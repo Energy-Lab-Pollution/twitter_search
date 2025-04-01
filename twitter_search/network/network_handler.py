@@ -65,6 +65,52 @@ class NetworkHandler:
                 user_id = user_dict["user_id"]
                 users_list.append(user_id)
         return users_list
+    
+    def create_edges(self):
+        """
+        Gets the existing JSON file and creates a 
+        list of dicts of the following form:
+        {
+            "edges": [
+                {
+                    "source": "user_id_1",
+                    "target": "user_id_2",
+                    "tweet_id": "tweet_id_1",
+                    "target_username": "username2",
+                    "target_followers": 200
+                },
+                ...
+            ]
+        }
+        """
+        retweeter_edges = []
+        try:
+            with open(self.location_file_path, "r") as f:
+                existing_data = json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            existing_data = []
+
+        if not existing_data:
+            return
+        
+        for user_dict in existing_data:
+            user_id = user_dict["user_id"]
+            tweets = user_dict["tweets"]
+            for tweet in tweets:
+                if "retweeters" in tweet and tweet["retweeters"]:
+                    for retweeter in tweet["retweeters"]:
+                        retweeter_dict = {}
+                        retweeter_dict["source"] = user_id
+                        retweeter_dict["target"] = retweeter["user_id"]
+                        retweeter_dict["tweet_id"] = tweet["tweet_id"]
+
+
+
+
+
+        
+
+                
 
     async def run(self):
         """
