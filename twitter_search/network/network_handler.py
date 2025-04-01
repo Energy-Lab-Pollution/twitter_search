@@ -66,10 +66,10 @@ class NetworkHandler:
                 users_list.append(user_id)
         return users_list
     
-    def create_edges(self):
+    def create_edges(self, edge_type):
         """
         Gets the existing JSON file and creates a 
-        list of dicts of the following form:
+        list of dicts of the following form for retweeters:
         {
             "edges": [
                 {
@@ -84,6 +84,7 @@ class NetworkHandler:
         }
         """
         retweeter_edges = []
+        follower_edges = []
         try:
             with open(self.location_file_path, "r") as f:
                 existing_data = json.load(f)
@@ -96,6 +97,7 @@ class NetworkHandler:
         for user_dict in existing_data:
             user_id = user_dict["user_id"]
             tweets = user_dict["tweets"]
+            print("Processing retweeters")
             for tweet in tweets:
                 if "retweeters" in tweet and tweet["retweeters"]:
                     for retweeter in tweet["retweeters"]:
@@ -103,14 +105,28 @@ class NetworkHandler:
                         retweeter_dict["source"] = user_id
                         retweeter_dict["target"] = retweeter["user_id"]
                         retweeter_dict["tweet_id"] = tweet["tweet_id"]
+                        retweeter_dict["target_username"] = tweet["username"]
+                        # TODO: Filter Kolkata and add other fields
+                        # retweeter_dict["source_username"] = user_dict["username"]
+                        # retweeter_dict["source_followers"] = user_dict["followers_count"]
 
+                        retweeter_edges.extend(retweeter_dict)
 
+            print("Processing followers")
+            followers = user_dict["followers"]
+            for follower in followers:
+                follower_dict = {}
+                follower_dict["source"] =  user_id
+                follower_dict["target"] = follower["user_id"]
+                follower_dict["target_username"] = follower["username"]
+                follower_dict["target_followers"] = follower["followers_count"]
+                # TODO: Filter Kolkata and add other fields
+                # follower_dict["source_username"] = user_dict["username"]
+                # follower_dict["source_followers"] = user_dict["followers_count"]
 
+                follower_edges.extend(follower_dict)
 
-
-        
-
-                
+        return follower_edges, retweeter_edges                
 
     async def run(self):
         """
@@ -135,3 +151,4 @@ class NetworkHandler:
                     continue
             else:
                 continue
+
