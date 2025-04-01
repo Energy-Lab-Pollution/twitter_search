@@ -53,6 +53,10 @@ ALIAS_DICT = {
     "bengaluru": "bangalore",
     "ciudad de guatemala": "guatemala",
     "new delhi": "delhi",
+    "calcutta": "kolkata",
+    "kolkatta": "kolkata",
+    "calcuta": "kolkata",
+    "bombay": "mumbai",
 }
 
 CITIES_LANGS = {
