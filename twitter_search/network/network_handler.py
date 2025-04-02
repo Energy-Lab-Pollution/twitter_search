@@ -130,7 +130,7 @@ class NetworkHandler:
 
         edge_dict["target"] = target["user_id"]
         edge_dict["target_username"] = target["username"]
-        edge_dict["target_followers"] = target["followers"]
+        edge_dict["target_followers"] = target["followers_count"]
 
         return edge_dict
 
@@ -185,23 +185,26 @@ class NetworkHandler:
                                 continue
 
         else:
-            print("Processing followers")
-            followers = user_dict["followers"]
-            for follower in followers:
-                location_matches = self.check_location(
-                    follower["location"], self.location
-                )
-                if location_matches:
-                    follower_dict = self.parse_edge_dict(
-                        user_dict, follower, tweet=None
+            for user_dict in existing_data:
+                followers = user_dict["followers"]
+                for follower in followers:
+                    location_matches = self.check_location(
+                        follower["location"], self.location
                     )
-                    edges.extend(follower_dict)
-                else:
-                    continue
+                    if location_matches:
+                        print("location matches")
+                        follower_dict = self.parse_edge_dict(
+                            user_dict, follower, tweet=None
+                        )
+                        edges.append(follower_dict)
+                    else:
+                        continue
 
         # Save JSON
         graph_dict["edges"] = edges
-        network_json_maker(graph_filename, graph_dict)
+        with open(graph_filename, "w", encoding='utf-8') as file:
+            json.dump(graph_dict, file, ensure_ascii=False, indent=4)
+        print("Successfully stored edges json file")
 
     async def run(self):
         """
