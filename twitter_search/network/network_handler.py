@@ -28,9 +28,7 @@ class NetworkHandler:
 
         self.base_dir = Path(__file__).parent.parent / "data/"
         # Users .csv with location matching
-        self.users_file_path = (
-            self.base_dir / "analysis_outputs/location_matches.csv"
-        )
+        self.users_file_path = self.base_dir / "analysis_outputs/location_matches.csv"
 
         # Check if network path
         if not os.path.exists(self.base_dir / f"networks/{self.location}"):
@@ -55,9 +53,7 @@ class NetworkHandler:
         self.user_df = self.user_df.loc[
             self.user_df.loc[:, "search_location"] == self.location
         ]
-        self.user_df = self.user_df.loc[
-            self.user_df.loc[:, "location_match"], :
-        ]
+        self.user_df = self.user_df.loc[self.user_df.loc[:, "location_match"], :]
         self.user_df.reset_index(drop=True, inplace=True)
 
     def get_already_processed_users(self):
@@ -173,7 +169,10 @@ class NetworkHandler:
                 for tweet in tweets:
                     if "retweeters" in tweet and tweet["retweeters"]:
                         for retweeter in tweet["retweeters"]:
-                            if tweet["tweet_id"] not in existing_tweets and retweeter["user_id"] not in existing_retweeters:
+                            if (
+                                tweet["tweet_id"] not in existing_tweets
+                                and retweeter["user_id"] not in existing_retweeters
+                            ):
                                 location_matches = self.check_location(
                                     retweeter["location"], self.location
                                 )
@@ -211,7 +210,7 @@ class NetworkHandler:
 
         # Save JSON
         graph_dict["edges"] = edges
-        with open(graph_filename, "w", encoding='utf-8') as file:
+        with open(graph_filename, "w", encoding="utf-8") as file:
             json.dump(graph_dict, file, ensure_ascii=False, indent=4)
         print(f"Successfully stored {self.location} {edge_type} edges json file")
 
