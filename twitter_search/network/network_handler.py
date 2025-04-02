@@ -32,7 +32,7 @@ class NetworkHandler:
         )
         # Building location output path
         self.location_file_path = (
-            self.base_dir / f"networks/{self.location}.json"
+            self.base_dir / f"networks/{self.location}/{self.location}.json"
         )
 
         # Get city users
@@ -144,6 +144,9 @@ class NetworkHandler:
         }
         """
         edges = []
+        graph_dict = {}
+        graph_filename = self.base_dir / f"networks/{self.location}.json"
+
         try:
             with open(self.location_file_path, "r") as f:
                 existing_data = json.load(f)
@@ -174,6 +177,8 @@ class NetworkHandler:
                     follower_dict = self.parse_edge_dict(user_dict, follower, tweet=None)
                     edges.extend(follower_dict)
                 
+        graph_dict["edges"] = edges
+        
         return edges
 
     async def run(self):
