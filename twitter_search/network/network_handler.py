@@ -169,7 +169,6 @@ class NetworkHandler:
         if edge_type == "retweeter":
             for user_dict in existing_data:
                 tweets = user_dict["tweets"]
-                print("Processing retweeters")
                 for tweet in tweets:
                     if "retweeters" in tweet and tweet["retweeters"]:
                         for retweeter in tweet["retweeters"]:
@@ -180,7 +179,7 @@ class NetworkHandler:
                                 retweeter_dict = self.parse_edge_dict(
                                     user_dict, retweeter, tweet
                                 )
-                                edges.extend(retweeter_dict)
+                                edges.append(retweeter_dict)
                             else:
                                 continue
 
@@ -192,7 +191,6 @@ class NetworkHandler:
                         follower["location"], self.location
                     )
                     if location_matches:
-                        print("location matches")
                         follower_dict = self.parse_edge_dict(
                             user_dict, follower, tweet=None
                         )
@@ -202,9 +200,10 @@ class NetworkHandler:
 
         # Save JSON
         graph_dict["edges"] = edges
+        print(graph_dict)
         with open(graph_filename, "w", encoding='utf-8') as file:
             json.dump(graph_dict, file, ensure_ascii=False, indent=4)
-        print("Successfully stored edges json file")
+        print(f"Successfully stored {self.location} {edge_type} edges json file")
 
     async def run(self):
         """
