@@ -2,9 +2,9 @@
 Script that handles the 'user_network.py' script to
 generate a network from a particular city
 """
+import json
 import os
 import re
-import json
 import time
 from pathlib import Path
 
@@ -33,9 +33,9 @@ class NetworkHandler:
             self.base_dir / "analysis_outputs/location_matches.csv"
         )
 
-        # Check if network path 
+        # Check if network path
         if not os.path.exists(self.base_dir / f"networks/{self.location}"):
-             os.makedirs(self.base_dir / f"networks/{self.location}")
+            os.makedirs(self.base_dir / f"networks/{self.location}")
         else:
             print("Directory already exists")
 
@@ -77,7 +77,7 @@ class NetworkHandler:
                 user_id = user_dict["user_id"]
                 users_list.append(user_id)
         return users_list
-    
+
     @staticmethod
     def check_location(raw_location, target_location):
         """
@@ -108,23 +108,23 @@ class NetworkHandler:
                 return False
         else:
             return False
-    
+
     @staticmethod
     def parse_edge_dict(source, target, tweet=None):
         """
         Parses soruce and target dictionaries to generate
         a single edge dictionary
-        
+
         Args:
-            - source (dict): Dict with source user info 
+            - source (dict): Dict with source user info
             - target (dict): Dict with target user info
             - tweet (dict): Dict with original tweet info (Retweeters only)
         """
         edge_dict = {}
-        edge_dict["source"] = source['user_id']
+        edge_dict["source"] = source["user_id"]
         edge_dict["source_username"] = source["username"]
         edge_dict["source_followers"] = source["followers_count"]
-        
+
         if tweet:
             edge_dict["tweet_id"] = tweet["tweet_id"]
 
@@ -133,7 +133,6 @@ class NetworkHandler:
         edge_dict["target_followers"] = target["followers"]
 
         return edge_dict
-
 
     def create_edges(self, edge_type):
         """
@@ -154,7 +153,9 @@ class NetworkHandler:
         """
         edges = []
         graph_dict = {}
-        graph_filename = self.base_dir / f"networks/{self.location}/{self.location}.json"
+        graph_filename = (
+            self.base_dir / f"networks/{self.location}/{self.location}.json"
+        )
 
         try:
             with open(self.location_file_path, "r") as f:
@@ -172,9 +173,13 @@ class NetworkHandler:
                 for tweet in tweets:
                     if "retweeters" in tweet and tweet["retweeters"]:
                         for retweeter in tweet["retweeters"]:
-                            location_matches = self.check_location(retweeter["location"], self.location)
+                            location_matches = self.check_location(
+                                retweeter["location"], self.location
+                            )
                             if location_matches:
-                                retweeter_dict = self.parse_edge_dict(user_dict, retweeter, tweet)
+                                retweeter_dict = self.parse_edge_dict(
+                                    user_dict, retweeter, tweet
+                                )
                                 edges.extend(retweeter_dict)
                             else:
                                 continue
@@ -183,17 +188,21 @@ class NetworkHandler:
             print("Processing followers")
             followers = user_dict["followers"]
             for follower in followers:
-                location_matches = self.check_location(follower["location"], self.location)
+                location_matches = self.check_location(
+                    follower["location"], self.location
+                )
                 if location_matches:
-                    follower_dict = self.parse_edge_dict(user_dict, follower, tweet=None)
+                    follower_dict = self.parse_edge_dict(
+                        user_dict, follower, tweet=None
+                    )
                     edges.extend(follower_dict)
                 else:
                     continue
-        
-        # Save JSON 
+
+        # Save JSON
         graph_dict["edges"] = edges
         network_json_maker(graph_filename, graph_dict)
-        
+
     async def run(self):
         """
         Gets the user network data for a given number of

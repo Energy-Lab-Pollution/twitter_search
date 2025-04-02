@@ -15,11 +15,12 @@ if __name__ == "__main__":
         "location", type=str, help="Location to read users from"
     )
     parser.add_argument(
-        "edge_type", type=int, help="Edge type to choose",
-        choices=["retweeters", "followers"]
+        "edge_type",
+        type=int,
+        help="Edge type to choose",
+        choices=["retweeters", "followers"],
     )
 
     args = parser.parse_args()
     network_handler = NetworkHandler(args.location, num_users=None)
     network_handler.create_edges(edge_type=args.edge_type)
-
