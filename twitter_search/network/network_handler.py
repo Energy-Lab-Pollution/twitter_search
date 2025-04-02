@@ -160,14 +160,18 @@ class NetworkHandler:
             for tweet in tweets:
                 if "retweeters" in tweet and tweet["retweeters"]:
                     for retweeter in tweet["retweeters"]:
-                        retweeter_dict = self.parse_edge_dict(user_dict, retweeter, tweet)
-                        retweeter_edges.extend(retweeter_dict)
+                        location_matches = self.check_location(retweeter["location"], self.location)
+                        if location_matches:
+                            retweeter_dict = self.parse_edge_dict(user_dict, retweeter, tweet)
+                            retweeter_edges.extend(retweeter_dict)
 
             print("Processing followers")
             followers = user_dict["followers"]
             for follower in followers:
-                follower_dict = self.parse_edge_dict(user_dict, follower, tweet=None)
-                follower_edges.extend(follower_dict)
+                location_matches = self.check_location(follower["location"], self.location)
+                if location_matches:
+                    follower_dict = self.parse_edge_dict(user_dict, follower, tweet=None)
+                    follower_edges.extend(follower_dict)
 
         return follower_edges, retweeter_edges
 
