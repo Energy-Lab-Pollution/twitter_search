@@ -11,6 +11,7 @@ from pathlib import Path
 import pandas as pd
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import FIFTEEN_MINUTES
+from config_utils.util import network_json_maker
 from network.user_network import UserNetwork
 
 
@@ -32,6 +33,7 @@ class NetworkHandler:
             self.base_dir / "analysis_outputs/location_matches.csv"
         )
 
+        # Check if network path 
         if not os.path.exists(self.base_dir / f"networks/{self.location}"):
              os.makedirs(self.base_dir / f"networks/{self.location}")
         else:
@@ -174,6 +176,8 @@ class NetworkHandler:
                             if location_matches:
                                 retweeter_dict = self.parse_edge_dict(user_dict, retweeter, tweet)
                                 edges.extend(retweeter_dict)
+                            else:
+                                continue
 
         else:
             print("Processing followers")
@@ -183,11 +187,13 @@ class NetworkHandler:
                 if location_matches:
                     follower_dict = self.parse_edge_dict(user_dict, follower, tweet=None)
                     edges.extend(follower_dict)
-                
-        graph_dict["edges"] = edges
+                else:
+                    continue
         
-        return edges
-
+        # Save JSON 
+        graph_dict["edges"] = edges
+        network_json_maker(graph_filename, graph_dict)
+        
     async def run(self):
         """
         Gets the user network data for a given number of
