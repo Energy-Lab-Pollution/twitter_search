@@ -107,8 +107,8 @@ class NetworkHandler:
                         retweeter_dict["tweet_id"] = tweet["tweet_id"]
                         retweeter_dict["target_username"] = tweet["username"]
                         # TODO: Filter Kolkata and add other fields
-                        # retweeter_dict["source_username"] = user_dict["username"]
-                        # retweeter_dict["source_followers"] = user_dict["followers_count"]
+                        retweeter_dict["source_username"] = user_dict["username"]
+                        retweeter_dict["source_followers"] = user_dict["followers_count"]
 
                         retweeter_edges.extend(retweeter_dict)
 
@@ -121,8 +121,8 @@ class NetworkHandler:
                 follower_dict["target_username"] = follower["username"]
                 follower_dict["target_followers"] = follower["followers_count"]
                 # TODO: Filter Kolkata and add other fields
-                # follower_dict["source_username"] = user_dict["username"]
-                # follower_dict["source_followers"] = user_dict["followers_count"]
+                follower_dict["source_username"] = user_dict["username"]
+                follower_dict["source_followers"] = user_dict["followers_count"]
 
                 follower_edges.extend(follower_dict)
 
