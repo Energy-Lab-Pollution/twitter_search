@@ -65,10 +65,10 @@ class NetworkHandler:
                 user_id = user_dict["user_id"]
                 users_list.append(user_id)
         return users_list
-    
+
     def create_edges(self, edge_type):
         """
-        Gets the existing JSON file and creates a 
+        Gets the existing JSON file and creates a
         list of dicts of the following form for retweeters:
         {
             "edges": [
@@ -93,7 +93,7 @@ class NetworkHandler:
 
         if not existing_data:
             return
-        
+
         for user_dict in existing_data:
             user_id = user_dict["user_id"]
             tweets = user_dict["tweets"]
@@ -116,7 +116,7 @@ class NetworkHandler:
             followers = user_dict["followers"]
             for follower in followers:
                 follower_dict = {}
-                follower_dict["source"] =  user_id
+                follower_dict["source"] = user_id
                 follower_dict["target"] = follower["user_id"]
                 follower_dict["target_username"] = follower["username"]
                 follower_dict["target_followers"] = follower["followers_count"]
@@ -126,7 +126,7 @@ class NetworkHandler:
 
                 follower_edges.extend(follower_dict)
 
-        return follower_edges, retweeter_edges                
+        return follower_edges, retweeter_edges
 
     async def run(self):
         """
@@ -151,4 +151,3 @@ class NetworkHandler:
                     continue
             else:
                 continue
-

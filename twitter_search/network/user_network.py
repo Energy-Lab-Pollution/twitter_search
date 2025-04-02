@@ -274,7 +274,7 @@ class UserNetwork:
         """
         user_dict = {}
         user_dict["user_id"] = user_id
-        
+
         # Get source user information
         user_obj = await self.client.get_user_by_id(user_id)
         user_dict["username"] = user_obj.screen_name
