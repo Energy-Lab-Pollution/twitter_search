@@ -11,7 +11,6 @@ from pathlib import Path
 import pandas as pd
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import FIFTEEN_MINUTES
-from config_utils.util import network_json_maker
 from network.user_network import UserNetwork
 
 
