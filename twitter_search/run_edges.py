@@ -18,7 +18,7 @@ if __name__ == "__main__":
         "edge_type",
         type=str,
         help="Edge type to choose",
-        choices=["retweeter", "follower"],
+        choices=["retweet", "follower"],
     )
 
     args = parser.parse_args()
