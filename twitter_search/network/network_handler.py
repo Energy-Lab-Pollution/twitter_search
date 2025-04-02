@@ -164,15 +164,11 @@ class NetworkHandler:
         if edge_type == "retweeter":
             for user_dict in existing_data:
                 tweets = user_dict["tweets"]
-                existing_retweeters = []
                 existing_tweets = []
                 for tweet in tweets:
                     if "retweeters" in tweet and tweet["retweeters"]:
                         for retweeter in tweet["retweeters"]:
-                            if (
-                                tweet["tweet_id"] not in existing_tweets
-                                and retweeter["user_id"] not in existing_retweeters
-                            ):
+                            if tweet["tweet_id"] not in existing_tweets:
                                 location_matches = self.check_location(
                                     retweeter["location"], self.location
                                 )
@@ -184,7 +180,6 @@ class NetworkHandler:
 
                                     # Add to arrays to track existing stuff
                                     existing_tweets.append(tweet["tweet_id"])
-                                    existing_retweeters.append(retweeter["user_id"])
                             else:
                                 continue
 
