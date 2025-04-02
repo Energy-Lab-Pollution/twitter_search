@@ -126,7 +126,7 @@ class NetworkHandler:
         return edge_dict
 
 
-    def create_edges(self):
+    def create_edges(self, edge_type):
         """
         Gets the existing JSON file and creates a
         list of dicts of the following form for retweeters:
@@ -143,8 +143,7 @@ class NetworkHandler:
             ]
         }
         """
-        retweeter_edges = []
-        follower_edges = []
+        edges = []
         try:
             with open(self.location_file_path, "r") as f:
                 existing_data = json.load(f)
@@ -154,26 +153,28 @@ class NetworkHandler:
         if not existing_data:
             return
 
-        for user_dict in existing_data:
-            tweets = user_dict["tweets"]
-            print("Processing retweeters")
-            for tweet in tweets:
-                if "retweeters" in tweet and tweet["retweeters"]:
-                    for retweeter in tweet["retweeters"]:
-                        location_matches = self.check_location(retweeter["location"], self.location)
-                        if location_matches:
-                            retweeter_dict = self.parse_edge_dict(user_dict, retweeter, tweet)
-                            retweeter_edges.extend(retweeter_dict)
+        if edge_type == "retweeters":
+            for user_dict in existing_data:
+                tweets = user_dict["tweets"]
+                print("Processing retweeters")
+                for tweet in tweets:
+                    if "retweeters" in tweet and tweet["retweeters"]:
+                        for retweeter in tweet["retweeters"]:
+                            location_matches = self.check_location(retweeter["location"], self.location)
+                            if location_matches:
+                                retweeter_dict = self.parse_edge_dict(user_dict, retweeter, tweet)
+                                edges.extend(retweeter_dict)
 
+        else:
             print("Processing followers")
             followers = user_dict["followers"]
             for follower in followers:
                 location_matches = self.check_location(follower["location"], self.location)
                 if location_matches:
                     follower_dict = self.parse_edge_dict(user_dict, follower, tweet=None)
-                    follower_edges.extend(follower_dict)
-
-        return follower_edges, retweeter_edges
+                    edges.extend(follower_dict)
+                
+        return edges
 
     async def run(self):
         """
