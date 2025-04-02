@@ -2,11 +2,13 @@
 Script that handles the 'user_network.py' script to
 generate a network from a particular city
 """
+import re
 import json
 import time
 from pathlib import Path
 
 import pandas as pd
+from config_utils.cities import ALIAS_DICT
 from config_utils.constants import FIFTEEN_MINUTES
 from network.user_network import UserNetwork
 
@@ -17,6 +19,7 @@ class NetworkHandler:
     """
 
     FIFTEEN_MINUTES = FIFTEEN_MINUTES
+    ALIAS_DICT = ALIAS_DICT
 
     def __init__(self, location, num_users):
         self.location = location.lower()
@@ -65,6 +68,37 @@ class NetworkHandler:
                 user_id = user_dict["user_id"]
                 users_list.append(user_id)
         return users_list
+    
+    @staticmethod
+    def check_location(raw_location, target_location):
+        """
+        Uses regex to see if the raw location matches
+        the target location
+        """
+
+        target_locations = [target_location]
+
+        # alias is the key, target loc is the value
+        for alias, value in ALIAS_DICT.items():
+            if value == target_location:
+                target_locations.append(alias)
+
+        if isinstance(raw_location, str):
+            raw_location = raw_location.lower().strip()
+            location_regex = re.findall(r"\w+", raw_location)
+
+            if location_regex:
+                for target_location in target_locations:
+                    if target_location in location_regex:
+                        return True
+                    elif target_location in raw_location:
+                        return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
     
     @staticmethod
     def parse_edge_dict(source, target, tweet=None):
