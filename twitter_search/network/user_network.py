@@ -5,7 +5,6 @@ import time
 
 import twikit
 from config_utils.constants import (
-    ONE_MINUTE,
     TWIKIT_COOKIES_DIR,
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
@@ -275,16 +274,21 @@ class UserNetwork:
         """
         user_dict = {}
         user_dict["user_id"] = user_id
+        
+        # Get source user information
+        user_obj = await self.client.get_user_by_id(user_id)
+        user_dict["username"] = user_obj.screen_name
+        user_dict["followers_count"] = user_obj.followers_count
+        user_dict["following_count"] = user_obj.following_count
 
         # First get tweets, without retweeters
         print("Getting user tweets")
         user_tweets = await self.get_user_tweets(user_id)
-        time.sleep(ONE_MINUTE)
+
         print("Getting user retweeters")
         user_tweets = await self.add_retweeters(user_tweets)
         user_dict["tweets"] = user_tweets
 
-        time.sleep(ONE_MINUTE)
         print("Getting user followers...")
         followers = await self.get_followers(user_id)
         user_dict["followers"] = followers
