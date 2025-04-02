@@ -131,8 +131,8 @@ class NetworkHandler:
 
     def create_edges(self, edge_type):
         """
-        Gets the existing JSON file and creates a
-        list of dicts of the following form for retweeters:
+        Gets the existing JSON file and creates a list of dicts
+        of the following form for retweeters or followers:
         {
             "edges": [
                 {
@@ -145,6 +145,10 @@ class NetworkHandler:
                 ...
             ]
         }
+
+        Note:
+        'target' is the original user (which is followed / retweeted by someone)
+        'source' is the user who follows or retweets the target user
         """
         edges = []
         graph_dict = {}
@@ -174,7 +178,7 @@ class NetworkHandler:
                                 )
                                 if location_matches:
                                     retweeter_dict = self.parse_edge_dict(
-                                        user_dict, retweeter, tweet
+                                        retweeter, user_dict, tweet
                                     )
                                     edges.append(retweeter_dict)
 
@@ -194,7 +198,7 @@ class NetworkHandler:
                         )
                         if location_matches:
                             follower_dict = self.parse_edge_dict(
-                                user_dict, follower, tweet=None
+                                follower, user_dict, tweet=None
                             )
                             edges.append(follower_dict)
                             existing_followers.append(follower["user_id"])
