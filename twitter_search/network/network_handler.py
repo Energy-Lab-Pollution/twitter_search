@@ -2,6 +2,7 @@
 Script that handles the 'user_network.py' script to
 generate a network from a particular city
 """
+import os
 import re
 import json
 import time
@@ -30,6 +31,12 @@ class NetworkHandler:
         self.users_file_path = (
             self.base_dir / "analysis_outputs/location_matches.csv"
         )
+
+        if not os.path.exists(self.base_dir / f"networks/{self.location}"):
+             os.makedirs(self.base_dir / f"networks/{self.location}")
+        else:
+            print("Directory already exists")
+
         # Building location output path
         self.location_file_path = (
             self.base_dir / f"networks/{self.location}/{self.location}.json"
@@ -145,7 +152,7 @@ class NetworkHandler:
         """
         edges = []
         graph_dict = {}
-        graph_filename = self.base_dir / f"networks/{self.location}.json"
+        graph_filename = self.base_dir / f"networks/{self.location}/{self.location}.json"
 
         try:
             with open(self.location_file_path, "r") as f:
