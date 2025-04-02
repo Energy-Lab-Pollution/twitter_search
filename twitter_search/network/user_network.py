@@ -242,13 +242,21 @@ class UserNetwork:
         parsed_followers = self.parse_users(followers)
         followers_list.extend(parsed_followers)
 
+        # Keeping track of currently extracted users
+        extracted_users = [parsed_follower['user_id'] for parsed_follower in parsed_followers]
+
         while more_followers_available:
             num_iter += 1
             try:
                 more_followers = await followers.next()
                 if more_followers:
                     more_parsed_followers = self.parse_users(more_followers)
-                    followers_list.extend(more_parsed_followers)
+                    for parsed_follower in more_parsed_followers:
+                        if parsed_follower['user_id'] not in extracted_users:
+                            followers_list.append(parsed_follower)
+                            extracted_users.append(parsed_follower['user_id'])
+                        else:
+                            continue
                 else:
                     more_followers_available = False
             # Stop here and just return what you got
