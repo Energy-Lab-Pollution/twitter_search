@@ -2,11 +2,8 @@
 Script to get followers and retweeters from a particular set
 of X Users
 """
-import asyncio
-import time
 from argparse import ArgumentParser
 
-from config_utils.constants import FIFTEEN_MINUTES
 from network.network_handler import NetworkHandler
 
 
@@ -23,7 +20,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    network_handler = NetworkHandler(args.location, num_users=None)
+    network_handler.create_edges(edge_type=args.edge_type)
 
-    if args.w
-
-    network_handler = NetworkHandler(args.location, args.num_users)
