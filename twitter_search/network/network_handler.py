@@ -65,8 +65,34 @@ class NetworkHandler:
                 user_id = user_dict["user_id"]
                 users_list.append(user_id)
         return users_list
+    
+    @staticmethod
+    def parse_edge_dict(source, target, tweet=None):
+        """
+        Parses soruce and target dictionaries to generate
+        a single edge dictionary
+        
+        Args:
+            - source (dict): Dict with source user info 
+            - target (dict): Dict with target user info
+            - tweet (dict): Dict with original tweet info (Retweeters only)
+        """
+        edge_dict = {}
+        edge_dict["source"] = source['user_id']
+        edge_dict["source_username"] = source["username"]
+        edge_dict["source_followers"] = source["followers_count"]
+        
+        if tweet:
+            edge_dict["tweet_id"] = tweet["tweet_id"]
 
-    def create_edges(self, edge_type):
+        edge_dict["target"] = target["user_id"]
+        edge_dict["target_username"] = target["username"]
+        edge_dict["target_followers"] = target["followers"]
+
+        return edge_dict
+
+
+    def create_edges(self):
         """
         Gets the existing JSON file and creates a
         list of dicts of the following form for retweeters:
@@ -95,35 +121,18 @@ class NetworkHandler:
             return
 
         for user_dict in existing_data:
-            user_id = user_dict["user_id"]
             tweets = user_dict["tweets"]
             print("Processing retweeters")
             for tweet in tweets:
                 if "retweeters" in tweet and tweet["retweeters"]:
                     for retweeter in tweet["retweeters"]:
-                        retweeter_dict = {}
-                        retweeter_dict["source"] = user_id
-                        retweeter_dict["target"] = retweeter["user_id"]
-                        retweeter_dict["tweet_id"] = tweet["tweet_id"]
-                        retweeter_dict["target_username"] = tweet["username"]
-                        # TODO: Filter Kolkata and add other fields
-                        retweeter_dict["source_username"] = user_dict["username"]
-                        retweeter_dict["source_followers"] = user_dict["followers_count"]
-
+                        retweeter_dict = self.parse_edge_dict(user_dict, retweeter, tweet)
                         retweeter_edges.extend(retweeter_dict)
 
             print("Processing followers")
             followers = user_dict["followers"]
             for follower in followers:
-                follower_dict = {}
-                follower_dict["source"] = user_id
-                follower_dict["target"] = follower["user_id"]
-                follower_dict["target_username"] = follower["username"]
-                follower_dict["target_followers"] = follower["followers_count"]
-                # TODO: Filter Kolkata and add other fields
-                follower_dict["source_username"] = user_dict["username"]
-                follower_dict["source_followers"] = user_dict["followers_count"]
-
+                follower_dict = self.parse_edge_dict(user_dict, follower, tweet=None)
                 follower_edges.extend(follower_dict)
 
         return follower_edges, retweeter_edges
