@@ -165,7 +165,7 @@ class NetworkHandler:
         if not existing_data:
             return
 
-        if edge_type == "retweeter":
+        if edge_type == "retweet":
             for user_dict in existing_data:
                 tweets = user_dict["tweets"]
                 existing_tweets = []
@@ -235,4 +235,5 @@ class NetworkHandler:
                     print(f"Error getting user: {error}")
                     continue
             else:
+                print(f"Skipping {user_id} - they have already been processed")
                 continue
