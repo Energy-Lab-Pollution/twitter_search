@@ -154,7 +154,7 @@ class NetworkHandler:
         edges = []
         graph_dict = {}
         graph_filename = (
-            self.base_dir / f"networks/{self.location}/{self.location}.json"
+            self.base_dir / f"networks/{self.location}/{edge_type}_interactions.json"
         )
 
         try:
@@ -166,7 +166,7 @@ class NetworkHandler:
         if not existing_data:
             return
 
-        if edge_type == "retweeters":
+        if edge_type == "retweeter":
             for user_dict in existing_data:
                 tweets = user_dict["tweets"]
                 print("Processing retweeters")
