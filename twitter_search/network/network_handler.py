@@ -168,38 +168,49 @@ class NetworkHandler:
         if edge_type == "retweeter":
             for user_dict in existing_data:
                 tweets = user_dict["tweets"]
+                existing_retweeters = []
+                existing_tweets = []
                 for tweet in tweets:
                     if "retweeters" in tweet and tweet["retweeters"]:
                         for retweeter in tweet["retweeters"]:
-                            location_matches = self.check_location(
-                                retweeter["location"], self.location
-                            )
-                            if location_matches:
-                                retweeter_dict = self.parse_edge_dict(
-                                    user_dict, retweeter, tweet
+                            if tweet["tweet_id"] not in existing_tweets and retweeter["user_id"] not in existing_retweeters:
+                                location_matches = self.check_location(
+                                    retweeter["location"], self.location
                                 )
-                                edges.append(retweeter_dict)
+                                if location_matches:
+                                    retweeter_dict = self.parse_edge_dict(
+                                        user_dict, retweeter, tweet
+                                    )
+                                    edges.append(retweeter_dict)
+
+                                    # Add to arrays to track existing stuff
+                                    existing_tweets.append(tweet["tweet_id"])
+                                    existing_retweeters.append(retweeter["user_id"])
                             else:
                                 continue
 
         else:
             for user_dict in existing_data:
                 followers = user_dict["followers"]
+                existing_followers = []
                 for follower in followers:
-                    location_matches = self.check_location(
-                        follower["location"], self.location
-                    )
-                    if location_matches:
-                        follower_dict = self.parse_edge_dict(
-                            user_dict, follower, tweet=None
+                    if follower["user_id"] not in existing_followers:
+                        location_matches = self.check_location(
+                            follower["location"], self.location
                         )
-                        edges.append(follower_dict)
+                        if location_matches:
+                            follower_dict = self.parse_edge_dict(
+                                user_dict, follower, tweet=None
+                            )
+                            edges.append(follower_dict)
+                            existing_followers.append(follower["user_id"])
+                        else:
+                            continue
                     else:
                         continue
 
         # Save JSON
         graph_dict["edges"] = edges
-        print(graph_dict)
         with open(graph_filename, "w", encoding='utf-8') as file:
             json.dump(graph_dict, file, ensure_ascii=False, indent=4)
         print(f"Successfully stored {self.location} {edge_type} edges json file")
