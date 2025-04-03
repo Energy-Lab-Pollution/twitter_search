@@ -183,14 +183,17 @@ class NetworkHandler:
         print(f"Number of root users {num_users}")
 
         for user_dict in location_json:
-            followers_list.append(user_dict['followers_count'])
+            if user_dict['followers_count'] > 0:
+                followers_list.append(user_dict['followers_count'])
             twikit_followers.append(len(user_dict['followers']))
             
             user_tweets = user_dict['tweets']
             for user_tweet in user_tweets:
-                retweets_list.append(user_tweet['retweet_count'])
+                if user_tweet['retweet_count'] > 0:
+                    retweets_list.append(user_tweet['retweet_count'])
                 if 'retweeters' in user_tweet:
-                    twikit_retweeters.append(len(user_tweet['retweeters']))
+                    if user_tweet['retweeters']:
+                        twikit_retweeters.append(len(user_tweet['retweeters']))
             
         print(f"Median retweeters {statistics.median(retweets_list)}")
         print(f"Median followers {statistics.median(followers_list)}")
@@ -237,7 +240,9 @@ class NetworkHandler:
             return
 
         if edge_type == "retweet":
+            kolkata_retweeters = []
             for user_dict in existing_data:
+                user_retweeter_count = []
                 tweets = user_dict["tweets"]
                 existing_tweets = []
                 for tweet in tweets:
