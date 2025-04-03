@@ -148,27 +148,24 @@ class NetworkHandler:
         Calculates basic stats for retweeters / followers
         
         --- Number of root users
-        --- Number of
         
         --- Avg. Number of Retweeters per user
         - Number of retweeters (total agg)
         - Number of retweeters (twikit)
-        - Number of retweeters (from Kolkata)
+        - Number of retweeters (from the desired location)
 
         --- Avg. Number of Followers per user
         - Number of followers (total agg)
         - Number of followers (twikit)
-        - Number of followers (from Kolkata)
-
-
-        
-        # Retweeters
+        - Number of followers (from the desired 
 
         """
         retweets_list = []
         followers_list = []
         twikit_retweeters = []
         twikit_followers = []
+        city_retweeters = []
+        city_followers = []
 
         follower_graph = self.read_json(
             self.base_dir / f"networks/{self.location}/follower_interactions.json"
@@ -183,6 +180,8 @@ class NetworkHandler:
         print(f"Number of root users {num_users}")
 
         for user_dict in location_json:
+            user_city_followers = 0
+            user_city_retweeters = 0
             if user_dict['followers_count'] > 0:
                 followers_list.append(user_dict['followers_count'])
             twikit_followers.append(len(user_dict['followers']))
@@ -194,14 +193,24 @@ class NetworkHandler:
                 if 'retweeters' in user_tweet:
                     if user_tweet['retweeters']:
                         twikit_retweeters.append(len(user_tweet['retweeters']))
+
+            for follower_dict in follower_graph['edges']:
+                if follower_dict['target'] == user_dict['user_id']:
+                    user_city_followers += 1
+            
+            for retweeter_dict in retweeter_graph['edges']:
+                if retweeter_dict['target'] == user_dict['user_id']:
+                    user_city_retweeters += 1
+
+            city_retweeters.append(user_city_retweeters)
+            city_followers.append(user_city_followers)
             
         print(f"Median retweeters {statistics.median(retweets_list)}")
         print(f"Median followers {statistics.median(followers_list)}")
         print(f"Median retweeters with twikit {statistics.median(twikit_retweeters)}")
         print(f"Median followers with twikit {statistics.median(twikit_followers)}")
-
-
-
+        print(f"Median retweeters with twikit in {self.location} {statistics.median(city_retweeters)}")
+        print(f"Median followers with twikit in {self.location} {statistics.median(city_followers)}")
 
     def create_edges(self, edge_type):
         """
@@ -240,9 +249,7 @@ class NetworkHandler:
             return
 
         if edge_type == "retweet":
-            kolkata_retweeters = []
             for user_dict in existing_data:
-                user_retweeter_count = []
                 tweets = user_dict["tweets"]
                 existing_tweets = []
                 for tweet in tweets:
@@ -257,7 +264,6 @@ class NetworkHandler:
                                         retweeter, user_dict, tweet
                                     )
                                     edges.append(retweeter_dict)
-
                                     # Add to arrays to track existing stuff
                                     existing_tweets.append(tweet["tweet_id"])
                             else:
