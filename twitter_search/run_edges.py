@@ -24,3 +24,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     network_handler = NetworkHandler(args.location, num_users=None)
     network_handler.create_edges(edge_type=args.edge_type)
+    network_handler.calculate_stats()

@@ -5,6 +5,7 @@ generate a network from a particular city
 import json
 import os
 import re
+import statistics
 import time
 from pathlib import Path
 
@@ -72,6 +73,19 @@ class NetworkHandler:
                 user_id = user_dict["user_id"]
                 users_list.append(user_id)
         return users_list
+    
+    @staticmethod
+    def read_json(path):
+        """
+        Reads a JSON file and returns the data
+        """
+        try:
+            with open(path, "r") as f:
+                existing_data = json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            existing_data = []
+
+        return existing_data
 
     @staticmethod
     def check_location(raw_location, target_location):
@@ -128,6 +142,63 @@ class NetworkHandler:
         edge_dict["target_followers"] = target["followers_count"]
 
         return edge_dict
+    
+    def calculate_stats(self):
+        """
+        Calculates basic stats for retweeters / followers
+        
+        --- Number of root users
+        --- Number of
+        
+        --- Avg. Number of Retweeters per user
+        - Number of retweeters (total agg)
+        - Number of retweeters (twikit)
+        - Number of retweeters (from Kolkata)
+
+        --- Avg. Number of Followers per user
+        - Number of followers (total agg)
+        - Number of followers (twikit)
+        - Number of followers (from Kolkata)
+
+
+        
+        # Retweeters
+
+        """
+        retweets_list = []
+        followers_list = []
+        twikit_retweeters = []
+        twikit_followers = []
+
+        follower_graph = self.read_json(
+            self.base_dir / f"networks/{self.location}/follower_interactions.json"
+        )
+        retweeter_graph = self.read_json(
+            self.base_dir / f"networks/{self.location}/retweet_interactions.json"
+        )
+
+        location_json = self.read_json(self.location_file_path)
+
+        num_users = len(location_json)
+        print(f"Number of root users {num_users}")
+
+        for user_dict in location_json:
+            followers_list.append(user_dict['followers_count'])
+            twikit_followers.append(len(user_dict['followers']))
+            
+            user_tweets = user_dict['tweets']
+            for user_tweet in user_tweets:
+                retweets_list.append(user_tweet['retweet_count'])
+                if 'retweeters' in user_tweet:
+                    twikit_retweeters.append(len(user_tweet['retweeters']))
+            
+        print(f"Median retweeters {statistics.median(retweets_list)}")
+        print(f"Median followers {statistics.median(followers_list)}")
+        print(f"Median retweeters with twikit {statistics.median(twikit_retweeters)}")
+        print(f"Median followers with twikit {statistics.median(twikit_followers)}")
+
+
+
 
     def create_edges(self, edge_type):
         """
