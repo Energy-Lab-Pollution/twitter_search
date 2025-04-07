@@ -164,6 +164,11 @@ class NetworkHandler:
         city_retweeters = []
         city_followers = []
 
+        # Proportions
+        perc_tweets_with_retweeters = []
+        perc_tweets_with_retweeters_twikit = []
+
+        # Paths setup
         follower_graph = self.read_json(
             self.base_dir / f"networks/{self.location}/follower_interactions.json"
         )
@@ -179,21 +184,31 @@ class NetworkHandler:
         for user_dict in location_json:
             user_city_followers = 0
             user_city_retweeters = 0
+            num_original_tweets = 0
+            num_tweets_with_retweeters = 0
+            num_tweets_with_retweeters_twikit = 0
             if user_dict["followers_count"] > 0:
                 followers_list.append(user_dict["followers_count"])
             twikit_followers.append(len(user_dict["followers"]))
 
             user_tweets = user_dict["tweets"]
             for user_tweet in user_tweets:
+                num_original_tweets += 1
                 # Remove reposts by others
                 if (not user_tweet["tweet_text"].startswith("RT @")) and (
                     user_tweet["retweet_count"] > 0
                 ):
+                    num_tweets_with_retweeters += 1
                     retweets_list.append(user_tweet["retweet_count"])
                 if "retweeters" in user_tweet:
                     if user_tweet["retweeters"]:
+                        num_tweets_with_retweeters_twikit += 1
                         twikit_retweeters.append(len(user_tweet["retweeters"]))
 
+            # Populate proportions array
+            perc_tweets_with_retweeters.append(num_tweets_with_retweeters / num_original_tweets)
+            perc_tweets_with_retweeters_twikit.append(num_tweets_with_retweeters_twikit / num_tweets_with_retweeters )
+            
             for follower_dict in follower_graph["edges"]:
                 if follower_dict["target"] == user_dict["user_id"]:
                     user_city_followers += 1
@@ -205,16 +220,20 @@ class NetworkHandler:
             city_retweeters.append(user_city_retweeters)
             city_followers.append(user_city_followers)
 
-        print(f"Median retweeters {statistics.median(retweets_list)}")
+        print("================= FOLLOWER STATS =====================")
         print(f"Median followers {statistics.median(followers_list)}")
-        print(f"Median retweeters with twikit {statistics.median(twikit_retweeters)}")
         print(f"Median followers with twikit {statistics.median(twikit_followers)}")
-        print(
-            f"Median retweeters with twikit in {self.location} {statistics.median(city_retweeters)}"
-        )
         print(
             f"Median followers with twikit in {self.location} {statistics.median(city_followers)}"
         )
+
+        print("================= RETWEET STATS =====================")
+        print(f"Median retweeters {statistics.median(retweets_list)}")
+        print(f"Median retweeters with twikit {statistics.median(twikit_retweeters)}")
+        print(
+            f"Median retweeters with twikit in {self.location} {statistics.median(city_retweeters)}"
+        )
+
 
     def create_edges(self, edge_type):
         """
