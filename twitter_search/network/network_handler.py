@@ -144,7 +144,7 @@ class NetworkHandler:
 
         return edge_dict
 
-    def calculate_rt_queries(self):
+    def calculate_rt_queries(self, location_json):
         """
         Calculates basic stats for retweeters / followers
 
@@ -163,10 +163,6 @@ class NetworkHandler:
         """
         perc_retweets_queried = []
         perc_original_tweets_queried = []
-        user_total = []
-
-        # Paths setup
-        location_json = self.read_json(self.location_file_path)
 
         for user_dict in location_json:
             retweets_queried = 0
@@ -189,7 +185,6 @@ class NetworkHandler:
             perc_retweets_queried.append(retweets_queried / total)
             perc_original_tweets_queried.append(original_tweets_queried / total)
 
-    
         print("================ RT QUERIES =================")
         print(
             f"a) Median RTs queried by Twikit {statistics.median(perc_retweets_queried)}"
@@ -350,7 +345,7 @@ class NetworkHandler:
             f"g) Median sum of kolkata retweeters / median sum of twikit retweeters: "
             f"{statistics.median(city_retweeters) / statistics.median(twikit_retweeters)}"
         )
-        self.calculate_rt_queries()
+        self.calculate_rt_queries(location_json)
 
     def create_edges(self, edge_type):
         """
