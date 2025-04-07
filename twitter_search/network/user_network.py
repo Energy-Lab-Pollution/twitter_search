@@ -160,8 +160,8 @@ class UserNetwork:
         self.retweeters_maxed_out = False
 
         for tweet_dict in tweets_list:
-            # Only get retweeters if retweet_count > 0
-            if tweet_dict["retweet_count"] > 0:
+            # Only get retweeters if tweet is not a repost and retweet_count > 0
+            if (not tweet_dict['tweet_text'].startswith("RT @")) and (tweet_dict["retweet_count"] > 0):
                 if not self.retweeters_maxed_out:
                     retweeters = await self.get_single_tweet_retweeters(
                         tweet_dict["tweet_id"]

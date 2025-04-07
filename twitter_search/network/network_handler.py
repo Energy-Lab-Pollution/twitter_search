@@ -265,6 +265,9 @@ class NetworkHandler:
                 tweets = user_dict["tweets"]
                 existing_tweets = []
                 for tweet in tweets:
+                    # If they retweeted someone else, skip
+                    if tweet['tweet_text'].startswith("RT @"):
+                        continue
                     if "retweeters" in tweet and tweet["retweeters"]:
                         for retweeter in tweet["retweeters"]:
                             if tweet["tweet_id"] not in existing_tweets:
