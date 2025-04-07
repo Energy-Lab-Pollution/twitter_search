@@ -21,7 +21,7 @@ FOLDERS = [
     "cleaned_data",
     "twikit_raw_data",
     "twikit_cleaned_data",
-    "networks"
+    "networks",
 ]
 
 
