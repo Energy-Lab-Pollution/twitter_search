@@ -144,7 +144,6 @@ class NetworkHandler:
 
         return edge_dict
 
-
     def calculate_rt_queries(self):
         """
         Calculates basic stats for retweeters / followers
@@ -164,6 +163,7 @@ class NetworkHandler:
         """
         perc_retweets_queried = []
         perc_original_tweets_queried = []
+        user_total = []
 
         # Paths setup
         location_json = self.read_json(self.location_file_path)
@@ -175,23 +175,27 @@ class NetworkHandler:
             user_tweets = user_dict["tweets"]
             for user_tweet in user_tweets:
                 # Remove reposts by others
-                if (user_tweet["tweet_text"].startswith("RT @")) and ("retweeters" in user_tweet):
-                    retweets_queried += 1                
+                if (user_tweet["tweet_text"].startswith("RT @")) and (
+                    "retweeters" in user_tweet
+                ):
+                    retweets_queried += 1
                 else:
                     if "retweeters" in user_tweet:
                         original_tweets_queried += 1
 
-                total += (retweets_queried + original_tweets_queried)
-            
+            total += retweets_queried + original_tweets_queried
+            if total == 0:
+                continue
             perc_retweets_queried.append(retweets_queried / total)
             perc_original_tweets_queried.append(original_tweets_queried / total)
 
+    
         print("================ RT QUERIES =================")
         print(
-            f"b) Median RTs queried by Twikit {statistics.median(perc_retweets_queried)}"
+            f"a) Median RTs queried by Twikit {statistics.median(perc_retweets_queried)}"
         )
         print(
-            f"b) Median RTs queried by Twikit {statistics.median(perc_original_tweets_queried)}"
+            f"b) Median original tweets queried by Twikit {statistics.median(perc_original_tweets_queried)}"
         )
 
     def calculate_stats(self):
@@ -251,7 +255,7 @@ class NetworkHandler:
             user_tweets = user_dict["tweets"]
             for user_tweet in user_tweets:
                 # Remove reposts by others
-                if (not user_tweet["tweet_text"].startswith("RT @")):
+                if not user_tweet["tweet_text"].startswith("RT @"):
                     num_original_tweets += 1
                     if user_tweet["retweet_count"] > 0:
                         num_tweets_with_retweeters += 1
@@ -259,7 +263,9 @@ class NetworkHandler:
                     if "retweeters" in user_tweet:
                         if user_tweet["retweeters"]:
                             num_tweets_with_retweeters_twikit += 1
-                            twikit_retweeters.append(len(user_tweet["retweeters"]))
+                            twikit_retweeters.append(
+                                len(user_tweet["retweeters"])
+                            )
 
             # Populate proportions array
             if num_original_tweets == 0:
@@ -289,7 +295,9 @@ class NetworkHandler:
             city_followers.append(user_city_followers)
             original_tweets.append(num_original_tweets)
 
-        print(f"Median number of original tweets per user: {statistics.median(original_tweets)}")
+        print(
+            f"Median number of original tweets per user: {statistics.median(original_tweets)}"
+        )
         print("================= FOLLOWER STATS =====================")
         print(
             f"a) Median count of followers {statistics.median(followers_list)}"
