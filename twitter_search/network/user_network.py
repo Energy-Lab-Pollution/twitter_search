@@ -105,7 +105,7 @@ class UserNetwork:
             return []
 
         try:
-            retweeters = await self.client.get_retweeters(tweet_id)
+            retweeters = await self.client.get_retweeters(tweet_id, count=1000)
             if retweeters:
                 parsed_retweeters = self.parse_users(retweeters)
                 retweeters_list.extend(parsed_retweeters)
@@ -197,7 +197,7 @@ class UserNetwork:
         num_iter = 0
 
         # Parse first set of tweets
-        user_tweets = await self.client.get_user_tweets(user_id, "Tweets")
+        user_tweets = await self.client.get_user_tweets(user_id, "Tweets", count=1000)
         tweets_list = self.parse_tweets(user_tweets)
         dict_list.extend(tweets_list)
 
@@ -237,7 +237,7 @@ class UserNetwork:
             - tweet_list(list): List of dicts with followers info
         """
         followers_list = []
-        followers = await self.client.get_user_followers(user_id)
+        followers = await self.client.get_user_followers(user_id, count=1000)
         more_followers_available = True
         num_iter = 0
 

@@ -288,35 +288,35 @@ class NetworkHandler:
             original_tweets.append(num_original_tweets)
 
         print(
-            f"Median number of original tweets per user: {statistics.median(original_tweets)}"
+            f"Median number of original tweets per user: {round(statistics.median(original_tweets), 2)}"
         )
         print("================= FOLLOWER STATS =====================")
         print(
-            f"a) Median count of followers {statistics.median(followers_list)}"
+            f"a) Median count of followers {round(statistics.median(followers_list), 2)}"
         )
         print(
-            f"b) Median twikit followers {statistics.median(twikit_followers)}"
+            f"b) Median twikit followers {round(statistics.median(twikit_followers), 2)}"
         )
         print(
             (
                 "c) Median twikit followers / median followers: "
-                f"{statistics.median(twikit_followers) / statistics.median(followers_list)}"
+                f"{round(statistics.median(twikit_followers) / statistics.median(followers_list), 2)}"
             )
         )
         print(
-            f"d) Median twikit followers in {self.location}: {statistics.median(city_followers)}"
+            f"d) Median twikit followers in {self.location}: {round(statistics.median(city_followers), 2)}"
         )
         print(
             (
                 "e) Median twikit followers in kolkata / median twikit followers: "
-                f"{statistics.median(twikit_followers) / statistics.median(followers_list)}"
+                f"{round(statistics.median(twikit_followers) / statistics.median(followers_list), 2)}"
             )
         )
         print("================= RETWEET STATS =====================")
         print(
             (
                 "a) Median proportion of tweets per user that have at "
-                f"least one all-time retweeter {statistics.median(perc_tweets_with_retweeters)}"
+                f"least one all-time retweeter {round(statistics.median(perc_tweets_with_retweeters), 2)}"
             )
         )
         print(
@@ -325,7 +325,7 @@ class NetworkHandler:
         print(
             (
                 "c) Median of num tweets with retweets / num tweets with twikit retweets: "
-                f"{statistics.median(perc_tweets_with_retweeters_twikit)}"
+                f"{round(statistics.median(perc_tweets_with_retweeters_twikit), 2)}"
             )
         )
         print(
@@ -333,14 +333,14 @@ class NetworkHandler:
         )
         print(
             f"e) Median sum of twikit retweeters / median sum of all time retweeters: "
-            f"{statistics.median(twikit_retweeters) / statistics.median(retweets_list)}"
+            f"{round(statistics.median(twikit_retweeters) / statistics.median(retweets_list), 2)}"
         )
         print(
             f"f) Median retweeters with twikit in {self.location}: {statistics.median(city_retweeters)}"
         )
         print(
             f"g) Median sum of kolkata retweeters / median sum of twikit retweeters: "
-            f"{statistics.median(city_retweeters) / statistics.median(twikit_retweeters)}"
+            f"{round(statistics.median(city_retweeters) / statistics.median(twikit_retweeters), 2)}"
         )
         self.calculate_rt_queries(location_json)
 
