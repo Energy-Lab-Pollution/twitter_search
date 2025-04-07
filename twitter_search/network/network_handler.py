@@ -29,7 +29,9 @@ class NetworkHandler:
 
         self.base_dir = Path(__file__).parent.parent / "data/"
         # Users .csv with location matching
-        self.users_file_path = self.base_dir / "analysis_outputs/location_matches.csv"
+        self.users_file_path = (
+            self.base_dir / "analysis_outputs/location_matches.csv"
+        )
 
         # Check if network path
         if not os.path.exists(self.base_dir / f"networks/{self.location}"):
@@ -51,7 +53,9 @@ class NetworkHandler:
         self.user_df = self.user_df.loc[
             self.user_df.loc[:, "search_location"] == self.location
         ]
-        self.user_df = self.user_df.loc[self.user_df.loc[:, "location_match"], :]
+        self.user_df = self.user_df.loc[
+            self.user_df.loc[:, "location_match"], :
+        ]
         self.user_df.reset_index(drop=True, inplace=True)
 
     def get_already_processed_users(self):
@@ -170,10 +174,12 @@ class NetworkHandler:
 
         # Paths setup
         follower_graph = self.read_json(
-            self.base_dir / f"networks/{self.location}/follower_interactions.json"
+            self.base_dir
+            / f"networks/{self.location}/follower_interactions.json"
         )
         retweeter_graph = self.read_json(
-            self.base_dir / f"networks/{self.location}/retweet_interactions.json"
+            self.base_dir
+            / f"networks/{self.location}/retweet_interactions.json"
         )
 
         location_json = self.read_json(self.location_file_path)
@@ -206,12 +212,17 @@ class NetworkHandler:
                         twikit_retweeters.append(len(user_tweet["retweeters"]))
 
             # Populate proportions array
-            perc_tweets_with_retweeters.append(num_tweets_with_retweeters / num_original_tweets)
+            perc_tweets_with_retweeters.append(
+                num_tweets_with_retweeters / num_original_tweets
+            )
             if num_tweets_with_retweeters == 0:
                 perc_tweets_with_retweeters_twikit.append(0)
             else:
-                perc_tweets_with_retweeters_twikit.append(num_tweets_with_retweeters_twikit / num_tweets_with_retweeters )
-            
+                perc_tweets_with_retweeters_twikit.append(
+                    num_tweets_with_retweeters_twikit
+                    / num_tweets_with_retweeters
+                )
+
             for follower_dict in follower_graph["edges"]:
                 if follower_dict["target"] == user_dict["user_id"]:
                     user_city_followers += 1
@@ -225,26 +236,43 @@ class NetworkHandler:
 
         print("================= FOLLOWER STATS =====================")
         print(f"Median followers {statistics.median(followers_list)}")
-        print(f"Median followers with twikit {statistics.median(twikit_followers)}")
+        print(
+            f"Median followers with twikit {statistics.median(twikit_followers)}"
+        )
         print(
             f"Median followers with twikit in {self.location} {statistics.median(city_followers)}"
         )
 
         print("================= RETWEET STATS =====================")
-        print(("Median proportion of tweets per user that have at "
-               f"least one all-time retweeter {statistics.median(perc_tweets_with_retweeters)}"))
-        print(("Median proportion of tweets per user that have at "
-                f"least one twikit retweeter {statistics.median(perc_tweets_with_retweeters_twikit)}"))
-        print(f"Median sum of all-time retweeters per user: {statistics.median(retweets_list)}")
-        print(f"Median sum of twikit retweeters per user: {statistics.median(twikit_retweeters)}")
-        print(f"Median sum of twikit retweeters / median sum of all time retweeters: "  
-              f"{statistics.median(twikit_retweeters) / statistics.median(retweets_list)}")
+        print(
+            (
+                "Median proportion of tweets per user that have at "
+                f"least one all-time retweeter {statistics.median(perc_tweets_with_retweeters)}"
+            )
+        )
+        print(
+            (
+                "Median proportion of tweets per user that have at "
+                f"least one twikit retweeter {statistics.median(perc_tweets_with_retweeters_twikit)}"
+            )
+        )
+        print(
+            f"Median sum of all-time retweeters per user: {statistics.median(retweets_list)}"
+        )
+        print(
+            f"Median sum of twikit retweeters per user: {statistics.median(twikit_retweeters)}"
+        )
+        print(
+            f"Median sum of twikit retweeters / median sum of all time retweeters: "
+            f"{statistics.median(twikit_retweeters) / statistics.median(retweets_list)}"
+        )
         print(
             f"Median retweeters with twikit in {self.location}: {statistics.median(city_retweeters)}"
         )
-        print(f"Median sum of kolkata retweeters / median sum of twikit retweeters: "  
-              f"{statistics.median(city_retweeters) / statistics.median(twikit_retweeters)}")        
-
+        print(
+            f"Median sum of kolkata retweeters / median sum of twikit retweeters: "
+            f"{statistics.median(city_retweeters) / statistics.median(twikit_retweeters)}"
+        )
 
     def create_edges(self, edge_type):
         """
@@ -270,7 +298,8 @@ class NetworkHandler:
         edges = []
         graph_dict = {}
         graph_filename = (
-            self.base_dir / f"networks/{self.location}/{edge_type}_interactions.json"
+            self.base_dir
+            / f"networks/{self.location}/{edge_type}_interactions.json"
         )
 
         try:
@@ -330,7 +359,9 @@ class NetworkHandler:
         graph_dict["edges"] = edges
         with open(graph_filename, "w", encoding="utf-8") as file:
             json.dump(graph_dict, file, ensure_ascii=False, indent=4)
-        print(f"Successfully stored {self.location} {edge_type} edges json file")
+        print(
+            f"Successfully stored {self.location} {edge_type} edges json file"
+        )
 
     async def run(self):
         """
