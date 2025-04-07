@@ -144,6 +144,56 @@ class NetworkHandler:
 
         return edge_dict
 
+
+    def calculate_rt_queries(self):
+        """
+        Calculates basic stats for retweeters / followers
+
+        --- Number of root users
+
+        --- Avg. Number of Retweeters per user
+        - Number of retweeters (total agg)
+        - Number of retweeters (twikit)
+        - Number of retweeters (from the desired location)
+
+        --- Avg. Number of Followers per user
+        - Number of followers (total agg)
+        - Number of followers (twikit)
+        - Number of followers (from the desired
+
+        """
+        perc_retweets_queried = []
+        perc_original_tweets_queried = []
+
+        # Paths setup
+        location_json = self.read_json(self.location_file_path)
+
+        for user_dict in location_json:
+            retweets_queried = 0
+            original_tweets_queried = 0
+            total = 0
+            user_tweets = user_dict["tweets"]
+            for user_tweet in user_tweets:
+                # Remove reposts by others
+                if (user_tweet["tweet_text"].startswith("RT @")) and ("retweeters" in user_tweet):
+                    retweets_queried += 1                
+                else:
+                    if "retweeters" in user_tweet:
+                        original_tweets_queried += 1
+
+                total += (retweets_queried + original_tweets_queried)
+            
+            perc_retweets_queried.append(retweets_queried / total)
+            perc_original_tweets_queried.append(original_tweets_queried / total)
+
+        print("================ RT QUERIES =================")
+        print(
+            f"b) Median RTs queried by Twikit {statistics.median(perc_retweets_queried)}"
+        )
+        print(
+            f"b) Median RTs queried by Twikit {statistics.median(perc_original_tweets_queried)}"
+        )
+
     def calculate_stats(self):
         """
         Calculates basic stats for retweeters / followers
@@ -239,8 +289,6 @@ class NetworkHandler:
             city_followers.append(user_city_followers)
             original_tweets.append(num_original_tweets)
 
-
-        
         print(f"Median number of original tweets per user: {statistics.median(original_tweets)}")
         print("================= FOLLOWER STATS =====================")
         print(
@@ -264,7 +312,6 @@ class NetworkHandler:
                 f"{statistics.median(twikit_followers) / statistics.median(followers_list)}"
             )
         )
-
         print("================= RETWEET STATS =====================")
         print(
             (
@@ -295,6 +342,7 @@ class NetworkHandler:
             f"g) Median sum of kolkata retweeters / median sum of twikit retweeters: "
             f"{statistics.median(city_retweeters) / statistics.median(twikit_retweeters)}"
         )
+        self.calculate_rt_queries()
 
     def create_edges(self, edge_type):
         """
