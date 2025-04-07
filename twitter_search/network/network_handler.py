@@ -23,17 +23,10 @@ class NetworkHandler:
     FIFTEEN_MINUTES = FIFTEEN_MINUTES
     ALIAS_DICT = ALIAS_DICT
 
-    def __init__(self, location, num_users):
+    def __init__(self, location):
         self.location = location.lower()
-        self.num_users = num_users
-
         self.base_dir = Path(__file__).parent.parent / "data/"
-        # Users .csv with location matching
-        self.users_file_path = (
-            self.base_dir / "analysis_outputs/location_matches.csv"
-        )
-
-        # Check if network path
+        # Check if network path exists
         if not os.path.exists(self.base_dir / f"networks/{self.location}"):
             os.makedirs(self.base_dir / f"networks/{self.location}")
         else:
@@ -44,12 +37,16 @@ class NetworkHandler:
             self.base_dir / f"networks/{self.location}/{self.location}.json"
         )
 
-    def get_city_users(self):
+    def _get_city_users(self):
         """
         Method to get users whose location match the desired
         location
         """
-        self.user_df = pd.read_csv(self.users_file_path)
+        # Users .csv with location matching
+        users_file_path = (
+            self.base_dir / "analysis_outputs/location_matches.csv"
+        )
+        self.user_df = pd.read_csv(users_file_path)
         self.user_df = self.user_df.loc[
             self.user_df.loc[:, "search_location"] == self.location
         ]
@@ -58,7 +55,7 @@ class NetworkHandler:
         ]
         self.user_df.reset_index(drop=True, inplace=True)
 
-    def get_already_processed_users(self):
+    def _get_already_processed_users(self):
         """
         Reads the location JSON file and gets the
         set of users that have already been processed
@@ -436,7 +433,7 @@ class NetworkHandler:
             f"Successfully stored {self.location} {edge_type} edges json file"
         )
 
-    async def run(self):
+    async def create_user_network(self, num_users):
         """
         Gets the user network data for a given number of
         users.
@@ -445,8 +442,8 @@ class NetworkHandler:
             - num_users: Number of users to get data from
         """
         # Get city users and already processed users
-        self.get_city_users()
-        already_processed_users = self.get_already_processed_users()
+        self._get_city_users()
+        already_processed_users = self._get_already_processed_users()
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
 
         for user_id in user_ids[: self.num_users]:

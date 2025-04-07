@@ -33,5 +33,5 @@ if __name__ == "__main__":
         print("Sleeping for 15 minutes...")
         time.sleep(FIFTEEN_MINUTES)
 
-    network_handler = NetworkHandler(args.location, args.num_users)
-    asyncio.run(network_handler.run())
+    network_handler = NetworkHandler(args.location)
+    asyncio.run(network_handler.create_user_network(args.num_users))
