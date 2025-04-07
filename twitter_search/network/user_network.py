@@ -142,7 +142,7 @@ class UserNetwork:
                 print(f"Made {self.retweeters_counter} retweets requests")
                 self.retweeters_maxed_out = True
                 return retweeters_list
-            
+
             attempt_number += 1
 
         return retweeters_list
@@ -203,7 +203,9 @@ class UserNetwork:
         num_iter = 0
 
         # Parse first set of tweets
-        user_tweets = await self.client.get_user_tweets(user_id, "Tweets", count=1000)
+        user_tweets = await self.client.get_user_tweets(
+            user_id, "Tweets", count=1000
+        )
         tweets_list = self.parse_tweets(user_tweets)
         dict_list.extend(tweets_list)
 
