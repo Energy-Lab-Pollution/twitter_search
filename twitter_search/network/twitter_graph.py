@@ -37,9 +37,7 @@ class TwitterGraph:
         """
         self.location = location
         self.base_dir = base_dir if base_dir is not None else self.BASE_DIR
-        self.network_type = (
-            network_type if network_type is not None else "retweet"
-        )
+        self.network_type = network_type if network_type is not None else "retweet"
         self.graph = nx.DiGraph()  # Directed graph for Twitter relationships
         self.num_nodes = 0
         self.num_edges = 0
@@ -100,9 +98,9 @@ class TwitterGraph:
                 if self.graph.has_edge(edge["source"], edge["target"]):
                     # If edge exists, increment weight and append tweet_id
                     self.graph[edge["source"]][edge["target"]]["weight"] += 1
-                    self.graph[edge["source"]][edge["target"]][
-                        "tweet_ids"
-                    ].append(edge["tweet_id"])
+                    self.graph[edge["source"]][edge["target"]]["tweet_ids"].append(
+                        edge["tweet_id"]
+                    )
                 else:
                     # If edge doesn't exist, create it with weight 1
                     self.graph.add_edge(
@@ -130,9 +128,7 @@ class TwitterGraph:
         """
         self.num_nodes = self.graph.number_of_nodes()
         self.num_edges = self.graph.number_of_edges()
-        self.avg_degree = (
-            sum(dict(self.graph.degree()).values()) / self.num_nodes
-        )
+        self.avg_degree = sum(dict(self.graph.degree()).values()) / self.num_nodes
         self.pagerank = nx.pagerank(self.graph, weight="weight")
         self.top_users = sorted(
             self.pagerank.items(), key=lambda x: x[1], reverse=True
@@ -163,12 +159,8 @@ class TwitterGraph:
         ]
 
         # Edge width based on weight
-        edge_weights = [
-            self.graph[u][v]["weight"] for u, v in self.graph.edges()
-        ]
-        edge_widths = [
-            w * 2 for w in edge_weights
-        ]  # Scale weights for visualization
+        edge_weights = [self.graph[u][v]["weight"] for u, v in self.graph.edges()]
+        edge_widths = [w * 2 for w in edge_weights]  # Scale weights for visualization
 
         # Spring layout
         pos = nx.spring_layout(self.graph)
@@ -210,25 +202,21 @@ class TwitterGraph:
             stats_text,
             transform=ax.transAxes,
             verticalalignment="center",
-            bbox=dict(
-                boxstyle="round", facecolor="white", alpha=0.8, edgecolor="gray"
-            ),
+            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8, edgecolor="gray"),
         )
 
         # Set title with proper spacing
-        title = f"Twitter {self.network_type.title()} Network - {self.location.title()}\n"
+        title = (
+            f"Twitter {self.network_type.title()} Network - {self.location.title()}\n"
+        )
         fig.suptitle(title, y=0.95, fontsize=12)
 
         # Save visualization with high DPI and tight bounding box
-        output_dir = os.path.join(
-            self.base_dir, self.location, "visualizations"
-        )
+        output_dir = os.path.join(self.base_dir, self.location, "visualizations")
         os.makedirs(output_dir, exist_ok=True)
 
         # Save the visualization
-        output_path = os.path.join(
-            output_dir, f"{self.network_type}_network.png"
-        )
+        output_path = os.path.join(output_dir, f"{self.network_type}_network.png")
         plt.savefig(output_path, bbox_inches="tight", dpi=300, pad_inches=0.5)
         plt.close()  # Close the figure to free memory
 
@@ -257,16 +245,13 @@ class TwitterGraph:
             username = self.graph.nodes[user_id]["username"]
             followers = self.graph.nodes[user_id]["followers"]
             print(
-                f"@{username} (ID: {user_id}): {score:.4f} "
-                f"(Followers: {followers})"
+                f"@{username} (ID: {user_id}): {score:.4f} " f"(Followers: {followers})"
             )
 
 
 def parse_args():
     """Parse command line arguments"""
-    parser = argparse.ArgumentParser(
-        description="Create and analyze Twitter networks"
-    )
+    parser = argparse.ArgumentParser(description="Create and analyze Twitter networks")
     parser.add_argument(
         "--location",
         type=str,
@@ -298,9 +283,7 @@ if __name__ == "__main__":
     network_type = args.network_type if args.network_type else None
 
     # Create and process the network
-    print(
-        f"\nProcessing {network_type or 'retweet'} network for {args.location}..."
-    )
+    print(f"\nProcessing {network_type or 'retweet'} network for {args.location}...")
     twitter_graph = TwitterGraph(
         location=args.location, base_dir=base_dir, network_type=network_type
     )

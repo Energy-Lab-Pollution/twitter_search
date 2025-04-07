@@ -29,9 +29,7 @@ class NetworkHandler:
 
         self.base_dir = Path(__file__).parent.parent / "data/"
         # Users .csv with location matching
-        self.users_file_path = (
-            self.base_dir / "analysis_outputs/location_matches.csv"
-        )
+        self.users_file_path = self.base_dir / "analysis_outputs/location_matches.csv"
 
         # Check if network path
         if not os.path.exists(self.base_dir / f"networks/{self.location}"):
@@ -53,9 +51,7 @@ class NetworkHandler:
         self.user_df = self.user_df.loc[
             self.user_df.loc[:, "search_location"] == self.location
         ]
-        self.user_df = self.user_df.loc[
-            self.user_df.loc[:, "location_match"], :
-        ]
+        self.user_df = self.user_df.loc[self.user_df.loc[:, "location_match"], :]
         self.user_df.reset_index(drop=True, inplace=True)
 
     def get_already_processed_users(self):
@@ -169,12 +165,10 @@ class NetworkHandler:
         city_followers = []
 
         follower_graph = self.read_json(
-            self.base_dir
-            / f"networks/{self.location}/follower_interactions.json"
+            self.base_dir / f"networks/{self.location}/follower_interactions.json"
         )
         retweeter_graph = self.read_json(
-            self.base_dir
-            / f"networks/{self.location}/retweet_interactions.json"
+            self.base_dir / f"networks/{self.location}/retweet_interactions.json"
         )
 
         location_json = self.read_json(self.location_file_path)
@@ -191,7 +185,10 @@ class NetworkHandler:
 
             user_tweets = user_dict["tweets"]
             for user_tweet in user_tweets:
-                if user_tweet["retweet_count"] > 0:
+                # Remove reposts by others
+                if (not user_tweet["tweet_text"].startswith("RT @")) and (
+                    user_tweet["retweet_count"] > 0
+                ):
                     retweets_list.append(user_tweet["retweet_count"])
                 if "retweeters" in user_tweet:
                     if user_tweet["retweeters"]:
@@ -210,12 +207,8 @@ class NetworkHandler:
 
         print(f"Median retweeters {statistics.median(retweets_list)}")
         print(f"Median followers {statistics.median(followers_list)}")
-        print(
-            f"Median retweeters with twikit {statistics.median(twikit_retweeters)}"
-        )
-        print(
-            f"Median followers with twikit {statistics.median(twikit_followers)}"
-        )
+        print(f"Median retweeters with twikit {statistics.median(twikit_retweeters)}")
+        print(f"Median followers with twikit {statistics.median(twikit_followers)}")
         print(
             f"Median retweeters with twikit in {self.location} {statistics.median(city_retweeters)}"
         )
@@ -247,8 +240,7 @@ class NetworkHandler:
         edges = []
         graph_dict = {}
         graph_filename = (
-            self.base_dir
-            / f"networks/{self.location}/{edge_type}_interactions.json"
+            self.base_dir / f"networks/{self.location}/{edge_type}_interactions.json"
         )
 
         try:
@@ -308,9 +300,7 @@ class NetworkHandler:
         graph_dict["edges"] = edges
         with open(graph_filename, "w", encoding="utf-8") as file:
             json.dump(graph_dict, file, ensure_ascii=False, indent=4)
-        print(
-            f"Successfully stored {self.location} {edge_type} edges json file"
-        )
+        print(f"Successfully stored {self.location} {edge_type} edges json file")
 
     async def run(self):
         """
