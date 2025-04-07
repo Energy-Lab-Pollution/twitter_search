@@ -207,7 +207,10 @@ class NetworkHandler:
 
             # Populate proportions array
             perc_tweets_with_retweeters.append(num_tweets_with_retweeters / num_original_tweets)
-            perc_tweets_with_retweeters_twikit.append(num_tweets_with_retweeters_twikit / num_tweets_with_retweeters )
+            if num_tweets_with_retweeters == 0:
+                perc_tweets_with_retweeters_twikit.append(0)
+            else:
+                perc_tweets_with_retweeters_twikit.append(num_tweets_with_retweeters_twikit / num_tweets_with_retweeters )
             
             for follower_dict in follower_graph["edges"]:
                 if follower_dict["target"] == user_dict["user_id"]:
@@ -228,11 +231,19 @@ class NetworkHandler:
         )
 
         print("================= RETWEET STATS =====================")
-        print(f"Median retweeters {statistics.median(retweets_list)}")
-        print(f"Median retweeters with twikit {statistics.median(twikit_retweeters)}")
+        print(("Median proportion of tweets per user that have at "
+               f"least one all-time retweeter {statistics.median(perc_tweets_with_retweeters)}"))
+        print(("Median proportion of tweets per user that have at "
+                f"least one twikit retweeter {statistics.median(perc_tweets_with_retweeters_twikit)}"))
+        print(f"Median sum of all-time retweeters per user: {statistics.median(retweets_list)}")
+        print(f"Median sum of twikit retweeters per user: {statistics.median(twikit_retweeters)}")
+        print(f"Median sum of twikit retweeters / median sum of all time retweeters: "  
+              f"{statistics.median(twikit_retweeters) / statistics.median(retweets_list)}")
         print(
-            f"Median retweeters with twikit in {self.location} {statistics.median(city_retweeters)}"
+            f"Median retweeters with twikit in {self.location}: {statistics.median(city_retweeters)}"
         )
+        print(f"Median sum of kolkata retweeters / median sum of twikit retweeters: "  
+              f"{statistics.median(city_retweeters) / statistics.median(twikit_retweeters)}")        
 
 
     def create_edges(self, edge_type):
