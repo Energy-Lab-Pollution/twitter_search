@@ -446,7 +446,7 @@ class NetworkHandler:
         already_processed_users = self._get_already_processed_users()
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
 
-        for user_id in user_ids[: self.num_users]:
+        for user_id in user_ids[: num_users]:
             if user_id not in already_processed_users:
                 try:
                     user_network = UserNetwork(self.location_file_path)

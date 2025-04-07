@@ -97,6 +97,7 @@ class UserNetwork:
         retweeters_list = []
         more_retweeters_available = True
         self.retweeters_counter += 1
+        attempt_number = 1
 
         # Maxed out retweeters threshold
         if self.retweeters_counter == self.TWIKIT_RETWEETERS_THRESHOLD:
@@ -118,7 +119,10 @@ class UserNetwork:
             self.retweeters_counter += 1
             if self.retweeters_counter < self.TWIKIT_RETWEETERS_THRESHOLD:
                 try:
-                    more_retweeters = await retweeters.next()
+                    if attempt_number == 1:
+                        more_retweeters = await retweeters.next()
+                    else:
+                        more_retweeters = await more_retweeters.next()
                 # Stop here if failure and return what you had so far
                 except twikit.errors.TooManyRequests:
                     print("Retweeters: Too Many Requests")
@@ -138,6 +142,8 @@ class UserNetwork:
                 print(f"Made {self.retweeters_counter} retweets requests")
                 self.retweeters_maxed_out = True
                 return retweeters_list
+            
+            attempt_number += 1
 
         return retweeters_list
 
@@ -204,11 +210,14 @@ class UserNetwork:
         while more_tweets_available:
             num_iter += 1
             try:
-                next_tweets = await user_tweets.next()
+                if num_iter == 1:
+                    next_tweets = await user_tweets.next()
+                else:
+                    next_tweets = await next_tweets.next()
                 if next_tweets:
                     # Parse next tweets
-                    tweets_list = self.parse_tweets(next_tweets)
-                    dict_list.extend(tweets_list)
+                    next_tweets_list = self.parse_tweets(next_tweets)
+                    dict_list.extend(next_tweets_list)
                 else:
                     more_tweets_available = False
             # If errored out on requests, just return what you already have
@@ -252,7 +261,10 @@ class UserNetwork:
         while more_followers_available:
             num_iter += 1
             try:
-                more_followers = await followers.next()
+                if num_iter == 1:
+                    more_followers = await followers.next()
+                else:
+                    more_followers = await more_followers.next()
                 if more_followers:
                     more_parsed_followers = self.parse_users(more_followers)
                     for parsed_follower in more_parsed_followers:
