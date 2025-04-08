@@ -9,6 +9,7 @@ from config_utils.constants import (
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_TWEETS_THRESHOLD,
+    TWIKIT_COUNT,
 )
 from config_utils.util import network_json_maker
 
@@ -18,6 +19,7 @@ class UserNetwork:
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_RETWEETERS_THRESHOLD = TWIKIT_RETWEETERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
+    TWIKIT_COUNT = TWIKIT_COUNT
     SLEEP_TIME = 2
 
     def __init__(self, output_file_path):
@@ -106,7 +108,7 @@ class UserNetwork:
             return []
 
         try:
-            retweeters = await self.client.get_retweeters(tweet_id, count=1000)
+            retweeters = await self.client.get_retweeters(tweet_id, count=self.TWIKIT_COUNT)
             if retweeters:
                 parsed_retweeters = self.parse_users(retweeters)
                 retweeters_list.extend(parsed_retweeters)
@@ -204,7 +206,7 @@ class UserNetwork:
 
         # Parse first set of tweets
         user_tweets = await self.client.get_user_tweets(
-            user_id, "Tweets", count=1000
+            user_id, "Tweets", count=self.TWIKIT_COUNT
         )
         tweets_list = self.parse_tweets(user_tweets)
         dict_list.extend(tweets_list)
@@ -248,7 +250,7 @@ class UserNetwork:
             - tweet_list(list): List of dicts with followers info
         """
         followers_list = []
-        followers = await self.client.get_user_followers(user_id, count=1000)
+        followers = await self.client.get_user_followers(user_id, count=self.TWIKIT_COUNT)
         more_followers_available = True
         num_iter = 0
 

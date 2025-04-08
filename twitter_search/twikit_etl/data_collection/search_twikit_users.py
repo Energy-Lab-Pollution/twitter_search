@@ -97,7 +97,7 @@ class TwikitUserSearcher:
         """
 
         tweets = await self.client.search_tweet(
-            self.query, "Latest", count=1000
+            self.query, "Latest", count=constants.TWIKIT_COUNT
         )
         self.tweets_list, self.users_list = self.parse_tweets_and_users(tweets)
 

@@ -309,7 +309,7 @@ class NetworkHandler:
         print(
             (
                 "e) Median twikit followers in kolkata / median twikit followers: "
-                f"{round(statistics.median(twikit_followers) / statistics.median(followers_list), 2)}"
+                f"{round(statistics.median(city_followers) / statistics.median(twikit_followers), 2)}"
             )
         )
         print("================= RETWEET STATS =====================")
