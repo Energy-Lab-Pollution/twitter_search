@@ -1,6 +1,7 @@
 """
 Script to create and analyze Twitter networks using NetworkX
 """
+
 import argparse
 import json
 import os

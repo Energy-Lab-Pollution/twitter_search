@@ -1,6 +1,7 @@
 """
 Detects all generated .csv files and concatenates them into a single file
 """
+
 from etl.csv_concat import CSVConcat
 
 

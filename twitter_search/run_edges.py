@@ -2,6 +2,7 @@
 Script to get followers and retweeters from a particular set
 of X Users
 """
+
 from argparse import ArgumentParser
 
 from network.network_handler import NetworkHandler

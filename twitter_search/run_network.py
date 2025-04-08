@@ -2,6 +2,7 @@
 Script to get followers and retweeters from a particular set
 of X Users
 """
+
 import asyncio
 import time
 from argparse import ArgumentParser

@@ -2,6 +2,7 @@
 Script that handles the 'user_network.py' script to
 generate a network from a particular city
 """
+
 import json
 import os
 import re

@@ -1,6 +1,7 @@
 """
 Script to pull tweets and retweeters from a particular user,
 """
+
 import time
 
 import twikit
