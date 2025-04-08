@@ -235,6 +235,8 @@ class NetworkHandler:
         print(f"Number of root users {num_users}")
 
         for user_dict in location_json:
+            user_retweeters = 0
+            user_twikit_retweeters = 0
             user_city_followers = 0
             user_city_retweeters = 0
             num_original_tweets = 0
@@ -251,14 +253,17 @@ class NetworkHandler:
                     num_original_tweets += 1
                     if user_tweet["retweet_count"] > 0:
                         num_tweets_with_retweeters += 1
-                        retweets_list.append(user_tweet["retweet_count"])
+                        user_retweeters += user_tweet["retweet_count"]
+
                     if "retweeters" in user_tweet:
                         if user_tweet["retweeters"]:
                             num_tweets_with_retweeters_twikit += 1
-                            twikit_retweeters.append(
-                                len(user_tweet["retweeters"])
+                            user_twikit_retweeters += len(
+                                user_tweet["retweeters"]
                             )
 
+            retweets_list.append(user_retweeters)
+            twikit_retweeters.append(user_twikit_retweeters)
             # Populate proportions array
             if num_original_tweets == 0:
                 perc_tweets_with_retweeters.append(0)
