@@ -1,20 +1,17 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
-        exclude: /twitter_search/twitter_filtering/utils/shape_files/
       - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-json
-        exclude: /twitter_search/twitter_filtering/utils/shape_files/
       - id: check-case-conflict
       - id: check-toml
       - id: check-merge-conflict
       - id: check-xml
       - id: check-yaml
       - id: end-of-file-fixer
-        exclude: /twitter_search/twitter_filtering/utils/shape_files/
       - id: check-symlinks
       - id: mixed-line-ending
       - id: sort-simple-yaml
@@ -24,7 +21,6 @@ repos:
       - id: pretty-format-json
         args:
           - --autofix
-        exclude: /twitter_search/twitter_filtering/utils/shape_files/
 
 
   - repo: https://github.com/pre-commit/pygrep-hooks
@@ -36,7 +32,7 @@ repos:
       - id: python-no-log-warn
 
   - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+    rev: 6.0.1
     hooks:
       - id: isort
         name: Run isort to sort imports
@@ -49,7 +45,7 @@ repos:
           - --line-length=80
 
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+    rev: 7.2.0
     hooks:
       - id: flake8
         args:
@@ -57,7 +53,7 @@ repos:
           - --select=B,C,E,F,W,T4,B9
 
   - repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 25.1.0
     hooks:
       - id: black
         args:
