@@ -154,17 +154,17 @@ python3 twitter_search/run_analysis.py
 
 This step is crucial, in particular the location matching analysis, to determine which users reside in the location of interest.
 
-## Graph / Networks Creation 
+## Graph / Networks Creation
 
 As of April 2025, we are interested in representing the network of users in each particular city to identify the most 'central' users. We use the `analysis_outputs/location_matches.csv` file to get users whose location matches the desired city. Afterwards, we run the following processes:
 
 ### Network JSON Creation
-This process creates a JSON with the followers / retweets per user in the desired location. 
+This process creates a JSON with the followers / retweets per user in the desired location.
 
-To get the network data for 170 Kolkata users without waiting for 15 mins for the extraction to start. This process takes a long time since we need to wait 15 minutes, per user, so the rate limits are refreshed. Note that if a user is already present in the output JSON file, they will be skipped. 
+To get the network data for 170 Kolkata users without waiting for 15 mins for the extraction to start. This process takes a long time since we need to wait 15 minutes, per user, so the rate limits are refreshed. Note that if a user is already present in the output JSON file, they will be skipped.
 
 ```bash
-python3 twitter_search/run_network.py "kolkata" 170 "No" 
+python3 twitter_search/run_network.py "kolkata" 170 "No"
 ```
 
 The output data will be stored in the `data/networks/kolkata/kolkata.json`.
@@ -175,7 +175,7 @@ The second step uses the `data/networks/kolkata/kolkata.json` file to generate f
 To create the follower-based edges for Kolkata, we do the following:
 
 ```bash
-python3 twitter_search/run_edges.py "kolkata" "follower" 
+python3 twitter_search/run_edges.py "kolkata" "follower"
 ```
 For the retweet-based edges, we run:
 
@@ -187,7 +187,7 @@ python3 twitter_search/run_edges.py "kolkata" "retweet"
 
 Finally, we create the actual graph, along with its centrality calculations, with the following script:
 
-For the retweet based graph: 
+For the retweet based graph:
 
 ```bash
 python3 twitter_search/network/twitter_graph.py --location "kolkata"
