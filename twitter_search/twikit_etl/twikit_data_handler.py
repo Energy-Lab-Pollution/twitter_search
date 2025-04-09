@@ -1,6 +1,7 @@
 """
 Script that runs the Twitter Search Pipeline by using Twikit
 """
+
 import os
 from datetime import datetime
 from pathlib import Path

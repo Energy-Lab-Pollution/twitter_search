@@ -1,6 +1,7 @@
 """
 Dictionary with the current queries for searching users
 """
+
 # QUERY DICTIONARY
 QUERIES_EN = {
     "media": """location (media OR press OR coverage OR broadcasting

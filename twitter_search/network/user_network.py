@@ -1,12 +1,13 @@
 """
 Script to pull tweets and retweeters from a particular user,
 """
+
 import time
 
 import twikit
 from config_utils.constants import (
-    ONE_MINUTE,
     TWIKIT_COOKIES_DIR,
+    TWIKIT_COUNT,
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_TWEETS_THRESHOLD,
@@ -19,6 +20,7 @@ class UserNetwork:
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_RETWEETERS_THRESHOLD = TWIKIT_RETWEETERS_THRESHOLD
     TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
+    TWIKIT_COUNT = TWIKIT_COUNT
     SLEEP_TIME = 2
 
     def __init__(self, output_file_path):
@@ -98,6 +100,7 @@ class UserNetwork:
         retweeters_list = []
         more_retweeters_available = True
         self.retweeters_counter += 1
+        attempt_number = 1
 
         # Maxed out retweeters threshold
         if self.retweeters_counter == self.TWIKIT_RETWEETERS_THRESHOLD:
@@ -106,7 +109,9 @@ class UserNetwork:
             return []
 
         try:
-            retweeters = await self.client.get_retweeters(tweet_id)
+            retweeters = await self.client.get_retweeters(
+                tweet_id, count=self.TWIKIT_COUNT
+            )
             if retweeters:
                 parsed_retweeters = self.parse_users(retweeters)
                 retweeters_list.extend(parsed_retweeters)
@@ -119,7 +124,10 @@ class UserNetwork:
             self.retweeters_counter += 1
             if self.retweeters_counter < self.TWIKIT_RETWEETERS_THRESHOLD:
                 try:
-                    more_retweeters = await retweeters.next()
+                    if attempt_number == 1:
+                        more_retweeters = await retweeters.next()
+                    else:
+                        more_retweeters = await more_retweeters.next()
                 # Stop here if failure and return what you had so far
                 except twikit.errors.TooManyRequests:
                     print("Retweeters: Too Many Requests")
@@ -139,6 +147,8 @@ class UserNetwork:
                 print(f"Made {self.retweeters_counter} retweets requests")
                 self.retweeters_maxed_out = True
                 return retweeters_list
+
+            attempt_number += 1
 
         return retweeters_list
 
@@ -161,8 +171,10 @@ class UserNetwork:
         self.retweeters_maxed_out = False
 
         for tweet_dict in tweets_list:
-            # Only get retweeters if retweet_count > 0
-            if tweet_dict["retweet_count"] > 0:
+            # Only get retweeters if tweet is not a repost and retweet_count > 0
+            if (not tweet_dict["tweet_text"].startswith("RT @")) and (
+                tweet_dict["retweet_count"] > 0
+            ):
                 if not self.retweeters_maxed_out:
                     retweeters = await self.get_single_tweet_retweeters(
                         tweet_dict["tweet_id"]
@@ -196,18 +208,23 @@ class UserNetwork:
         num_iter = 0
 
         # Parse first set of tweets
-        user_tweets = await self.client.get_user_tweets(user_id, "Tweets")
+        user_tweets = await self.client.get_user_tweets(
+            user_id, "Tweets", count=self.TWIKIT_COUNT
+        )
         tweets_list = self.parse_tweets(user_tweets)
         dict_list.extend(tweets_list)
 
         while more_tweets_available:
             num_iter += 1
             try:
-                next_tweets = await user_tweets.next()
+                if num_iter == 1:
+                    next_tweets = await user_tweets.next()
+                else:
+                    next_tweets = await next_tweets.next()
                 if next_tweets:
                     # Parse next tweets
-                    tweets_list = self.parse_tweets(next_tweets)
-                    dict_list.extend(tweets_list)
+                    next_tweets_list = self.parse_tweets(next_tweets)
+                    dict_list.extend(next_tweets_list)
                 else:
                     more_tweets_available = False
             # If errored out on requests, just return what you already have
@@ -236,20 +253,35 @@ class UserNetwork:
             - tweet_list(list): List of dicts with followers info
         """
         followers_list = []
-        followers = await self.client.get_user_followers(user_id)
+        followers = await self.client.get_user_followers(
+            user_id, count=self.TWIKIT_COUNT
+        )
         more_followers_available = True
         num_iter = 0
 
         parsed_followers = self.parse_users(followers)
         followers_list.extend(parsed_followers)
 
+        # Keeping track of currently extracted users
+        extracted_users = [
+            parsed_follower["user_id"] for parsed_follower in parsed_followers
+        ]
+
         while more_followers_available:
             num_iter += 1
             try:
-                more_followers = await followers.next()
+                if num_iter == 1:
+                    more_followers = await followers.next()
+                else:
+                    more_followers = await more_followers.next()
                 if more_followers:
                     more_parsed_followers = self.parse_users(more_followers)
-                    followers_list.extend(more_parsed_followers)
+                    for parsed_follower in more_parsed_followers:
+                        if parsed_follower["user_id"] not in extracted_users:
+                            followers_list.append(parsed_follower)
+                            extracted_users.append(parsed_follower["user_id"])
+                        else:
+                            continue
                 else:
                     more_followers_available = False
             # Stop here and just return what you got
@@ -276,15 +308,20 @@ class UserNetwork:
         user_dict = {}
         user_dict["user_id"] = user_id
 
+        # Get source user information
+        user_obj = await self.client.get_user_by_id(user_id)
+        user_dict["username"] = user_obj.screen_name
+        user_dict["followers_count"] = user_obj.followers_count
+        user_dict["following_count"] = user_obj.following_count
+
         # First get tweets, without retweeters
         print("Getting user tweets")
         user_tweets = await self.get_user_tweets(user_id)
-        time.sleep(ONE_MINUTE)
+
         print("Getting user retweeters")
         user_tweets = await self.add_retweeters(user_tweets)
         user_dict["tweets"] = user_tweets
 
-        time.sleep(ONE_MINUTE)
         print("Getting user followers...")
         followers = await self.get_followers(user_id)
         user_dict["followers"] = followers

@@ -38,7 +38,7 @@ class CSVConverter:
 
     def __init__(self, location, twikit=False) -> None:
         # See which JSON files are available
-        self.location = location
+        self.location = location.lower()
         self.twikit = twikit
 
         print("Checking if city is in secondary cities dictionary")

@@ -1,6 +1,7 @@
 """
 Pipeline to search twikit users
 """
+
 import asyncio
 from datetime import datetime
 
@@ -96,7 +97,9 @@ class TwikitUserSearcher:
         to get more tweets with the given query.
         """
 
-        tweets = await self.client.search_tweet(self.query, "Latest", count=20)
+        tweets = await self.client.search_tweet(
+            self.query, "Latest", count=constants.TWIKIT_COUNT
+        )
         self.tweets_list, self.users_list = self.parse_tweets_and_users(tweets)
 
         more_tweets_available = True
