@@ -87,10 +87,10 @@ class NetworkHandler:
 
         return tweets_list, users_list
 
-    async def search_twikit_users(self):
+    async def _get_twikit_city_users(self):
         """
-        Method used to search for tweets, with twikit
-        with the given query
+        Method used to search for tweets, with twikit,
+        using a given query
 
         This method uses twikit's "await next" function
         to get more tweets with the given query.
@@ -136,7 +136,7 @@ class NetworkHandler:
 
             num_iter += 1
 
-    def _get_city_users(self):
+    def _get_file_city_users(self):
         """
         Method to get users whose location match the desired
         location
@@ -153,6 +153,18 @@ class NetworkHandler:
             self.user_df.loc[:, "location_match"], :
         ]
         self.user_df.reset_index(drop=True, inplace=True)
+
+    async def _get_city_users(self, extraction_type):
+        """
+        Searches for city users either from:
+            - twikit
+            - location_matches.csv file
+        """
+        if extraction_type == "twikit":
+            await self._get_twikit_city_users()
+        else:
+            self._get_file_city_users()
+
 
     def _get_already_processed_users(self):
         """
