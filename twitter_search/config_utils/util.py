@@ -4,16 +4,15 @@ Util script with different functions used throughout the project
 
 import json
 import os
+from datetime import datetime
 
 import googlemaps
 import tweepy
-from datetime import datetime
 
 # Local imports
 from config_utils import config
 from config_utils.constants import GEOCODE_TIMEOUT
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut
-
 
 
 LIST_FIELDS = ["id", "name", "description"]
@@ -330,7 +329,9 @@ def flatten_and_remove_empty(input_list):
 
     return new_list
 
+
 # JSON Creators
+
 
 def json_maker(file_path, data_to_append):
     """

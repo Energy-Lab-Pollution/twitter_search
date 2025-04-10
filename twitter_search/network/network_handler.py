@@ -8,13 +8,18 @@ import os
 import re
 import statistics
 import time
-import twikit
 from pathlib import Path
 
 import pandas as pd
+import twikit
 from config_utils.cities import ALIAS_DICT
-from config_utils.constants import FIFTEEN_MINUTES, TWIKIT_COUNT, TWIKIT_COOKIES_DIR
-from config_utils.util import load_json, convert_to_yyyy_mm_dd
+from config_utils.constants import (
+    FIFTEEN_MINUTES,
+    TWIKIT_COOKIES_DIR,
+    TWIKIT_COUNT,
+    TWIKIT_TWEETS_THRESHOLD,
+)
+from config_utils.util import convert_to_yyyy_mm_dd, load_json
 from network.user_network import UserNetwork
 
 
@@ -40,48 +45,47 @@ class NetworkHandler:
             self.base_dir / f"networks/{self.location}/{self.location}.json"
         )
 
-
     def parse_tweets_and_users(self, tweets):
-            """
-            Parses tweets and users from twikit into dictionaries
+        """
+        Parses tweets and users from twikit into dictionaries
 
-            Args:
-                tweets: Array of twikit.tweet.Tweet objects
+        Args:
+            tweets: Array of twikit.tweet.Tweet objects
 
-            Returns:
-                tweets_list: Array of dictionaries with tweets' data
-                users_list: Array of dictionaries with users' data
-            """
-            tweets_list = []
-            users_list = []
-            for tweet in tweets:
-                tweet_dict = {}
-                tweet_dict["tweet_id"] = tweet.id
-                tweet_dict["text"] = tweet.text
-                tweet_dict["created_at"] = tweet.created_at
-                tweet_dict["author_id"] = tweet.user.id
+        Returns:
+            tweets_list: Array of dictionaries with tweets' data
+            users_list: Array of dictionaries with users' data
+        """
+        tweets_list = []
+        users_list = []
+        for tweet in tweets:
+            tweet_dict = {}
+            tweet_dict["tweet_id"] = tweet.id
+            tweet_dict["text"] = tweet.text
+            tweet_dict["created_at"] = tweet.created_at
+            tweet_dict["author_id"] = tweet.user.id
 
-                parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
+            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
 
-                user_dict = {}
-                user_dict["user_id"] = tweet.user.id
-                user_dict["username"] = tweet.user.name
-                user_dict["description"] = tweet.user.description
-                user_dict["location"] = tweet.user.location
-                user_dict["name"] = tweet.user.screen_name
-                user_dict["url"] = tweet.user.url
-                user_dict["followers_count"] = tweet.user.followers_count
-                user_dict["following_count"] = tweet.user.following_count
-                user_dict["listed_count"] = tweet.user.listed_count
-                user_dict["tweets"] = [tweet.text]
-                user_dict["tweet_date"] = parsed_date
-                user_dict["user_date_id"] = f"{tweet.user.id}-{parsed_date}"
-                user_dict["geo_code"] = []
+            user_dict = {}
+            user_dict["user_id"] = tweet.user.id
+            user_dict["username"] = tweet.user.name
+            user_dict["description"] = tweet.user.description
+            user_dict["location"] = tweet.user.location
+            user_dict["name"] = tweet.user.screen_name
+            user_dict["url"] = tweet.user.url
+            user_dict["followers_count"] = tweet.user.followers_count
+            user_dict["following_count"] = tweet.user.following_count
+            user_dict["listed_count"] = tweet.user.listed_count
+            user_dict["tweets"] = [tweet.text]
+            user_dict["tweet_date"] = parsed_date
+            user_dict["user_date_id"] = f"{tweet.user.id}-{parsed_date}"
+            user_dict["geo_code"] = []
 
-                tweets_list.append(tweet_dict)
-                users_list.append(user_dict)
+            tweets_list.append(tweet_dict)
+            users_list.append(user_dict)
 
-            return tweets_list, users_list
+        return tweets_list, users_list
 
     async def search_twikit_users(self):
         """
@@ -127,12 +131,11 @@ class NetworkHandler:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} batches")
 
-            if num_iter == self.twikit_threshold:
+            if num_iter == TWIKIT_TWEETS_THRESHOLD:
                 break
 
             num_iter += 1
 
-    
     def _get_city_users(self):
         """
         Method to get users whose location match the desired
@@ -158,13 +161,12 @@ class NetworkHandler:
         """
         users_list = []
         existing_data = load_json(self.location_file_path)
-        
+
         if existing_data:
             for user_dict in existing_data:
                 user_id = user_dict["user_id"]
                 users_list.append(user_id)
         return users_list
-
 
     @staticmethod
     def check_location(raw_location, target_location):
