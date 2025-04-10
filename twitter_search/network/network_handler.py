@@ -8,12 +8,13 @@ import os
 import re
 import statistics
 import time
+import twikit
 from pathlib import Path
 
 import pandas as pd
 from config_utils.cities import ALIAS_DICT
-from config_utils.constants import FIFTEEN_MINUTES, TWIKIT_COUNT
-from config_utils.util import load_json
+from config_utils.constants import FIFTEEN_MINUTES, TWIKIT_COUNT, TWIKIT_COOKIES_DIR
+from config_utils.util import load_json, convert_to_yyyy_mm_dd
 from network.user_network import UserNetwork
 
 
@@ -60,7 +61,7 @@ class NetworkHandler:
                 tweet_dict["created_at"] = tweet.created_at
                 tweet_dict["author_id"] = tweet.user.id
 
-                parsed_date = self.convert_to_yyyy_mm_dd(tweet.created_at)
+                parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
 
                 user_dict = {}
                 user_dict["user_id"] = tweet.user.id
@@ -82,7 +83,7 @@ class NetworkHandler:
 
             return tweets_list, users_list
 
-    async def search_tweets_and_users(self):
+    async def search_twikit_users(self):
         """
         Method used to search for tweets, with twikit
         with the given query
@@ -90,8 +91,10 @@ class NetworkHandler:
         This method uses twikit's "await next" function
         to get more tweets with the given query.
         """
+        client = twikit.Client("en-US")
+        client.load_cookies(TWIKIT_COOKIES_DIR)
 
-        tweets = await self.client.search_tweet(
+        tweets = await client.search_tweet(
             self.location, "Latest", count=TWIKIT_COUNT
         )
         self.tweets_list, self.users_list = self.parse_tweets_and_users(tweets)

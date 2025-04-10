@@ -330,6 +330,7 @@ def flatten_and_remove_empty(input_list):
 
     return new_list
 
+# JSON Creators
 
 def json_maker(file_path, data_to_append):
     """
@@ -399,6 +400,7 @@ def network_json_maker(file_path, data_to_append):
         json.dump(existing_data, f, indent=1)
 
 
+# Date conversion
 def convert_to_yyyy_mm_dd(date_string):
     """
     Converts a date string in the format "Fri Dec 06 18:09:05 +0000 2024"
