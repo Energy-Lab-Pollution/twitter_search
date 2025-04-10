@@ -154,11 +154,8 @@ class NetworkHandler:
         set of users that have already been processed
         """
         users_list = []
-        try:
-            with open(self.location_file_path, "r") as f:
-                existing_data = json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            existing_data = []
+        existing_data = load_json(self.location_file_path)
+        
         if existing_data:
             for user_dict in existing_data:
                 user_id = user_dict["user_id"]
