@@ -7,6 +7,7 @@ import os
 
 import googlemaps
 import tweepy
+from datetime import datetime
 
 # Local imports
 from config_utils import config
@@ -392,3 +393,22 @@ def network_json_maker(file_path, data_to_append):
     # Write the updated list of dictionaries back to the file
     with open(file_path, "w") as f:
         json.dump(existing_data, f, indent=1)
+
+
+def convert_to_yyyy_mm_dd(date_string):
+    """
+    Converts a date string in the format "Fri Dec 06 18:09:05 +0000 2024"
+    to the "yyyy-mm-dd" format.
+
+    Args:
+        date_string: The input date string.
+
+    Returns:
+        The date string in the "yyyy-mm-dd" format.
+    """
+    try:
+        date_obj = datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
+        return date_obj.strftime("%Y-%m-%d")
+    except ValueError:
+        print(f"Invalid date format: {date_string}")
+        return None
