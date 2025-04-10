@@ -45,9 +45,9 @@ class NetworkHandler:
             self.base_dir / f"networks/{self.location}/{self.location}.json"
         )
 
-    def parse_tweets_and_users(self, tweets):
+    def parse_users(self, tweets):
         """
-        Parses tweets and users from twikit into dictionaries
+        Parses users from the found tweets into dictionaries
 
         Args:
             tweets: Array of twikit.tweet.Tweet objects
@@ -56,17 +56,8 @@ class NetworkHandler:
             tweets_list: Array of dictionaries with tweets' data
             users_list: Array of dictionaries with users' data
         """
-        tweets_list = []
         users_list = []
         for tweet in tweets:
-            tweet_dict = {}
-            tweet_dict["tweet_id"] = tweet.id
-            tweet_dict["text"] = tweet.text
-            tweet_dict["created_at"] = tweet.created_at
-            tweet_dict["author_id"] = tweet.user.id
-
-            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
-
             user_dict = {}
             user_dict["user_id"] = tweet.user.id
             user_dict["username"] = tweet.user.name
@@ -77,15 +68,16 @@ class NetworkHandler:
             user_dict["followers_count"] = tweet.user.followers_count
             user_dict["following_count"] = tweet.user.following_count
             user_dict["listed_count"] = tweet.user.listed_count
+            user_dict["tweet_id"] = tweet.id
             user_dict["tweets"] = [tweet.text]
+            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
             user_dict["tweet_date"] = parsed_date
             user_dict["user_date_id"] = f"{tweet.user.id}-{parsed_date}"
             user_dict["geo_code"] = []
 
-            tweets_list.append(tweet_dict)
             users_list.append(user_dict)
 
-        return tweets_list, users_list
+        return users_list
 
     async def _get_twikit_city_users(self):
         """
