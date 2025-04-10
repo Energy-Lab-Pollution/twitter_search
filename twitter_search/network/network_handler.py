@@ -38,6 +38,13 @@ class NetworkHandler:
             self.base_dir / f"networks/{self.location}/{self.location}.json"
         )
 
+    def search_users(self):
+        """
+        Looks for twikit users
+        """
+        pass
+
+    
     def _get_city_users(self):
         """
         Method to get users whose location match the desired
