@@ -1,12 +1,11 @@
 """
 Pipeline to search twikit users
 """
-
 import asyncio
-from datetime import datetime
 
 import twikit
-from config_utils import constants, util
+from config_utils.util import json_maker, convert_to_yyyy_mm_dd
+from config_utils.constants import TWIKIT_COOKIES_DIR, TWIKIT_COUNT 
 
 
 class TwikitUserSearcher:
@@ -25,26 +24,7 @@ class TwikitUserSearcher:
         self.twikit_threshold = twikit_threshold
 
         self.client = twikit.Client("en-US")
-        self.client.load_cookies(constants.TWIKIT_COOKIES_DIR)
-
-    @staticmethod
-    def convert_to_yyyy_mm_dd(date_string):
-        """
-        Converts a date string in the format "Fri Dec 06 18:09:05 +0000 2024"
-        to the "yyyy-mm-dd" format.
-
-        Args:
-            date_string: The input date string.
-
-        Returns:
-            The date string in the "yyyy-mm-dd" format.
-        """
-        try:
-            date_obj = datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
-            return date_obj.strftime("%Y-%m-%d")
-        except ValueError:
-            print(f"Invalid date format: {date_string}")
-            return None
+        self.client.load_cookies(TWIKIT_COOKIES_DIR)
 
     def parse_tweets_and_users(self, tweets):
         """
@@ -66,7 +46,7 @@ class TwikitUserSearcher:
             tweet_dict["created_at"] = tweet.created_at
             tweet_dict["author_id"] = tweet.user.id
 
-            parsed_date = self.convert_to_yyyy_mm_dd(tweet.created_at)
+            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
 
             user_dict = {}
             user_dict["user_id"] = tweet.user.id
@@ -98,7 +78,7 @@ class TwikitUserSearcher:
         """
 
         tweets = await self.client.search_tweet(
-            self.query, "Latest", count=constants.TWIKIT_COUNT
+            self.query, "Latest", count=TWIKIT_COUNT
         )
         self.tweets_list, self.users_list = self.parse_tweets_and_users(tweets)
 
@@ -142,8 +122,8 @@ class TwikitUserSearcher:
         The util function checks for any existing dictionaries and
         only adds the newer data
         """
-        util.json_maker(self.output_file_users, self.users_list)
-        util.json_maker(self.output_file_tweets, self.users_list)
+        json_maker(self.output_file_users, self.users_list)
+        json_maker(self.output_file_tweets, self.users_list)
 
     def run_search(self):
         """
