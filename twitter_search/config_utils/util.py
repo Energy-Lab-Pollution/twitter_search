@@ -15,15 +15,6 @@ from config_utils.constants import GEOCODE_TIMEOUT
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 
 
-def load_json(file_path):
-    """
-    Loads json from file
-    """
-    with open(file_path, "r") as json_file:
-        data = json.load(json_file)
-
-    return data
-
 
 LIST_FIELDS = ["id", "name", "description"]
 USER_FIELDS = [
@@ -41,6 +32,19 @@ USER_FIELDS = [
     "url",
     "username",
 ]
+
+
+def load_json(path):
+    """
+    Reads a JSON file and returns the data
+    """
+    try:
+        with open(path, "r") as f:
+            existing_data = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        existing_data = []
+
+    return existing_data
 
 
 def strtobool(val):

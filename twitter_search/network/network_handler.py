@@ -11,8 +11,9 @@ import time
 from pathlib import Path
 
 import pandas as pd
-from config_utils.cities import CITIES, ALIAS_DICT
+from config_utils.cities import ALIAS_DICT
 from config_utils.constants import FIFTEEN_MINUTES, TWIKIT_COUNT
+from config_utils.util import load_json
 from network.user_network import UserNetwork
 
 
@@ -164,18 +165,6 @@ class NetworkHandler:
                 users_list.append(user_id)
         return users_list
 
-    @staticmethod
-    def read_json(path):
-        """
-        Reads a JSON file and returns the data
-        """
-        try:
-            with open(path, "r") as f:
-                existing_data = json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            existing_data = []
-
-        return existing_data
 
     @staticmethod
     def check_location(raw_location, target_location):
@@ -312,16 +301,16 @@ class NetworkHandler:
         perc_tweets_with_retweeters_twikit = []
 
         # Paths setup
-        follower_graph = self.read_json(
+        follower_graph = load_json(
             self.base_dir
             / f"networks/{self.location}/follower_interactions.json"
         )
-        retweeter_graph = self.read_json(
+        retweeter_graph = load_json(
             self.base_dir
             / f"networks/{self.location}/retweet_interactions.json"
         )
 
-        location_json = self.read_json(self.location_file_path)
+        location_json = load_json(self.location_file_path)
 
         num_users = len(location_json)
         print(f"Number of root users {num_users}")
