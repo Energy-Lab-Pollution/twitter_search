@@ -70,7 +70,8 @@ class NetworkHandler:
             user_dict["listed_count"] = tweet.user.listed_count
             user_dict["tweet_id"] = tweet.id
             user_dict["tweets"] = [tweet.text]
-            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
+
+            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)        
             user_dict["tweet_date"] = parsed_date
             user_dict["user_date_id"] = f"{tweet.user.id}-{parsed_date}"
             user_dict["geo_code"] = []
@@ -87,23 +88,23 @@ class NetworkHandler:
         This method uses twikit's "await next" function
         to get more tweets with the given query.
         """
+        # TODO: Also check for location here
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DIR)
 
         tweets = await client.search_tweet(
             self.location, "Latest", count=TWIKIT_COUNT
         )
-        self.tweets_list, self.users_list = self.parse_tweets_and_users(tweets)
+        self.users_list = self.parse_users(tweets)
 
         more_tweets_available = True
         num_iter = 1
 
         next_tweets = await tweets.next()
         if next_tweets:
-            next_tweets_list, next_users_list = self.parse_tweets_and_users(
+            next_users_list = self.parse_users(
                 next_tweets
             )
-            self.tweets_list.extend(next_tweets_list)
             self.users_list.extend(next_users_list)
         else:
             more_tweets_available = False
@@ -111,10 +112,9 @@ class NetworkHandler:
         while more_tweets_available:
             next_tweets = await next_tweets.next()
             if next_tweets:
-                next_tweets_list, next_users_list = self.parse_tweets_and_users(
+                next_tweets_list, next_users_list = self.parse_users(
                     next_tweets
                 )
-                self.tweets_list.extend(next_tweets_list)
                 self.users_list.extend(next_users_list)
 
             else:
@@ -123,6 +123,7 @@ class NetworkHandler:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} batches")
 
+            # TODO: We may leave this entire process running
             if num_iter == TWIKIT_TWEETS_THRESHOLD:
                 break
 
@@ -535,14 +536,22 @@ class NetworkHandler:
         """
         # Get city users and already processed users
         await self._get_city_users(extraction_type="file")
+
+        # TODO 1: Check location for twikit people
+
         already_processed_users = self._get_already_processed_users()
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
 
         for user_id in user_ids[:num_users]:
             if user_id not in already_processed_users:
                 try:
+                    # TODO: In user network, we will have to start going into
+                    # each of the followers and retweeters list and do the
+                    # whole location checking again
+                    # same db storage methods are used
                     user_network = UserNetwork(self.location_file_path)
                     print(f"Processing user {user_id}...")
+                    # TODO: user_id will come from a queue
                     await user_network.run(user_id)
                     time.sleep(self.FIFTEEN_MINUTES)
                 except Exception as error:
