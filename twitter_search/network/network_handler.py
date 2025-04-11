@@ -112,7 +112,7 @@ class NetworkHandler:
         while more_tweets_available:
             next_tweets = await next_tweets.next()
             if next_tweets:
-                next_tweets_list, next_users_list = self.parse_users(
+                next_users_list = self.parse_users(
                     next_tweets
                 )
                 self.users_list.extend(next_users_list)
