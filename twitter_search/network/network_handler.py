@@ -534,7 +534,7 @@ class NetworkHandler:
             - num_users: Number of users to get data from
         """
         # Get city users and already processed users
-        self._get_city_users()
+        await self._get_city_users(extraction_type="file")
         already_processed_users = self._get_already_processed_users()
         user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
 
