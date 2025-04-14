@@ -119,7 +119,6 @@ class NetworkHandler:
         This method uses twikit's "await next" function
         to get more tweets with the given query.
         """
-        # TODO: Also check for location here
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DIR)
 
