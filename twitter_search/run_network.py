@@ -35,4 +35,8 @@ if __name__ == "__main__":
         time.sleep(FIFTEEN_MINUTES)
 
     network_handler = NetworkHandler(args.location)
-    asyncio.run(network_handler.create_user_network(args.num_users))
+    asyncio.run(
+        network_handler.create_user_network(
+            args.num_users, extraction_type="file"
+        )
+    )
