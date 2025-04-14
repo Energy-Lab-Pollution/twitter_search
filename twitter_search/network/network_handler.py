@@ -45,6 +45,37 @@ class NetworkHandler:
             self.base_dir / f"networks/{self.location}/{self.location}.json"
         )
 
+    @staticmethod
+    def check_location(raw_location, target_location):
+        """
+        Uses regex to see if the raw location matches
+        the target location
+        """
+
+        target_locations = [target_location]
+
+        # alias is the key, target loc is the value
+        for alias, value in ALIAS_DICT.items():
+            if value == target_location:
+                target_locations.append(alias)
+
+        if isinstance(raw_location, str):
+            raw_location = raw_location.lower().strip()
+            location_regex = re.findall(r"\w+", raw_location)
+
+            if location_regex:
+                for target_location in target_locations:
+                    if target_location in location_regex:
+                        return True
+                    elif target_location in raw_location:
+                        return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+
     def parse_users(self, tweets):
         """
         Parses users from the found tweets into dictionaries
@@ -154,11 +185,16 @@ class NetworkHandler:
             - location_matches.csv file
         """
         if extraction_type == "twikit":
+            self.user_ids[]
             await self._get_twikit_city_users()
+            for user in self.users_list:
+                self.check_location("", self.location)
+
         else:
             self._get_file_city_users()
-
-
+            self.already_processed_users = self._get_already_processed_users()
+            self.user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
+        
     def _get_already_processed_users(self):
         """
         Reads the location JSON file and gets the
@@ -172,37 +208,6 @@ class NetworkHandler:
                 user_id = user_dict["user_id"]
                 users_list.append(user_id)
         return users_list
-
-    @staticmethod
-    def check_location(raw_location, target_location):
-        """
-        Uses regex to see if the raw location matches
-        the target location
-        """
-
-        target_locations = [target_location]
-
-        # alias is the key, target loc is the value
-        for alias, value in ALIAS_DICT.items():
-            if value == target_location:
-                target_locations.append(alias)
-
-        if isinstance(raw_location, str):
-            raw_location = raw_location.lower().strip()
-            location_regex = re.findall(r"\w+", raw_location)
-
-            if location_regex:
-                for target_location in target_locations:
-                    if target_location in location_regex:
-                        return True
-                    elif target_location in raw_location:
-                        return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
 
     @staticmethod
     def parse_edge_dict(source, target, tweet=None):
@@ -526,7 +531,7 @@ class NetworkHandler:
             f"Successfully stored {self.location} {edge_type} edges json file"
         )
 
-    async def create_user_network(self, num_users):
+    async def create_user_network(self, num_users, extraction_type):
         """
         Gets the user network data for a given number of
         users.
@@ -535,15 +540,12 @@ class NetworkHandler:
             - num_users: Number of users to get data from
         """
         # Get city users and already processed users
-        await self._get_city_users(extraction_type="file")
+        await self._get_city_users(extraction_type)
 
         # TODO 1: Check location for twikit people
 
-        already_processed_users = self._get_already_processed_users()
-        user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
-
-        for user_id in user_ids[:num_users]:
-            if user_id not in already_processed_users:
+        for user_id in self.user_ids[:num_users]:
+            if user_id not in self.already_processed_users:
                 try:
                     # TODO: In user network, we will have to start going into
                     # each of the followers and retweeters list and do the
