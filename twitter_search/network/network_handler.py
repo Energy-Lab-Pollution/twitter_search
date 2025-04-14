@@ -102,7 +102,7 @@ class NetworkHandler:
             user_dict["tweet_id"] = tweet.id
             user_dict["tweets"] = [tweet.text]
 
-            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)        
+            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
             user_dict["tweet_date"] = parsed_date
             user_dict["user_date_id"] = f"{tweet.user.id}-{parsed_date}"
             user_dict["geo_code"] = []
@@ -133,9 +133,7 @@ class NetworkHandler:
 
         next_tweets = await tweets.next()
         if next_tweets:
-            next_users_list = self.parse_users(
-                next_tweets
-            )
+            next_users_list = self.parse_users(next_tweets)
             self.users_list.extend(next_users_list)
         else:
             more_tweets_available = False
@@ -143,9 +141,7 @@ class NetworkHandler:
         while more_tweets_available:
             next_tweets = await next_tweets.next()
             if next_tweets:
-                next_users_list = self.parse_users(
-                    next_tweets
-                )
+                next_users_list = self.parse_users(next_tweets)
                 self.users_list.extend(next_users_list)
 
             else:
@@ -183,7 +179,7 @@ class NetworkHandler:
         Searches for city users either from:
             - twikit
             - location_matches.csv file
-        
+
         The method only returns users who have a location match
         and haven't been processed before
         """
@@ -191,7 +187,9 @@ class NetworkHandler:
             self.user_ids = []
             await self._get_twikit_city_users()
             for user in self.users_list:
-                location_match = self.check_location(user["location"], self.location)
+                location_match = self.check_location(
+                    user["location"], self.location
+                )
 
                 if location_match:
                     self.user_ids.append[user["user_id"]]
@@ -206,7 +204,7 @@ class NetworkHandler:
             self._get_file_city_users()
             self.already_processed_users = self._get_already_processed_users()
             self.user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
-        
+
     def _get_already_processed_users(self):
         """
         Reads the location JSON file and gets the

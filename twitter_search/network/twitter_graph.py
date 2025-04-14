@@ -192,7 +192,8 @@ class TwitterGraph:
         labels = {
             node: self.graph.nodes[node]["username"]
             for node in self.graph.nodes()
-            if self.graph.degree(node) > self.DEGREE_THRESHOLD  # Only label significant nodes
+            if self.graph.degree(node)
+            > self.DEGREE_THRESHOLD  # Only label significant nodes
         }
         nx.draw_networkx_labels(self.graph, pos, labels, font_size=8, ax=ax)
 
