@@ -13,7 +13,7 @@ import networkx as nx
 
 class TwitterGraph:
     BASE_DIR = Path(__file__).parent.parent / "data/networks"
-    DEGREE_THRESHOLD = 50
+    DEGREE_THRESHOLD = 70
 
     def __init__(self, location, base_dir=None, network_type=None):
         """
