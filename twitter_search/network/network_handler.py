@@ -557,10 +557,6 @@ class NetworkHandler:
         for user_id in self.user_ids[:num_users]:
             if user_id not in self.already_processed_users:
                 try:
-                    # TODO: In user network, we will have to start going into
-                    # each of the followers and retweeters list and do the
-                    # whole location checking again
-                    # same db storage methods are used
                     user_network = UserNetwork(self.location_file_path)
                     print(f"Processing user {user_id}...")
                     # TODO: user_id will come from a queue
