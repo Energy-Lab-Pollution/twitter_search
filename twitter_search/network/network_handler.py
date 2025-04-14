@@ -183,12 +183,24 @@ class NetworkHandler:
         Searches for city users either from:
             - twikit
             - location_matches.csv file
+        
+        The method only returns users who have a location match
+        and haven't been processed before
         """
         if extraction_type == "twikit":
-            self.user_ids[]
+            self.user_ids = []
             await self._get_twikit_city_users()
             for user in self.users_list:
-                self.check_location("", self.location)
+                location_match = self.check_location(user["location"], self.location)
+
+                if location_match:
+                    self.user_ids.append[user["user_id"]]
+                    # TODO: Check if user has been processed before
+                    # TODO: Upload to DynamoDB
+                    # TODO: Send user_id to SQS queue to get network data
+                else:
+                    # TODO: Handle users whose location doesn't match
+                    pass
 
         else:
             self._get_file_city_users()
@@ -541,8 +553,6 @@ class NetworkHandler:
         """
         # Get city users and already processed users
         await self._get_city_users(extraction_type)
-
-        # TODO 1: Check location for twikit people
 
         for user_id in self.user_ids[:num_users]:
             if user_id not in self.already_processed_users:
