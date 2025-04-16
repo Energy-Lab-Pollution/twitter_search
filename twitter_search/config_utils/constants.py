@@ -145,27 +145,44 @@ ONE_MINUTE = 60
 
 # Neptune constants
 NEPTUNE_ENDPOINT = "wss://<your-neptune-endpoint>:8182/gremlin"
-GREMLIN_ADD_INTERACTION = """
-        g.V('{source}').fold().
-          coalesce(
-              unfold(),
-              addV('user').property(id, '{source}')
-                           .property('username', '{source_username}')
-                           .property('followers', {source_followers})
-                           .property('location', '{location}')
-          ).
-          sideEffect(
-              g.V('{target}').fold().
-                coalesce(
-                    unfold(),
-                    addV('user').property(id, '{target}')
-                                 .property('username', '{target_username}')
-                                 .property('followers', {target_followers})
-                                 .property('location', '{location}')
-                )
-          ).
-          addE('interacted_with').
-            from(g.V('{source}')).to(g.V('{target}')).
-            property('tweet_id', '{tweet_id}').
-            property('location', '{location}')
-        """
+# Increases weight for existing edges in Retweet Network
+RETWEET_TEMPLATE = """
+g.V('{source}').fold().
+  coalesce(unfold(),
+           addV('user').property(id, '{source}')…property('location', '{location}')
+  ).as('s').
+  sideEffect(
+    g.V('{target}').fold().
+      coalesce(unfold(),
+               addV('user').property(id, '{target}')…property('location', '{location}')
+      )
+  ).as('t').
+  choose(
+    __.select('s').outE('retweeted').where(inV().as('t')),
+    __.select('s').outE('retweeted').where(inV().as('t')).
+      property('weight', __.math('weight+1')).
+      property(list, 'tweet_ids', '{tweet_id}'),
+    __.addE('retweeted').from('s').to('t').
+      property('weight', 1).
+      property(list, 'tweet_ids', '{tweet_id}').
+      property('location', '{location}')
+  )
+"""
+
+FOLLOW_TEMPLATE = """
+g.V('{source}').fold().
+  coalesce(unfold(),
+           addV('user').property(id, '{source}')…property('location', '{location}')
+  ).as('s').
+  sideEffect(
+    g.V('{target}').fold().
+      coalesce(unfold(),
+               addV('user').property(id, '{target}')…property('location', '{location}')
+      )
+  ).as('t').
+  // simply add a follows edge if not exists
+  coalesce(
+    select('s').outE('follows').where(inV().as('t')),
+    addE('follows').from('s').to('t').property('location', '{location}')
+  )
+"""
