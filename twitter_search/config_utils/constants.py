@@ -168,8 +168,7 @@ g.V('{source}').fold().
       property('location', '{location}')
   )
 """
-
-FOLLOW_TEMPLATE = """
+FOLLOWER_TEMPLATE = """
 g.V('{source}').fold().
   coalesce(unfold(),
            addV('user').property(id, '{source}')…property('location', '{location}')
