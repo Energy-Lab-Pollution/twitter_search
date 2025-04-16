@@ -27,6 +27,7 @@ httpx = "^0.28.0"
 pre-commit = "^4.2.0"
 matplotlib = "^3.10.1"
 scipy = "^1.15.2"
+gremlinpython = "^3.7.3"
 
 [build-system]
 requires = ["poetry-core"]
