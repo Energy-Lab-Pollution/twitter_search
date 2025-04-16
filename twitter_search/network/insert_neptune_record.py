@@ -5,7 +5,7 @@ Adding file to insert a single record to AWS Neptune
 import threading
 import time
 
-from config_utils.constants import GREMLIN_ADD_INTERACTION, NEPTUNE_ENDPOINT
+from config_utils.constants import FOLLOWER_TEMPLATE, RETWEET_TEMPLATE, NEPTUNE_ENDPOINT
 from gremlin_python.driver import client, serializer
 
 
@@ -17,7 +17,6 @@ class NeptuneWriter:
 
     KEEP_ALIVE_INTERVAL = 600
     NEPTUNE_ENDPOINT = NEPTUNE_ENDPOINT
-    GREMLIN_ADD_INTERACTION = GREMLIN_ADD_INTERACTION
 
     def __init__(self):
         # Define Gremlin Client
@@ -59,7 +58,13 @@ class NeptuneWriter:
         t = threading.Thread(target=ping_loop, daemon=True)
         t.start()
 
-    def add_interaction(
+    def _execute(self, query):
+        """
+        Executes a Gremlin Query
+        """
+        return self.gremlin_client.submitAsync(query).result().all().result()
+
+    def add_retweet(
         self,
         source,
         source_username,
@@ -71,7 +76,8 @@ class NeptuneWriter:
         location,
     ):
         """
-        Adds or updates vertices and creates an edge representing an interaction.
+        Adds or updates vertices and creates an edge representing a 
+        retweet interaction.
 
         Args:
             source (str): ID of the source user.
@@ -83,7 +89,7 @@ class NeptuneWriter:
             tweet_id (str): ID of the tweet for the interaction.
             location (str): Location tag for partitioning.
         """
-        query = GREMLIN_ADD_INTERACTION.format(
+        query = RETWEET_TEMPLATE.format(
             source=source,
             source_username=source_username,
             source_followers=source_followers,
@@ -95,18 +101,49 @@ class NeptuneWriter:
         )
 
         try:
-            result = self.client.submitAsync(query).result().all().result()
-            return result
+            return self._execute(query)
         except Exception as e:
             # On error: attempt reconnect once and retry
             print(
                 f"[AddInteraction] Error executing query: {e}. Reconnecting and retrying..."
             )
             self._connect()
-            retry_result = (
-                self.client.submitAsync(query).result().all().result()
+            return self._execute(query)
+
+    def add_follow(self, source, source_username, source_followers,
+                   target, target_username, target_followers,
+                   location):
+        """
+        Adds or updates vertices and creates an edge representing a 
+        follow interaction.
+
+        Args:
+            source (str): ID of the source user.
+            source_username (str): Username of the source user.
+            source_followers (int): Follower count of the source user.
+            target (str): ID of the target user.
+            target_username (str): Username of the target user.
+            target_followers (int): Follower count of the target user.
+            location (str): Location tag for partitioning.
+        """
+        query = FOLLOWER_TEMPLATE.format(
+            source=source,
+            source_username=source_username,
+            source_followers=source_followers,
+            target=target,
+            target_username=target_username,
+            target_followers=target_followers,
+            location=location
+        )
+        try:
+            return self._execute(query)
+        except Exception as e:
+            # On error: attempt reconnect once and retry
+            print(
+                f"[AddInteraction] Error executing query: {e}. Reconnecting and retrying..."
             )
-            return retry_result
+            self._connect()
+            return self._execute(query)
 
     def close(self):
         """Closes the Gremlin client connection."""
