@@ -171,6 +171,7 @@ class UserNetwork:
         self.retweeters_maxed_out = False
 
         for tweet_dict in tweets_list:
+            # TODO: Upload tweet data to DynamoDB - store_data('tweet')
             # Only get retweeters if tweet is not a repost and retweet_count > 0
             if (not tweet_dict["tweet_text"].startswith("RT @")) and (
                 tweet_dict["retweet_count"] > 0
@@ -181,6 +182,9 @@ class UserNetwork:
                     )
                     # If retweeters, we add that field to the dict
                     if isinstance(retweeters, list):
+                        # Check user location (?)
+                        # TODO: Upload users data to DynamoDB - store_data('user')
+                        # TODO: Send to SQS for network processing
                         tweet_dict["retweeters"] = retweeters
             if counter % 200 == 0:
                 print(f"Processed {counter} tweets")
@@ -295,6 +299,9 @@ class UserNetwork:
                 print("Followers: maxed out number of requests")
                 return followers_list
 
+        # Check user location (?)
+        # TODO: Upload users data to DynamoDB - store_data('user')
+        # TODO: Send to SQS for network processing
         return followers_list
 
     async def run(self, user_id):
