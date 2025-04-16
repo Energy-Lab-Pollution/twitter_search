@@ -5,7 +5,11 @@ Adding file to insert a single record to AWS Neptune
 import threading
 import time
 
-from config_utils.constants import FOLLOWER_TEMPLATE, RETWEET_TEMPLATE, NEPTUNE_ENDPOINT
+from config_utils.constants import (
+    FOLLOWER_TEMPLATE,
+    NEPTUNE_ENDPOINT,
+    RETWEET_TEMPLATE,
+)
 from gremlin_python.driver import client, serializer
 
 
@@ -76,7 +80,7 @@ class NeptuneWriter:
         location,
     ):
         """
-        Adds or updates vertices and creates an edge representing a 
+        Adds or updates vertices and creates an edge representing a
         retweet interaction.
 
         Args:
@@ -110,11 +114,18 @@ class NeptuneWriter:
             self._connect()
             return self._execute(query)
 
-    def add_follow(self, source, source_username, source_followers,
-                   target, target_username, target_followers,
-                   location):
+    def add_follow(
+        self,
+        source,
+        source_username,
+        source_followers,
+        target,
+        target_username,
+        target_followers,
+        location,
+    ):
         """
-        Adds or updates vertices and creates an edge representing a 
+        Adds or updates vertices and creates an edge representing a
         follow interaction.
 
         Args:
@@ -133,7 +144,7 @@ class NeptuneWriter:
             target=target,
             target_username=target_username,
             target_followers=target_followers,
-            location=location
+            location=location,
         )
         try:
             return self._execute(query)
