@@ -142,3 +142,30 @@ TWIKIT_COUNT = 1000
 FIFTEEN_MINUTES = 900
 TWO_MINUTES = 120
 ONE_MINUTE = 60
+
+# Neptune constants
+NEPTUNE_ENDPOINT = "wss://<your-neptune-endpoint>:8182/gremlin"
+GREMLIN_ADD_INTERACTION = """
+        g.V('{source}').fold().
+          coalesce(
+              unfold(),
+              addV('user').property(id, '{source}')
+                           .property('username', '{source_username}')
+                           .property('followers', {source_followers})
+                           .property('location', '{location}')
+          ).
+          sideEffect(
+              g.V('{target}').fold().
+                coalesce(
+                    unfold(),
+                    addV('user').property(id, '{target}')
+                                 .property('username', '{target_username}')
+                                 .property('followers', {target_followers})
+                                 .property('location', '{location}')
+                )
+          ).
+          addE('interacted_with').
+            from(g.V('{source}')).to(g.V('{target}')).
+            property('tweet_id', '{tweet_id}').
+            property('location', '{location}')
+        """
