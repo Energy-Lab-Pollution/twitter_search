@@ -22,6 +22,11 @@ if __name__ == "__main__":
         "num_users", type=int, help="Number of users to process"
     )
     parser.add_argument(
+        "extraction_type", type=str, 
+        choices=["file","twikit", "x"],
+        help="Choose how to get users"
+    )
+    parser.add_argument(
         "wait",
         type=str,
         choices=["Yes", "No"],
