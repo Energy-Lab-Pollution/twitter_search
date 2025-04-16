@@ -315,4 +315,4 @@ if __name__ == "__main__":
     twitter_graph.print_graph_info()
 
     # Visualize the network
-    twitter_graph.visualize_network()
+    # twitter_graph.visualize_network()
