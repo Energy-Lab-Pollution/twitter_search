@@ -193,16 +193,22 @@ class NetworkHandler:
                 if location_match:
                     self.user_ids.append[user["user_id"]]
                     # TODO: Check if user has been processed before
-                    # TODO: Upload to DynamoDB
+                    # TODO: Upload user data to DynamoDB (followers, location, etc)
                     # TODO: Send user_id to SQS queue to get network data
                 else:
                     # TODO: Handle users whose location doesn't match
                     pass
 
-        else:
+        elif extraction_type == "file":
             self._get_file_city_users()
             self.already_processed_users = self._get_already_processed_users()
             self.user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
+
+        # X official API
+        else:
+            raise NotImplementedError(
+                "Official X API methods need to be implemented"
+            )
 
     def _get_already_processed_users(self):
         """
