@@ -114,7 +114,7 @@ class NeptuneWriter:
             self._connect()
             return self._execute(query)
 
-    def add_follow(
+    def add_follower(
         self,
         source,
         source_username,

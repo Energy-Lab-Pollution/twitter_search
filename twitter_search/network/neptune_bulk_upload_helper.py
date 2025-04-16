@@ -1,8 +1,14 @@
-import json
+"""
+Chat GPT generated script to transform JSONs graph data into
+csvs and upload to Neptune
+"""
+
 import csv
-import os
+import json
+
 import boto3
 import requests
+
 
 # Configuration - Update these constants with your actual values
 S3_BUCKET = "your-s3-bucket-name"
@@ -65,7 +71,8 @@ def convert_json_to_csv(
     # Write vertices CSV
     with open(vertices_csv_path, "w", newline="") as vfile:
         writer = csv.DictWriter(
-            vfile, fieldnames=["~id", "~label", "username", "followers", "location"]
+            vfile,
+            fieldnames=["~id", "~label", "username", "followers", "location"],
         )
         writer.writeheader()
         for vid, props in vertices.items():
@@ -146,7 +153,8 @@ if __name__ == "__main__":
         location="kolkata",
     )
     upload_to_s3(
-        "outputs/kolkata_vertices.csv", f"{RETWEET_S3_PREFIX}kolkata_vertices.csv"
+        "outputs/kolkata_vertices.csv",
+        f"{RETWEET_S3_PREFIX}kolkata_vertices.csv",
     )
     upload_to_s3(
         "outputs/kolkata_retweet_edges.csv",
@@ -163,7 +171,8 @@ if __name__ == "__main__":
         location="kolkata",
     )
     upload_to_s3(
-        "outputs/kolkata_vertices.csv", f"{FOLLOW_S3_PREFIX}kolkata_vertices.csv"
+        "outputs/kolkata_vertices.csv",
+        f"{FOLLOW_S3_PREFIX}kolkata_vertices.csv",
     )
     upload_to_s3(
         "outputs/kolkata_follow_edges.csv",
