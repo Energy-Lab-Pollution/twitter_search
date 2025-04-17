@@ -185,3 +185,45 @@ g.V('{source}').fold().
     addE('follows').from('s').to('t').property('location', '{location}')
   )
 """
+RETWEET_CYPHER_TEMPLATE = """
+// 1. Ensure source user node exists
+MERGE (s:User {id: $source})
+  ON CREATE SET
+    s.username  = $source_username,
+    s.followers = $source_followers,
+    s.location  = $location
+
+// 2. Ensure target user node exists
+MERGE (t:User {id: $target})
+  ON CREATE SET
+    t.username  = $target_username,
+    t.followers = $target_followers,
+    t.location  = $location
+
+// 3. Ensure (or update) the retweet relationship
+MERGE (s)-[r:RETWEETED { location: $location }]->(t)
+  ON CREATE SET
+    r.weight    = 1,
+    r.tweet_ids = [$tweet_id]
+  ON MATCH SET
+    r.weight    = r.weight + 1,
+    r.tweet_ids = r.tweet_ids + [$tweet_id]
+"""
+
+FOLLOWER_CYPHER_TEMPLATE = """// 1. Ensure source user node exists
+MERGE (s:User {id: $source})
+  ON CREATE SET
+    s.username  = $source_username,
+    s.followers = $source_followers,
+    s.location  = $location
+
+// 2. Ensure target user node exists
+MERGE (t:User {id: $target})
+  ON CREATE SET
+    t.username  = $target_username,
+    t.followers = $target_followers,
+    t.location  = $location
+
+// 3. Ensure the follows relationship exists
+MERGE (s)-[f:FOLLOWS { location: $location }]->(t)
+"""
