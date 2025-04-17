@@ -159,12 +159,16 @@ This step is crucial, in particular the location matching analysis, to determine
 As of April 2025, we are interested in representing the network of users in each particular city to identify the most 'central' users. We use the `analysis_outputs/location_matches.csv` file to get users whose location matches the desired city. Afterwards, we run the following processes:
 
 ### Network JSON Creation
-This process creates a JSON with the followers / retweets per user in the desired location.
+This process creates a JSON with the followers / retweets per user in the desired location. Note that there will be several ways to get the users data:
+
+- `"file"`: Reads the `location_matches.csv` file and gets the user_ids from the users who belong to such location.
+- `"twikit"`: Searches for tweets mentioning the location, gets the users and only keeps the ones who are actually in the desired city (work in progress).
+- `"x"`: Same approach as the twikit approach, but using the official X API (not implemented yet).
 
 To get the network data for 170 Kolkata users without waiting for 15 mins for the extraction to start. This process takes a long time since we need to wait 15 minutes, per user, so the rate limits are refreshed. Note that if a user is already present in the output JSON file, they will be skipped.
 
 ```bash
-python3 twitter_search/run_network.py "kolkata" 170 "No"
+python3 twitter_search/run_network.py "kolkata" 170 "twikit" "No"
 ```
 
 The output data will be stored in the `data/networks/kolkata/kolkata.json`.
