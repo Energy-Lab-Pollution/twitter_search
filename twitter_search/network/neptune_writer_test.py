@@ -1,11 +1,14 @@
 """
 Adding file to insert a single record to AWS Neptune
 """
-import websocket
-from gremlin_python.driver import client, serializer
-from amazon_sigv4_auth import SigV4RequestAuth  # e.g. from requests-aws4auth or aws-requests-auth
 
+import websocket
+from amazon_sigv4_auth import (
+    SigV4RequestAuth,  # e.g. from requests-aws4auth or aws-requests-auth
+)
+from gremlin_python.driver import client, serializer
 from keys import aws_keys
+
 
 # Neptune constants
 NEPTUNE_ENDPOINT = "wss://grct-test-db.cluster-cz8qgw2s68ic.us-east-2.neptune.amazonaws.com:8182/gremlin"
@@ -50,17 +53,17 @@ g.V('{source}').fold().
   )
 """
 
+
 def signed_transport_factory():
     headers = auth.get_signed_headers()
     header_list = [f"{k}: {v}" for k, v in headers.items()]
 
     class SignedWebSocketClient(WebSocketClient):
         def __init__(self, *args, **kwargs):
-            kwargs['headers'] = header_list
+            kwargs["headers"] = header_list
             super().__init__(*args, **kwargs)
 
     return lambda *args, **kwargs: SignedWebSocketClient(*args, **kwargs)
-
 
 
 class NeptuneWriterTest:
@@ -88,20 +91,20 @@ class NeptuneWriterTest:
                 pass
 
         auth = SigV4RequestAuth(
-        aws_keys['access_key'], 
-        aws_keys['secret_key'], 
-        aws_region='us-east-2',
-        service='neptune-db',
-    )
+            aws_keys["access_key"],
+            aws_keys["secret_key"],
+            aws_region="us-east-2",
+            service="neptune-db",
+        )
 
         self.gremlin_client = client.Client(
             NEPTUNE_ENDPOINT,
-            'g',
+            "g",
             message_serializer=serializer.GraphSONSerializersV2d0(),
-            transport_factory=lambda: WebSocketClientFactory(
+            transport_factory=lambda: signed_transport_factory(
                 url=NEPTUNE_ENDPOINT,
                 headers=auth.get_signed_headers(),
-            )
+            ),
         )
 
     def _execute(self, query):
@@ -154,7 +157,6 @@ class NeptuneWriterTest:
                 f"[AddInteraction] Error executing query: {e}. Reconnecting and retrying..."
             )
 
-
     def add_follower(
         self,
         source,
@@ -194,7 +196,6 @@ class NeptuneWriterTest:
             print(
                 f"[AddInteraction] Error executing query: {e}. Reconnecting and retrying..."
             )
-
 
     def close(self):
         """Closes the Gremlin client connection."""
