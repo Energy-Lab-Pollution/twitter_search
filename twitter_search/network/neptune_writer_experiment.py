@@ -2,7 +2,9 @@
 Adding file to insert a single record to AWS Neptune
 """
 
-from amazon_sigv4_auth import SigV4RequestAuth
+from botocore.credentials import Credentials
+from botocore.auth import SigV4Auth
+from botocore.awsrequest import AWSRequest
 from gremlin_python.driver.client import Client
 from gremlin_python.driver.serializer import GraphSONSerializersV2d0
 from keys import aws_keys
@@ -59,36 +61,39 @@ class NeptuneClient:
     def __init__(self):
         self.endpoint = NEPTUNE_ENDPOINT
         # set up AWS4Auth correctly
-        self.auth = SigV4RequestAuth(
+        self.creds = Credentials(
             aws_keys["aws_access_key"],
             aws_keys["aws_secret_key"],
-            service="neptune-db",
-            region="us-east-2",
-            session_token=None,
         )
+        self.service="neptune-db",
+        self.region="us-east-2",
+        self.url = f"wss://{self.endpoint}:8182/gremlin"
         # open initial connection
         self._connect()
 
-    def _connect(self):
-        """(Re)creates the Gremlin client with a signed WebSocket transport."""
-        url = f"wss://{self.endpoint}:8182/gremlin"
-        # grab SigV4 headers once per connection
-        sig_headers = self.auth.get_signed_headers()
-        header_list = [f"{k}: {v}" for k, v in sig_headers.items()]
+    def _get_sigv4_headers(self):
+        # AWSRequest wants a “realistic” request object
+        aws_req = AWSRequest(method="GET", url=self.url, headers={})
+        SigV4Auth(self.creds, self.service, self.region).add_auth(aws_req)
+        return dict(aws_req.headers.items())
 
-        # transport_factory must be a zero-arg callable returning a WebSocket
+    def _connect(self):
+        sig_hdrs = self._get_sigv4_headers()
+        header_list = [f"{k}: {v}" for k, v in sig_hdrs.items()]
+
         def transport_factory():
             return create_connection(
-                url, header=header_list, ping_interval=self.KEEP_ALIVE
+                self.url,
+                header=header_list,
+                ping_interval=self.KEEP_ALIVE
             )
 
         self.client = Client(
-            url,
-            "g",
+            self.url,
+            'g',
             message_serializer=GraphSONSerializersV2d0(),
-            transport_factory=transport_factory,
+            transport_factory=transport_factory
         )
-        self.log.info(f"Connected to Neptune at {self.endpoint}")
 
     def _execute(self, gremlin_query: str, retry: bool = True):
         """Submits a Gremlin query, retries once on failure."""
