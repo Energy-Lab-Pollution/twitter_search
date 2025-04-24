@@ -14,8 +14,8 @@ import requests
 S3_BUCKET = "your-s3-bucket-name"
 RETWEET_S3_PREFIX = "neptune/retweets/"
 FOLLOW_S3_PREFIX = "neptune/follows/"
-NEPTUNE_LOADER_ENDPOINT = "https://<your-neptune-endpoint>:8182/loader"
-IAM_ROLE_ARN = "arn:aws:iam::<your-account-id>:role/YourNeptuneLoadRole"
+NEPTUNE_LOADER_ENDPOINT = "https://grct-test-db.cluster-cz8qgw2s68ic.us-east-2.neptune.amazonaws.com:8182/loader"
+IAM_ROLE_ARN = "arn:aws:iam::97088024424:role/YourNeptuneLoadRole"
 AWS_REGION = "us-east-1"
 
 # AWS clients

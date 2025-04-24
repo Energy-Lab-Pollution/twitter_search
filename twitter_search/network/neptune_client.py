@@ -7,59 +7,20 @@ from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
 from gremlin_python.driver.client import Client
 from gremlin_python.driver.serializer import GraphSONSerializersV2d0
-from keys import aws_keys
 from websocket import create_connection
 
-
-# Neptune constants
-NEPTUNE_ENDPOINT = "wss://grct-test-db.cluster-cz8qgw2s68ic.us-east-2.neptune.amazonaws.com:8182/gremlin"
-# Increases weight for existing edges in Retweet Network
-RETWEET_TEMPLATE = """
-g.V('{source}').fold().
-  coalesce(unfold(),
-           addV('user').property(id, '{source}')…property('location', '{location}')
-  ).as('s').
-  sideEffect(
-    g.V('{target}').fold().
-      coalesce(unfold(),
-               addV('user').property(id, '{target}')…property('location', '{location}')
-      )
-  ).as('t').
-  choose(
-    __.select('s').outE('retweeted').where(inV().as('t')),
-    __.select('s').outE('retweeted').where(inV().as('t')).
-      property('weight', __.math('weight+1')).
-      property(list, 'tweet_ids', '{tweet_id}'),
-    __.addE('retweeted').from('s').to('t').
-      property('weight', 1).
-      property(list, 'tweet_ids', '{tweet_id}').
-      property('location', '{location}')
-  )
-"""
-FOLLOWER_TEMPLATE = """
-g.V('{source}').fold().
-  coalesce(unfold(),
-           addV('user').property(id, '{source}')…property('location', '{location}')
-  ).as('s').
-  sideEffect(
-    g.V('{target}').fold().
-      coalesce(unfold(),
-               addV('user').property(id, '{target}')…property('location', '{location}')
-      )
-  ).as('t').
-  // simply add a follows edge if not exists
-  coalesce(
-    select('s').outE('follows').where(inV().as('t')),
-    addE('follows').from('s').to('t').property('location', '{location}')
-  )
-"""
+# Local imports
+from keys import aws_keys
+from config_utils.constants import (NEPTUNE_ENDPOINT,
+                                    RETWEET_TEMPLATE,
+                                    FOLLOWER_TEMPLATE)
 
 
 class NeptuneClient:
     KEEP_ALIVE = 60  # ping interval in seconds
 
     def __init__(self):
-        self.endpoint = NEPTUNE_ENDPOINT
+        self.endpoint = f"wss://{NEPTUNE_ENDPOINT}:8182/gremlin"
         # set up AWS4Auth correctly
         self.creds = Credentials(
             aws_keys["aws_access_key"],
@@ -160,56 +121,3 @@ class NeptuneClient:
         except Exception as e:
             print(f"Error closing connection: {e}")
 
-
-if __name__ == "__main__":
-
-    writer = NeptuneClient()
-    print("Initialized client...")
-    writer.add_retweet(
-        source="1392834695558144004",
-        source_username="ratri_bose",
-        source_followers=95,
-        target="1433432747989626880",
-        target_username="LiveSanghamitra",
-        target_followers=921,
-        tweet_id="1909221609862209855",
-        location="kolkata",
-    )
-    writer.add_retweet(
-        source="966616811411091456",
-        source_username="AitcProvat",
-        source_followers=1482,
-        target="1433432747989626880",
-        target_username="LiveSanghamitra",
-        target_followers=921,
-        tweet_id="1908827352471117987",
-        location="kolkata",
-    )
-
-    writer.add_retweet(
-        source="354283190",
-        source_username="SureshKumarIyer",
-        source_followers=58,
-        target="1433432747989626880",
-        target_username="LiveSanghamitra",
-        target_followers=921,
-        tweet_id="1908233554544271446",
-        location="kolkata",
-    )
-    print("Added retweet edges")
-
-    writer.add_follower(
-        source="1263531549888335873",
-        source_username="nghamitraLIVE",
-        source_followers=19975,
-        target="1433432747989626880",
-        target_username="LiveSanghamitra",
-        target_followers=921,
-        location="kolkata",
-    )
-
-    print("Follower edge added")
-
-    writer.close()
-
-    print("Closed client")
