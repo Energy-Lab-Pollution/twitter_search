@@ -144,7 +144,7 @@ TWO_MINUTES = 120
 ONE_MINUTE = 60
 
 # Neptune constants
-NEPTUNE_ENDPOINT = "wss://<your-neptune-endpoint>:8182/gremlin"
+NEPTUNE_ENDPOINT = "grct-test-db.cluster-cz8qgw2s68ic.us-east-2.neptune.amazonaws.com"
 # Increases weight for existing edges in Retweet Network
 RETWEET_TEMPLATE = """
 g.V('{source}').fold().
