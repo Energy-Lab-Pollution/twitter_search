@@ -9,14 +9,11 @@ import json
 import boto3
 import requests
 
+from config_utils.constants import (S3_BUCKET,
+                                    NEPTUNE_ENDPOINT,
+                                    NEPTUNE_AWS_REGION,
+                                    IAM_ROLE_ARN)
 
-# Configuration - Update these constants with your actual values
-S3_BUCKET = "your-s3-bucket-name"
-RETWEET_S3_PREFIX = "neptune/retweets/"
-FOLLOW_S3_PREFIX = "neptune/follows/"
-NEPTUNE_LOADER_ENDPOINT = "https://grct-test-db.cluster-cz8qgw2s68ic.us-east-2.neptune.amazonaws.com:8182/loader"
-IAM_ROLE_ARN = "arn:aws:iam::97088024424:role/YourNeptuneLoadRole"
-AWS_REGION = "us-east-1"
 
 # AWS clients
 s3_client = boto3.client("s3")
@@ -130,52 +127,46 @@ def bulk_load_to_neptune(s3_prefix):
     """
     Trigger Neptune Bulk Loader for all files under the given S3 prefix.
     """
+    loader_endpoint = f"https://{NEPTUNE_ENDPOINT}:8182/loader"
     payload = {
         "source": f"s3://{S3_BUCKET}/{s3_prefix}",
         "format": "csv",
         "iamRoleArn": IAM_ROLE_ARN,
-        "region": AWS_REGION,
+        "region": NEPTUNE_AWS_REGION,
         "failOnError": "FALSE",
         "parallelism": "HIGH",
     }
-    response = requests.post(NEPTUNE_LOADER_ENDPOINT, json=payload)
+    response = requests.post(loader_endpoint, json=payload)
     print("Bulk load response:", response.status_code, response.json())
 
 
 if __name__ == "__main__":
     # Example usage:
     # Convert and load retweets
+    location = "kolkata"
+    interaction_type = "retweet"
+    
+    json_path=f"data/networks/{location}/{interaction_type}_interactions.json",
+    vertices_csv_path=f"data/networks/{location}_{interaction_type}_vertices.csv",
+    edges_csv_path=f"data/networks/{location}/{location}_{interaction_type}_edges.csv"
+    s3_path = f"networks/{location}/neptune/{interaction_type}"
+    
     convert_json_to_csv(
-        json_path="data/networks/kolkata/retweet_interactions.json",
-        vertices_csv_path="outputs/kolkata_vertices.csv",
-        edges_csv_path="outputs/kolkata_retweet_edges.csv",
-        graph_type="retweet",
-        location="kolkata",
+        json_path,
+        vertices_csv_path,
+        edges_csv_path,
+        graph_type=interaction_type,
+        location=location,
     )
+    # Upload vertices
     upload_to_s3(
-        "outputs/kolkata_vertices.csv",
-        f"{RETWEET_S3_PREFIX}kolkata_vertices.csv",
+        vertices_csv_path,
+        f"{s3_path}/{location}_{interaction_type}_vertices.csv",
     )
+    # Upload edges
     upload_to_s3(
-        "outputs/kolkata_retweet_edges.csv",
-        f"{RETWEET_S3_PREFIX}kolkata_retweet_edges.csv",
+        edges_csv_path,
+        f"{s3_path}/kolkata_retweet_edges.csv",
     )
-    bulk_load_to_neptune(RETWEET_S3_PREFIX)
+    bulk_load_to_neptune(s3_path)
 
-    # Convert and load follows
-    convert_json_to_csv(
-        json_path="data/networks/kolkata/follower_interactions.json",
-        vertices_csv_path="outputs/kolkata_vertices.csv",  # reuse or separate as needed
-        edges_csv_path="outputs/kolkata_follow_edges.csv",
-        graph_type="follow",
-        location="kolkata",
-    )
-    upload_to_s3(
-        "outputs/kolkata_vertices.csv",
-        f"{FOLLOW_S3_PREFIX}kolkata_vertices.csv",
-    )
-    upload_to_s3(
-        "outputs/kolkata_follow_edges.csv",
-        f"{FOLLOW_S3_PREFIX}kolkata_follow_edges.csv",
-    )
-    bulk_load_to_neptune(FOLLOW_S3_PREFIX)
