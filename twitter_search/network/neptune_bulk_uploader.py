@@ -156,17 +156,18 @@ class NeptuneBulkUploader:
         """
         Trigger Neptune Bulk Loader for all files under the given S3 prefix.
         """
-        loader_endpoint = f"https://{NEPTUNE_ENDPOINT}:8182/loader"
-        payload = {
-            "source": f"s3://{S3_BUCKET}/{s3_prefix}",
-            "format": "csv",
-            "iamRoleArn": IAM_ROLE_ARN,
-            "region": NEPTUNE_AWS_REGION,
-            "failOnError": "FALSE",
-            "parallelism": "HIGH",
-        }
-        response = requests.post(loader_endpoint, json=payload)
-        print("Bulk load response:", response.status_code, response.json())
+        neptune_client = boto3.client('neptune-data', region_name='us-east-2')
+        # loader_endpoint = f"https://{NEPTUNE_ENDPOINT}:8182/loader"
+        response = neptune_client.start_loader_job(
+            source= f"s3://{S3_BUCKET}/{s3_prefix}",
+            format="csv",
+            iamRoleArn=IAM_ROLE_ARN,
+            region=NEPTUNE_AWS_REGION,
+            failOnError=True,
+            parallelism="MEDIUM",
+        )
+        print("Loader job ID:", response['payload']['jobId'])  # monitor this job via get_loader_job_status
+
 
     def run(self):
         """
