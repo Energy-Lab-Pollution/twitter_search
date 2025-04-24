@@ -58,4 +58,3 @@ if __name__ == "__main__":
     neptune_client.close()
 
     print("Closed client")
-

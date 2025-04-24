@@ -5,15 +5,17 @@ Adding file to insert a single record to AWS Neptune
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
+from config_utils.constants import (
+    FOLLOWER_TEMPLATE,
+    NEPTUNE_ENDPOINT,
+    RETWEET_TEMPLATE,
+)
 from gremlin_python.driver.client import Client
 from gremlin_python.driver.serializer import GraphSONSerializersV2d0
-from websocket import create_connection
 
 # Local imports
 from keys import aws_keys
-from config_utils.constants import (NEPTUNE_ENDPOINT,
-                                    RETWEET_TEMPLATE,
-                                    FOLLOWER_TEMPLATE)
+from websocket import create_connection
 
 
 class NeptuneClient:
@@ -120,4 +122,3 @@ class NeptuneClient:
             print("Connection closed.")
         except Exception as e:
             print(f"Error closing connection: {e}")
-
