@@ -5,9 +5,8 @@ Adding file to insert a single record to AWS Neptune
 from amazon_sigv4_auth import SigV4RequestAuth
 from gremlin_python.driver.client import Client
 from gremlin_python.driver.serializer import GraphSONSerializersV2d0
-from websocket import create_connection
-
 from keys import aws_keys
+from websocket import create_connection
 
 
 # Neptune constants
@@ -52,17 +51,21 @@ g.V('{source}').fold().
     addE('follows').from('s').to('t').property('location', '{location}')
   )
 """
+
+
 class NeptuneClient:
     KEEP_ALIVE = 600  # ping interval in seconds
 
     def __init__(self):
         self.endpoint = NEPTUNE_ENDPOINT
         # set up AWS4Auth correctly
-        self.auth = SigV4RequestAuth(aws_keys["aws_access_key"],
-                             aws_keys["aws_secret_key"],
-                             service="neptune-db",
-                             region="us-east-2",
-                             session_token=None)
+        self.auth = SigV4RequestAuth(
+            aws_keys["aws_access_key"],
+            aws_keys["aws_secret_key"],
+            service="neptune-db",
+            region="us-east-2",
+            session_token=None,
+        )
         # open initial connection
         self._connect()
 
@@ -76,16 +79,14 @@ class NeptuneClient:
         # transport_factory must be a zero-arg callable returning a WebSocket
         def transport_factory():
             return create_connection(
-                url,
-                header=header_list,
-                ping_interval=self.KEEP_ALIVE
+                url, header=header_list, ping_interval=self.KEEP_ALIVE
             )
 
         self.client = Client(
             url,
-            'g',
+            "g",
             message_serializer=GraphSONSerializersV2d0(),
-            transport_factory=transport_factory
+            transport_factory=transport_factory,
         )
         self.log.info(f"Connected to Neptune at {self.endpoint}")
 
@@ -111,15 +112,17 @@ class NeptuneClient:
         query = template.format(**kwargs)
         return self._execute(query)
 
-    def add_retweet(self,
-                    source: str,
-                    source_username: str,
-                    source_followers: int,
-                    target: str,
-                    target_username: str,
-                    target_followers: int,
-                    tweet_id: str,
-                    location: str):
+    def add_retweet(
+        self,
+        source: str,
+        source_username: str,
+        source_followers: int,
+        target: str,
+        target_username: str,
+        target_followers: int,
+        tweet_id: str,
+        location: str,
+    ):
         return self.add_interaction(
             RETWEET_TEMPLATE,
             source=source,
@@ -132,14 +135,16 @@ class NeptuneClient:
             location=location,
         )
 
-    def add_follower(self,
-                     source: str,
-                     source_username: str,
-                     source_followers: int,
-                     target: str,
-                     target_username: str,
-                     target_followers: int,
-                     location: str):
+    def add_follower(
+        self,
+        source: str,
+        source_username: str,
+        source_followers: int,
+        target: str,
+        target_username: str,
+        target_followers: int,
+        location: str,
+    ):
         return self.add_interaction(
             FOLLOWER_TEMPLATE,
             source=source,
@@ -158,6 +163,7 @@ class NeptuneClient:
             self.log.info("Connection closed.")
         except Exception as e:
             self.log.error(f"Error closing connection: {e}")
+
 
 if __name__ == "__main__":
 
