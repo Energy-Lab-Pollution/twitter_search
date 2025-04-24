@@ -2,9 +2,9 @@
 Adding file to insert a single record to AWS Neptune
 """
 
-from botocore.credentials import Credentials
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
+from botocore.credentials import Credentials
 from gremlin_python.driver.client import Client
 from gremlin_python.driver.serializer import GraphSONSerializersV2d0
 from keys import aws_keys
@@ -56,7 +56,7 @@ g.V('{source}').fold().
 
 
 class NeptuneClient:
-    KEEP_ALIVE = 600  # ping interval in seconds
+    KEEP_ALIVE = 60  # ping interval in seconds
 
     def __init__(self):
         self.endpoint = NEPTUNE_ENDPOINT
@@ -65,8 +65,8 @@ class NeptuneClient:
             aws_keys["aws_access_key"],
             aws_keys["aws_secret_key"],
         )
-        self.service="neptune-db"
-        self.region="us-east-2"
+        self.service = "neptune-db"
+        self.region = "us-east-2"
         self.url = NEPTUNE_ENDPOINT
         # open initial connection
         self._connect()
@@ -83,16 +83,14 @@ class NeptuneClient:
 
         def transport_factory():
             return create_connection(
-                self.url,
-                header=header_list,
-                ping_interval=self.KEEP_ALIVE
+                self.url, header=header_list, ping_interval=self.KEEP_ALIVE
             )
 
         self.client = Client(
             self.url,
-            'g',
+            "g",
             message_serializer=GraphSONSerializersV2d0(),
-            transport_factory=transport_factory
+            transport_factory=transport_factory,
         )
 
     def _execute(self, gremlin_query: str, retry: bool = True):
