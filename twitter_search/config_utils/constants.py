@@ -144,7 +144,9 @@ TWO_MINUTES = 120
 ONE_MINUTE = 60
 
 # Neptune constants
-NEPTUNE_ENDPOINT = "grct-test-db.cluster-cz8qgw2s68ic.us-east-2.neptune.amazonaws.com"
+NEPTUNE_ENDPOINT = (
+    "grct-test-db.cluster-cz8qgw2s68ic.us-east-2.neptune.amazonaws.com"
+)
 # Increases weight for existing edges in Retweet Network
 RETWEET_TEMPLATE = """
 g.V('{source}').fold().
@@ -227,3 +229,7 @@ MERGE (t:User {id: $target})
 // 3. Ensure the follows relationship exists
 MERGE (s)-[f:FOLLOWS { location: $location }]->(t)
 """
+
+S3_BUCKET = "global-rct-users"
+IAM_ROLE_ARN = "arn:aws:iam::97088024424:role/YourNeptuneLoadRole"
+NEPTUNE_AWS_REGION = "us-west-1"
