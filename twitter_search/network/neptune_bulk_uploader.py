@@ -5,9 +5,12 @@ csvs and upload to Neptune
 
 import csv
 import json
+from pathlib import Path
 
 import boto3
 import requests
+
+# Local imports
 from config_utils.constants import (
     IAM_ROLE_ARN,
     NEPTUNE_AWS_REGION,
@@ -23,14 +26,18 @@ class NeptuneBulkUploader:
         self.s3_client = boto3.client("s3")
         self.location = location
         self.interaction_type = interaction_type
+        self.base_dir = Path(__file__).parent.parent / "data/"
         self.json_path = (
-            f"data/networks/{location}/{interaction_type}_interactions.json",
+            self.base_dir
+            / f"networks/{location}/{interaction_type}_interactions.json"
         )
         self.vertices_csv_path = (
-            f"data/networks/{location}_{interaction_type}_vertices.csv",
+            self.base_dir
+            / f"networks/{location}/{location}_{interaction_type}_vertices.csv"
         )
         self.edges_csv_path = (
-            f"data/networks/{location}/{location}_{interaction_type}_edges.csv"
+            self.base_dir
+            / f"networks/{location}/{location}_{interaction_type}_edges.csv"
         )
         self.s3_path = f"networks/{location}/neptune/{interaction_type}"
 
