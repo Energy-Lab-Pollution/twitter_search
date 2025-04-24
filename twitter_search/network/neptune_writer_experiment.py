@@ -65,9 +65,9 @@ class NeptuneClient:
             aws_keys["aws_access_key"],
             aws_keys["aws_secret_key"],
         )
-        self.service="neptune-db",
-        self.region="us-east-2",
-        self.url = f"wss://{self.endpoint}:8182/gremlin"
+        self.service="neptune-db"
+        self.region="us-east-2"
+        self.url = NEPTUNE_ENDPOINT
         # open initial connection
         self._connect()
 
@@ -101,14 +101,7 @@ class NeptuneClient:
             result = self.client.submitAsync(gremlin_query)
             return result.result().all().result()
         except Exception as e:
-            self.log.warning(f"Query failed: {e}")
-            if retry:
-                self.log.info("Reconnecting and retrying...")
-                self._connect()
-                return self._execute(gremlin_query, retry=False)
-            else:
-                self.log.error("Retry also failed.")
-                raise
+            print(f"Query failed: {e}")
 
     def add_interaction(self, template: str, **kwargs):
         """
@@ -165,9 +158,9 @@ class NeptuneClient:
         """Closes the underlying Gremlin client."""
         try:
             self.client.close()
-            self.log.info("Connection closed.")
+            print("Connection closed.")
         except Exception as e:
-            self.log.error(f"Error closing connection: {e}")
+            print(f"Error closing connection: {e}")
 
 
 if __name__ == "__main__":
