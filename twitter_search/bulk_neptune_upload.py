@@ -2,9 +2,11 @@
 Script that transform network JSON files to csvs and
 uploads them in bulk to Neptune
 """
+
 from argparse import ArgumentParser
 
-from network.neptune_bulk_upload import NeptuneBulkUploader
+from network.neptune_bulk_uploader import NeptuneBulkUploader
+
 
 if __name__ == "__main__":
     # Convert and load retweets
