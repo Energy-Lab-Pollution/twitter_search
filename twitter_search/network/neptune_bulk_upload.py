@@ -8,11 +8,12 @@ import json
 
 import boto3
 import requests
-
-from config_utils.constants import (S3_BUCKET,
-                                    NEPTUNE_ENDPOINT,
-                                    NEPTUNE_AWS_REGION,
-                                    IAM_ROLE_ARN)
+from config_utils.constants import (
+    IAM_ROLE_ARN,
+    NEPTUNE_AWS_REGION,
+    NEPTUNE_ENDPOINT,
+    S3_BUCKET,
+)
 
 
 # AWS clients
@@ -145,12 +146,18 @@ if __name__ == "__main__":
     # Convert and load retweets
     location = "kolkata"
     interaction_type = "retweet"
-    
-    json_path=f"data/networks/{location}/{interaction_type}_interactions.json",
-    vertices_csv_path=f"data/networks/{location}_{interaction_type}_vertices.csv",
-    edges_csv_path=f"data/networks/{location}/{location}_{interaction_type}_edges.csv"
+
+    json_path = (
+        f"data/networks/{location}/{interaction_type}_interactions.json",
+    )
+    vertices_csv_path = (
+        f"data/networks/{location}_{interaction_type}_vertices.csv",
+    )
+    edges_csv_path = (
+        f"data/networks/{location}/{location}_{interaction_type}_edges.csv"
+    )
     s3_path = f"networks/{location}/neptune/{interaction_type}"
-    
+
     convert_json_to_csv(
         json_path,
         vertices_csv_path,
@@ -169,4 +176,3 @@ if __name__ == "__main__":
         f"{s3_path}/kolkata_retweet_edges.csv",
     )
     bulk_load_to_neptune(s3_path)
-
