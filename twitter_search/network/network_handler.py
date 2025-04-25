@@ -11,8 +11,15 @@ import time
 from pathlib import Path
 
 import pandas as pd
+import twikit
 from config_utils.cities import ALIAS_DICT
-from config_utils.constants import FIFTEEN_MINUTES
+from config_utils.constants import (
+    FIFTEEN_MINUTES,
+    TWIKIT_COOKIES_DIR,
+    TWIKIT_COUNT,
+    TWIKIT_TWEETS_THRESHOLD,
+)
+from config_utils.util import convert_to_yyyy_mm_dd, load_json
 from network.user_network import UserNetwork
 
 
@@ -37,54 +44,6 @@ class NetworkHandler:
         self.location_file_path = (
             self.base_dir / f"networks/{self.location}/{self.location}.json"
         )
-
-    def _get_city_users(self):
-        """
-        Method to get users whose location match the desired
-        location
-        """
-        # Users .csv with location matching
-        users_file_path = (
-            self.base_dir / "analysis_outputs/location_matches.csv"
-        )
-        self.user_df = pd.read_csv(users_file_path)
-        self.user_df = self.user_df.loc[
-            self.user_df.loc[:, "search_location"] == self.location
-        ]
-        self.user_df = self.user_df.loc[
-            self.user_df.loc[:, "location_match"], :
-        ]
-        self.user_df.reset_index(drop=True, inplace=True)
-
-    def _get_already_processed_users(self):
-        """
-        Reads the location JSON file and gets the
-        set of users that have already been processed
-        """
-        users_list = []
-        try:
-            with open(self.location_file_path, "r") as f:
-                existing_data = json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            existing_data = []
-        if existing_data:
-            for user_dict in existing_data:
-                user_id = user_dict["user_id"]
-                users_list.append(user_id)
-        return users_list
-
-    @staticmethod
-    def read_json(path):
-        """
-        Reads a JSON file and returns the data
-        """
-        try:
-            with open(path, "r") as f:
-                existing_data = json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            existing_data = []
-
-        return existing_data
 
     @staticmethod
     def check_location(raw_location, target_location):
@@ -116,6 +75,154 @@ class NetworkHandler:
                 return False
         else:
             return False
+
+    def parse_users(self, tweets):
+        """
+        Parses users from the found tweets into dictionaries
+
+        Args:
+            tweets: Array of twikit.tweet.Tweet objects
+
+        Returns:
+            tweets_list: Array of dictionaries with tweets' data
+            users_list: Array of dictionaries with users' data
+        """
+        users_list = []
+        for tweet in tweets:
+            user_dict = {}
+            user_dict["user_id"] = tweet.user.id
+            user_dict["username"] = tweet.user.name
+            user_dict["description"] = tweet.user.description
+            user_dict["location"] = tweet.user.location
+            user_dict["name"] = tweet.user.screen_name
+            user_dict["url"] = tweet.user.url
+            user_dict["followers_count"] = tweet.user.followers_count
+            user_dict["following_count"] = tweet.user.following_count
+            user_dict["listed_count"] = tweet.user.listed_count
+            user_dict["tweet_id"] = tweet.id
+            user_dict["tweets"] = [tweet.text]
+
+            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
+            user_dict["tweet_date"] = parsed_date
+            user_dict["user_date_id"] = f"{tweet.user.id}-{parsed_date}"
+            user_dict["geo_code"] = []
+
+            users_list.append(user_dict)
+
+        return users_list
+
+    async def _get_twikit_city_users(self):
+        """
+        Method used to search for tweets, with twikit,
+        using a given query
+
+        This method uses twikit's "await next" function
+        to get more tweets with the given query.
+        """
+        client = twikit.Client("en-US")
+        client.load_cookies(TWIKIT_COOKIES_DIR)
+
+        tweets = await client.search_tweet(
+            self.location, "Latest", count=TWIKIT_COUNT
+        )
+        self.users_list = self.parse_users(tweets)
+
+        more_tweets_available = True
+        num_iter = 1
+
+        next_tweets = await tweets.next()
+        if next_tweets:
+            next_users_list = self.parse_users(next_tweets)
+            self.users_list.extend(next_users_list)
+        else:
+            more_tweets_available = False
+
+        while more_tweets_available:
+            next_tweets = await next_tweets.next()
+            if next_tweets:
+                next_users_list = self.parse_users(next_tweets)
+                self.users_list.extend(next_users_list)
+
+            else:
+                more_tweets_available = False
+
+            if num_iter % 5 == 0:
+                print(f"Processed {num_iter} batches")
+
+            # TODO: We may leave this entire process running
+            if num_iter == TWIKIT_TWEETS_THRESHOLD:
+                break
+
+            num_iter += 1
+
+    def _get_file_city_users(self):
+        """
+        Method to get users whose location match the desired
+        location
+        """
+        # Users .csv with location matching
+        users_file_path = (
+            self.base_dir / "analysis_outputs/location_matches.csv"
+        )
+        self.user_df = pd.read_csv(users_file_path)
+        self.user_df = self.user_df.loc[
+            self.user_df.loc[:, "search_location"] == self.location
+        ]
+        self.user_df = self.user_df.loc[
+            self.user_df.loc[:, "location_match"], :
+        ]
+        self.user_df.reset_index(drop=True, inplace=True)
+
+    async def _get_city_users(self, extraction_type):
+        """
+        Searches for city users either from:
+            - twikit
+            - location_matches.csv file
+
+        The method only returns users who have a location match
+        and haven't been processed before
+        """
+        if extraction_type == "twikit":
+            self.user_ids = []
+            await self._get_twikit_city_users()
+            for user in self.users_list:
+                location_match = self.check_location(
+                    user["location"], self.location
+                )
+
+                if location_match:
+                    self.user_ids.append[user["user_id"]]
+                    # TODO: Check if user has been processed before
+                    # TODO: Upload user data to DynamoDB (followers, location, etc)
+                    # TODO: Send user_id to SQS queue to get network data
+                else:
+                    # TODO: Handle users whose location doesn't match
+                    pass
+
+        elif extraction_type == "file":
+            self._get_file_city_users()
+            self.already_processed_users = self._get_already_processed_users()
+            self.user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
+
+        # X official API
+        else:
+            raise NotImplementedError(
+                "Official X API methods need to be implemented"
+            )
+
+    def _get_already_processed_users(self):
+        """
+        Reads the location JSON file and gets the
+        set of users that have already been processed
+        """
+        users_list = []
+        existing_data = load_json(self.location_file_path)
+
+        if existing_data:
+            for user_dict in existing_data:
+                user_id = user_dict["user_id"]
+                users_list.append(user_id)
+        return users_list
 
     @staticmethod
     def parse_edge_dict(source, target, tweet=None):
@@ -221,16 +328,16 @@ class NetworkHandler:
         perc_tweets_with_retweeters_twikit = []
 
         # Paths setup
-        follower_graph = self.read_json(
+        follower_graph = load_json(
             self.base_dir
             / f"networks/{self.location}/follower_interactions.json"
         )
-        retweeter_graph = self.read_json(
+        retweeter_graph = load_json(
             self.base_dir
             / f"networks/{self.location}/retweet_interactions.json"
         )
 
-        location_json = self.read_json(self.location_file_path)
+        location_json = load_json(self.location_file_path)
 
         num_users = len(location_json)
         print(f"Number of root users {num_users}")
@@ -439,7 +546,7 @@ class NetworkHandler:
             f"Successfully stored {self.location} {edge_type} edges json file"
         )
 
-    async def create_user_network(self, num_users):
+    async def create_user_network(self, num_users, extraction_type):
         """
         Gets the user network data for a given number of
         users.
@@ -448,15 +555,14 @@ class NetworkHandler:
             - num_users: Number of users to get data from
         """
         # Get city users and already processed users
-        self._get_city_users()
-        already_processed_users = self._get_already_processed_users()
-        user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
+        await self._get_city_users(extraction_type)
 
-        for user_id in user_ids[:num_users]:
-            if user_id not in already_processed_users:
+        for user_id in self.user_ids[:num_users]:
+            if user_id not in self.already_processed_users:
                 try:
                     user_network = UserNetwork(self.location_file_path)
                     print(f"Processing user {user_id}...")
+                    # TODO: user_id will come from a queue
                     await user_network.run(user_id)
                     time.sleep(self.FIFTEEN_MINUTES)
                 except Exception as error:

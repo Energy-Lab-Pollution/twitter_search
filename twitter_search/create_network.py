@@ -22,6 +22,12 @@ if __name__ == "__main__":
         "num_users", type=int, help="Number of users to process"
     )
     parser.add_argument(
+        "extraction_type",
+        type=str,
+        choices=["file", "twikit", "x"],
+        help="Choose how to get users",
+    )
+    parser.add_argument(
         "wait",
         type=str,
         choices=["Yes", "No"],
@@ -35,4 +41,8 @@ if __name__ == "__main__":
         time.sleep(FIFTEEN_MINUTES)
 
     network_handler = NetworkHandler(args.location)
-    asyncio.run(network_handler.create_user_network(args.num_users))
+    asyncio.run(
+        network_handler.create_user_network(
+            args.num_users, extraction_type="file"
+        )
+    )

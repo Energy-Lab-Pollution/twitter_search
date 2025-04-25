@@ -27,6 +27,10 @@ httpx = "^0.28.0"
 pre-commit = "^4.2.0"
 matplotlib = "^3.10.1"
 scipy = "^1.15.2"
+gremlinpython = "^3.7.3"
+requests-aws4auth = "^1.3.1"
+websocket-client = "^1.8.0"
+requests-auth-aws-sigv4 = "^0.7"
 
 [build-system]
 requires = ["poetry-core"]

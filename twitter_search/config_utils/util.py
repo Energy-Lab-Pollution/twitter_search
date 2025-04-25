@@ -4,6 +4,7 @@ Util script with different functions used throughout the project
 
 import json
 import os
+from datetime import datetime
 
 import googlemaps
 import tweepy
@@ -12,16 +13,6 @@ import tweepy
 from config_utils import config
 from config_utils.constants import GEOCODE_TIMEOUT
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut
-
-
-def load_json(file_path):
-    """
-    Loads json from file
-    """
-    with open(file_path, "r") as json_file:
-        data = json.load(json_file)
-
-    return data
 
 
 LIST_FIELDS = ["id", "name", "description"]
@@ -40,6 +31,19 @@ USER_FIELDS = [
     "url",
     "username",
 ]
+
+
+def load_json(path):
+    """
+    Reads a JSON file and returns the data
+    """
+    try:
+        with open(path, "r") as f:
+            existing_data = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError):
+        existing_data = []
+
+    return existing_data
 
 
 def strtobool(val):
@@ -326,6 +330,9 @@ def flatten_and_remove_empty(input_list):
     return new_list
 
 
+# JSON Creators
+
+
 def json_maker(file_path, data_to_append):
     """
     Create a JSON file with the data provided, the
@@ -392,3 +399,23 @@ def network_json_maker(file_path, data_to_append):
     # Write the updated list of dictionaries back to the file
     with open(file_path, "w") as f:
         json.dump(existing_data, f, indent=1)
+
+
+# Date conversion
+def convert_to_yyyy_mm_dd(date_string):
+    """
+    Converts a date string in the format "Fri Dec 06 18:09:05 +0000 2024"
+    to the "yyyy-mm-dd" format.
+
+    Args:
+        date_string: The input date string.
+
+    Returns:
+        The date string in the "yyyy-mm-dd" format.
+    """
+    try:
+        date_obj = datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
+        return date_obj.strftime("%Y-%m-%d")
+    except ValueError:
+        print(f"Invalid date format: {date_string}")
+        return None

@@ -142,3 +142,94 @@ TWIKIT_COUNT = 1000
 FIFTEEN_MINUTES = 900
 TWO_MINUTES = 120
 ONE_MINUTE = 60
+
+# Neptune constants
+NEPTUNE_ENDPOINT = (
+    "grct-test-db.cluster-cz8qgw2s68ic.us-east-2.neptune.amazonaws.com"
+)
+# Increases weight for existing edges in Retweet Network
+RETWEET_TEMPLATE = """
+g.V('{source}').fold().
+  coalesce(unfold(),
+           addV('user').property(id, '{source}')…property('location', '{location}')
+  ).as('s').
+  sideEffect(
+    g.V('{target}').fold().
+      coalesce(unfold(),
+               addV('user').property(id, '{target}')…property('location', '{location}')
+      )
+  ).as('t').
+  choose(
+    __.select('s').outE('retweeted').where(inV().as('t')),
+    __.select('s').outE('retweeted').where(inV().as('t')).
+      property('weight', __.math('weight+1')).
+      property(list, 'tweet_ids', '{tweet_id}'),
+    __.addE('retweeted').from('s').to('t').
+      property('weight', 1).
+      property(list, 'tweet_ids', '{tweet_id}').
+      property('location', '{location}')
+  )
+"""
+FOLLOWER_TEMPLATE = """
+g.V('{source}').fold().
+  coalesce(unfold(),
+           addV('user').property(id, '{source}')…property('location', '{location}')
+  ).as('s').
+  sideEffect(
+    g.V('{target}').fold().
+      coalesce(unfold(),
+               addV('user').property(id, '{target}')…property('location', '{location}')
+      )
+  ).as('t').
+  // simply add a follows edge if not exists
+  coalesce(
+    select('s').outE('follows').where(inV().as('t')),
+    addE('follows').from('s').to('t').property('location', '{location}')
+  )
+"""
+RETWEET_CYPHER_TEMPLATE = """
+// 1. Ensure source user node exists
+MERGE (s:User {id: $source})
+  ON CREATE SET
+    s.username  = $source_username,
+    s.followers = $source_followers,
+    s.location  = $location
+
+// 2. Ensure target user node exists
+MERGE (t:User {id: $target})
+  ON CREATE SET
+    t.username  = $target_username,
+    t.followers = $target_followers,
+    t.location  = $location
+
+// 3. Ensure (or update) the retweet relationship
+MERGE (s)-[r:RETWEETED { location: $location }]->(t)
+  ON CREATE SET
+    r.weight    = 1,
+    r.tweet_ids = [$tweet_id]
+  ON MATCH SET
+    r.weight    = r.weight + 1,
+    r.tweet_ids = r.tweet_ids + [$tweet_id]
+"""
+
+FOLLOWER_CYPHER_TEMPLATE = """// 1. Ensure source user node exists
+MERGE (s:User {id: $source})
+  ON CREATE SET
+    s.username  = $source_username,
+    s.followers = $source_followers,
+    s.location  = $location
+
+// 2. Ensure target user node exists
+MERGE (t:User {id: $target})
+  ON CREATE SET
+    t.username  = $target_username,
+    t.followers = $target_followers,
+    t.location  = $location
+
+// 3. Ensure the follows relationship exists
+MERGE (s)-[f:FOLLOWS { location: $location }]->(t)
+"""
+
+NEPTUNE_S3_BUCKET = "global-rct-network-data"
+IAM_ROLE_ARN = "arn:aws:iam::597088024424:role/NeptuneLoadRole"
+NEPTUNE_AWS_REGION = "us-east-2"

@@ -181,4 +181,6 @@ finetuning_results/
 # Twikit results and cookies
 cookies.json
 *.json
+*.csv
 *.png
+keys.py

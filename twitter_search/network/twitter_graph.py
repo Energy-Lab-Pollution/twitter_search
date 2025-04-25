@@ -13,6 +13,7 @@ import networkx as nx
 
 class TwitterGraph:
     BASE_DIR = Path(__file__).parent.parent / "data/networks"
+    DEGREE_THRESHOLD = 70
 
     def __init__(self, location, base_dir=None, network_type=None):
         """
@@ -191,7 +192,8 @@ class TwitterGraph:
         labels = {
             node: self.graph.nodes[node]["username"]
             for node in self.graph.nodes()
-            if self.graph.degree(node) > 20  # Only label significant nodes
+            if self.graph.degree(node)
+            > self.DEGREE_THRESHOLD  # Only label significant nodes
         }
         nx.draw_networkx_labels(self.graph, pos, labels, font_size=8, ax=ax)
 
@@ -313,4 +315,4 @@ if __name__ == "__main__":
     twitter_graph.print_graph_info()
 
     # Visualize the network
-    twitter_graph.visualize_network()
+    # twitter_graph.visualize_network()
