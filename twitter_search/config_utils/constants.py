@@ -231,5 +231,5 @@ MERGE (s)-[f:FOLLOWS { location: $location }]->(t)
 """
 
 S3_BUCKET = "global-rct-users"
-IAM_ROLE_ARN = "arn:aws:iam::97088024424:role/YourNeptuneLoadRole"
+IAM_ROLE_ARN = "arn:aws:iam::597088024424:role/NeptuneLoadRole"
 NEPTUNE_AWS_REGION = "us-west-1"
