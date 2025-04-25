@@ -8,13 +8,11 @@ import json
 from pathlib import Path
 
 import boto3
-import requests
 
 # Local imports
 from config_utils.constants import (
     IAM_ROLE_ARN,
     NEPTUNE_AWS_REGION,
-    NEPTUNE_ENDPOINT,
     S3_BUCKET,
 )
 
@@ -156,7 +154,7 @@ class NeptuneBulkUploader:
         """
         Trigger Neptune Bulk Loader for all files under the given S3 prefix.
         """
-        neptune_client = boto3.client('neptune-data', region_name='us-east-2')
+        neptune_client = boto3.client('neptunedata')
         # loader_endpoint = f"https://{NEPTUNE_ENDPOINT}:8182/loader"
         response = neptune_client.start_loader_job(
             source= f"s3://{S3_BUCKET}/{s3_prefix}",
@@ -164,6 +162,7 @@ class NeptuneBulkUploader:
             iamRoleArn=IAM_ROLE_ARN,
             region=NEPTUNE_AWS_REGION,
             failOnError=True,
+            s3BucketRegion='us-west-1',
             parallelism="MEDIUM",
         )
         print("Loader job ID:", response['payload']['jobId'])  # monitor this job via get_loader_job_status
