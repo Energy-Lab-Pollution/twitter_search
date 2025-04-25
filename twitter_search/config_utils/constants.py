@@ -230,6 +230,6 @@ MERGE (t:User {id: $target})
 MERGE (s)-[f:FOLLOWS { location: $location }]->(t)
 """
 
-S3_BUCKET = "global-rct-users"
+NEPTUNE_S3_BUCKET = "global-rct-network-data"
 IAM_ROLE_ARN = "arn:aws:iam::597088024424:role/NeptuneLoadRole"
-NEPTUNE_AWS_REGION = "us-west-1"
+NEPTUNE_AWS_REGION = "us-east-2"

@@ -13,7 +13,7 @@ import boto3
 from config_utils.constants import (
     IAM_ROLE_ARN,
     NEPTUNE_AWS_REGION,
-    S3_BUCKET,
+    NEPTUNE_S3_BUCKET,
 )
 
 
@@ -146,23 +146,23 @@ class NeptuneBulkUploader:
         """
         Upload a file to the specified S3 bucket and key.
         """
-        self.s3_client.upload_file(file_path, S3_BUCKET, s3_key)
-        print(f"Uploaded {file_path} to s3://{S3_BUCKET}/{s3_key}")
+        self.s3_client.upload_file(file_path, NEPTUNE_S3_BUCKET, s3_key)
+        print(f"Uploaded {file_path} to s3://{NEPTUNE_S3_BUCKET}/{s3_key}")
 
     @staticmethod
     def bulk_load_to_neptune(s3_prefix):
         """
         Trigger Neptune Bulk Loader for all files under the given S3 prefix.
         """
-        neptune_client = boto3.client("neptunedata")
-        # loader_endpoint = f"https://{NEPTUNE_ENDPOINT}:8182/loader"
+        neptune_client = boto3.client(
+            "neptunedata", region_name=NEPTUNE_AWS_REGION
+        )
         response = neptune_client.start_loader_job(
-            source=f"s3://{S3_BUCKET}/{s3_prefix}",
+            source=f"s3://{NEPTUNE_S3_BUCKET}/{s3_prefix}",
             format="csv",
             iamRoleArn=IAM_ROLE_ARN,
-            region=NEPTUNE_AWS_REGION,
             failOnError=True,
-            s3BucketRegion="us-west-1",
+            s3BucketRegion=NEPTUNE_AWS_REGION,
             parallelism="MEDIUM",
         )
         print(
