@@ -203,7 +203,7 @@ class NetworkHandler:
         result_count = 0
         next_token = None
 
-        # pagination
+        # TODO: Only return / keep user ids
         while result_count < MAX_RESULTS:
             print(f"Max results is: {result_count}")
             response = x_client.search_recent_tweets(
