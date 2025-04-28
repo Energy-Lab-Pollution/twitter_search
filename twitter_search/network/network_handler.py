@@ -79,7 +79,7 @@ class NetworkHandler:
         else:
             return False
 
-    def parse_users(self, tweets):
+    def parse_twikit_users(self, tweets):
         """
         Parses users from the found tweets into dictionaries
 
@@ -114,6 +114,38 @@ class NetworkHandler:
 
         return users_list
 
+    def parse_x_users(user_list):
+        """
+        This function takes a list of user objects and
+        transformis it into a list of dictionaries
+
+        Parameters
+        ----------
+        user_list : list
+            List of user objects
+
+        Returns
+        -------
+        dict_list: list
+            List of dictionaries with user data
+        """
+        dict_list = []
+        for user in user_list:
+            values = {
+                "user_id": user["id"],
+                "username": user["username"],
+                "description": user["description"],
+                "location": user["location"],
+                "name": user["name"],
+                "url": user["url"],
+                "tweets": [],
+                "geo_code": [],
+            }
+            values.update(user["public_metrics"])
+            dict_list.append(values)
+        return dict_list
+
+
     async def _get_twikit_city_users(self):
         """
         Method used to search for tweets, with twikit,
@@ -129,14 +161,14 @@ class NetworkHandler:
         tweets = await client.search_tweet(
             self.location, "Latest", count=TWIKIT_COUNT
         )
-        self.users_list = self.parse_users(tweets)
+        self.users_list = self.parse_twikit_users(tweets)
 
         more_tweets_available = True
         num_iter = 1
 
         next_tweets = await tweets.next()
         if next_tweets:
-            next_users_list = self.parse_users(next_tweets)
+            next_users_list = self.parse_twikit_users(next_tweets)
             self.users_list.extend(next_users_list)
         else:
             more_tweets_available = False
@@ -144,7 +176,7 @@ class NetworkHandler:
         while more_tweets_available:
             next_tweets = await next_tweets.next()
             if next_tweets:
-                next_users_list = self.parse_users(next_tweets)
+                next_users_list = self.parse_twikit_users(next_tweets)
                 self.users_list.extend(next_users_list)
 
             else:
@@ -175,7 +207,7 @@ class NetworkHandler:
         while result_count < MAX_RESULTS:
             print(f"Max results is: {result_count}")
             response = x_client.search_recent_tweets(
-                query=self.query,
+                query=self.location,
                 max_results=MAX_RESULTS,
                 next_token=next_token,
                 expansions=EXPANSIONS,
@@ -250,9 +282,7 @@ class NetworkHandler:
 
         # X official API
         else:
-            raise NotImplementedError(
-                "Official X API methods need to be implemented"
-            )
+            self._get_x_city_users()
 
     def _get_already_processed_users(self):
         """
