@@ -37,7 +37,7 @@ class NeptuneBulkUploader:
             self.base_dir
             / f"networks/{location}/{location}_{interaction_type}_edges.csv"
         )
-        self.s3_path = f"networks/{location}/neptune/{interaction_type}"
+        self.s3_path = f"networks/{location}/{interaction_type}/"
 
     def convert_json_to_csv(self):
         """
