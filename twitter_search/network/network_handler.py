@@ -173,6 +173,8 @@ class NetworkHandler:
         ]
         self.user_df.reset_index(drop=True, inplace=True)
 
+        print(f"Users in .csv: {len(self.user_df)}")
+
     async def _get_city_users(self, extraction_type):
         """
         Searches for city users either from:
@@ -546,7 +548,7 @@ class NetworkHandler:
             f"Successfully stored {self.location} {edge_type} edges json file"
         )
 
-    async def create_user_network(self, num_users, extraction_type):
+    async def create_user_network(self, extraction_type):
         """
         Gets the user network data for a given number of
         users.
@@ -554,20 +556,19 @@ class NetworkHandler:
         Args:
             - num_users: Number of users to get data from
         """
-        # Get city users and already processed users
+        # Get city users and users to process
         await self._get_city_users(extraction_type)
+        users_to_process = list(
+            set(self.user_ids).difference(set(self.already_processed_users))
+        )
 
-        for user_id in self.user_ids[:num_users]:
-            if user_id not in self.already_processed_users:
-                try:
-                    user_network = UserNetwork(self.location_file_path)
-                    print(f"Processing user {user_id}...")
-                    # TODO: user_id will come from a queue
-                    await user_network.run(user_id)
-                    time.sleep(self.FIFTEEN_MINUTES)
-                except Exception as error:
-                    print(f"Error getting user: {error}")
-                    continue
-            else:
-                print(f"Skipping {user_id} - they have already been processed")
+        for user_to_process in users_to_process:
+            try:
+                user_network = UserNetwork(self.location_file_path)
+                print(f"Processing user {user_to_process}...")
+                # TODO: user_id will come from a queue
+                await user_network.run(user_to_process)
+                time.sleep(self.FIFTEEN_MINUTES)
+            except Exception as error:
+                print(f"Error getting user: {error}")
                 continue
