@@ -12,6 +12,8 @@ from pathlib import Path
 
 import pandas as pd
 import twikit
+
+# Local constants
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
@@ -19,7 +21,8 @@ from config_utils.constants import (
     TWIKIT_COUNT,
     TWIKIT_TWEETS_THRESHOLD,
 )
-from config_utils.util import convert_to_yyyy_mm_dd, load_json
+from config_utils.util import client_creator, convert_to_yyyy_mm_dd, load_json
+from config_utils.constants import MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS
 from network.user_network import UserNetwork
 
 
@@ -117,7 +120,8 @@ class NetworkHandler:
         using a given query
 
         This method uses twikit's "await next" function
-        to get more tweets with the given query.
+        to get more tweets with the given query. The corresponding
+        users are then parsed from such tweets.
         """
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DIR)
@@ -154,6 +158,44 @@ class NetworkHandler:
                 break
 
             num_iter += 1
+
+    def _get_x_city_users(self):
+        """
+        Method used to search for tweets, with the X API,
+        using a given query
+
+        The corresponding users are then parsed from 
+        such tweets.
+        """
+        x_client = client_creator()
+        result_count = 0
+        next_token = None
+
+        # pagination
+        while result_count < MAX_RESULTS:
+            print(f"Max results is: {result_count}")
+            response = x_client.search_recent_tweets(
+                query=self.query,
+                max_results=MAX_RESULTS,
+                next_token=next_token,
+                expansions=EXPANSIONS,
+                tweet_fields=TWEET_FIELDS,
+                user_fields=USER_FIELDS,
+            )
+            if response.meta["result_count"] == 0:
+                print("No more results found.")
+                break
+            result_count += response.meta["result_count"]
+            self.total_tweets.extend(response.data)
+            self.total_users.extend(response.includes["users"])
+            try:
+                next_token = response.meta["next_token"]
+            except Exception as err:
+                print(err)
+                next_token = None
+
+            if next_token is None:
+                break
 
     def _get_file_city_users(self):
         """
