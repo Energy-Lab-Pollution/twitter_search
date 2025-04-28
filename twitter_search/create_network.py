@@ -19,9 +19,6 @@ if __name__ == "__main__":
         "location", type=str, help="Location to read users from"
     )
     parser.add_argument(
-        "num_users", type=int, help="Number of users to process"
-    )
-    parser.add_argument(
         "extraction_type",
         type=str,
         choices=["file", "twikit", "x"],
@@ -41,8 +38,4 @@ if __name__ == "__main__":
         time.sleep(FIFTEEN_MINUTES)
 
     network_handler = NetworkHandler(args.location)
-    asyncio.run(
-        network_handler.create_user_network(
-            args.num_users, extraction_type="file"
-        )
-    )
+    asyncio.run(network_handler.create_user_network(extraction_type="file"))
