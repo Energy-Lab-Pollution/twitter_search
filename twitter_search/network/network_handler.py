@@ -103,17 +103,13 @@ class NetworkHandler:
             user_dict["tweets_count"] = tweet.user.statuses_count
             # TODO: Check difference between verified and is_blue_verified
             user_dict["verified"] = tweet.user.verified
-            # TODO: Ask if we will need the ones below..
-            user_dict["tweet_id"] = tweet.id
-            user_dict["tweets"] = [tweet.text]
-
-
+            user_dict["created_at"] = tweet.user.created_at
 
             users_list.append(user_dict)
 
         return users_list
 
-    def parse_x_users(user_list):
+    def parse_x_users(self, user_list):
         """
         This function takes a list of user objects and
         transformis it into a list of dictionaries
@@ -128,21 +124,22 @@ class NetworkHandler:
         dict_list: list
             List of dictionaries with user data
         """
-        dict_list = []
+        user_dicts = []
         for user in user_list:
-            values = {
+            user_dict = {
                 "user_id": user["id"],
                 "username": user["username"],
                 "description": user["description"],
                 "profile_location": user["location"],
-                "name": user["name"],
-                "url": user["url"],
-                "tweets": [],
-                "geo_code": [],
+                "target_location": self.location,
+                "verified": user["verified"],
+                "created_at": user["created_at"]
             }
-            values.update(user["public_metrics"])
-            dict_list.append(values)
-        return dict_list
+            for key, value in user["public_metrics"].items():
+                user_dict[key] = value
+            user_dicts.append(user_dict)
+
+        return user_dicts
 
 
     async def _get_twikit_city_users(self):
@@ -201,6 +198,7 @@ class NetworkHandler:
         x_client = client_creator()
         result_count = 0
         next_token = None
+        self.users_list = []
 
         # TODO: Only return / keep user ids
         while result_count < MAX_RESULTS:
@@ -218,7 +216,8 @@ class NetworkHandler:
                 break
             result_count += response.meta["result_count"]
             self.total_tweets.extend(response.data)
-            self.total_users.extend(response.includes["users"])
+            self.users_list.extend(response.includes["users"])
+            self.users_list = self.parse_x_users(self.users_list)
             try:
                 next_token = response.meta["next_token"]
             except Exception as err:
