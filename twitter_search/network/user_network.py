@@ -59,7 +59,7 @@ class UserNetwork:
                 user_dict["tweets_count"] = user.statuses_count
                 # TODO: Check difference between verified and is_blue_verified
                 user_dict["verified"] = user.verified
-                # TODO: Add new attributes
+                user_dict["created_at"] = user.created_at
 
                 users_list.append(user_dict)
 
@@ -309,7 +309,7 @@ class UserNetwork:
         # TODO: Send to SQS for network processing
         return followers_list
 
-    async def run(self, user_id):
+    async def run_twikit(self, user_id):
         """
         Runs the pertinent functions by getting a user's retweeters and
         followers
@@ -323,8 +323,13 @@ class UserNetwork:
         # Get source user information
         user_obj = await self.client.get_user_by_id(user_id)
         user_dict["username"] = user_obj.screen_name
+        user_dict["profile_location"] = user_obj.location
         user_dict["followers_count"] = user_obj.followers_count
         user_dict["following_count"] = user_obj.following_count
+        user_dict["tweets_count"] = user_obj.statuses_count
+        user_dict["verified"] = user_obj.verified
+        user_dict["created_at"] = user_obj.created_at
+
         # TODO: Add new attributes -- city is added if location matches
         # TODO: processing_status is pending
         # extracted_at is null - take midpoint for when we got these root users
