@@ -6,6 +6,7 @@ import time
 
 import twikit
 from config_utils.constants import (
+    FIFTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
     TWIKIT_COUNT,
     TWIKIT_FOLLOWERS_THRESHOLD,
@@ -66,7 +67,7 @@ class UserNetwork:
         return users_list
 
     @staticmethod
-    def parse_tweets(tweets):
+    def parse_twikit_tweets(tweets):
         """
         Given a set of tweets, we get a list of dictionaries
         with the tweets' and retweeters' information
@@ -220,7 +221,7 @@ class UserNetwork:
         user_tweets = await self.client.get_user_tweets(
             user_id, "Tweets", count=self.TWIKIT_COUNT
         )
-        tweets_list = self.parse_tweets(user_tweets)
+        tweets_list = self.parse_twikit_tweets(user_tweets)
         dict_list.extend(tweets_list)
 
         while more_tweets_available:
@@ -232,7 +233,7 @@ class UserNetwork:
                     next_tweets = await next_tweets.next()
                 if next_tweets:
                     # Parse next tweets
-                    next_tweets_list = self.parse_tweets(next_tweets)
+                    next_tweets_list = self.parse_twikit_tweets(next_tweets)
                     dict_list.extend(next_tweets_list)
                 else:
                     more_tweets_available = False
@@ -353,3 +354,20 @@ class UserNetwork:
 
         network_json_maker(self.output_file_path, user_dict_list)
         print(f"Stored {user_id} data")
+
+    async def run(self, user_id, extraction_type):
+        """
+        Gets the network data either using Twikit or X
+        
+        Args:
+            - user_id: str
+            - extraction_type: str
+        """
+        if extraction_type == "x":
+            raise NotImplementedError()
+        else:
+            # If file or twikit extraction method, use twikit
+            await self.run_twikit(user_id)
+            time.sleep(FIFTEEN_MINUTES)
+
+

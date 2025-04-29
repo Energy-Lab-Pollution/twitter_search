@@ -633,14 +633,12 @@ class NetworkHandler:
         )
 
         # TODO: Add check location for users
-
         for user_to_process in users_to_process:
             try:
                 user_network = UserNetwork(self.location_file_path, self.location)
                 print(f"Processing user {user_to_process}...")
                 # TODO: user_id will come from a queue
-                await user_network.run(user_to_process)
-                time.sleep(self.FIFTEEN_MINUTES)
+                await user_network.run(user_to_process, extraction_type)
             except Exception as error:
                 print(f"Error getting user: {error}")
                 continue
