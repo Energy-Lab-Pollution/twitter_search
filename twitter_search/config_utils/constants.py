@@ -76,6 +76,7 @@ USER_FIELDS = [
     "public_metrics",
     "url",
     "username",
+    "verified"
 ]
 
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
