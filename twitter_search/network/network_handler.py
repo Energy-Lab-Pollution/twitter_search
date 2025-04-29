@@ -634,6 +634,8 @@ class NetworkHandler:
             set(self.user_ids).difference(set(self.already_processed_users))
         )
 
+        # TODO: Add check location for users
+
         for user_to_process in users_to_process:
             try:
                 user_network = UserNetwork(self.location_file_path)

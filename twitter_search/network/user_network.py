@@ -55,6 +55,7 @@ class UserNetwork:
                 user_dict["location"] = user.location
                 user_dict["followers_count"] = user.followers_count
                 user_dict["following_count"] = user.following_count
+                # TODO: Add new attributes
 
                 users_list.append(user_dict)
 
@@ -320,6 +321,10 @@ class UserNetwork:
         user_dict["username"] = user_obj.screen_name
         user_dict["followers_count"] = user_obj.followers_count
         user_dict["following_count"] = user_obj.following_count
+        # TODO: Add new attributes -- city is added if location matches
+        # TODO: processing_status is pending
+        # extracted_at is null - take midpoint for when we got these root users
+        # last_modified is null
 
         # First get tweets, without retweeters
         print("Getting user tweets")
