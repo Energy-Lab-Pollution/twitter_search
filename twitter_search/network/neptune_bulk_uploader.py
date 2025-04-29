@@ -115,7 +115,7 @@ class NeptuneBulkUploader:
                 "~to",
                 "~label",
                 "weight",
-                "tweet_ids:String[]",
+                "tweet_ids:String",
                 "location",
             ]
         else:
@@ -139,7 +139,7 @@ class NeptuneBulkUploader:
                 if self.interaction_type == "retweet":
                     row["weight"] = props["weight"]
                     # join tweet_ids with semicolon
-                    row["tweet_ids:String[]"] = "|".join(props["tweet_ids"])
+                    row["tweet_ids:String"] = ",".join(props["tweet_ids"])
                 writer.writerow(row)
 
     def upload_to_s3(self, file_path, s3_key):
