@@ -21,7 +21,7 @@ from config_utils.constants import (
     TWIKIT_COUNT,
     TWIKIT_TWEETS_THRESHOLD,
 )
-from config_utils.util import client_creator, convert_to_yyyy_mm_dd, load_json
+from config_utils.util import client_creator, load_json
 from config_utils.constants import MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS
 from network.user_network import UserNetwork
 
@@ -96,19 +96,21 @@ class NetworkHandler:
             user_dict["user_id"] = tweet.user.id
             user_dict["username"] = tweet.user.name
             user_dict["description"] = tweet.user.description
-            user_dict["location"] = tweet.user.location
+            user_dict["profile_location"] = tweet.user.location
+            user_dict["target_location"] = self.location
             user_dict["name"] = tweet.user.screen_name
             user_dict["url"] = tweet.user.url
             user_dict["followers_count"] = tweet.user.followers_count
             user_dict["following_count"] = tweet.user.following_count
+            user_dict["tweets_count"] = tweet.user.statuses_count
             user_dict["listed_count"] = tweet.user.listed_count
+            # TODO: Check difference between verified and is_blue_verified
+            user_dict["verified"] = tweet.user.verified
+            # TODO: Ask if we will need the ones below..
             user_dict["tweet_id"] = tweet.id
             user_dict["tweets"] = [tweet.text]
 
-            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
-            user_dict["tweet_date"] = parsed_date
-            user_dict["user_date_id"] = f"{tweet.user.id}-{parsed_date}"
-            user_dict["geo_code"] = []
+
 
             users_list.append(user_dict)
 
@@ -135,7 +137,7 @@ class NetworkHandler:
                 "user_id": user["id"],
                 "username": user["username"],
                 "description": user["description"],
-                "location": user["location"],
+                "profile_location": user["location"],
                 "name": user["name"],
                 "url": user["url"],
                 "tweets": [],
@@ -638,7 +640,7 @@ class NetworkHandler:
 
         for user_to_process in users_to_process:
             try:
-                user_network = UserNetwork(self.location_file_path)
+                user_network = UserNetwork(self.location_file_path, self.location)
                 print(f"Processing user {user_to_process}...")
                 # TODO: user_id will come from a queue
                 await user_network.run(user_to_process)
