@@ -66,7 +66,6 @@ LIST_FIELDS = ["id", "name", "description"]
 USER_FIELDS = [
     "created_at",
     "description",
-    "entities",
     "id",
     "location",
     "most_recent_tweet_id",
@@ -103,21 +102,6 @@ TWEET_FIELDS = [
     "source",
     "text",
     "withheld",
-]
-USER_FIELDS = [
-    "created_at",
-    "description",
-    "entities",
-    "id",
-    "location",
-    "most_recent_tweet_id",
-    "name",
-    "pinned_tweet_id",
-    "profile_image_url",
-    "protected",
-    "public_metrics",
-    "url",
-    "username",
 ]
 
 # THRESHOLDS FOR GETTING LISTS
