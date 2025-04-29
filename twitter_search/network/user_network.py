@@ -23,16 +23,16 @@ class UserNetwork:
     TWIKIT_COUNT = TWIKIT_COUNT
     SLEEP_TIME = 2
 
-    def __init__(self, output_file_path):
+    def __init__(self, output_file_path, location):
         self.client = twikit.Client("en-US")
         self.client.load_cookies(self.TWIKIT_COOKIES_DIR)
+        self.location = location
         self.output_file_path = output_file_path
 
         # Setting retweeters counter at the top level
         self.retweeters_counter = 0
 
-    @staticmethod
-    def parse_users(users):
+    def parse_twikit_users(self, users):
         """
         Parse retweeters (user objects) and put them
         into a list of dictionaries
@@ -52,9 +52,12 @@ class UserNetwork:
                 user_dict["user_id"] = user.id
                 user_dict["username"] = user.screen_name
                 user_dict["description"] = user.description
-                user_dict["location"] = user.location
+                user_dict["profile_location"] = user.location
+                user_dict["target_location"] = self.location
                 user_dict["followers_count"] = user.followers_count
                 user_dict["following_count"] = user.following_count
+                user_dict["tweets_count"] = user.statuses_count
+
                 # TODO: Add new attributes
 
                 users_list.append(user_dict)
@@ -65,7 +68,7 @@ class UserNetwork:
     def parse_tweets(tweets):
         """
         Given a set of tweets, we get a list of dictionaries
-        with the twees' and retweeters' information
+        with the tweets' and retweeters' information
 
         Args:
         ----------
@@ -114,7 +117,7 @@ class UserNetwork:
                 tweet_id, count=self.TWIKIT_COUNT
             )
             if retweeters:
-                parsed_retweeters = self.parse_users(retweeters)
+                parsed_retweeters = self.parse_twikit_users(retweeters)
                 retweeters_list.extend(parsed_retweeters)
         except twikit.errors.TooManyRequests:
             print("Retweeters: Too Many Requests")
@@ -139,7 +142,7 @@ class UserNetwork:
                     print("Retweeters: Bad Request")
                     return retweeters_list
                 if more_retweeters:
-                    more_parsed_retweeters = self.parse_users(more_retweeters)
+                    more_parsed_retweeters = self.parse_twikit_users(more_retweeters)
                     retweeters_list.extend(more_parsed_retweeters)
                 else:
                     more_retweeters_available = False
@@ -264,7 +267,7 @@ class UserNetwork:
         more_followers_available = True
         num_iter = 0
 
-        parsed_followers = self.parse_users(followers)
+        parsed_followers = self.parse_twikit_users(followers)
         followers_list.extend(parsed_followers)
 
         # Keeping track of currently extracted users
@@ -280,7 +283,7 @@ class UserNetwork:
                 else:
                     more_followers = await more_followers.next()
                 if more_followers:
-                    more_parsed_followers = self.parse_users(more_followers)
+                    more_parsed_followers = self.parse_twikit_users(more_followers)
                     for parsed_follower in more_parsed_followers:
                         if parsed_follower["user_id"] not in extracted_users:
                             followers_list.append(parsed_follower)
