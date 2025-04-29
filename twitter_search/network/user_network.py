@@ -57,7 +57,8 @@ class UserNetwork:
                 user_dict["followers_count"] = user.followers_count
                 user_dict["following_count"] = user.following_count
                 user_dict["tweets_count"] = user.statuses_count
-
+                # TODO: Check difference between verified and is_blue_verified
+                user_dict["verified"] = user.verified
                 # TODO: Add new attributes
 
                 users_list.append(user_dict)

@@ -98,12 +98,9 @@ class NetworkHandler:
             user_dict["description"] = tweet.user.description
             user_dict["profile_location"] = tweet.user.location
             user_dict["target_location"] = self.location
-            user_dict["name"] = tweet.user.screen_name
-            user_dict["url"] = tweet.user.url
             user_dict["followers_count"] = tweet.user.followers_count
             user_dict["following_count"] = tweet.user.following_count
             user_dict["tweets_count"] = tweet.user.statuses_count
-            user_dict["listed_count"] = tweet.user.listed_count
             # TODO: Check difference between verified and is_blue_verified
             user_dict["verified"] = tweet.user.verified
             # TODO: Ask if we will need the ones below..
