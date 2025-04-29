@@ -33,6 +33,39 @@ class UserNetwork:
         # Setting retweeters counter at the top level
         self.retweeters_counter = 0
 
+    def parse_x_users(self, user_list):
+        """
+        This function takes a list of user objects and
+        transformis it into a list of dictionaries
+
+        Parameters
+        ----------
+        user_list : list
+            List of user objects
+
+        Returns
+        -------
+        dict_list: list
+            List of dictionaries with user data
+        """
+        user_dicts = []
+        for user in user_list:
+            user_dict = {
+                "user_id": user["id"],
+                "username": user["username"],
+                "description": user["description"],
+                "profile_location": user["location"],
+                "target_location": self.location,
+                "verified": user["verified"],
+                "created_at": user["created_at"]
+            }
+            for key, value in user["public_metrics"].items():
+                user_dict[key] = value
+            user_dicts.append(user_dict)
+
+        return user_dicts
+
+
     def parse_twikit_users(self, users):
         """
         Parse retweeters (user objects) and put them
@@ -158,7 +191,7 @@ class UserNetwork:
 
         return retweeters_list
 
-    async def add_retweeters(self, tweets_list):
+    async def twikit_add_retweeters(self, tweets_list):
         """
         For every tweet in a list of dictionaries, attempt to
         get all possible retweeters.
@@ -199,7 +232,7 @@ class UserNetwork:
 
         return new_tweets_list
 
-    async def get_user_tweets(self, user_id):
+    async def twikit_get_user_tweets(self, user_id):
         """
         For a given user, we get as many of their tweets as possible
         and parse them into a list
@@ -251,7 +284,7 @@ class UserNetwork:
 
         return dict_list
 
-    async def get_followers(self, user_id):
+    async def twikit_get_followers(self, user_id):
         """
         Gets a given user's followers
 
@@ -338,14 +371,14 @@ class UserNetwork:
 
         # First get tweets, without retweeters
         print("Getting user tweets")
-        user_tweets = await self.get_user_tweets(user_id)
+        user_tweets = await self.twikit_get_user_tweets(user_id)
 
         print("Getting user retweeters")
-        user_tweets = await self.add_retweeters(user_tweets)
+        user_tweets = await self.twikit_add_retweeters(user_tweets)
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
-        followers = await self.get_followers(user_id)
+        followers = await self.twikit_get_followers(user_id)
         user_dict["followers"] = followers
 
         # Will put the extracted data into a list
