@@ -365,8 +365,9 @@ class UserNetwork:
             - dict_list (list): list of dictionaries
         """
         # TODO: Finish implementation
-        user_tweets = self.x_client.get_users_tweets(user_id, max_results=100)
-        
+        user_tweets = []
+        response = self.x_client.get_users_tweets(user_id, max_results=100)
+                
         return user_tweets
 
     async def twikit_get_followers(self, user_id):
@@ -435,6 +436,17 @@ class UserNetwork:
         # TODO: Upload users data to DynamoDB - store_data('user')
         # TODO: Send to SQS for network processing
         return followers_list
+
+    def x_get_followers(self, user_id):
+        """
+        Get user followers using the X Client
+        """
+        users_list = []
+        response = self.x_client.get_users_followers(user_id, max_results=1000)
+        parsed_users = self.parse_x_users(response.data)
+        users_list.extend(parsed_users)
+
+        return parsed_users
 
     async def run_twikit(self, user_dict):
         """
