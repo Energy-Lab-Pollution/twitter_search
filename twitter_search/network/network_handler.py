@@ -185,6 +185,7 @@ class NetworkHandler:
         tweets = await client.search_tweet(
             self.location, "Latest", count=TWIKIT_COUNT
         )
+        # TODO: Add set operation to keep unique users only
         users_list = self.parse_twikit_users(tweets)
 
         more_tweets_available = True
@@ -283,18 +284,17 @@ class NetworkHandler:
         """
         Searches for city users with either twikit or X. If the file_flag
         is true, the root users are obtained from a .csv file.
-
-
         """
-        if extraction_type == "twikit":
-            users_list = await self._get_twikit_city_users()
-        else:
-            users_list = self._get_x_city_users()
-
         if file_flag:
             self._get_file_city_users()
             self.already_processed_users = self._get_already_processed_users()
             users_list = self.user_df.loc[:, "user_id"].unique().tolist()
+            return users_list
+
+        if extraction_type == "twikit":
+            users_list = await self._get_twikit_city_users()
+        elif extraction_type == "x":
+            users_list = self._get_x_city_users()
 
         return users_list
 
@@ -634,7 +634,7 @@ class NetworkHandler:
             f"Successfully stored {self.location} {edge_type} edges json file"
         )
 
-    async def get_root_user_attributes(self, client, user_id):
+    async def get_csv_user_attributes(self, client, user_id):
         """
         Function to get all user attributes when we only get their
         ids from the existing file
@@ -679,7 +679,7 @@ class NetworkHandler:
             - file_flag (boolean): Determines
         """
         # Get city users and users to process
-        users_list = self._get_city_users(extraction_type)
+        users_list = self._get_city_users(extraction_type, file_flag)
         # list of user dicts that gets proccessed (no ids )
         if file_flag:
             users_list = list(
@@ -688,18 +688,18 @@ class NetworkHandler:
             client = twikit.Client("en-US")
             client.load_cookies(TWIKIT_COOKIES_DIR)
 
+        # TODO: user_id will come from a queue
         for user_to_process in users_list:
             try:
                 # Only get attributes if file flag is true
                 if file_flag:
-                    user_to_process_dict = await self.get_root_user_attributes(
+                    user_to_process_dict = await self.get_csv_user_attributes(
                         client, user_to_process
                     )
                 user_network = UserNetwork(
                     self.location_file_path, self.location
                 )
                 print(f"Processing user {user_to_process}...")
-                # TODO: user_id will come from a queue
                 await user_network.run(user_to_process_dict, extraction_type)
             except Exception as error:
                 print(f"Error getting user: {error}")

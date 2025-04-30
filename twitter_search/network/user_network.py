@@ -464,17 +464,17 @@ class UserNetwork:
         network_json_maker(self.output_file_path, user_dict_list)
         print(f"Stored {user_dict["user_id"]} data")
 
-    async def run(self, user_id, extraction_type):
+    async def run(self, user_dict, extraction_type):
         """
         Gets the network data either using Twikit or X
 
         Args:
-            - user_id: str
+            - user_dict (dict): Dict with user data
             - extraction_type: str
         """
         if extraction_type == "x":
             raise NotImplementedError()
         else:
             # If file or twikit extraction method, use twikit
-            await self.run_twikit(user_id)
+            await self.run_twikit(user_dict)
             time.sleep(FIFTEEN_MINUTES)
