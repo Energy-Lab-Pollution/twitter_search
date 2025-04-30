@@ -105,7 +105,6 @@ class NetworkHandler:
             # TODO: Check difference between verified and is_blue_verified
             user_dict["verified"] = tweet.user.verified
             user_dict["created_at"] = tweet.user.created_at
-
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
@@ -113,6 +112,12 @@ class NetworkHandler:
             user_dict["extracted_at"] = datetime.now()
             user_dict["last_processed"] = None
             user_dict["last_updated"] = datetime.now()
+
+            # See if location matches to add city
+            location_match = self.check_location(
+                    tweet.user.location, self.location
+            )
+            user_dict["city"] = self.location if location_match else None
 
             users_list.append(user_dict)
 
@@ -148,6 +153,12 @@ class NetworkHandler:
                 user_dict[key] = value
             user_dicts.append(user_dict)
 
+            # See if location matches to add city
+            location_match = self.check_location(
+                    user["location"], self.location
+            )
+            user_dict["city"] = self.location if location_match else None
+
         return user_dicts
 
 
@@ -162,11 +173,12 @@ class NetworkHandler:
         """
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DIR)
+        users_list = []
 
         tweets = await client.search_tweet(
             self.location, "Latest", count=TWIKIT_COUNT
         )
-        self.users_list = self.parse_twikit_users(tweets)
+        users_list = self.parse_twikit_users(tweets)
 
         more_tweets_available = True
         num_iter = 1
@@ -174,7 +186,7 @@ class NetworkHandler:
         next_tweets = await tweets.next()
         if next_tweets:
             next_users_list = self.parse_twikit_users(next_tweets)
-            self.users_list.extend(next_users_list)
+            users_list.extend(next_users_list)
         else:
             more_tweets_available = False
 
@@ -182,7 +194,7 @@ class NetworkHandler:
             next_tweets = await next_tweets.next()
             if next_tweets:
                 next_users_list = self.parse_twikit_users(next_tweets)
-                self.users_list.extend(next_users_list)
+                users_list.extend(next_users_list)
 
             else:
                 more_tweets_available = False
@@ -195,6 +207,8 @@ class NetworkHandler:
                 break
 
             num_iter += 1
+        
+        return users_list
 
     def _get_x_city_users(self):
         """
@@ -207,9 +221,8 @@ class NetworkHandler:
         x_client = client_creator()
         result_count = 0
         next_token = None
-        self.users_list = []
+        users_list = []
 
-        # TODO: Only return / keep user ids
         while result_count < MAX_RESULTS:
             print(f"Max results is: {result_count}")
             response = x_client.search_recent_tweets(
@@ -225,8 +238,8 @@ class NetworkHandler:
                 break
             result_count += response.meta["result_count"]
             self.total_tweets.extend(response.data)
-            self.users_list.extend(response.includes["users"])
-            self.users_list = self.parse_x_users(self.users_list)
+            users_list.extend(response.includes["users"])
+            users_list = self.parse_x_users(users_list)
             try:
                 next_token = response.meta["next_token"]
             except Exception as err:
@@ -235,6 +248,8 @@ class NetworkHandler:
 
             if next_token is None:
                 break
+        
+        return users_list
 
     def _get_file_city_users(self):
         """
@@ -256,40 +271,24 @@ class NetworkHandler:
 
         print(f"Users in .csv: {len(self.user_df)}")
 
-    async def _get_city_users(self, extraction_type):
+    async def _get_city_users(self, extraction_type, file_flag):
         """
-        Searches for city users either from:
-            - twikit
-            - location_matches.csv file
+        Searches for city users with either twikit or X. If the file_flag
+        is true, the root users are obtained from a .csv file.
 
-        The method only returns users who have a location match
-        and haven't been processed before
+        
         """
         if extraction_type == "twikit":
-            self.user_ids = []
-            await self._get_twikit_city_users()
-            for user in self.users_list:
-                location_match = self.check_location(
-                    user["location"], self.location
-                )
+            users_list = await self._get_twikit_city_users()
+        else:
+            users_list = self._get_x_city_users()
 
-                if location_match:
-                    self.user_ids.append[user["user_id"]]
-                    # TODO: Check if user has been processed before
-                    # TODO: Upload user data to DynamoDB (followers, location, etc)
-                    # TODO: Send user_id to SQS queue to get network data
-                else:
-                    # TODO: Handle users whose location doesn't match
-                    pass
-
-        elif extraction_type == "file":
+        if file_flag:
             self._get_file_city_users()
             self.already_processed_users = self._get_already_processed_users()
-            self.user_ids = self.user_df.loc[:, "user_id"].unique().tolist()
+            users_list = self.user_df.loc[:, "user_id"].unique().tolist()
 
-        # X official API
-        else:
-            self._get_x_city_users()
+        return users_list
 
     def _get_already_processed_users(self):
         """
@@ -662,43 +661,35 @@ class NetworkHandler:
 
         return user_dict
 
-    async def create_user_network(self, extraction_type):
+    async def create_user_network(self, extraction_type, file_flag):
         """
         Gets the user network data for a given number of
         users.
 
         Args:
-            - num_users: Number of users to get data from
+            - extraction_type (str): Determines if the users' network data will be
+            obtained via twikit or X
+            - file_flag (boolean): Determines
         """
         # Get city users and users to process
-        await self._get_city_users(extraction_type)
+        users_list =  self._get_city_users(extraction_type)
         # list of user dicts that gets proccessed (no ids )
-        if extraction_type == "file":
-            users_to_process = list(
-                set(self.user_ids).difference(set(self.already_processed_users))
+        if file_flag:
+            users_list = list(
+                set(users_list).difference(set(self.already_processed_users))
             )
             client = twikit.Client("en-US")
             client.load_cookies(TWIKIT_COOKIES_DIR)
 
-            # TODO: Add check location for users
-            # TODO: when the extraction file is type, it makes more sense
-            # to get the user attributes over here, save to db 
-            # File shouldnt be either twikit or X
-            #  Flag should tell us if we are getting user from a file
-
-            # Get all user attributes in network handler, save it to the db and
-            # just loop to call all the necessary APIs -- user network will receive a
-            # user dict
-            for user_to_process in users_to_process:
-                try:
+        for user_to_process in users_list:
+            try:
+                # Only get attributes if file flag is true
+                if file_flag:
                     user_to_process_dict = await self.get_root_user_attributes(client, user_to_process)
-                    user_network = UserNetwork(self.location_file_path, self.location)
-                    print(f"Processing user {user_to_process}...")
-                    # TODO: user_id will come from a queue
-                    await user_network.run(user_to_process_dict, extraction_type)
-                except Exception as error:
-                    print(f"Error getting user: {error}")
-                    continue
-
-        elif extraction_type == "twikit":
-            pass
+                user_network = UserNetwork(self.location_file_path, self.location)
+                print(f"Processing user {user_to_process}...")
+                # TODO: user_id will come from a queue
+                await user_network.run(user_to_process_dict, extraction_type)
+            except Exception as error:
+                print(f"Error getting user: {error}")
+                continue
