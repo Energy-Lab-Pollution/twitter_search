@@ -105,6 +105,14 @@ class NetworkHandler:
             user_dict["verified"] = tweet.user.verified
             user_dict["created_at"] = tweet.user.created_at
 
+            # TODO: Adding new attributes
+            user_dict["category"] = None
+            user_dict["treatment_arm"] = None
+            user_dict["processing_status"] = "pending"
+            user_dict["extracted_at"] = datetime.now()
+            user_dict["last_processed"] = None
+            user_dict["last_updated"] = datetime.now()
+
             users_list.append(user_dict)
 
         return users_list
@@ -628,17 +636,22 @@ class NetworkHandler:
         """
         # Get city users and users to process
         await self._get_city_users(extraction_type)
-        users_to_process = list(
-            set(self.user_ids).difference(set(self.already_processed_users))
-        )
+        # list of user dicts that gets proccessed (no ids )
+        if extraction_type == "file":
+            users_to_process = list(
+                set(self.user_ids).difference(set(self.already_processed_users))
+            )
 
-        # TODO: Add check location for users
-        for user_to_process in users_to_process:
-            try:
-                user_network = UserNetwork(self.location_file_path, self.location)
-                print(f"Processing user {user_to_process}...")
-                # TODO: user_id will come from a queue
-                await user_network.run(user_to_process, extraction_type)
-            except Exception as error:
-                print(f"Error getting user: {error}")
-                continue
+            # TODO: Add check location for users
+            for user_to_process in users_to_process:
+                try:
+                    user_network = UserNetwork(self.location_file_path, self.location)
+                    print(f"Processing user {user_to_process}...")
+                    # TODO: user_id will come from a queue
+                    await user_network.run(user_to_process, extraction_type)
+                except Exception as error:
+                    print(f"Error getting user: {error}")
+                    continue
+
+        elif extraction_type == "twikit":
+            pass

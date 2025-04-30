@@ -57,7 +57,8 @@ class UserNetwork:
                 "profile_location": user["location"],
                 "target_location": self.location,
                 "verified": user["verified"],
-                "created_at": user["created_at"]
+                "created_at": user["created_at"],
+                "processing_status": "pending",
             }
             for key, value in user["public_metrics"].items():
                 user_dict[key] = value
@@ -365,7 +366,7 @@ class UserNetwork:
         # TODO: Send to SQS for network processing
         return followers_list
 
-    async def run_twikit(self, user_id):
+    async def run_twikit(self, user_id, extraction_type):
         """
         Runs the pertinent functions by getting a user's retweeters and
         followers
@@ -373,43 +374,57 @@ class UserNetwork:
         Args:
             - user_id (str): User id to get info from
         """
-        user_dict = {}
-        user_dict["user_id"] = user_id
+        if extraction_type == "file":
+            user_dict = {}
+            user_dict["user_id"] = user_id
 
-        # Get source user information
-        user_obj = await self.client.get_user_by_id(user_id)
-        user_dict["username"] = user_obj.screen_name
-        user_dict["profile_location"] = user_obj.location
-        user_dict["followers_count"] = user_obj.followers_count
-        user_dict["following_count"] = user_obj.following_count
-        user_dict["tweets_count"] = user_obj.statuses_count
-        user_dict["verified"] = user_obj.verified
-        user_dict["created_at"] = user_obj.created_at
-        user_dict["target_location"] = self.location
+            # Get source user information
+            user_obj = await self.client.get_user_by_id(user_id)
+            user_dict["username"] = user_obj.screen_name
+            user_dict["profile_location"] = user_obj.location
+            user_dict["followers_count"] = user_obj.followers_count
+            user_dict["following_count"] = user_obj.following_count
+            user_dict["tweets_count"] = user_obj.statuses_count
+            user_dict["verified"] = user_obj.verified
+            user_dict["created_at"] = user_obj.created_at
+            user_dict["target_location"] = self.location
 
-        # TODO: Add new attributes -- city is added if location matches
-        # TODO: processing_status is pending
-        # extracted_at is null - take midpoint for when we got these root users
-        # last_modified is null
+            # TODO: Adding new attributes
+            user_dict["category"] = None
+            user_dict["treatment_arm"] = None
+            user_dict["processing_status"] = "pending"
+            user_dict["extracted_at"] = datetime.now()
+            user_dict["last_updated"] = datetime.now()
 
-        # First get tweets, without retweeters
-        print("Getting user tweets")
-        user_tweets = await self.twikit_get_user_tweets(user_id)
+            # TODO: Add new attributes -- city is added if location matches
+            # TODO: processing_status is pending
+            # extracted_at is null - take midpoint for when we got these root users
+            # last_modified is null
 
-        print("Getting user retweeters")
-        user_tweets = await self.twikit_add_retweeters(user_tweets)
-        user_dict["tweets"] = user_tweets
+            # First get tweets, without retweeters
+            # Only provide this tate 
+            user_dict["last_processed"] = None
+            user_dict["processing_status"] = "in progress"
+            print("Getting user tweets")
+            user_tweets = await self.twikit_get_user_tweets(user_id)
 
-        print("Getting user followers...")
-        followers = await self.twikit_get_followers(user_id)
-        user_dict["followers"] = followers
+            print("Getting user retweeters")
+            user_tweets = await self.twikit_add_retweeters(user_tweets)
+            user_dict["tweets"] = user_tweets
 
-        # Will put the extracted data into a list
-        # Easier to extend future data
-        user_dict_list = [user_dict]
+            print("Getting user followers...")
+            followers = await self.twikit_get_followers(user_id)
+            user_dict["followers"] = followers
 
-        network_json_maker(self.output_file_path, user_dict_list)
-        print(f"Stored {user_id} data")
+            # Will put the extracted data into a list
+            # Easier to extend future data
+            user_dict_list = [user_dict]
+            user_dict["last_processed"] = datetime.now()
+            user_dict["processing_status"] = "completed"
+
+
+            network_json_maker(self.output_file_path, user_dict_list)
+            print(f"Stored {user_id} data")
 
     async def run(self, user_id, extraction_type):
         """
