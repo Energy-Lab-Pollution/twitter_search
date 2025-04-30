@@ -229,6 +229,7 @@ class NetworkHandler:
         result_count = 0
         next_token = None
         users_list = []
+        tweets_list = []
 
         while result_count < MAX_RESULTS:
             print(f"Max results is: {result_count}")
@@ -244,7 +245,7 @@ class NetworkHandler:
                 print("No more results found.")
                 break
             result_count += response.meta["result_count"]
-            self.total_tweets.extend(response.data)
+            tweets_list.extend(response.data)
             users_list.extend(response.includes["users"])
             users_list = self.parse_x_users(users_list)
             try:
