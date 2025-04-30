@@ -1,12 +1,13 @@
 """
 Script to pull tweets and retweeters from a particular user,
 """
-
+import re
 import time
 
 import twikit
 from datetime import datetime
 
+from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
@@ -34,6 +35,38 @@ class UserNetwork:
 
         # Setting retweeters counter at the top level
         self.retweeters_counter = 0
+
+    @staticmethod
+    def check_location(raw_location, target_location):
+        """
+        Uses regex to see if the raw location matches
+        the target location
+        """
+
+        target_locations = [target_location]
+
+        # alias is the key, target loc is the value
+        for alias, value in ALIAS_DICT.items():
+            if value == target_location:
+                target_locations.append(alias)
+
+        if isinstance(raw_location, str):
+            raw_location = raw_location.lower().strip()
+            location_regex = re.findall(r"\w+", raw_location)
+
+            if location_regex:
+                for target_location in target_locations:
+                    if target_location in location_regex:
+                        return True
+                    elif target_location in raw_location:
+                        return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+
 
     def parse_x_users(self, user_list):
         """
