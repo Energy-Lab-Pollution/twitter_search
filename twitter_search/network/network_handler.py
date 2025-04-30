@@ -7,7 +7,6 @@ import json
 import os
 import re
 import statistics
-
 from datetime import datetime
 from pathlib import Path
 
@@ -17,13 +16,16 @@ import twikit
 # Local constants
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
+    EXPANSIONS,
     FIFTEEN_MINUTES,
+    MAX_RESULTS,
+    TWEET_FIELDS,
     TWIKIT_COOKIES_DIR,
     TWIKIT_COUNT,
     TWIKIT_TWEETS_THRESHOLD,
+    USER_FIELDS,
 )
 from config_utils.util import client_creator, load_json
-from config_utils.constants import MAX_RESULTS, EXPANSIONS, TWEET_FIELDS, USER_FIELDS
 from network.user_network import UserNetwork
 
 
@@ -114,7 +116,7 @@ class NetworkHandler:
             user_dict["last_updated"] = datetime.now()
             # See if location matches to add city
             location_match = self.check_location(
-                    tweet.user.location, self.location
+                tweet.user.location, self.location
             )
             user_dict["city"] = self.location if location_match else None
 
@@ -146,11 +148,11 @@ class NetworkHandler:
                 "profile_location": user["location"],
                 "target_location": self.location,
                 "verified": user["verified"],
-                "created_at": user["created_at"]
+                "created_at": user["created_at"],
             }
             for key, value in user["public_metrics"].items():
                 user_dict[key] = value
-            
+
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
@@ -160,7 +162,7 @@ class NetworkHandler:
             user_dict["last_updated"] = datetime.now()
             # See if location matches to add city
             location_match = self.check_location(
-                    user["location"], self.location
+                user["location"], self.location
             )
             user_dict["city"] = self.location if location_match else None
             user_dicts.append(user_dict)
@@ -212,7 +214,7 @@ class NetworkHandler:
                 break
 
             num_iter += 1
-        
+
         return users_list
 
     def _get_x_city_users(self):
@@ -220,7 +222,7 @@ class NetworkHandler:
         Method used to search for tweets, with the X API,
         using a given query
 
-        The corresponding users are then parsed from 
+        The corresponding users are then parsed from
         such tweets.
         """
         x_client = client_creator()
@@ -253,7 +255,7 @@ class NetworkHandler:
 
             if next_token is None:
                 break
-        
+
         return users_list
 
     def _get_file_city_users(self):
@@ -281,7 +283,7 @@ class NetworkHandler:
         Searches for city users with either twikit or X. If the file_flag
         is true, the root users are obtained from a .csv file.
 
-        
+
         """
         if extraction_type == "twikit":
             users_list = await self._get_twikit_city_users()
@@ -631,7 +633,6 @@ class NetworkHandler:
             f"Successfully stored {self.location} {edge_type} edges json file"
         )
 
-
     async def get_root_user_attributes(self, client, user_id):
         """
         Function to get all user attributes when we only get their
@@ -677,7 +678,7 @@ class NetworkHandler:
             - file_flag (boolean): Determines
         """
         # Get city users and users to process
-        users_list =  self._get_city_users(extraction_type)
+        users_list = self._get_city_users(extraction_type)
         # list of user dicts that gets proccessed (no ids )
         if file_flag:
             users_list = list(
@@ -690,8 +691,12 @@ class NetworkHandler:
             try:
                 # Only get attributes if file flag is true
                 if file_flag:
-                    user_to_process_dict = await self.get_root_user_attributes(client, user_to_process)
-                user_network = UserNetwork(self.location_file_path, self.location)
+                    user_to_process_dict = await self.get_root_user_attributes(
+                        client, user_to_process
+                    )
+                user_network = UserNetwork(
+                    self.location_file_path, self.location
+                )
                 print(f"Processing user {user_to_process}...")
                 # TODO: user_id will come from a queue
                 await user_network.run(user_to_process_dict, extraction_type)

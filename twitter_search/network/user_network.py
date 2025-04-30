@@ -1,12 +1,12 @@
 """
 Script to pull tweets and retweeters from a particular user,
 """
+
 import re
 import time
-
-import twikit
 from datetime import datetime
 
+import twikit
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
@@ -67,7 +67,6 @@ class UserNetwork:
         else:
             return False
 
-
     def parse_x_users(self, user_list):
         """
         This function takes a list of user objects and
@@ -107,7 +106,7 @@ class UserNetwork:
             user_dict["last_updated"] = datetime.now()
             # See if location matches to add city
             location_match = self.check_location(
-                    user["location"], self.location
+                user["location"], self.location
             )
             user_dict["city"] = self.location if location_match else None
             user_dicts.append(user_dict)
@@ -149,10 +148,10 @@ class UserNetwork:
                 user_dict["extracted_at"] = datetime.now()
                 user_dict["last_processed"] = None
                 user_dict["last_updated"] = datetime.now()
-                
+
                 # See if location matches to add city
                 location_match = self.check_location(
-                        user.location, self.location
+                    user.location, self.location
                 )
                 user_dict["city"] = self.location if location_match else None
 
@@ -238,7 +237,9 @@ class UserNetwork:
                     print("Retweeters: Bad Request")
                     return retweeters_list
                 if more_retweeters:
-                    more_parsed_retweeters = self.parse_twikit_users(more_retweeters)
+                    more_parsed_retweeters = self.parse_twikit_users(
+                        more_retweeters
+                    )
                     retweeters_list.extend(more_parsed_retweeters)
                 else:
                     more_retweeters_available = False
@@ -344,7 +345,7 @@ class UserNetwork:
                 return dict_list
 
         return dict_list
-    
+
     def x_get_user_tweets(self, user_id):
         """
         For a given user, we get as many of their tweets as possible
@@ -395,7 +396,9 @@ class UserNetwork:
                 else:
                     more_followers = await more_followers.next()
                 if more_followers:
-                    more_parsed_followers = self.parse_twikit_users(more_followers)
+                    more_parsed_followers = self.parse_twikit_users(
+                        more_followers
+                    )
                     for parsed_follower in more_parsed_followers:
                         if parsed_follower["user_id"] not in extracted_users:
                             followers_list.append(parsed_follower)
@@ -458,14 +461,13 @@ class UserNetwork:
         user_dict["last_processed"] = datetime.now()
         user_dict["processing_status"] = "completed"
 
-
         network_json_maker(self.output_file_path, user_dict_list)
         print(f"Stored {user_dict["user_id"]} data")
 
     async def run(self, user_id, extraction_type):
         """
         Gets the network data either using Twikit or X
-        
+
         Args:
             - user_id: str
             - extraction_type: str
@@ -476,5 +478,3 @@ class UserNetwork:
             # If file or twikit extraction method, use twikit
             await self.run_twikit(user_id)
             time.sleep(FIFTEEN_MINUTES)
-
-
