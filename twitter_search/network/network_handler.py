@@ -112,7 +112,6 @@ class NetworkHandler:
             user_dict["extracted_at"] = datetime.now()
             user_dict["last_processed"] = None
             user_dict["last_updated"] = datetime.now()
-
             # See if location matches to add city
             location_match = self.check_location(
                     tweet.user.location, self.location
@@ -151,16 +150,22 @@ class NetworkHandler:
             }
             for key, value in user["public_metrics"].items():
                 user_dict[key] = value
-            user_dicts.append(user_dict)
-
+            
+            # TODO: Adding new attributes
+            user_dict["category"] = None
+            user_dict["treatment_arm"] = None
+            user_dict["processing_status"] = "pending"
+            user_dict["extracted_at"] = datetime.now()
+            user_dict["last_processed"] = None
+            user_dict["last_updated"] = datetime.now()
             # See if location matches to add city
             location_match = self.check_location(
                     user["location"], self.location
             )
             user_dict["city"] = self.location if location_match else None
+            user_dicts.append(user_dict)
 
         return user_dicts
-
 
     async def _get_twikit_city_users(self):
         """

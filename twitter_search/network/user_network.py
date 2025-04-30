@@ -64,10 +64,22 @@ class UserNetwork:
             }
             for key, value in user["public_metrics"].items():
                 user_dict[key] = value
+
+            # TODO: Adding new attributes
+            user_dict["category"] = None
+            user_dict["treatment_arm"] = None
+            user_dict["processing_status"] = "pending"
+            user_dict["extracted_at"] = datetime.now()
+            user_dict["last_processed"] = None
+            user_dict["last_updated"] = datetime.now()
+            # See if location matches to add city
+            location_match = self.check_location(
+                    user["location"], self.location
+            )
+            user_dict["city"] = self.location if location_match else None
             user_dicts.append(user_dict)
 
         return user_dicts
-
 
     def parse_twikit_users(self, users):
         """
@@ -97,6 +109,19 @@ class UserNetwork:
                 # TODO: Check difference between verified and is_blue_verified
                 user_dict["verified"] = user.verified
                 user_dict["created_at"] = user.created_at
+                # TODO: Adding new attributes
+                user_dict["category"] = None
+                user_dict["treatment_arm"] = None
+                user_dict["processing_status"] = "pending"
+                user_dict["extracted_at"] = datetime.now()
+                user_dict["last_processed"] = None
+                user_dict["last_updated"] = datetime.now()
+                
+                # See if location matches to add city
+                location_match = self.check_location(
+                        user.location, self.location
+                )
+                user_dict["city"] = self.location if location_match else None
 
                 users_list.append(user_dict)
 
