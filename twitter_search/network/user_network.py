@@ -16,7 +16,7 @@ from config_utils.constants import (
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_TWEETS_THRESHOLD,
 )
-from config_utils.util import network_json_maker
+from config_utils.util import client_creator, network_json_maker
 
 
 class UserNetwork:
@@ -28,8 +28,13 @@ class UserNetwork:
     SLEEP_TIME = 2
 
     def __init__(self, output_file_path, location):
+        # Twikit Client
         self.client = twikit.Client("en-US")
         self.client.load_cookies(self.TWIKIT_COOKIES_DIR)
+
+        # X Tweepy Client
+        self.x_client = client_creator()
+
         self.location = location
         self.output_file_path = output_file_path
 
@@ -359,8 +364,10 @@ class UserNetwork:
         ---------
             - dict_list (list): list of dictionaries
         """
-
-        pass
+        # TODO: Finish implementation
+        user_tweets = self.x_client.get_users_tweets(user_id, max_results=100)
+        
+        return user_tweets
 
     async def twikit_get_followers(self, user_id):
         """
