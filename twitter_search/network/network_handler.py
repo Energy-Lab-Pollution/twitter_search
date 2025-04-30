@@ -7,7 +7,8 @@ import json
 import os
 import re
 import statistics
-import time
+
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -626,6 +627,41 @@ class NetworkHandler:
             f"Successfully stored {self.location} {edge_type} edges json file"
         )
 
+
+    async def get_root_user_attributes(self, client, user_id):
+        """
+        Function to get all user attributes when we only get their
+        ids from the existing file
+
+        Args:
+            - client: twikit.client object
+            - user_id: str
+        """
+        user_dict = {}
+        user_dict["user_id"] = user_id
+
+        # Get source user information
+        user_obj = await client.get_user_by_id(user_id)
+        user_dict["username"] = user_obj.screen_name
+        user_dict["profile_location"] = user_obj.location
+        user_dict["followers_count"] = user_obj.followers_count
+        user_dict["following_count"] = user_obj.following_count
+        user_dict["tweets_count"] = user_obj.statuses_count
+        user_dict["verified"] = user_obj.verified
+        user_dict["created_at"] = user_obj.created_at
+        user_dict["target_location"] = self.location
+        user_dict["city"]
+
+        # TODO: Adding new attributes
+        user_dict["category"] = None
+        user_dict["treatment_arm"] = None
+        user_dict["processing_status"] = "pending"
+        user_dict["extracted_at"] = datetime.now()
+        user_dict["last_updated"] = datetime.now()
+        user_dict["last_processed"] = None
+
+        return user_dict
+
     async def create_user_network(self, extraction_type):
         """
         Gets the user network data for a given number of
@@ -641,14 +677,25 @@ class NetworkHandler:
             users_to_process = list(
                 set(self.user_ids).difference(set(self.already_processed_users))
             )
+            client = twikit.Client("en-US")
+            client.load_cookies(TWIKIT_COOKIES_DIR)
 
             # TODO: Add check location for users
+            # TODO: when the extraction file is type, it makes more sense
+            # to get the user attributes over here, save to db 
+            # File shouldnt be either twikit or X
+            #  Flag should tell us if we are getting user from a file
+
+            # Get all user attributes in network handler, save it to the db and
+            # just loop to call all the necessary APIs -- user network will receive a
+            # user dict
             for user_to_process in users_to_process:
                 try:
+                    user_to_process_dict = await self.get_root_user_attributes(client, user_to_process)
                     user_network = UserNetwork(self.location_file_path, self.location)
                     print(f"Processing user {user_to_process}...")
                     # TODO: user_id will come from a queue
-                    await user_network.run(user_to_process, extraction_type)
+                    await user_network.run(user_to_process_dict, extraction_type)
                 except Exception as error:
                     print(f"Error getting user: {error}")
                     continue
