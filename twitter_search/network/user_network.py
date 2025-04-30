@@ -347,6 +347,12 @@ class UserNetwork:
             except twikit.errors.TooManyRequests:
                 print("Followers: too many requests, stopping...")
                 return followers_list
+            except twikit.errors.BadRequest:
+                print("Followers: Bad Request")
+                return followers_list
+            except twikit.errors.NotFound:
+                print("Followers: Not Found")
+                return followers_list
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} follower batches, sleeping...")
                 time.sleep(self.SLEEP_TIME)

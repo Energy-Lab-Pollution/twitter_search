@@ -578,7 +578,7 @@ class NetworkHandler:
                         for retweeter in tweet["retweeters"]:
                             if tweet["tweet_id"] not in existing_tweets:
                                 location_matches = self.check_location(
-                                    retweeter["location"], self.location
+                                    retweeter["profile_location"], self.location
                                 )
                                 if location_matches:
                                     retweeter_dict = self.parse_edge_dict(
@@ -597,7 +597,7 @@ class NetworkHandler:
                 for follower in followers:
                     if follower["user_id"] not in existing_followers:
                         location_matches = self.check_location(
-                            follower["location"], self.location
+                            follower["profile_location"], self.location
                         )
                         if location_matches:
                             follower_dict = self.parse_edge_dict(
