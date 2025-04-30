@@ -385,6 +385,7 @@ class UserNetwork:
         user_dict["tweets_count"] = user_obj.statuses_count
         user_dict["verified"] = user_obj.verified
         user_dict["created_at"] = user_obj.created_at
+        user_dict["target_location"] = self.location
 
         # TODO: Add new attributes -- city is added if location matches
         # TODO: processing_status is pending
