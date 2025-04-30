@@ -235,7 +235,7 @@ class UserNetwork:
     async def twikit_get_user_tweets(self, user_id):
         """
         For a given user, we get as many of their tweets as possible
-        and parse them into a list
+        and parse them into a list using twikit
 
         Args
         -------
@@ -283,6 +283,22 @@ class UserNetwork:
                 return dict_list
 
         return dict_list
+    
+    def x_get_user_tweets(self, user_id):
+        """
+        For a given user, we get as many of their tweets as possible
+        and parse them into a list using x
+
+        Args
+        -------
+            - client: Twikit client obj
+
+        Returns:
+        ---------
+            - dict_list (list): list of dictionaries
+        """
+
+        pass
 
     async def twikit_get_followers(self, user_id):
         """
