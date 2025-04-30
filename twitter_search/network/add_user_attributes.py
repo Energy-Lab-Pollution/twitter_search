@@ -34,15 +34,15 @@ class UserAttributes:
     def __init__(self, location):
         self.location = location.lower()
         self.base_dir = Path(__file__).parent.parent / "data/"
-        # Check if network path exists
-        if not os.path.exists(self.base_dir / f"networks/{self.location}"):
-            os.makedirs(self.base_dir / f"networks/{self.location}")
-        else:
-            print("Directory already exists")
-
         # Building location output path
         self.location_file_path = (
             self.base_dir / f"networks/{self.location}/{self.location}.json"
+        )
+        self.retweet_edges_path = (
+            self.base_dir / f"networks/{self.location}/retweet_interactions.json"
+        )
+        self.follower_edges_path = (
+            self.base_dir / f"networks/{self.location}/follower_interactions.json"
         )
 
     async def get_root_user_attributes(self, client, user_id):
