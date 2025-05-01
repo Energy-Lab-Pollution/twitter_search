@@ -92,14 +92,10 @@ class UserAttributes:
 
         return user_dict
 
-    async def create_user_network(self):
+    async def run(self):
         """
-        Gets the user network data for a given number of
-        users.
-
-        Args:
-            - extraction_type (str): Determines if the users' network data will be
-            obtained via twikit or X
+        Gets the user attributes for root users, followers
+        and retweeters
         """
         new_location_json = []
 
