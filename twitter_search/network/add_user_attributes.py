@@ -56,29 +56,40 @@ class UserAttributes:
         """
         user_dict = {}
         user_dict["user_id"] = user_id
+        success = False
 
         if self.num_twikit_requests % TWIKIT_USER_ATTRIBUTES_THRESHOLD:
             time.sleep(FIFTEEN_MINUTES)
 
-        # Get source user information
-        user_obj = await client.get_user_by_id(user_id)
-        user_dict["username"] = user_obj.screen_name
-        user_dict["profile_location"] = user_obj.location
-        user_dict["followers_count"] = user_obj.followers_count
-        user_dict["following_count"] = user_obj.following_count
-        user_dict["tweets_count"] = user_obj.statuses_count
-        user_dict["verified"] = user_obj.verified
-        user_dict["created_at"] = user_obj.created_at
-        user_dict["target_location"] = self.location
-        user_dict["city"]
+        while not success: 
+            # Get source user information
+            try:
+                user_obj = await client.get_user_by_id(user_id)
+                success = True
+            except twikit.errors.TooManyRequests:
+                print("User Attributes: Too Many Requests")
+                time.sleep(FIFTEEN_MINUTES)
+            except twikit.error.BadRequest:
+                print("User Attributes: Bad Request")
+                success = True
 
-        # TODO: Adding new attributes
-        user_dict["category"] = None
-        user_dict["treatment_arm"] = None
-        user_dict["processing_status"] = "pending"
-        user_dict["extracted_at"] = datetime.now()
-        user_dict["last_updated"] = datetime.now()
-        user_dict["last_processed"] = None
+            user_dict["username"] = user_obj.screen_name
+            user_dict["profile_location"] = user_obj.location
+            user_dict["followers_count"] = user_obj.followers_count
+            user_dict["following_count"] = user_obj.following_count
+            user_dict["tweets_count"] = user_obj.statuses_count
+            user_dict["verified"] = user_obj.verified
+            user_dict["created_at"] = user_obj.created_at
+            user_dict["target_location"] = self.location
+            user_dict["city"]
+
+            # TODO: Adding new attributes
+            user_dict["category"] = None
+            user_dict["treatment_arm"] = None
+            user_dict["processing_status"] = "pending"
+            user_dict["extracted_at"] = datetime.now()
+            user_dict["last_updated"] = datetime.now()
+            user_dict["last_processed"] = None
 
         self.num_twikit_requests += 1
 
@@ -126,7 +137,6 @@ class UserAttributes:
                 if "retweeters" in tweet and tweet["retweeters"]:
                     new_tweet_dict = tweet.copy()
                     processed_retweeters = []
-                    
                     for retweeter in tweet["retweeters"]:
                         retweeter_attributes_dict = await self.get_user_attributes(
                             client, retweeter["user_id"]
@@ -142,15 +152,11 @@ class UserAttributes:
             # Procesing
             new_user_followers = []
             for follower in followers:
-                try:                
-                    # Only get attributes if file flag is true
-                    follower_attributes_dict= await self.get_user_attributes(
-                            client, follower["user_id"]
-                        )
-                    new_user_followers.append(follower_attributes_dict)
-                except Exception as error:
-                    print(f"Error getting follower attributes: {error}")
-                    continue
+                # Only get attributes if file flag is true
+                follower_attributes_dict= await self.get_user_attributes(
+                        client, follower["user_id"]
+                    )
+                new_user_followers.append(follower_attributes_dict)
             # Add newly processed followers
             user_attributes_dict["followers"] = new_user_followers
             new_location_json.append(user_attributes_dict)
