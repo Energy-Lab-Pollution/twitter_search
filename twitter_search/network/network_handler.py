@@ -327,6 +327,7 @@ class NetworkHandler:
         edge_dict["source"] = source["user_id"]
         edge_dict["source_username"] = source["username"]
         edge_dict["source_followers"] = source["followers_count"]
+        edge_dict["source_following"] = source["following_count"]
 
         if tweet:
             edge_dict["tweet_id"] = tweet["tweet_id"]
@@ -334,6 +335,7 @@ class NetworkHandler:
         edge_dict["target"] = target["user_id"]
         edge_dict["target_username"] = target["username"]
         edge_dict["target_followers"] = target["followers_count"]
+        edge_dict["target_following"] = target["following_count"]
 
         return edge_dict
 
@@ -405,6 +407,7 @@ class NetworkHandler:
         """
         retweets_list = []
         followers_list = []
+        following_list = []
         twikit_retweeters = []
         twikit_followers = []
         city_retweeters = []
@@ -440,6 +443,8 @@ class NetworkHandler:
             num_tweets_with_retweeters_twikit = 0
             if user_dict["followers_count"] > 0:
                 followers_list.append(user_dict["followers_count"])
+            if user_dict["following_count"] > 0:
+                following_list.append(user_dict["following_count"])
             twikit_followers.append(len(user_dict["followers"]))
 
             user_tweets = user_dict["tweets"]
@@ -496,21 +501,31 @@ class NetworkHandler:
             f"a) Median count of followers {round(statistics.median(followers_list), 2)}"
         )
         print(
-            f"b) Median twikit followers {round(statistics.median(twikit_followers), 2)}"
+            f"b) Median count of following {round(statistics.median(following_list), 2)}"
+        )
+        
+        print(
+            f"c) Median twikit followers {round(statistics.median(twikit_followers), 2)}"
         )
         print(
             (
-                "c) Median twikit followers / median followers: "
+                "d) Median twikit followers / median followers: "
                 f"{round(statistics.median(twikit_followers) / statistics.median(followers_list), 2)}"
             )
         )
         print(
-            f"d) Median twikit followers in {self.location}: {round(statistics.median(city_followers), 2)}"
+            f"e) Median twikit followers in {self.location}: {round(statistics.median(city_followers), 2)}"
         )
         print(
             (
-                "e) Median twikit followers in kolkata / median twikit followers: "
+                f"f) Median twikit followers in {self.location} / median twikit followers: "
                 f"{round(statistics.median(city_followers) / statistics.median(twikit_followers), 2)}"
+            )
+        )
+        print(
+            (
+                f"g) Median twikit followers in {self.location} / median total followers: "
+                f"{round(statistics.median(city_followers) / statistics.median(followers_list), 2)}"
             )
         )
         print("================= RETWEET STATS =====================")
@@ -542,6 +557,10 @@ class NetworkHandler:
         print(
             f"g) Median sum of kolkata retweeters / median sum of twikit retweeters: "
             f"{round(statistics.median(city_retweeters) / statistics.median(twikit_retweeters), 2)}"
+        )
+        print(
+            f"h) Median sum of kolkata retweeters / median sum of all-time retweeters: "
+            f"{round(statistics.median(city_retweeters) / statistics.median(retweets_list), 2)}"
         )
         self.calculate_rt_queries(location_json)
 
@@ -594,7 +613,7 @@ class NetworkHandler:
                         for retweeter in tweet["retweeters"]:
                             if tweet["tweet_id"] not in existing_tweets:
                                 location_matches = self.check_location(
-                                    retweeter["profile_location"], self.location
+                                    retweeter["location"], self.location
                                 )
                                 if location_matches:
                                     retweeter_dict = self.parse_edge_dict(
@@ -613,7 +632,7 @@ class NetworkHandler:
                 for follower in followers:
                     if follower["user_id"] not in existing_followers:
                         location_matches = self.check_location(
-                            follower["profile_location"], self.location
+                            follower["location"], self.location
                         )
                         if location_matches:
                             follower_dict = self.parse_edge_dict(
