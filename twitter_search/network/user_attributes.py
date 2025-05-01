@@ -98,8 +98,10 @@ class UserAttributes:
                 user_obj = await client.get_user_by_id(user_id)
                 success = True
             except twikit.errors.TooManyRequests:
-                print("User Attributes: Too Many Requests")
                 time.sleep(FIFTEEN_MINUTES)
+                print("User Attributes: Too Many Requests...")
+                user_obj = await client.get_user_by_id(user_id)
+                success = True
             except twikit.errors.BadRequest:
                 print("User Attributes: Bad Request")
                 success = True
@@ -151,7 +153,7 @@ class UserAttributes:
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DIR)
 
-        for user_dict in existing_users[:3]:
+        for user_dict in existing_users[:2]:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
             print(f"Processing user {user_dict["user_id"]}...")
@@ -195,7 +197,7 @@ class UserAttributes:
             # Add newly processed followers
             user_attributes_dict["followers"] = new_user_followers
             new_location_json.append(user_attributes_dict)
-
-        # New JSON saved with a new filename
-        network_json_maker(self.new_location_file_path, new_location_json)
+            # New JSON saved with a new filename
+            network_json_maker(self.new_location_file_path, new_location_json)
+        
         print(f"Stored {user_dict["user_id"]} data")
