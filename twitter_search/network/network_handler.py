@@ -503,7 +503,7 @@ class NetworkHandler:
         print(
             f"b) Median count of following {round(statistics.median(following_list), 2)}"
         )
-        
+
         print(
             f"c) Median twikit followers {round(statistics.median(twikit_followers), 2)}"
         )

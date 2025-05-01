@@ -32,6 +32,4 @@ if __name__ == "__main__":
         time.sleep(FIFTEEN_MINUTES)
 
     user_attributes = UserAttributes(args.location)
-    asyncio.run(
-        user_attributes.run()
-    )
+    asyncio.run(user_attributes.run())

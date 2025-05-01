@@ -17,6 +17,7 @@ from config_utils.constants import (
 )
 from config_utils.util import network_json_maker
 
+
 class UserAttributes:
     """
     Class that handles the Twikit search and data collection process
@@ -33,10 +34,12 @@ class UserAttributes:
             self.base_dir / f"networks/{self.location}/{self.location}.json"
         )
         self.retweet_edges_path = (
-            self.base_dir / f"networks/{self.location}/retweet_interactions.json"
+            self.base_dir
+            / f"networks/{self.location}/retweet_interactions.json"
         )
         self.follower_edges_path = (
-            self.base_dir / f"networks/{self.location}/follower_interactions.json"
+            self.base_dir
+            / f"networks/{self.location}/follower_interactions.json"
         )
         self.new_location_file_path = (
             self.base_dir / f"networks/{self.location}/{self.location}_new.json"
@@ -57,7 +60,7 @@ class UserAttributes:
         user_dict["user_id"] = user_id
         success = False
 
-        while not success: 
+        while not success:
             # Get source user information
             try:
                 user_obj = await client.get_user_by_id(user_id)
@@ -114,10 +117,10 @@ class UserAttributes:
             followers = user_dict["followers"]
             print(f"Processing user {user_dict["user_id"]}...")
             # Getting
-            user_attributes_dict= await self.get_user_attributes(
-                    client, user_dict["user_id"]
-                )
-         
+            user_attributes_dict = await self.get_user_attributes(
+                client, user_dict["user_id"]
+            )
+
             # Adding attributes to retweeters
             new_user_tweets = []
             for tweet in tweets:
@@ -127,29 +130,31 @@ class UserAttributes:
                     new_tweet_dict = tweet.copy()
                     processed_retweeters = []
                     for retweeter in tweet["retweeters"]:
-                        retweeter_attributes_dict = await self.get_user_attributes(
-                            client, retweeter["user_id"]
+                        retweeter_attributes_dict = (
+                            await self.get_user_attributes(
+                                client, retweeter["user_id"]
+                            )
                         )
-                        processed_retweeters.append(retweeter_attributes_dict)                    
-                    
+                        processed_retweeters.append(retweeter_attributes_dict)
+
                     new_tweet_dict["retweeters"] = processed_retweeters
                     new_user_tweets.append(new_tweet_dict)
 
             # Add newly processed tweets and retweeters
             user_attributes_dict["tweets"] = new_user_tweets
-            
+
             # Procesing
             new_user_followers = []
             for follower in followers:
                 # Only get attributes if file flag is true
-                follower_attributes_dict= await self.get_user_attributes(
-                        client, follower["user_id"]
-                    )
+                follower_attributes_dict = await self.get_user_attributes(
+                    client, follower["user_id"]
+                )
                 new_user_followers.append(follower_attributes_dict)
             # Add newly processed followers
             user_attributes_dict["followers"] = new_user_followers
             new_location_json.append(user_attributes_dict)
-                        
+
         # New JSON saved with a new filename
         network_json_maker(self.new_location_file_path, new_location_json)
         print(f"Stored {user_dict["user_id"]} data")

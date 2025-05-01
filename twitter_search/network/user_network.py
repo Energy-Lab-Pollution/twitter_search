@@ -367,7 +367,7 @@ class UserNetwork:
         # TODO: Finish implementation
         user_tweets = []
         response = self.x_client.get_users_tweets(user_id, max_results=100)
-                
+
         return user_tweets
 
     async def twikit_get_followers(self, user_id):
