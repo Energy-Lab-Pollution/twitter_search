@@ -48,6 +48,7 @@ class UserAttributes:
         # Global requests counter
         self.num_twikit_requests = 0
 
+    @staticmethod
     def check_location(raw_location, target_location):
         """
         Uses regex to see if the raw location matches
@@ -150,7 +151,7 @@ class UserAttributes:
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DIR)
 
-        for user_dict in existing_users:
+        for user_dict in existing_users[:3]:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
             print(f"Processing user {user_dict["user_id"]}...")
@@ -161,6 +162,7 @@ class UserAttributes:
 
             # Adding attributes to retweeters
             new_user_tweets = []
+            print(f"Processing retweeters..")
             for tweet in tweets:
                 if tweet["tweet_text"].startswith("RT @"):
                     continue
@@ -182,6 +184,7 @@ class UserAttributes:
             user_attributes_dict["tweets"] = new_user_tweets
 
             # Procesing
+            print(f"Processing followers")
             new_user_followers = []
             for follower in followers:
                 # Only get attributes if file flag is true
