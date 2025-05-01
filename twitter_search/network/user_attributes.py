@@ -2,6 +2,7 @@
 Script to add missing user attributes for Kolkata and Kanpur
 """
 
+import re
 import json
 import time
 from datetime import datetime
@@ -47,6 +48,36 @@ class UserAttributes:
         # Global requests counter
         self.num_twikit_requests = 0
 
+    def check_location(raw_location, target_location):
+        """
+        Uses regex to see if the raw location matches
+        the target location
+        """
+
+        target_locations = [target_location]
+
+        # alias is the key, target loc is the value
+        for alias, value in ALIAS_DICT.items():
+            if value == target_location:
+                target_locations.append(alias)
+
+        if isinstance(raw_location, str):
+            raw_location = raw_location.lower().strip()
+            location_regex = re.findall(r"\w+", raw_location)
+
+            if location_regex:
+                for target_location in target_locations:
+                    if target_location in location_regex:
+                        return True
+                    elif target_location in raw_location:
+                        return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+
     async def get_user_attributes(self, client, user_id):
         """
         Function to get all user attributes when we only get their
@@ -75,23 +106,30 @@ class UserAttributes:
                 print("User Attributes: Not Found")
                 success = True
 
+            user_dict["user_id"] = user_obj.id
             user_dict["username"] = user_obj.screen_name
+            user_dict["description"] = user_obj.description
             user_dict["profile_location"] = user_obj.location
+            user_dict["target_location"] = self.location
             user_dict["followers_count"] = user_obj.followers_count
             user_dict["following_count"] = user_obj.following_count
             user_dict["tweets_count"] = user_obj.statuses_count
+            # TODO: Check difference between verified and is_blue_verified
             user_dict["verified"] = user_obj.verified
             user_dict["created_at"] = user_obj.created_at
-            user_dict["target_location"] = self.location
-            user_dict["city"]
-
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
             user_dict["processing_status"] = "pending"
             user_dict["extracted_at"] = datetime.now()
-            user_dict["last_updated"] = datetime.now()
             user_dict["last_processed"] = None
+            user_dict["last_updated"] = datetime.now()
+
+            # See if location matches to add city
+            location_match = self.check_location(
+                user_obj.location, self.location
+            )
+            user_dict["city"] = self.location if location_match else None
 
         return user_dict
 
