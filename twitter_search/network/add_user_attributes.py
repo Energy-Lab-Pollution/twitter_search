@@ -3,25 +3,20 @@ Script to add missing user attributes for Kolkata and Kanpur
 """
 
 import json
-import os
-import re
+import time
 from datetime import datetime
 from pathlib import Path
 
-import pandas as pd
 import twikit
 
 # Local constants
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
-    MAX_RESULTS,
     TWIKIT_COOKIES_DIR,
-    TWIKIT_COUNT,
-    TWIKIT_TWEETS_THRESHOLD,
+    TWIKIT_USER_ATTRIBUTES_THRESHOLD,
 )
-from config_utils.util import client_creator, load_json
-from network.user_network import UserNetwork
+from config_utils.util import network_json_maker
 
 class UserAttributes:
     """
@@ -44,8 +39,13 @@ class UserAttributes:
         self.follower_edges_path = (
             self.base_dir / f"networks/{self.location}/follower_interactions.json"
         )
+        self.new_location_file_path = (
+            self.base_dir / f"networks/{self.location}/{self.location}_new.json"
+        )
+        # Global requests counter
+        self.num_twikit_requests = 0
 
-    async def get_root_user_attributes(self, client, user_id):
+    async def get_user_attributes(self, client, user_id):
         """
         Function to get all user attributes when we only get their
         ids from the existing file
@@ -56,6 +56,9 @@ class UserAttributes:
         """
         user_dict = {}
         user_dict["user_id"] = user_id
+
+        if self.num_twikit_requests % TWIKIT_USER_ATTRIBUTES_THRESHOLD:
+            time.sleep(FIFTEEN_MINUTES)
 
         # Get source user information
         user_obj = await client.get_user_by_id(user_id)
@@ -77,9 +80,11 @@ class UserAttributes:
         user_dict["last_updated"] = datetime.now()
         user_dict["last_processed"] = None
 
+        self.num_twikit_requests += 1
+
         return user_dict
 
-    async def create_user_network(self, extraction_type, file_flag):
+    async def create_user_network(self, extraction_type):
         """
         Gets the user network data for a given number of
         users.
@@ -87,22 +92,69 @@ class UserAttributes:
         Args:
             - extraction_type (str): Determines if the users' network data will be
             obtained via twikit or X
-            - file_flag (boolean): Determines
         """
-        # Get city users and users to process
-        users_list = self._get_city_users(extraction_type)
-        # list of user dicts that gets proccessed (no ids )
+        new_location_json = []
+
+        # Get city users from the RAW JSON
+        try:
+            with open(self.location_file_path, "r") as f:
+                existing_users = json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            existing_users = []
+
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DIR)
 
-        for user_to_process in users_list:
-            try:
-                # Only get attributes if file flag is true
-                user_to_process_dict = await self.get_root_user_attributes(
-                        client, user_to_process
+        for user_dict in existing_users:
+            tweets = user_dict["tweets"]
+            followers = user_dict["followers"]
+            try:                
+                print(f"Processing user {user_dict["user_id"]}...")
+                # Getting
+                user_attributes_dict= await self.get_user_attributes(
+                        client, user_dict["user_id"]
                     )
-                print(f"Processing user {user_to_process}...")
-                # TODO: user_id will come from a queue
             except Exception as error:
                 print(f"Error getting user: {error}")
                 continue
+            
+            # Adding attributes to retweeters
+            new_user_tweets = []
+            for tweet in tweets:
+                if tweet["tweet_text"].startswith("RT @"):
+                    continue
+                if "retweeters" in tweet and tweet["retweeters"]:
+                    new_tweet_dict = tweet.copy()
+                    processed_retweeters = []
+                    
+                    for retweeter in tweet["retweeters"]:
+                        retweeter_attributes_dict = await self.get_user_attributes(
+                            client, retweeter["user_id"]
+                        )
+                        processed_retweeters.append(retweeter_attributes_dict)                    
+                    
+                    new_tweet_dict["retweeters"] = processed_retweeters
+                    new_user_tweets.append(new_tweet_dict)
+
+            # Add newly processed tweets and retweeters
+            user_attributes_dict["tweets"] = new_user_tweets
+            
+            # Procesing
+            new_user_followers = []
+            for follower in followers:
+                try:                
+                    # Only get attributes if file flag is true
+                    follower_attributes_dict= await self.get_user_attributes(
+                            client, follower["user_id"]
+                        )
+                    new_user_followers.append(follower_attributes_dict)
+                except Exception as error:
+                    print(f"Error getting follower attributes: {error}")
+                    continue
+            # Add newly processed followers
+            user_attributes_dict["followers"] = new_user_followers
+            new_location_json.append(user_attributes_dict)
+                        
+        # New JSON saved with a new filename
+        network_json_maker(self.new_location_file_path, new_location_json)
+        print(f"Stored {user_dict["user_id"]} data")
