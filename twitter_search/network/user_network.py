@@ -238,7 +238,7 @@ class UserNetwork:
                     print(f"Made {self.retweeters_counter} retweets requests")
                     self.retweeters_maxed_out = True
                     return retweeters_list
-                except twikit.error.BadRequest:
+                except twikit.errors.BadRequest:
                     print("Retweeters: Bad Request")
                     return retweeters_list
                 if more_retweeters:

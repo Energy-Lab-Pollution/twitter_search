@@ -14,7 +14,6 @@ from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
-    TWIKIT_USER_ATTRIBUTES_THRESHOLD,
 )
 from config_utils.util import network_json_maker
 
@@ -58,9 +57,6 @@ class UserAttributes:
         user_dict["user_id"] = user_id
         success = False
 
-        if self.num_twikit_requests % TWIKIT_USER_ATTRIBUTES_THRESHOLD:
-            time.sleep(FIFTEEN_MINUTES)
-
         while not success: 
             # Get source user information
             try:
@@ -69,8 +65,11 @@ class UserAttributes:
             except twikit.errors.TooManyRequests:
                 print("User Attributes: Too Many Requests")
                 time.sleep(FIFTEEN_MINUTES)
-            except twikit.error.BadRequest:
+            except twikit.errors.BadRequest:
                 print("User Attributes: Bad Request")
+                success = True
+            except twikit.error.NotFound:
+                print("User Attributes: Not Found")
                 success = True
 
             user_dict["username"] = user_obj.screen_name
@@ -91,11 +90,9 @@ class UserAttributes:
             user_dict["last_updated"] = datetime.now()
             user_dict["last_processed"] = None
 
-        self.num_twikit_requests += 1
-
         return user_dict
 
-    async def create_user_network(self, extraction_type):
+    async def create_user_network(self):
         """
         Gets the user network data for a given number of
         users.
@@ -119,16 +116,12 @@ class UserAttributes:
         for user_dict in existing_users:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
-            try:                
-                print(f"Processing user {user_dict["user_id"]}...")
-                # Getting
-                user_attributes_dict= await self.get_user_attributes(
-                        client, user_dict["user_id"]
-                    )
-            except Exception as error:
-                print(f"Error getting user: {error}")
-                continue
-            
+            print(f"Processing user {user_dict["user_id"]}...")
+            # Getting
+            user_attributes_dict= await self.get_user_attributes(
+                    client, user_dict["user_id"]
+                )
+         
             # Adding attributes to retweeters
             new_user_tweets = []
             for tweet in tweets:
