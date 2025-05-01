@@ -7,6 +7,7 @@ import json
 import time
 from datetime import datetime
 from pathlib import Path
+from tqdm import tqdm
 
 import twikit
 
@@ -96,18 +97,16 @@ class UserAttributes:
             # Get source user information
             try:
                 user_obj = await client.get_user_by_id(user_id)
-                success = True
             except twikit.errors.TooManyRequests:
-                time.sleep(FIFTEEN_MINUTES)
                 print("User Attributes: Too Many Requests...")
+                time.sleep(FIFTEEN_MINUTES)
                 user_obj = await client.get_user_by_id(user_id)
-                success = True
             except twikit.errors.BadRequest:
                 print("User Attributes: Bad Request")
-                success = True
-            except twikit.error.NotFound:
+                return user_dict
+            except twikit.errors.NotFound:
                 print("User Attributes: Not Found")
-                success = True
+                return user_dict
 
             user_dict["user_id"] = user_obj.id
             user_dict["username"] = user_obj.screen_name
@@ -133,6 +132,7 @@ class UserAttributes:
                 user_obj.location, self.location
             )
             user_dict["city"] = self.location if location_match else None
+            success = True
 
         return user_dict
 
@@ -165,7 +165,7 @@ class UserAttributes:
             # Adding attributes to retweeters
             new_user_tweets = []
             print(f"Processing retweeters..")
-            for tweet in tweets:
+            for tweet in tqdm(tweets):
                 if tweet["tweet_text"].startswith("RT @"):
                     continue
                 if "retweeters" in tweet and tweet["retweeters"]:
@@ -188,7 +188,7 @@ class UserAttributes:
             # Procesing
             print(f"Processing followers")
             new_user_followers = []
-            for follower in followers:
+            for follower in tqdm(followers):
                 # Only get attributes if file flag is true
                 follower_attributes_dict = await self.get_user_attributes(
                     client, follower["user_id"]
@@ -199,5 +199,4 @@ class UserAttributes:
             new_location_json.append(user_attributes_dict)
             # New JSON saved with a new filename
             network_json_maker(self.new_location_file_path, new_location_json)
-        
-        print(f"Stored {user_dict["user_id"]} data")
+            print(f"Stored {user_dict["user_id"]} data")
