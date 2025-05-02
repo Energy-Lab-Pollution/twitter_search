@@ -385,9 +385,23 @@ class UserNetwork:
             - tweet_list(list): List of dicts with followers info
         """
         followers_list = []
-        followers = await self.client.get_user_followers(
-            user_id, count=self.TWIKIT_COUNT
-        )
+        try:
+            followers = await self.client.get_user_followers(
+                user_id, count=self.TWIKIT_COUNT
+            )
+        except twikit.errors.TooManyRequests:
+            print("Followers: too many requests, stopping...")
+            return followers_list
+        except twikit.errors.BadRequest:
+            print("Followers: Bad Request")
+            return followers_list
+        except twikit.errors.NotFound:
+            print("Followers: Not Found")
+            return followers_list
+        except twikit.errors.TwitterException as e:
+            print(f"Followers: Twitter Exception {e}")
+            return followers_list
+
         more_followers_available = True
         num_iter = 0
 
@@ -483,7 +497,7 @@ class UserNetwork:
         # Will put the extracted data into a list
         # Easier to extend future data
         user_dict_list = [user_dict]
-        user_dict["last_processed"] = datetime.now()
+        user_dict["last_processed"] = datetime.now().isoformat()
         user_dict["processing_status"] = "completed"
 
         network_json_maker(self.output_file_path, user_dict_list)

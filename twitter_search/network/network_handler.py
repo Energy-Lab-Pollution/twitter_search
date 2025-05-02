@@ -716,7 +716,7 @@ class NetworkHandler:
 
         # TODO: user_id will come from a queue
         for user_to_process in users_list:
-            try:
+            # try:
                 # Only get attributes if file flag is true
                 if file_flag:
                     user_to_process_dict = await self.get_csv_user_attributes(
@@ -727,6 +727,6 @@ class NetworkHandler:
                 )
                 print(f"Processing user {user_to_process}...")
                 await user_network.run(user_to_process_dict, extraction_type)
-            except Exception as error:
-                print(f"Error getting user: {error}")
-                continue
+            # except Exception as error:
+            #     print(f"Error getting user: {error}")
+            #     continue
