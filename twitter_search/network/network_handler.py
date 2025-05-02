@@ -111,9 +111,9 @@ class NetworkHandler:
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
             user_dict["processing_status"] = "pending"
-            user_dict["extracted_at"] = datetime.now()
+            user_dict["extracted_at"] = datetime.now().isoformat()
             user_dict["last_processed"] = None
-            user_dict["last_updated"] = datetime.now()
+            user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
             location_match = self.check_location(
                 tweet.user.location, self.location
@@ -157,9 +157,9 @@ class NetworkHandler:
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
             user_dict["processing_status"] = "pending"
-            user_dict["extracted_at"] = datetime.now()
+            user_dict["extracted_at"] = datetime.now().isoformat()
             user_dict["last_processed"] = None
-            user_dict["last_updated"] = datetime.now()
+            user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
             location_match = self.check_location(
                 user["location"], self.location

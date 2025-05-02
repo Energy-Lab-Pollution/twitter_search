@@ -107,6 +107,12 @@ class UserAttributes:
             except twikit.errors.NotFound:
                 print("User Attributes: Not Found")
                 return user_dict
+            except twikit.errors.TwitterException as err:
+                print("User Attributes: Twitter Error ({err})")
+                if "Invalid user id" in err:
+                    return user_dict
+                elif "User is suspended" in err:
+                    return user_dict 
 
             user_dict["user_id"] = user_obj.id
             user_dict["username"] = user_obj.screen_name
@@ -142,7 +148,7 @@ class UserAttributes:
         set of users that have already been processed
         """
         users_list = []
-        existing_data = load_json(self.location_file_path)
+        existing_data = load_json(self.new_location_file_path)
 
         if existing_data:
             for user_dict in existing_data:
@@ -181,6 +187,8 @@ class UserAttributes:
             user_attributes_dict = await self.get_user_attributes(
                 client, user_dict["user_id"]
             )
+
+            if 
 
             # Adding attributes to retweeters
             new_user_tweets = []
