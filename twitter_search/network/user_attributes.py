@@ -15,9 +15,9 @@ import twikit
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
-    TWIKIT_COOKIES_DIR,
+    TWIKIT_FDM_COOKIES_DIR,
 )
-from config_utils.util import network_json_maker, convert_to_iso_format
+from config_utils.util import convert_to_iso_format, load_json, network_json_maker
 
 
 class UserAttributes:
@@ -107,9 +107,6 @@ class UserAttributes:
             except twikit.errors.NotFound:
                 print("User Attributes: Not Found")
                 return user_dict
-            except twikit.errors.TwitterException as e:
-                print(f"User Attributes: Twitter Exception {e}")
-                return user_dict
 
             user_dict["user_id"] = user_obj.id
             user_dict["username"] = user_obj.screen_name
@@ -139,6 +136,21 @@ class UserAttributes:
 
         return user_dict
 
+    def _get_already_processed_users(self):
+        """
+        Reads the location JSON file and gets the
+        set of users that have already been processed
+        """
+        users_list = []
+        existing_data = load_json(self.location_file_path)
+
+        if existing_data:
+            for user_dict in existing_data:
+                user_id = user_dict["user_id"]
+                users_list.append(user_id)
+        return users_list
+
+
     async def run(self):
         """
         Gets the user attributes for root users, followers
@@ -146,17 +158,22 @@ class UserAttributes:
         """
         new_location_json = []
 
+        # Already re-processed users with all attributes:
+        processed_users = self._get_already_processed_users()
+
         # Get city users from the RAW JSON
-        try:
-            with open(self.location_file_path, "r") as f:
-                existing_users = json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            existing_users = []
+        with open(self.location_file_path, "r") as f:
+            users_list = json.load(f)
+        
+        # Only process users with no new attributes added
+        users_to_process = list(
+                set(users_list).difference(set(processed_users))
+            )
 
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DIR)
+        client.load_cookies(TWIKIT_FDM_COOKIES_DIR)
 
-        for user_dict in existing_users:
+        for user_dict in users_to_process:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
             print(f"Processing user {user_dict["user_id"]}...")
