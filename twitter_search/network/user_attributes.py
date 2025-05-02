@@ -164,18 +164,18 @@ class UserAttributes:
         # Get city users from the RAW JSON
         with open(self.location_file_path, "r") as f:
             users_list = json.load(f)
-        
-        # Only process users with no new attributes added
-        users_to_process = list(
-                set(users_list).difference(set(processed_users))
-            )
 
+        
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_FDM_COOKIES_DIR)
 
-        for user_dict in users_to_process:
+        for user_dict in users_list:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
+            if user_dict["user_id"] in processed_users:
+                print(f"Already processed {user_dict['user_id']}.. skipping")
+                continue
+            
             print(f"Processing user {user_dict["user_id"]}...")
             # Getting
             user_attributes_dict = await self.get_user_attributes(
