@@ -17,7 +17,7 @@ from config_utils.constants import (
     FIFTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
 )
-from config_utils.util import network_json_maker
+from config_utils.util import network_json_maker, convert_to_iso_format
 
 
 class UserAttributes:
@@ -121,7 +121,7 @@ class UserAttributes:
             user_dict["tweets_count"] = user_obj.statuses_count
             # TODO: Check difference between verified and is_blue_verified
             user_dict["verified"] = user_obj.verified
-            user_dict["created_at"] = user_obj.created_at
+            user_dict["created_at"] = convert_to_iso_format(user_obj.created_at)
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None

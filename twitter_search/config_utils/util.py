@@ -402,10 +402,10 @@ def network_json_maker(file_path, data_to_append):
 
 
 # Date conversion
-def convert_to_yyyy_mm_dd(date_string):
+def convert_to_iso_format(date_string):
     """
     Converts a date string in the format "Fri Dec 06 18:09:05 +0000 2024"
-    to the "yyyy-mm-dd" format.
+    to isoformat
 
     Args:
         date_string: The input date string.
@@ -415,7 +415,7 @@ def convert_to_yyyy_mm_dd(date_string):
     """
     try:
         date_obj = datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
-        return date_obj.strftime("%Y-%m-%d")
+        return date_obj.isoformat()
     except ValueError:
         print(f"Invalid date format: {date_string}")
         return None

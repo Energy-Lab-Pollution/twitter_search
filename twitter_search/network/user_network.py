@@ -16,7 +16,7 @@ from config_utils.constants import (
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_TWEETS_THRESHOLD,
 )
-from config_utils.util import client_creator, network_json_maker
+from config_utils.util import client_creator, network_json_maker, convert_to_iso_format
 
 
 class UserNetwork:
@@ -145,7 +145,7 @@ class UserNetwork:
                 user_dict["tweets_count"] = user.statuses_count
                 # TODO: Check difference between verified and is_blue_verified
                 user_dict["verified"] = user.verified
-                user_dict["created_at"] = user.created_at
+                user_dict["created_at"] = convert_to_iso_format(user.created_at)
                 # TODO: Adding new attributes
                 user_dict["category"] = None
                 user_dict["treatment_arm"] = None
@@ -153,6 +153,7 @@ class UserNetwork:
                 user_dict["extracted_at"] = datetime.now().isoformat()
                 user_dict["last_processed"] = None
                 user_dict["last_updated"] = datetime.now().isoformat()
+
 
                 # See if location matches to add city
                 location_match = self.check_location(
