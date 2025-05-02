@@ -106,9 +106,9 @@ class UserNetwork:
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
             user_dict["processing_status"] = "pending"
-            user_dict["extracted_at"] = datetime.now()
+            user_dict["extracted_at"] = datetime.now().isoformat()
             user_dict["last_processed"] = None
-            user_dict["last_updated"] = datetime.now()
+            user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
             location_match = self.check_location(
                 user["location"], self.location
@@ -150,9 +150,9 @@ class UserNetwork:
                 user_dict["category"] = None
                 user_dict["treatment_arm"] = None
                 user_dict["processing_status"] = "pending"
-                user_dict["extracted_at"] = datetime.now()
+                user_dict["extracted_at"] = datetime.now().isoformat()
                 user_dict["last_processed"] = None
-                user_dict["last_updated"] = datetime.now()
+                user_dict["last_updated"] = datetime.now().isoformat()
 
                 # See if location matches to add city
                 location_match = self.check_location(
@@ -240,6 +240,9 @@ class UserNetwork:
                     return retweeters_list
                 except twikit.errors.BadRequest:
                     print("Retweeters: Bad Request")
+                    return retweeters_list
+                except twikit.errors.TwitterException as e:
+                    print(f"Retweeters: Twitter Exception {e}")
                     return retweeters_list
                 if more_retweeters:
                     more_parsed_retweeters = self.parse_twikit_users(
@@ -424,6 +427,9 @@ class UserNetwork:
                 return followers_list
             except twikit.errors.NotFound:
                 print("Followers: Not Found")
+                return followers_list
+            except twikit.errors.TwitterException as e:
+                print(f"Followers: Twitter Exception {e}")
                 return followers_list
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} follower batches, sleeping...")

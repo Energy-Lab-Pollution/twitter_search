@@ -107,6 +107,9 @@ class UserAttributes:
             except twikit.errors.NotFound:
                 print("User Attributes: Not Found")
                 return user_dict
+            except twikit.errors.TwitterException as e:
+                print(f"User Attributes: Twitter Exception {e}")
+                return user_dict
 
             user_dict["user_id"] = user_obj.id
             user_dict["username"] = user_obj.screen_name
@@ -123,9 +126,9 @@ class UserAttributes:
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
             user_dict["processing_status"] = "pending"
-            user_dict["extracted_at"] = datetime.now()
+            user_dict["extracted_at"] = datetime.now().isoformat()
             user_dict["last_processed"] = None
-            user_dict["last_updated"] = datetime.now()
+            user_dict["last_updated"] = datetime.now().isoformat()
 
             # See if location matches to add city
             location_match = self.check_location(
@@ -153,7 +156,7 @@ class UserAttributes:
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DIR)
 
-        for user_dict in existing_users[:2]:
+        for user_dict in existing_users:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
             print(f"Processing user {user_dict["user_id"]}...")
@@ -198,5 +201,5 @@ class UserAttributes:
             user_attributes_dict["followers"] = new_user_followers
             new_location_json.append(user_attributes_dict)
             # New JSON saved with a new filename
-            network_json_maker(self.new_location_file_path, new_location_json)
+            network_json_maker(self.new_location_file_path, [user_attributes_dict])
             print(f"Stored {user_dict["user_id"]} data")
