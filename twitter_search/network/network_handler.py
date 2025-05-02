@@ -698,7 +698,7 @@ class NetworkHandler:
             - file_flag (boolean): Determines
         """
         # Get city users and users to process
-        users_list = self._get_city_users(extraction_type, file_flag)
+        users_list = await self._get_city_users(extraction_type, file_flag)
         # list of user dicts that gets proccessed (no ids )
         if file_flag:
             users_list = list(

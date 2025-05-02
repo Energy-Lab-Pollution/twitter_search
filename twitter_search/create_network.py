@@ -32,7 +32,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "file_flag",
-        type="str",
+        type=str,
         choices=["Yes", "No"],
         help="Determines if root users will be extracted from the .csv file",
     )
@@ -43,7 +43,7 @@ if __name__ == "__main__":
         print("Sleeping for 15 minutes...")
         time.sleep(FIFTEEN_MINUTES)
 
-    file_flag = True if args.file == "Yes" else False
+    file_flag = True if args.file_flag == "Yes" else False
     network_handler = NetworkHandler(args.location)
     asyncio.run(
         network_handler.create_user_network(args.extraction_type, file_flag)
