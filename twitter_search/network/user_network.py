@@ -153,14 +153,11 @@ class UserNetwork:
                 user_dict["extracted_at"] = datetime.now().isoformat()
                 user_dict["last_processed"] = None
                 user_dict["last_updated"] = datetime.now().isoformat()
-
-
                 # See if location matches to add city
                 location_match = self.check_location(
                     user.location, self.location
                 )
                 user_dict["city"] = self.location if location_match else None
-
                 users_list.append(user_dict)
 
         return users_list

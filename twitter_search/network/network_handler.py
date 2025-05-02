@@ -25,7 +25,7 @@ from config_utils.constants import (
     TWIKIT_TWEETS_THRESHOLD,
     USER_FIELDS,
 )
-from config_utils.util import client_creator, load_json
+from config_utils.util import client_creator, load_json, convert_to_iso_format
 from network.user_network import UserNetwork
 
 
@@ -667,23 +667,30 @@ class NetworkHandler:
 
         # Get source user information
         user_obj = await client.get_user_by_id(user_id)
+        user_dict["user_id"] = user_obj.id
         user_dict["username"] = user_obj.screen_name
+        user_dict["description"] = user_obj.description
         user_dict["profile_location"] = user_obj.location
+        user_dict["target_location"] = self.location
         user_dict["followers_count"] = user_obj.followers_count
         user_dict["following_count"] = user_obj.following_count
         user_dict["tweets_count"] = user_obj.statuses_count
+        # TODO: Check difference between verified and is_blue_verified
         user_dict["verified"] = user_obj.verified
-        user_dict["created_at"] = user_obj.created_at
-        user_dict["target_location"] = self.location
-        user_dict["city"]
-
+        user_dict["created_at"] = convert_to_iso_format(user_obj.created_at)
         # TODO: Adding new attributes
         user_dict["category"] = None
         user_dict["treatment_arm"] = None
         user_dict["processing_status"] = "pending"
-        user_dict["extracted_at"] = datetime.now()
-        user_dict["last_updated"] = datetime.now()
+        user_dict["extracted_at"] = datetime.now().isoformat()
         user_dict["last_processed"] = None
+        user_dict["last_updated"] = datetime.now().isoformat()
+
+        # See if location matches to add city
+        location_match = self.check_location(
+            user_obj.location, self.location
+        )
+        user_dict["city"] = self.location if location_match else None
 
         return user_dict
 
