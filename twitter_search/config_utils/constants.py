@@ -118,6 +118,7 @@ for char in PUNCTUATIONS:
 
 # Twikit and Network Construction Constants
 TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
+TWIKIT_FDM_COOKIES_DIR = "twitter_search/config_utils/fdm_cookies.json"
 SINGLE_ACCOUNT_THRESHOLD = 10
 TWIKIT_TWEETS_THRESHOLD = 50
 TWIKIT_FOLLOWERS_THRESHOLD = 50

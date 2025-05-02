@@ -160,6 +160,8 @@ class UserNetwork:
                 user_dict["city"] = self.location if location_match else None
                 users_list.append(user_dict)
 
+                print(user_dict)
+
         return users_list
 
     @staticmethod
