@@ -28,6 +28,7 @@ class UserAttributes:
 
     FIFTEEN_MINUTES = FIFTEEN_MINUTES
     ALIAS_DICT = ALIAS_DICT
+    PROBLEMATIC_USERS = ["1249023238488768512", "147195485"]
 
     def __init__(self, location):
         self.location = location.lower()
@@ -166,10 +167,10 @@ class UserAttributes:
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_FDM_COOKIES_DIR)
 
-        for user_dict in users_list[:1]:
+        for user_dict in users_list:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
-            if str(user_dict["user_id"]) in processed_users:
+            if (str(user_dict["user_id"]) in processed_users) or (str(user_dict["user_id"]) in self.PROBLEMATIC_USERS):
                 print(f"Already processed {user_dict['user_id']}.. skipping")
                 continue
                             
@@ -189,7 +190,7 @@ class UserAttributes:
                 if "retweeters" in tweet and tweet["retweeters"]:
                     new_tweet_dict = tweet.copy()
                     processed_retweeters = []
-                    for retweeter in tweet["retweeters"]:
+                    for retweeter in tqdm(tweet["retweeters"]):
                         try:
                             retweeter_attributes_dict = (
                                 await self.get_user_attributes(
