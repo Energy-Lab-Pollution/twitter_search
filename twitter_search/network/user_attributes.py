@@ -219,4 +219,3 @@ class UserAttributes:
             # New JSON saved with a new filename
             network_json_maker(self.new_location_file_path, [user_attributes_dict])
             print(f"Stored {user_dict["user_id"]} data")
-            time.sleep(SEVENTEEN_MINUTES)
