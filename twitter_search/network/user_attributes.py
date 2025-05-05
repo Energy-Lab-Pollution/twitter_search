@@ -15,7 +15,7 @@ import twikit
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
-    SEVENTEEN_MINUTES,
+    SIXTEEN_MINUTES,
     TWIKIT_FDM_COOKIES_DIR,
 )
 from config_utils.util import convert_to_iso_format, load_json, network_json_maker, remove_duplicate_records
@@ -92,7 +92,7 @@ class UserAttributes:
                 user_obj = await client.get_user_by_id(user_id)
             except twikit.errors.TooManyRequests:
                 print("User Attributes: Too Many Requests...")
-                time.sleep(FIFTEEN_MINUTES)
+                time.sleep(SIXTEEN_MINUTES)
                 user_obj = await client.get_user_by_id(user_id)
             except twikit.errors.BadRequest:
                 print("User Attributes: Bad Request")
