@@ -664,9 +664,18 @@ class NetworkHandler:
         """
         user_dict = {}
         user_dict["user_id"] = user_id
-
-        # Get source user information
-        user_obj = await client.get_user_by_id(user_id)
+        try:
+            # Get source user information
+            user_obj = await client.get_user_by_id(user_id)
+        except twikit.errors.BadRequest:
+            print("User Attributes: Bad Request")
+            return user_dict
+        except twikit.errors.NotFound:
+            print("User Attributes: Not Found")
+            return user_dict
+        except twikit.errors.TwitterException as err:
+            print(f"User Attributes: Twitter Error ({err} - {user_id})")
+            return user_dict
         user_dict["user_id"] = user_obj.id
         user_dict["username"] = user_obj.screen_name
         user_dict["description"] = user_obj.description
@@ -683,7 +692,7 @@ class NetworkHandler:
         user_dict["treatment_arm"] = None
         user_dict["processing_status"] = "pending"
         user_dict["extracted_at"] = datetime.now().isoformat()
-        user_dict["last_processed"] = None
+        user_dict["last_processed"] = datetime.now().isoformat()
         user_dict["last_updated"] = datetime.now().isoformat()
 
         # See if location matches to add city

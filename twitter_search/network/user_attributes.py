@@ -5,7 +5,7 @@ Script to add missing user attributes for Kolkata and Kanpur
 import re
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from tqdm import tqdm
 
@@ -15,9 +15,10 @@ import twikit
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
+    SEVENTEEN_MINUTES,
     TWIKIT_FDM_COOKIES_DIR,
 )
-from config_utils.util import convert_to_iso_format, load_json, network_json_maker
+from config_utils.util import convert_to_iso_format, load_json, network_json_maker, remove_duplicate_records
 
 
 class UserAttributes:
@@ -34,14 +35,6 @@ class UserAttributes:
         # Building location output path
         self.location_file_path = (
             self.base_dir / f"networks/{self.location}/{self.location}.json"
-        )
-        self.retweet_edges_path = (
-            self.base_dir
-            / f"networks/{self.location}/retweet_interactions.json"
-        )
-        self.follower_edges_path = (
-            self.base_dir
-            / f"networks/{self.location}/follower_interactions.json"
         )
         self.new_location_file_path = (
             self.base_dir / f"networks/{self.location}/{self.location}_new.json"
@@ -108,7 +101,7 @@ class UserAttributes:
                 print("User Attributes: Not Found")
                 return user_dict
             except twikit.errors.TwitterException as err:
-                print(f"User Attributes: Twitter Error ({err})")
+                print(f"User Attributes: Twitter Error ({err} - {user_id})")
                 return user_dict
 
             user_dict["user_id"] = user_obj.id
@@ -127,7 +120,9 @@ class UserAttributes:
             user_dict["treatment_arm"] = None
             user_dict["processing_status"] = "pending"
             user_dict["extracted_at"] = datetime.now().isoformat()
-            user_dict["last_processed"] = None
+            # TODO: Needs to be a value of our choice
+            last_date = datetime.now() - timedelta(days=14)
+            user_dict["last_processed"] = last_date.isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
 
             # See if location matches to add city
@@ -172,17 +167,17 @@ class UserAttributes:
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_FDM_COOKIES_DIR)
 
-        for user_dict in users_list:
+        for user_dict in users_list[3:]:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
-            if user_dict["user_id"] in processed_users:
+            if str(user_dict["user_id"]) in processed_users:
                 print(f"Already processed {user_dict['user_id']}.. skipping")
                 continue
-            
+                            
             print(f"Processing user {user_dict["user_id"]}...")
-            # Getting
+            # Getting add
             user_attributes_dict = await self.get_user_attributes(
-                client, user_dict["user_id"]
+                client, str(user_dict["user_id"])
             )
             if "last_processed" not in user_attributes_dict:
                 continue
@@ -198,7 +193,7 @@ class UserAttributes:
                     for retweeter in tweet["retweeters"]:
                         retweeter_attributes_dict = (
                             await self.get_user_attributes(
-                                client, retweeter["user_id"]
+                                client, str(retweeter["user_id"])
                             )
                         )
                         processed_retweeters.append(retweeter_attributes_dict)
@@ -215,7 +210,7 @@ class UserAttributes:
             for follower in tqdm(followers):
                 # Only get attributes if file flag is true
                 follower_attributes_dict = await self.get_user_attributes(
-                    client, follower["user_id"]
+                    client, str(follower["user_id"])
                 )
                 new_user_followers.append(follower_attributes_dict)
             # Add newly processed followers
@@ -224,3 +219,4 @@ class UserAttributes:
             # New JSON saved with a new filename
             network_json_maker(self.new_location_file_path, [user_attributes_dict])
             print(f"Stored {user_dict["user_id"]} data")
+            time.sleep(SEVENTEEN_MINUTES)
