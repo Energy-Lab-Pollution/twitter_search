@@ -21,7 +21,6 @@ from config_utils.util import (
     convert_to_iso_format,
     load_json,
     network_json_maker,
-    remove_duplicate_records,
 )
 from tqdm import tqdm
 
@@ -188,7 +187,7 @@ class UserAttributes:
                 continue
             # Adding attributes to retweeters
             new_user_tweets = []
-            print(f"Processing retweeters..")
+            print("Processing retweeters..")
             for tweet in tqdm(tweets):
                 if tweet["tweet_text"].startswith("RT @"):
                     continue
@@ -220,7 +219,7 @@ class UserAttributes:
             user_attributes_dict["tweets"] = new_user_tweets
 
             # Procesing
-            print(f"Processing followers")
+            print("Processing followers")
             new_user_followers = []
             for follower in tqdm(followers):
                 # Only get attributes if file flag is true
