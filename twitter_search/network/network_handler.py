@@ -25,7 +25,7 @@ from config_utils.constants import (
     TWIKIT_TWEETS_THRESHOLD,
     USER_FIELDS,
 )
-from config_utils.util import client_creator, load_json, convert_to_iso_format
+from config_utils.util import client_creator, convert_to_iso_format, load_json
 from network.user_network import UserNetwork
 
 
@@ -106,7 +106,9 @@ class NetworkHandler:
             user_dict["tweets_count"] = tweet.user.statuses_count
             # TODO: Check difference between verified and is_blue_verified
             user_dict["verified"] = tweet.user.verified
-            user_dict["created_at"] = convert_to_iso_format(tweet.user.created_at)
+            user_dict["created_at"] = convert_to_iso_format(
+                tweet.user.created_at
+            )
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
@@ -696,9 +698,7 @@ class NetworkHandler:
         user_dict["last_updated"] = datetime.now().isoformat()
 
         # See if location matches to add city
-        location_match = self.check_location(
-            user_obj.location, self.location
-        )
+        location_match = self.check_location(user_obj.location, self.location)
         user_dict["city"] = self.location if location_match else None
 
         return user_dict
@@ -726,16 +726,14 @@ class NetworkHandler:
         # TODO: user_id will come from a queue
         for user_to_process in users_list:
             # try:
-                # Only get attributes if file flag is true
-                if file_flag:
-                    user_to_process_dict = await self.get_csv_user_attributes(
-                        client, user_to_process
-                    )
-                user_network = UserNetwork(
-                    self.location_file_path, self.location
+            # Only get attributes if file flag is true
+            if file_flag:
+                user_to_process_dict = await self.get_csv_user_attributes(
+                    client, user_to_process
                 )
-                print(f"Processing user {user_to_process}...")
-                await user_network.run(user_to_process_dict, extraction_type)
-            # except Exception as error:
-            #     print(f"Error getting user: {error}")
-            #     continue
+            user_network = UserNetwork(self.location_file_path, self.location)
+            print(f"Processing user {user_to_process}...")
+            await user_network.run(user_to_process_dict, extraction_type)
+        # except Exception as error:
+        #     print(f"Error getting user: {error}")
+        #     continue

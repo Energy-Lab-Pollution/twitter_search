@@ -2,12 +2,11 @@
 Script to add missing user attributes for Kolkata and Kanpur
 """
 
-import re
 import json
+import re
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from tqdm import tqdm
 
 import twikit
 
@@ -18,7 +17,13 @@ from config_utils.constants import (
     SIXTEEN_MINUTES,
     TWIKIT_FDM_COOKIES_DIR,
 )
-from config_utils.util import convert_to_iso_format, load_json, network_json_maker, remove_duplicate_records
+from config_utils.util import (
+    convert_to_iso_format,
+    load_json,
+    network_json_maker,
+    remove_duplicate_records,
+)
+from tqdm import tqdm
 
 
 class UserAttributes:
@@ -148,7 +153,6 @@ class UserAttributes:
                 users_list.append(user_id)
         return users_list
 
-
     async def run(self):
         """
         Gets the user attributes for root users, followers
@@ -163,17 +167,18 @@ class UserAttributes:
         with open(self.location_file_path, "r") as f:
             users_list = json.load(f)
 
-        
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_FDM_COOKIES_DIR)
 
         for user_dict in users_list:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
-            if (str(user_dict["user_id"]) in processed_users) or (str(user_dict["user_id"]) in self.PROBLEMATIC_USERS):
+            if (str(user_dict["user_id"]) in processed_users) or (
+                str(user_dict["user_id"]) in self.PROBLEMATIC_USERS
+            ):
                 print(f"Already processed {user_dict['user_id']}.. skipping")
                 continue
-                            
+
             print(f"Processing user {user_dict["user_id"]}...")
             # Getting add
             user_attributes_dict = await self.get_user_attributes(
@@ -197,9 +202,13 @@ class UserAttributes:
                                     client, str(retweeter["user_id"])
                                 )
                             )
-                            processed_retweeters.append(retweeter_attributes_dict)
+                            processed_retweeters.append(
+                                retweeter_attributes_dict
+                            )
                         except Exception as error:
-                            print(f"Error processing {retweeter['user_id']} - {error}")
+                            print(
+                                f"Error processing {retweeter['user_id']} - {error}"
+                            )
                             if "Twitter Error" not in str(error):
                                 processed_retweeters.append(retweeter)
                             else:
@@ -230,5 +239,7 @@ class UserAttributes:
             user_attributes_dict["followers"] = new_user_followers
             new_location_json.append(user_attributes_dict)
             # New JSON saved with a new filename
-            network_json_maker(self.new_location_file_path, [user_attributes_dict])
+            network_json_maker(
+                self.new_location_file_path, [user_attributes_dict]
+            )
             print(f"Stored {user_dict["user_id"]} data")

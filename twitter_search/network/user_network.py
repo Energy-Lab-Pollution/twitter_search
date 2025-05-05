@@ -16,7 +16,11 @@ from config_utils.constants import (
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_TWEETS_THRESHOLD,
 )
-from config_utils.util import client_creator, network_json_maker, convert_to_iso_format
+from config_utils.util import (
+    client_creator,
+    convert_to_iso_format,
+    network_json_maker,
+)
 
 
 class UserNetwork:
@@ -181,7 +185,9 @@ class UserNetwork:
                 tweet_dict = {}
                 tweet_dict["tweet_id"] = tweet.id
                 tweet_dict["tweet_text"] = tweet.text
-                tweet_dict["created_at"] = convert_to_iso_format(tweet.created_at)
+                tweet_dict["created_at"] = convert_to_iso_format(
+                    tweet.created_at
+                )
                 tweet_dict["retweet_count"] = tweet.retweet_count
                 tweet_dict["favorite_count"] = tweet.favorite_count
                 dict_list.append(tweet_dict)
