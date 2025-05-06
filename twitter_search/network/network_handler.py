@@ -9,6 +9,7 @@ import re
 import statistics
 from datetime import datetime
 from pathlib import Path
+from tqdm import tqdm
 
 import pandas as pd
 import twikit
@@ -290,7 +291,7 @@ class NetworkHandler:
         if file_flag:
             self._get_file_city_users()
             self.already_processed_users = self._get_already_processed_users()
-            users_list = self.user_df.loc[:, "user_id"].unique().tolist()
+            users_list = self.user_df.loc[:, "user_id"].astype(str).unique().tolist()
             return users_list
 
         if extraction_type == "twikit":
@@ -312,6 +313,7 @@ class NetworkHandler:
             for user_dict in existing_data:
                 user_id = user_dict["user_id"]
                 users_list.append(user_id)
+
         return users_list
 
     @staticmethod
@@ -717,14 +719,17 @@ class NetworkHandler:
         users_list = await self._get_city_users(extraction_type, file_flag)
         # list of user dicts that gets proccessed (no ids )
         if file_flag:
-            users_list = list(
+            missing_users = list(
                 set(users_list).difference(set(self.already_processed_users))
             )
             client = twikit.Client("en-US")
             client.load_cookies(TWIKIT_COOKIES_DIR)
 
+            print(f"Already processed {len(set(self.already_processed_users))}")
+            print(f"Missing {len(set(missing_users))} to process")
+
         # TODO: user_id will come from a queue
-        for user_to_process in users_list:
+        for user_to_process in tqdm(missing_users):
             # try:
             # Only get attributes if file flag is true
             if file_flag:
@@ -735,5 +740,5 @@ class NetworkHandler:
             print(f"Processing user {user_to_process}...")
             await user_network.run(user_to_process_dict, extraction_type)
         # except Exception as error:
-        #     print(f"Error getting user: {error}")
-        #     continue
+            # print(f"Error getting user: {error}")
+            # continue
