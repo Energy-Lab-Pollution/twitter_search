@@ -49,7 +49,7 @@ class NetworkHandler:
 
         # Building location output path
         self.location_file_path = (
-            self.base_dir / f"networks/{self.location}/{self.location}.json"
+            self.base_dir / f"networks/{self.location}/{self.location}_new.json"
         )
 
     @staticmethod

@@ -399,9 +399,9 @@ class UserNetwork:
         except twikit.errors.BadRequest:
             print("Followers: Bad Request")
             return followers_list
-        except twikit.errors.NotFound:
-            print("Followers: Not Found")
-            return followers_list
+        # except twikit.errors.NotFound:
+        #     print("Followers: Not Found")
+        #     return followers_list
         except twikit.errors.TwitterException as e:
             print(f"Followers: Twitter Exception {e}")
             return followers_list
@@ -443,9 +443,9 @@ class UserNetwork:
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request")
                 return followers_list
-            except twikit.errors.NotFound:
-                print("Followers: Not Found")
-                return followers_list
+            # except twikit.errors.NotFound:
+            #     print("Followers: Not Found")
+            #     return followers_list
             except twikit.errors.TwitterException as e:
                 print(f"Followers: Twitter Exception {e}")
                 return followers_list
@@ -494,6 +494,7 @@ class UserNetwork:
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
+        time.sleep(20)
         followers = await self.twikit_get_followers(user_dict["user_id"])
         user_dict["followers"] = followers
 

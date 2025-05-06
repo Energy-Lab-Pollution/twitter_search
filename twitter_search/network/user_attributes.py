@@ -44,8 +44,9 @@ class UserAttributes:
         self.new_location_file_path = (
             self.base_dir / f"networks/{self.location}/{self.location}_new.json"
         )
-        # Global requests counter
-        self.num_twikit_requests = 0
+        self.location_users_path = (
+            self.base_dir / f"networks/{self.location}/{self.location}_users.json"
+        )
 
     @staticmethod
     def check_location(raw_location, target_location):
@@ -138,6 +139,31 @@ class UserAttributes:
 
         return user_dict
 
+    def store_user_attributes(self, user_attributes_dict):
+        """
+        Stores the user attributes on the user file path.
+
+        Args:
+        ------
+        user_attributes_dict: Dictionary with user data
+        """
+
+        network_json_maker(self.location_users_path, [user_attributes_dict])
+
+    
+    def user_attributes_exist(self, user_id):
+        """
+        Determines if the user has already been processed or not
+        """
+        pass
+
+    def load_user_attributes(self, user_id):
+        """
+        Loads the user attributes from the predetermined JSON
+        """
+        pass
+
+
     def _get_already_processed_users(self):
         """
         Reads the location JSON file and gets the
@@ -195,6 +221,7 @@ class UserAttributes:
                     new_tweet_dict = tweet.copy()
                     processed_retweeters = []
                     for retweeter in tqdm(tweet["retweeters"]):
+                        # check if retweeter has been 
                         try:
                             retweeter_attributes_dict = (
                                 await self.get_user_attributes(
