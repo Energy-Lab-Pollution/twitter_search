@@ -5,6 +5,7 @@ import re
 import time
 from datetime import datetime
 
+import tweepy
 import twikit
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
@@ -14,10 +15,14 @@ from config_utils.constants import (
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_TWEETS_THRESHOLD,
+    X_FOLLOWERS_PAGE_SIZE,
+    X_MAX_FOLLOWERS,
+    X_MAX_RETWEETERS,
     X_MAX_USER_TWEETS,
     X_TWEETS_PAGE_SIZE
 )
 from config_utils.util import (
+    api_v1_creator,
     client_creator,
     convert_to_iso_format,
     network_json_maker,
@@ -39,6 +44,7 @@ class UserNetwork:
 
         # X Tweepy Client
         self.x_client = client_creator()
+        self.x_v1_client = api_v1_creator()
 
         self.location = location
         self.output_file_path = output_file_path
@@ -331,6 +337,40 @@ class UserNetwork:
 
         return new_tweets_list
 
+
+    def x_get_single_tweet_retweeters(self, tweet_id: str) -> list[dict]:
+        """
+        Pull up to 500 retweeters via v2, then parse.
+        """
+        all_rts = []
+        next_token = None
+
+        while True:
+            resp = self.x_client.get_retweeters(
+                id=tweet_id,
+                max_results=X_MAX_RETWEETERS,
+                pagination_token=next_token,
+                user_fields=[
+                    "id","username","description","location",
+                    "public_metrics","verified","created_at"
+                ]
+            )
+
+            batch = [u.data for u in resp.data] if resp.data else []
+            if not batch:
+                break
+
+            all_rts.extend(batch)
+            if len(all_rts) >= X_MAX_RETWEETERS:
+                all_rts = all_rts[: X_MAX_RETWEETERS]
+                break
+
+            next_token = resp.meta.get("next_token")
+            if not next_token:
+                break
+
+        return self.parse_x_users(all_rts)
+
     def x_add_retweeters(self, tweets_list: list[dict]) -> list[dict]:
         """
         For each tweet in tweets_list:
@@ -529,15 +569,34 @@ class UserNetwork:
 
     def x_get_followers(self, user_id):
         """
-        Get user followers using the X Client
+        Pull up to 1 000 followers via v1.1, convert each to a dict
+        shape that parse_x_users expects, then parse.
         """
-        # Do we need enterprise for this? Does V1.1 work?
-        users_list = []
-        response = self.x_client.get_users_followers(user_id, max_results=1000)
-        parsed_users = self.parse_x_users(response.data)
-        users_list.extend(parsed_users)
+        legacy_users = tweepy.Cursor(
+            self.api_v1.followers,
+            user_id=user_id,
+            count=X_FOLLOWERS_PAGE_SIZE
+        ).items(X_MAX_FOLLOWERS)
 
-        return parsed_users
+        # Convert to dicts
+        normalized = []
+        for legacy_user in legacy_users:
+            normalized.append({
+                "id":              legacy_user.id_str,
+                "username":        legacy_user.screen_name,
+                "description":     legacy_user.description,
+                "location":        legacy_user.location,
+                "created_at":      legacy_user.created_at.isoformat(),
+                "verified":        legacy_user.verified,
+                "public_metrics": {
+                    "followers_count": legacy_user.followers_count,
+                    "following_count": legacy_user.friends_count,
+                    "tweet_count":     legacy_user.statuses_count,
+                    "listed_count":    legacy_user.listed_count,
+                }
+            })
+
+        return self.parse_x_users(normalized)
 
     async def run_twikit(self, user_dict):
         """
