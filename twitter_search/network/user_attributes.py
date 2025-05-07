@@ -166,8 +166,7 @@ class UserAttributes:
         """
         Loads the user attributes from the predetermined JSON
         """
-        existing_users = load_json(self.location_users_path)
-        for existing_user in existing_users:
+        for existing_user in self.existing_users:
             if user_id == existing_user['user_id']:
                 return existing_user
 
