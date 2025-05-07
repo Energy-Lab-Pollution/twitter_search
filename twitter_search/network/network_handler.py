@@ -9,7 +9,6 @@ import re
 import statistics
 from datetime import datetime
 from pathlib import Path
-from tqdm import tqdm
 
 import pandas as pd
 import twikit
@@ -28,6 +27,7 @@ from config_utils.constants import (
 )
 from config_utils.util import client_creator, convert_to_iso_format, load_json
 from network.user_network import UserNetwork
+from tqdm import tqdm
 
 
 class NetworkHandler:
@@ -291,7 +291,9 @@ class NetworkHandler:
         if file_flag:
             self._get_file_city_users()
             self.already_processed_users = self._get_already_processed_users()
-            users_list = self.user_df.loc[:, "user_id"].astype(str).unique().tolist()
+            users_list = (
+                self.user_df.loc[:, "user_id"].astype(str).unique().tolist()
+            )
             return users_list
 
         if extraction_type == "twikit":
@@ -740,5 +742,5 @@ class NetworkHandler:
             print(f"Processing user {user_to_process}...")
             await user_network.run(user_to_process_dict, extraction_type)
         # except Exception as error:
-            # print(f"Error getting user: {error}")
-            # continue
+        # print(f"Error getting user: {error}")
+        # continue

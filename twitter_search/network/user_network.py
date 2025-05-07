@@ -1,6 +1,7 @@
 """
 Script to pull tweets and retweeters from a particular user,
 """
+
 import re
 import time
 from datetime import datetime
@@ -19,7 +20,7 @@ from config_utils.constants import (
     X_MAX_FOLLOWERS,
     X_MAX_RETWEETERS,
     X_MAX_USER_TWEETS,
-    X_TWEETS_PAGE_SIZE
+    X_TWEETS_PAGE_SIZE,
 )
 from config_utils.util import (
     api_v1_creator,
@@ -215,13 +216,17 @@ class UserNetwork:
                 else tweet.created_at
             )
 
-            parsed_tweets.append({
-                "tweet_id":       tweet.id,
-                "tweet_text":     tweet.text,
-                "created_at":     created,
-                "retweet_count":  tweet.public_metrics.get("retweet_count", 0),
-                "favorite_count": tweet.public_metrics.get("like_count",    0),
-            })
+            parsed_tweets.append(
+                {
+                    "tweet_id": tweet.id,
+                    "tweet_text": tweet.text,
+                    "created_at": created,
+                    "retweet_count": tweet.public_metrics.get(
+                        "retweet_count", 0
+                    ),
+                    "favorite_count": tweet.public_metrics.get("like_count", 0),
+                }
+            )
 
         return parsed_tweets
 
@@ -337,8 +342,7 @@ class UserNetwork:
 
         return new_tweets_list
 
-
-    def x_get_single_tweet_retweeters(self, tweet_id: str) -> list[dict]:
+    def x_get_single_tweet_retweeters(self, tweet_id):
         """
         Pull up to 500 retweeters via v2, then parse.
         """
@@ -351,9 +355,14 @@ class UserNetwork:
                 max_results=X_MAX_RETWEETERS,
                 pagination_token=next_token,
                 user_fields=[
-                    "id","username","description","location",
-                    "public_metrics","verified","created_at"
-                ]
+                    "id",
+                    "username",
+                    "description",
+                    "location",
+                    "public_metrics",
+                    "verified",
+                    "created_at",
+                ],
             )
 
             batch = [u.data for u in resp.data] if resp.data else []
@@ -362,7 +371,7 @@ class UserNetwork:
 
             all_rts.extend(batch)
             if len(all_rts) >= X_MAX_RETWEETERS:
-                all_rts = all_rts[: X_MAX_RETWEETERS]
+                all_rts = all_rts[:X_MAX_RETWEETERS]
                 break
 
             next_token = resp.meta.get("next_token")
@@ -387,7 +396,9 @@ class UserNetwork:
             # only fetch if there actually are retweets
             if tweet.get("public_metrics", {}).get("retweet_count", 0) > 0:
                 tweet_id = tweet["id"]
-                tweet["retweeters"] = self.x_get_single_tweet_retweeters(tweet_id)
+                tweet["retweeters"] = self.x_get_single_tweet_retweeters(
+                    tweet_id
+                )
 
         return tweets_list
 
@@ -463,17 +474,19 @@ class UserNetwork:
                 id=user_id,
                 max_results=X_TWEETS_PAGE_SIZE,
                 pagination_token=next_token,
-                tweet_fields=["created_at", "public_metrics"]
+                tweet_fields=["created_at", "public_metrics"],
             )
 
             page = response.date or []
             user_tweets.extend(page)
 
-            if (len(user_tweets) >= X_MAX_USER_TWEETS) or not (response.meta.get("next_token")):
+            if (len(user_tweets) >= X_MAX_USER_TWEETS) or not (
+                response.meta.get("next_token")
+            ):
                 break
 
         parsed_tweets = self.parse_x_tweets(user_tweets)
-        
+
         return parsed_tweets
 
     async def twikit_get_followers(self, user_id):
@@ -489,20 +502,26 @@ class UserNetwork:
         """
         followers_list = []
         max_retries = 3
- 
+
         for attempt in range(1, max_retries + 1):
             try:
                 # try to fetch
-                followers = await self.client.get_user_followers(user_id, count=self.TWIKIT_COUNT)
+                followers = await self.client.get_user_followers(
+                    user_id, count=self.TWIKIT_COUNT
+                )
                 break
             except twikit.errors.NotFound as error:
                 if attempt < max_retries:
                     print(str(error))
-                    print(f"Followers: Not Found - retrying (attempt {attempt})")
+                    print(
+                        f"Followers: Not Found - retrying (attempt {attempt})"
+                    )
                     time.sleep(90)
                 else:
-                    print(f"Followers: Not Found after {max_retries} attempts - giving up")
-                    return followers_list        # final failure
+                    print(
+                        f"Followers: Not Found after {max_retries} attempts - giving up"
+                    )
+                    return followers_list  # final failure
             except twikit.errors.TooManyRequests:
                 print("Followers: Too Many Requests - stopping early")
                 return followers_list
@@ -573,28 +592,28 @@ class UserNetwork:
         shape that parse_x_users expects, then parse.
         """
         legacy_users = tweepy.Cursor(
-            self.api_v1.followers,
-            user_id=user_id,
-            count=X_FOLLOWERS_PAGE_SIZE
+            self.api_v1.followers, user_id=user_id, count=X_FOLLOWERS_PAGE_SIZE
         ).items(X_MAX_FOLLOWERS)
 
         # Convert to dicts
         normalized = []
         for legacy_user in legacy_users:
-            normalized.append({
-                "id":              legacy_user.id_str,
-                "username":        legacy_user.screen_name,
-                "description":     legacy_user.description,
-                "location":        legacy_user.location,
-                "created_at":      legacy_user.created_at.isoformat(),
-                "verified":        legacy_user.verified,
-                "public_metrics": {
-                    "followers_count": legacy_user.followers_count,
-                    "following_count": legacy_user.friends_count,
-                    "tweet_count":     legacy_user.statuses_count,
-                    "listed_count":    legacy_user.listed_count,
+            normalized.append(
+                {
+                    "id": legacy_user.id_str,
+                    "username": legacy_user.screen_name,
+                    "description": legacy_user.description,
+                    "location": legacy_user.location,
+                    "created_at": legacy_user.created_at.isoformat(),
+                    "verified": legacy_user.verified,
+                    "public_metrics": {
+                        "followers_count": legacy_user.followers_count,
+                        "following_count": legacy_user.friends_count,
+                        "tweet_count": legacy_user.statuses_count,
+                        "listed_count": legacy_user.listed_count,
+                    },
                 }
-            })
+            )
 
         return self.parse_x_users(normalized)
 

@@ -45,7 +45,8 @@ class UserAttributes:
             self.base_dir / f"networks/{self.location}/{self.location}_new.json"
         )
         self.location_users_path = (
-            self.base_dir / f"networks/{self.location}/{self.location}_users.json"
+            self.base_dir
+            / f"networks/{self.location}/{self.location}_users.json"
         )
 
     @staticmethod
@@ -150,13 +151,12 @@ class UserAttributes:
 
         network_json_maker(self.location_users_path, [user_attributes_dict])
 
-    
     def user_attributes_exist(self, user_id):
         """
         Determines if the user has already been processed or not
         """
-        user_ids = [str(user['user_id']) for user in self.existing_users]
-        
+        user_ids = [str(user["user_id"]) for user in self.existing_users]
+
         if str(user_id) in user_ids:
             return True
         else:
@@ -167,9 +167,8 @@ class UserAttributes:
         Loads the user attributes from the predetermined JSON
         """
         for existing_user in self.existing_users:
-            if user_id == existing_user['user_id']:
+            if user_id == existing_user["user_id"]:
                 return existing_user
-
 
     def _get_already_processed_users(self):
         """
@@ -206,7 +205,7 @@ class UserAttributes:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
             self.existing_users = load_json(self.location_users_path)
-            if (str(user_dict["user_id"]) in processed_users):
+            if str(user_dict["user_id"]) in processed_users:
                 print(f"Already processed {user_dict['user_id']}.. skipping")
                 continue
 
@@ -228,9 +227,13 @@ class UserAttributes:
                     processed_retweeters = []
                     for retweeter in tqdm(tweet["retweeters"]):
                         # check if retweeter has been processed before
-                        if self.user_attributes_exist(retweeter['user_id']):
-                            retweeter_attributes_dict = self.load_user_attributes(retweeter['user_id'])
-                            processed_retweeters.append(retweeter_attributes_dict)
+                        if self.user_attributes_exist(retweeter["user_id"]):
+                            retweeter_attributes_dict = (
+                                self.load_user_attributes(retweeter["user_id"])
+                            )
+                            processed_retweeters.append(
+                                retweeter_attributes_dict
+                            )
                         else:
                             try:
                                 retweeter_attributes_dict = (
@@ -238,7 +241,9 @@ class UserAttributes:
                                         client, str(retweeter["user_id"])
                                     )
                                 )
-                                self.store_user_attributes(retweeter_attributes_dict)
+                                self.store_user_attributes(
+                                    retweeter_attributes_dict
+                                )
                                 processed_retweeters.append(
                                     retweeter_attributes_dict
                                 )
@@ -262,18 +267,24 @@ class UserAttributes:
             new_user_followers = []
             for follower in tqdm(followers):
                 # Only get attributes if file flag is true
-                if self.user_attributes_exist(follower['user_id']):
-                    follower_attributes_dict = self.load_user_attributes(follower['user_id'])
+                if self.user_attributes_exist(follower["user_id"]):
+                    follower_attributes_dict = self.load_user_attributes(
+                        follower["user_id"]
+                    )
                     new_user_followers.append(follower_attributes_dict)
                 else:
                     try:
-                        follower_attributes_dict = await self.get_user_attributes(
-                            client, str(follower["user_id"])
+                        follower_attributes_dict = (
+                            await self.get_user_attributes(
+                                client, str(follower["user_id"])
+                            )
                         )
                         self.store_user_attributes(follower_attributes_dict)
                         new_user_followers.append(follower_attributes_dict)
                     except Exception as error:
-                        print(f"Error processing {retweeter['user_id']} - {error}")
+                        print(
+                            f"Error processing {retweeter['user_id']} - {error}"
+                        )
                         if "Twitter Error" not in str(error):
                             new_user_followers.append(follower)
                         else:

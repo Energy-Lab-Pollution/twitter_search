@@ -313,15 +313,14 @@ def api_v1_creator():
     """
     Creates a tweepy.API wrapper for Twitter v1.1 endpoints (e.g. followers/list).
     """
-    consumer_key        = config.consumer_key
-    consumer_secret     = config.consumer_secret
-    access_token        = config.access_token
+    consumer_key = config.consumer_key
+    consumer_secret = config.consumer_secret
+    access_token = config.access_token
     access_token_secret = config.access_token_secret
 
     # 1) Build the OAuth1 handler
     auth = tweepy.OAuth1UserHandler(
-        consumer_key, consumer_secret,
-        access_token, access_token_secret
+        consumer_key, consumer_secret, access_token, access_token_secret
     )
 
     # 2) Create and return the API object, with rate-limit handling turned on
@@ -329,10 +328,11 @@ def api_v1_creator():
         auth,
         wait_on_rate_limit=True,
         wait_on_rate_limit_notify=True,  # prints warnings when ratelimited
-        retry_count=3,                   # auto-retry transient network errors
+        retry_count=3,  # auto-retry transient network errors
         retry_delay=5,
-        retry_errors={401, 404, 500, 502, 503, 504}
+        retry_errors={401, 404, 500, 502, 503, 504},
     )
+
 
 def flatten_and_remove_empty(input_list):
     """

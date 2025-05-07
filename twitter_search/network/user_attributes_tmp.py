@@ -15,7 +15,6 @@ from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     SIXTEEN_MINUTES,
-    TWIKIT_FDM_COOKIES_DIR,
 )
 from config_utils.util import (
     convert_to_iso_format,
@@ -45,7 +44,8 @@ class UserAttributes:
             self.base_dir / f"networks/{self.location}/{self.location}_new.json"
         )
         self.location_users_path = (
-            self.base_dir / f"networks/{self.location}/{self.location}_users.json"
+            self.base_dir
+            / f"networks/{self.location}/{self.location}_users.json"
         )
 
     @staticmethod
@@ -150,14 +150,13 @@ class UserAttributes:
 
         network_json_maker(self.location_users_path, [user_attributes_dict])
 
-    
     def user_attributes_exist(self, user_id):
         """
         Determines if the user has already been processed or not
         """
         existing_users = load_json(self.location_users_path)
-        user_ids = [str(user['user_id']) for user in existing_users]
-        
+        user_ids = [str(user["user_id"]) for user in existing_users]
+
         if str(user_id) in user_ids:
             return True
         else:
@@ -169,9 +168,8 @@ class UserAttributes:
         """
         existing_users = load_json(self.location_users_path)
         for existing_user in existing_users:
-            if user_id == existing_user['user_id']:
+            if user_id == existing_user["user_id"]:
                 return existing_user
-
 
     def _get_already_processed_users(self):
         """
@@ -200,13 +198,12 @@ class UserAttributes:
         with open(self.new_location_file_path, "r") as f:
             users_list = json.load(f)
 
-
         for user_dict in users_list:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
 
             print(f"Processing user {user_dict["user_id"]}...")
-            if not self.user_attributes_exist(user_dict['user_id']):
+            if not self.user_attributes_exist(user_dict["user_id"]):
                 user_dict_copy = user_dict.copy()
                 del user_dict_copy["tweets"]
                 del user_dict_copy["followers"]
@@ -223,13 +220,11 @@ class UserAttributes:
                 if "retweeters" in tweet and tweet["retweeters"]:
                     for retweeter in tqdm(tweet["retweeters"]):
                         retweeters.append(retweeters)
-                    if not self.user_attributes_exist(retweeter['user_id']):
+                    if not self.user_attributes_exist(retweeter["user_id"]):
                         self.store_user_attributes(retweeter)
 
             # Procesing
             print("Processing followers")
             for follower in tqdm(followers):
-                if not self.user_attributes_exist(follower['user_id']):
+                if not self.user_attributes_exist(follower["user_id"]):
                     self.store_user_attributes(follower)
-
-
