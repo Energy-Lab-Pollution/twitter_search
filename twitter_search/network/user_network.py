@@ -479,7 +479,6 @@ class UserNetwork:
         Args:
             - user_dict (dict): User dict
         """
-        # TODO: Add new attributes -- city is added if location matches
         # TODO: processing_status is pending
         # extracted_at is null - take midpoint for when we got these root users
         # last_modified is null
