@@ -346,11 +346,11 @@ class UserNetwork:
         """
         Pull up to 500 retweeters via v2, then parse.
         """
-        all_rts = []
+        retweeters_list = []
         next_token = None
 
-        while True:
-            resp = self.x_client.get_retweeters(
+        while len(retweeters_list) < X_MAX_RETWEETERS:
+            response = self.x_client.get_retweeters(
                 id=tweet_id,
                 max_results=X_MAX_RETWEETERS,
                 pagination_token=next_token,
@@ -365,22 +365,21 @@ class UserNetwork:
                 ],
             )
 
-            batch = [u.data for u in resp.data] if resp.data else []
-            if not batch:
+            retweeters = [user.data for user in response.data] if response.data else []
+            if not retweeters:
+                break
+            retweeters_list.extend(retweeters)
+            
+            if len(retweeters) >= X_MAX_RETWEETERS:
                 break
 
-            all_rts.extend(batch)
-            if len(all_rts) >= X_MAX_RETWEETERS:
-                all_rts = all_rts[:X_MAX_RETWEETERS]
-                break
-
-            next_token = resp.meta.get("next_token")
+            next_token = response.meta.get("next_token")
             if not next_token:
                 break
 
-        return self.parse_x_users(all_rts)
+        return self.parse_x_users(retweeters)
 
-    def x_add_retweeters(self, tweets_list: list[dict]) -> list[dict]:
+    def x_add_retweeters(self, tweets_list):
         """
         For each tweet in tweets_list:
         - skip it if it's a pure retweet
@@ -390,12 +389,12 @@ class UserNetwork:
         for tweet in tweets_list:
             # skip pure RTs
             refs = tweet.get("referenced_tweets") or []
-            if any(r.get("type") == "retweeted" for r in refs):
+            if any(ref.get("type") == "retweeted" for ref in refs):
                 continue
 
             # only fetch if there actually are retweets
-            if tweet.get("public_metrics", {}).get("retweet_count", 0) > 0:
-                tweet_id = tweet["id"]
+            if tweet.get("retweet_count", 0) > 0:
+                tweet_id = tweet["tweet_id"]
                 tweet["retweeters"] = self.x_get_single_tweet_retweeters(
                     tweet_id
                 )
@@ -469,7 +468,7 @@ class UserNetwork:
         """
         user_tweets = []
         next_token = None
-        while True:
+        while len(user_tweets) < X_MAX_USER_TWEETS:
             response = self.x_client.get_users_tweets(
                 id=user_id,
                 max_results=X_TWEETS_PAGE_SIZE,
@@ -478,6 +477,9 @@ class UserNetwork:
             )
 
             page = response.date or []
+            if not page:
+                break
+            
             user_tweets.extend(page)
 
             if (len(user_tweets) >= X_MAX_USER_TWEETS) or not (
