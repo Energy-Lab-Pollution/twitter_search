@@ -1,7 +1,6 @@
 """
 Script to pull tweets and retweeters from a particular user,
 """
-import asyncio
 import re
 import time
 from datetime import datetime
@@ -15,6 +14,8 @@ from config_utils.constants import (
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_TWEETS_THRESHOLD,
+    X_MAX_USER_TWEETS,
+    X_TWEETS_PAGE_SIZE
 )
 from config_utils.util import (
     client_creator,
@@ -194,6 +195,30 @@ class UserNetwork:
 
         return dict_list
 
+    @staticmethod
+    def parse_x_tweets(tweets_list):
+        """
+        Normalize Tweepy v2 Tweet objects into dicts like your Twikit parser.
+        """
+        parsed_tweets = []
+        for tweet in tweets_list:
+            # t.created_at is a datetime
+            created = (
+                tweet.created_at.isoformat()
+                if isinstance(tweet.created_at, datetime)
+                else tweet.created_at
+            )
+
+            parsed_tweets.append({
+                "tweet_id":       tweet.id,
+                "tweet_text":     tweet.text,
+                "created_at":     created,
+                "retweet_count":  tweet.public_metrics.get("retweet_count", 0),
+                "favorite_count": tweet.public_metrics.get("like_count",    0),
+            })
+
+        return parsed_tweets
+
     async def get_single_tweet_retweeters(self, tweet_id):
         """
         For a particular tweet, get all the possible retweeters
@@ -371,11 +396,25 @@ class UserNetwork:
         ---------
             - dict_list (list): list of dictionaries
         """
-        # TODO: Finish implementation
         user_tweets = []
-        response = self.x_client.get_users_tweets(user_id, max_results=100)
+        next_token = None
+        while True:
+            response = self.x_client.get_users_tweets(
+                id=user_id,
+                max_results=X_TWEETS_PAGE_SIZE,
+                pagination_token=next_token,
+                tweet_fields=["created_at", "public_metrics"]
+            )
 
-        return user_tweets
+            page = response.date or []
+            user_tweets.extend(page)
+
+            if (len(user_tweets) >= X_MAX_USER_TWEETS) or not (response.meta.get("next_token")):
+                break
+
+        parsed_tweets = self.parse_x_tweets(user_tweets)
+        
+        return parsed_tweets
 
     async def twikit_get_followers(self, user_id):
         """
@@ -396,10 +435,11 @@ class UserNetwork:
                 # try to fetch
                 followers = await self.client.get_user_followers(user_id, count=self.TWIKIT_COUNT)
                 break
-            except twikit.errors.NotFound:
+            except twikit.errors.NotFound as error:
                 if attempt < max_retries:
+                    print(str(error))
                     print(f"Followers: Not Found - retrying (attempt {attempt})")
-                    asyncio.sleep(60)      # use asyncio.sleep to avoid blocking
+                    time.sleep(90)
                 else:
                     print(f"Followers: Not Found after {max_retries} attempts - giving up")
                     return followers_list        # final failure
@@ -471,6 +511,7 @@ class UserNetwork:
         """
         Get user followers using the X Client
         """
+        # Do we need enterprise for this? Does V1.1 work?
         users_list = []
         response = self.x_client.get_users_followers(user_id, max_results=1000)
         parsed_users = self.parse_x_users(response.data)
