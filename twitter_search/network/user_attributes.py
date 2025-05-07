@@ -155,8 +155,7 @@ class UserAttributes:
         """
         Determines if the user has already been processed or not
         """
-        existing_users = load_json(self.location_users_path)
-        user_ids = [str(user['user_id']) for user in existing_users]
+        user_ids = [str(user['user_id']) for user in self.existing_users]
         
         if str(user_id) in user_ids:
             return True
@@ -207,9 +206,8 @@ class UserAttributes:
         for user_dict in users_list:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
-            if (str(user_dict["user_id"]) in processed_users) or (
-                str(user_dict["user_id"]) in self.PROBLEMATIC_USERS
-            ):
+            self.existing_users = load_json(self.location_users_path)
+            if (str(user_dict["user_id"]) in processed_users):
                 print(f"Already processed {user_dict['user_id']}.. skipping")
                 continue
 
@@ -230,7 +228,7 @@ class UserAttributes:
                     new_tweet_dict = tweet.copy()
                     processed_retweeters = []
                     for retweeter in tqdm(tweet["retweeters"]):
-                        # check if retweeter has been 
+                        # check if retweeter has been processed before
                         if self.user_attributes_exist(retweeter['user_id']):
                             retweeter_attributes_dict = self.load_user_attributes(retweeter['user_id'])
                             processed_retweeters.append(retweeter_attributes_dict)
@@ -241,6 +239,7 @@ class UserAttributes:
                                         client, str(retweeter["user_id"])
                                     )
                                 )
+                                self.store_user_attributes(retweeter_attributes_dict)
                                 processed_retweeters.append(
                                     retweeter_attributes_dict
                                 )
@@ -257,6 +256,7 @@ class UserAttributes:
 
             # Add newly processed tweets and retweeters
             user_attributes_dict["tweets"] = new_user_tweets
+            self.existing_users = load_json(self.location_users_path)
 
             # Procesing
             print("Processing followers")
@@ -271,6 +271,7 @@ class UserAttributes:
                         follower_attributes_dict = await self.get_user_attributes(
                             client, str(follower["user_id"])
                         )
+                        self.store_user_attributes(follower_attributes_dict)
                         new_user_followers.append(follower_attributes_dict)
                     except Exception as error:
                         print(f"Error processing {retweeter['user_id']} - {error}")
@@ -280,6 +281,7 @@ class UserAttributes:
                             continue
             # Add newly processed followers
             user_attributes_dict["followers"] = new_user_followers
+            self.existing_users = load_json(self.location_users_path)
             new_location_json.append(user_attributes_dict)
             # New JSON saved with a new filename
             network_json_maker(
