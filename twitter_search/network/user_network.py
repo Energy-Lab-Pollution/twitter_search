@@ -331,6 +331,26 @@ class UserNetwork:
 
         return new_tweets_list
 
+    def x_add_retweeters(self, tweets_list: list[dict]) -> list[dict]:
+        """
+        For each tweet in tweets_list:
+        - skip it if it's a pure retweet
+        - if retweet_count > 0, fetch its retweeters
+        - add a "retweeters" key to the tweet's dict
+        """
+        for tweet in tweets_list:
+            # skip pure RTs
+            refs = tweet.get("referenced_tweets") or []
+            if any(r.get("type") == "retweeted" for r in refs):
+                continue
+
+            # only fetch if there actually are retweets
+            if tweet.get("public_metrics", {}).get("retweet_count", 0) > 0:
+                tweet_id = tweet["id"]
+                tweet["retweeters"] = self.x_get_single_tweet_retweeters(tweet_id)
+
+        return tweets_list
+
     async def twikit_get_user_tweets(self, user_id):
         """
         For a given user, we get as many of their tweets as possible
