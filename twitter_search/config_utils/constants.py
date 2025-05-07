@@ -132,6 +132,10 @@ SEVENTEEN_MINUTES = 1020
 TWO_MINUTES = 120
 ONE_MINUTE = 60
 
+# X Constants
+X_MAX_USER_TWEETS = 1000
+X_TWEETS_PAGE_SIZE = 100
+
 # Neptune constants
 NEPTUNE_ENDPOINT = (
     "grct-test-db.cluster-cz8qgw2s68ic.us-east-2.neptune.amazonaws.com"
