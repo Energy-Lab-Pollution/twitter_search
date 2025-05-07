@@ -327,7 +327,6 @@ def api_v1_creator():
     return tweepy.API(
         auth,
         wait_on_rate_limit=True,
-        wait_on_rate_limit_notify=True,  # prints warnings when ratelimited
         retry_count=3,  # auto-retry transient network errors
         retry_delay=5,
         retry_errors={401, 404, 500, 502, 503, 504},

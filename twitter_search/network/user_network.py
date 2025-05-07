@@ -10,6 +10,7 @@ import tweepy
 import twikit
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
+    FIFTEEN_MINUTES,
     SIXTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
     TWIKIT_COUNT,
@@ -643,7 +644,7 @@ class UserNetwork:
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
-        time.sleep(20)
+        time.sleep(30)
         followers = await self.twikit_get_followers(user_dict["user_id"])
         user_dict["followers"] = followers
 
