@@ -365,11 +365,13 @@ class UserNetwork:
                 ],
             )
 
-            retweeters = [user.data for user in response.data] if response.data else []
+            retweeters = (
+                [user.data for user in response.data] if response.data else []
+            )
             if not retweeters:
                 break
             retweeters_list.extend(retweeters)
-            
+
             if len(retweeters) >= X_MAX_RETWEETERS:
                 break
 
@@ -479,7 +481,7 @@ class UserNetwork:
             page = response.date or []
             if not page:
                 break
-            
+
             user_tweets.extend(page)
 
             if (len(user_tweets) >= X_MAX_USER_TWEETS) or not (
@@ -668,7 +670,7 @@ class UserNetwork:
         # First get tweets, without retweeters
         user_dict["processing_status"] = "in progress"
         print("Getting user tweets")
-        user_tweets =  self.x_get_user_tweets(user_dict["user_id"])
+        user_tweets = self.x_get_user_tweets(user_dict["user_id"])
 
         print("Getting user retweeters")
         user_tweets = self.x_add_retweeters(user_tweets)
@@ -685,7 +687,7 @@ class UserNetwork:
         user_dict["processing_status"] = "completed"
 
         network_json_maker(self.output_file_path, user_dict_list)
-        print(f"Stored {user_dict["user_id"]} data")        
+        print(f"Stored {user_dict["user_id"]} data")
 
     async def run(self, user_dict, extraction_type):
         """
