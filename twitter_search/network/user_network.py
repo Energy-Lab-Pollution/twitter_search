@@ -622,7 +622,7 @@ class UserNetwork:
     async def run_twikit(self, user_dict):
         """
         Runs the pertinent functions by getting a user's retweeters and
-        followers
+        followers with twikit
 
         Args:
             - user_dict (dict): User dict
@@ -654,6 +654,39 @@ class UserNetwork:
         network_json_maker(self.output_file_path, user_dict_list)
         print(f"Stored {user_dict["user_id"]} data")
 
+    def run_x(self, user_dict):
+        """
+        Runs the pertinent functions by getting a user's retweeters and
+        followers
+
+        Args:
+            - user_dict (dict): User dict
+        """
+        # TODO: processing_status is pending
+        # extracted_at is null - take midpoint for when we got these root users
+        # last_modified is null
+        # First get tweets, without retweeters
+        user_dict["processing_status"] = "in progress"
+        print("Getting user tweets")
+        user_tweets =  self.x_get_user_tweets(user_dict["user_id"])
+
+        print("Getting user retweeters")
+        user_tweets = self.x_add_retweeters(user_tweets)
+        user_dict["tweets"] = user_tweets
+
+        print("Getting user followers...")
+        followers = self.x_get_followers(user_dict["user_id"])
+        user_dict["followers"] = followers
+
+        # Will put the extracted data into a list
+        # Easier to extend future data
+        user_dict_list = [user_dict]
+        user_dict["last_processed"] = datetime.now().isoformat()
+        user_dict["processing_status"] = "completed"
+
+        network_json_maker(self.output_file_path, user_dict_list)
+        print(f"Stored {user_dict["user_id"]} data")        
+
     async def run(self, user_dict, extraction_type):
         """
         Gets the network data either using Twikit or X
@@ -663,7 +696,7 @@ class UserNetwork:
             - extraction_type: str
         """
         if extraction_type == "x":
-            raise NotImplementedError()
+            self.run_x()
         else:
             # If file or twikit extraction method, use twikit
             await self.run_twikit(user_dict)
