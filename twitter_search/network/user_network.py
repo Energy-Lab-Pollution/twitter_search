@@ -413,11 +413,11 @@ class UserNetwork:
                 print(f"Followers: Twitter Exception - {e}")
                 return followers_list
 
-            more_followers_available = True
-            num_iter = 0
+        more_followers_available = True
+        num_iter = 0
 
-            parsed_followers = self.parse_twikit_users(followers)
-            followers_list.extend(parsed_followers)
+        parsed_followers = self.parse_twikit_users(followers)
+        followers_list.extend(parsed_followers)
 
         # Keeping track of currently extracted users
         extracted_users = [
