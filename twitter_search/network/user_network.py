@@ -639,7 +639,7 @@ class UserNetwork:
         print("Getting user tweets")
         user_tweets = await self.twikit_get_user_tweets(user_dict["user_id"])
 
-        time.sleep(20)
+        time.sleep(30)
         print("Getting user retweeters")
         user_tweets = await self.twikit_add_retweeters(user_tweets)
         user_dict["tweets"] = user_tweets
