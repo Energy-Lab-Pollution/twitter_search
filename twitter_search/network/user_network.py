@@ -9,7 +9,7 @@ from datetime import datetime
 import twikit
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
-    FIFTEEN_MINUTES,
+    SIXTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
     TWIKIT_COUNT,
     TWIKIT_FOLLOWERS_THRESHOLD,
@@ -399,9 +399,9 @@ class UserNetwork:
         except twikit.errors.BadRequest:
             print("Followers: Bad Request")
             return followers_list
-        # except twikit.errors.NotFound:
-        #     print("Followers: Not Found")
-        #     return followers_list
+        except twikit.errors.NotFound:
+            print("Followers: Not Found")
+            return followers_list
         except twikit.errors.TwitterException as e:
             print(f"Followers: Twitter Exception {e}")
             return followers_list
@@ -443,9 +443,9 @@ class UserNetwork:
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request")
                 return followers_list
-            # except twikit.errors.NotFound:
-            #     print("Followers: Not Found")
-            #     return followers_list
+            except twikit.errors.NotFound:
+                print("Followers: Not Found")
+                return followers_list
             except twikit.errors.TwitterException as e:
                 print(f"Followers: Twitter Exception {e}")
                 return followers_list
@@ -519,4 +519,4 @@ class UserNetwork:
         else:
             # If file or twikit extraction method, use twikit
             await self.run_twikit(user_dict)
-            time.sleep(FIFTEEN_MINUTES)
+            time.sleep(SIXTEEN_MINUTES)
