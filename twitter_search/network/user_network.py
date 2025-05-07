@@ -1,7 +1,7 @@
 """
 Script to pull tweets and retweeters from a particular user,
 """
-
+import asyncio
 import re
 import time
 from datetime import datetime
@@ -389,28 +389,35 @@ class UserNetwork:
             - tweet_list(list): List of dicts with followers info
         """
         followers_list = []
-        try:
-            followers = await self.client.get_user_followers(
-                user_id, count=self.TWIKIT_COUNT
-            )
-        except twikit.errors.TooManyRequests:
-            print("Followers: too many requests, stopping...")
-            return followers_list
-        except twikit.errors.BadRequest:
-            print("Followers: Bad Request")
-            return followers_list
-        except twikit.errors.NotFound:
-            print("Followers: Not Found")
-            return followers_list
-        except twikit.errors.TwitterException as e:
-            print(f"Followers: Twitter Exception {e}")
-            return followers_list
+        max_retries = 3
+ 
+        for attempt in range(1, max_retries + 1):
+            try:
+                # try to fetch
+                followers = await self.client.get_user_followers(user_id, count=self.TWIKIT_COUNT)
+                break
+            except twikit.errors.NotFound:
+                if attempt < max_retries:
+                    print(f"Followers: Not Found - retrying (attempt {attempt})")
+                    asyncio.sleep(60)      # use asyncio.sleep to avoid blocking
+                else:
+                    print(f"Followers: Not Found after {max_retries} attempts - giving up")
+                    return followers_list        # final failure
+            except twikit.errors.TooManyRequests:
+                print("Followers: Too Many Requests - stopping early")
+                return followers_list
+            except twikit.errors.BadRequest:
+                print("Followers: Bad Request - stopping early")
+                return followers_list
+            except twikit.errors.TwitterException as e:
+                print(f"Followers: Twitter Exception - {e}")
+                return followers_list
 
-        more_followers_available = True
-        num_iter = 0
+            more_followers_available = True
+            num_iter = 0
 
-        parsed_followers = self.parse_twikit_users(followers)
-        followers_list.extend(parsed_followers)
+            parsed_followers = self.parse_twikit_users(followers)
+            followers_list.extend(parsed_followers)
 
         # Keeping track of currently extracted users
         extracted_users = [
