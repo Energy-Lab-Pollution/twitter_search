@@ -2,16 +2,12 @@
 Script to search tweets and users from a particular location.
 The users who match a certain criteria will be sent to a processing queue.
 """
-import re
-
 import datetime
 import tweepy
 import twikit
 
-from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     EXPANSIONS,
-    FIFTEEN_MINUTES,
     MAX_RESULTS,
     TWEET_FIELDS,
     TWIKIT_COOKIES_DIR,
@@ -20,11 +16,9 @@ from config_utils.constants import (
     USER_FIELDS,
 )
 from config_utils.util import (
-    api_v1_creator,
     check_location,
     client_creator,
     convert_to_iso_format,
-    network_json_maker,
 )
 
 
@@ -212,3 +206,15 @@ class CityUsers:
                 break
 
         return users_list
+
+    async def _get_city_users(self, extraction_type):
+        """
+        Searches for city users with either twikit or X.
+        """
+        if extraction_type == "twikit":
+            users_list = await self._get_twikit_city_users()
+        elif extraction_type == "x":
+            users_list = self._get_x_city_users()
+
+        #TODO: Send users to queue
+
