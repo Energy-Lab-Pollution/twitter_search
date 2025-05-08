@@ -297,4 +297,4 @@ class UserAttributes:
             network_json_maker(
                 self.new_location_file_path, [user_attributes_dict]
             )
-            print(f"Stored {user_dict["user_id"]} data")
+            print(f"Stored {user_dict['user_id']} data")
