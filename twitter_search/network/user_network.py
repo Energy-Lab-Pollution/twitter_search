@@ -24,6 +24,7 @@ from config_utils.constants import (
 )
 from config_utils.util import (
     api_v1_creator,
+    check_location,
     client_creator,
     convert_to_iso_format,
     network_json_maker,
@@ -52,37 +53,6 @@ class UserNetwork:
 
         # Setting retweeters counter at the top level
         self.retweeters_counter = 0
-
-    @staticmethod
-    def check_location(raw_location, target_location):
-        """
-        Uses regex to see if the raw location matches
-        the target location
-        """
-
-        target_locations = [target_location]
-
-        # alias is the key, target loc is the value
-        for alias, value in ALIAS_DICT.items():
-            if value == target_location:
-                target_locations.append(alias)
-
-        if isinstance(raw_location, str):
-            raw_location = raw_location.lower().strip()
-            location_regex = re.findall(r"\w+", raw_location)
-
-            if location_regex:
-                for target_location in target_locations:
-                    if target_location in location_regex:
-                        return True
-                    elif target_location in raw_location:
-                        return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
 
     def parse_x_users(self, user_list):
         """
@@ -122,7 +92,7 @@ class UserNetwork:
             user_dict["last_processed"] = datetime.now().isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
-            location_match = self.check_location(
+            location_match = check_location(
                 user["location"], self.location
             )
             user_dict["city"] = self.location if location_match else None
@@ -166,7 +136,7 @@ class UserNetwork:
                 user_dict["last_processed"] = datetime.now().isoformat()
                 user_dict["last_updated"] = datetime.now().isoformat()
                 # See if location matches to add city
-                location_match = self.check_location(
+                location_match = check_location(
                     user.location, self.location
                 )
                 user_dict["city"] = self.location if location_match else None
@@ -520,7 +490,7 @@ class UserNetwork:
                     print(
                         f"Followers: Not Found - retrying (attempt {attempt})"
                     )
-                    time.sleep(300)
+                    time.sleep(60)
                 else:
                     print(
                         f"Followers: Not Found after {max_retries} attempts - giving up"
@@ -644,7 +614,7 @@ class UserNetwork:
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
-        time.sleep(90)
+        time.sleep(60)
         followers = await self.twikit_get_followers(user_dict["user_id"])
         user_dict["followers"] = followers
 
