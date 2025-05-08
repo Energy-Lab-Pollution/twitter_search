@@ -1,9 +1,10 @@
 """
 Util script with different functions used throughout the project
 """
-import re
+
 import json
 import os
+import re
 from datetime import datetime
 
 import googlemaps

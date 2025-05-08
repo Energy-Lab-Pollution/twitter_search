@@ -189,8 +189,6 @@ class UserAttributes:
         Gets the user attributes for root users, followers
         and retweeters
         """
-        new_location_json = []
-
         # Already re-processed users with all attributes:
         processed_users = self._get_already_processed_users()
 
@@ -291,8 +289,12 @@ class UserAttributes:
                             continue
             # Add newly processed followers
             user_attributes_dict["followers"] = new_user_followers
+
+            print("Deduplicating users")
             self.existing_users = load_json(self.location_users_path)
-            new_location_json.append(user_attributes_dict)
+            self.existing_users = remove_duplicate_records(self.existing_users)
+            network_json_maker(self.location_users_path, self.existing_users)
+
             # New JSON saved with a new filename
             network_json_maker(
                 self.new_location_file_path, [user_attributes_dict]
