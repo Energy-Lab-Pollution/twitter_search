@@ -10,7 +10,6 @@ import tweepy
 import twikit
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
-    FIFTEEN_MINUTES,
     SIXTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
     TWIKIT_COUNT,
