@@ -2,6 +2,9 @@
 Script to search tweets and users from a particular location.
 The users who match a certain criteria will be sent to a processing queue.
 """
+import json
+
+import boto3
 import datetime
 import tweepy
 import twikit
@@ -25,6 +28,7 @@ from config_utils.util import (
 class CityUsers:
     def __init__(self, location):
         self.location = location
+        self.sqs_client = boto3.client("sqs", region_name="")
 
     def parse_x_users(self, user_list):
         """
@@ -209,12 +213,23 @@ class CityUsers:
 
     async def _get_city_users(self, extraction_type):
         """
-        Searches for city users with either twikit or X.
+        Searches for city users with either twikit or X, then sends them
+        to the corresponding queue
         """
         if extraction_type == "twikit":
             users_list = await self._get_twikit_city_users()
         elif extraction_type == "x":
             users_list = self._get_x_city_users()
 
+        #TODO: Upload user attributes to Neptune ?
+
         #TODO: Send users to queue
+        queue_url = self.sqs_client.get_queue_url(QueueName="")["QueueUrl"]
+        for user in users_list:
+            message = {"user_id": str(user['user_id']),
+                       "location": self.location}
+            self.sqs_client.send_message(
+                QueueUrl=queue_url,
+                MessageBody=json.dumps(message)
+            )
 
