@@ -32,7 +32,6 @@ class UserAttributes:
 
     FIFTEEN_MINUTES = FIFTEEN_MINUTES
     ALIAS_DICT = ALIAS_DICT
-    PROBLEMATIC_USERS = ["1249023238488768512", "147195485"]
 
     def __init__(self, location):
         self.location = location.lower()

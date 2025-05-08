@@ -520,7 +520,7 @@ class UserNetwork:
                     print(
                         f"Followers: Not Found - retrying (attempt {attempt})"
                     )
-                    time.sleep(90)
+                    time.sleep(120)
                 else:
                     print(
                         f"Followers: Not Found after {max_retries} attempts - giving up"
