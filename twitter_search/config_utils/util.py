@@ -309,6 +309,30 @@ def client_creator():
     )
 
 
+def api_v1_creator():
+    """
+    Creates a tweepy.API wrapper for Twitter v1.1 endpoints (e.g. followers/list).
+    """
+    consumer_key = config.consumer_key
+    consumer_secret = config.consumer_secret
+    access_token = config.access_token
+    access_token_secret = config.access_token_secret
+
+    # 1) Build the OAuth1 handler
+    auth = tweepy.OAuth1UserHandler(
+        consumer_key, consumer_secret, access_token, access_token_secret
+    )
+
+    # 2) Create and return the API object, with rate-limit handling turned on
+    return tweepy.API(
+        auth,
+        wait_on_rate_limit=True,
+        retry_count=3,  # auto-retry transient network errors
+        retry_delay=5,
+        retry_errors={401, 404, 500, 502, 503, 504},
+    )
+
+
 def flatten_and_remove_empty(input_list):
     """
     Flatten a list of lists into a single list and remove any empty lists within it.
@@ -402,10 +426,10 @@ def network_json_maker(file_path, data_to_append):
 
 
 # Date conversion
-def convert_to_yyyy_mm_dd(date_string):
+def convert_to_iso_format(date_string):
     """
     Converts a date string in the format "Fri Dec 06 18:09:05 +0000 2024"
-    to the "yyyy-mm-dd" format.
+    to isoformat
 
     Args:
         date_string: The input date string.
@@ -415,7 +439,7 @@ def convert_to_yyyy_mm_dd(date_string):
     """
     try:
         date_obj = datetime.strptime(date_string, "%a %b %d %H:%M:%S %z %Y")
-        return date_obj.strftime("%Y-%m-%d")
+        return date_obj.isoformat()
     except ValueError:
         print(f"Invalid date format: {date_string}")
         return None

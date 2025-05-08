@@ -2,17 +2,32 @@
 Script to pull tweets and retweeters from a particular user,
 """
 
+import re
 import time
+from datetime import datetime
 
+import tweepy
 import twikit
+from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
+    SIXTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
     TWIKIT_COUNT,
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
     TWIKIT_TWEETS_THRESHOLD,
+    X_FOLLOWERS_PAGE_SIZE,
+    X_MAX_FOLLOWERS,
+    X_MAX_RETWEETERS,
+    X_MAX_USER_TWEETS,
+    X_TWEETS_PAGE_SIZE,
 )
-from config_utils.util import network_json_maker
+from config_utils.util import (
+    api_v1_creator,
+    client_creator,
+    convert_to_iso_format,
+    network_json_maker,
+)
 
 
 class UserNetwork:
@@ -23,16 +38,99 @@ class UserNetwork:
     TWIKIT_COUNT = TWIKIT_COUNT
     SLEEP_TIME = 2
 
-    def __init__(self, output_file_path):
+    def __init__(self, output_file_path, location):
+        # Twikit Client
         self.client = twikit.Client("en-US")
         self.client.load_cookies(self.TWIKIT_COOKIES_DIR)
+
+        # X Tweepy Client
+        self.x_client = client_creator()
+        self.x_v1_client = api_v1_creator()
+
+        self.location = location
         self.output_file_path = output_file_path
 
         # Setting retweeters counter at the top level
         self.retweeters_counter = 0
 
     @staticmethod
-    def parse_users(users):
+    def check_location(raw_location, target_location):
+        """
+        Uses regex to see if the raw location matches
+        the target location
+        """
+
+        target_locations = [target_location]
+
+        # alias is the key, target loc is the value
+        for alias, value in ALIAS_DICT.items():
+            if value == target_location:
+                target_locations.append(alias)
+
+        if isinstance(raw_location, str):
+            raw_location = raw_location.lower().strip()
+            location_regex = re.findall(r"\w+", raw_location)
+
+            if location_regex:
+                for target_location in target_locations:
+                    if target_location in location_regex:
+                        return True
+                    elif target_location in raw_location:
+                        return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+
+    def parse_x_users(self, user_list):
+        """
+        This function takes a list of user objects and
+        transformis it into a list of dictionaries
+
+        Parameters
+        ----------
+        user_list : list
+            List of user objects
+
+        Returns
+        -------
+        dict_list: list
+            List of dictionaries with user data
+        """
+        user_dicts = []
+        for user in user_list:
+            user_dict = {
+                "user_id": user["id"],
+                "username": user["username"],
+                "description": user["description"],
+                "profile_location": user["location"],
+                "target_location": self.location,
+                "verified": user["verified"],
+                "created_at": user["created_at"],
+                "processing_status": "pending",
+            }
+            for key, value in user["public_metrics"].items():
+                user_dict[key] = value
+
+            # TODO: Adding new attributes
+            user_dict["category"] = None
+            user_dict["treatment_arm"] = None
+            user_dict["processing_status"] = "pending"
+            user_dict["extracted_at"] = datetime.now().isoformat()
+            user_dict["last_processed"] = datetime.now().isoformat()
+            user_dict["last_updated"] = datetime.now().isoformat()
+            # See if location matches to add city
+            location_match = self.check_location(
+                user["location"], self.location
+            )
+            user_dict["city"] = self.location if location_match else None
+            user_dicts.append(user_dict)
+
+        return user_dicts
+
+    def parse_twikit_users(self, users):
         """
         Parse retweeters (user objects) and put them
         into a list of dictionaries
@@ -52,19 +150,35 @@ class UserNetwork:
                 user_dict["user_id"] = user.id
                 user_dict["username"] = user.screen_name
                 user_dict["description"] = user.description
-                user_dict["location"] = user.location
+                user_dict["profile_location"] = user.location
+                user_dict["target_location"] = self.location
                 user_dict["followers_count"] = user.followers_count
                 user_dict["following_count"] = user.following_count
-
+                user_dict["tweets_count"] = user.statuses_count
+                # TODO: Check difference between verified and is_blue_verified
+                user_dict["verified"] = user.verified
+                user_dict["created_at"] = convert_to_iso_format(user.created_at)
+                # TODO: Adding new attributes
+                user_dict["category"] = None
+                user_dict["treatment_arm"] = None
+                user_dict["processing_status"] = "pending"
+                user_dict["extracted_at"] = datetime.now().isoformat()
+                user_dict["last_processed"] = datetime.now().isoformat()
+                user_dict["last_updated"] = datetime.now().isoformat()
+                # See if location matches to add city
+                location_match = self.check_location(
+                    user.location, self.location
+                )
+                user_dict["city"] = self.location if location_match else None
                 users_list.append(user_dict)
 
         return users_list
 
     @staticmethod
-    def parse_tweets(tweets):
+    def parse_twikit_tweets(tweets):
         """
         Given a set of tweets, we get a list of dictionaries
-        with the twees' and retweeters' information
+        with the tweets' and retweeters' information
 
         Args:
         ----------
@@ -79,12 +193,42 @@ class UserNetwork:
                 tweet_dict = {}
                 tweet_dict["tweet_id"] = tweet.id
                 tweet_dict["tweet_text"] = tweet.text
-                tweet_dict["created_at"] = tweet.created_at
+                tweet_dict["created_at"] = convert_to_iso_format(
+                    tweet.created_at
+                )
                 tweet_dict["retweet_count"] = tweet.retweet_count
                 tweet_dict["favorite_count"] = tweet.favorite_count
                 dict_list.append(tweet_dict)
 
         return dict_list
+
+    @staticmethod
+    def parse_x_tweets(tweets_list):
+        """
+        Normalize Tweepy v2 Tweet objects into dicts like your Twikit parser.
+        """
+        parsed_tweets = []
+        for tweet in tweets_list:
+            # t.created_at is a datetime
+            created = (
+                tweet.created_at.isoformat()
+                if isinstance(tweet.created_at, datetime)
+                else tweet.created_at
+            )
+
+            parsed_tweets.append(
+                {
+                    "tweet_id": tweet.id,
+                    "tweet_text": tweet.text,
+                    "created_at": created,
+                    "retweet_count": tweet.public_metrics.get(
+                        "retweet_count", 0
+                    ),
+                    "favorite_count": tweet.public_metrics.get("like_count", 0),
+                }
+            )
+
+        return parsed_tweets
 
     async def get_single_tweet_retweeters(self, tweet_id):
         """
@@ -113,7 +257,7 @@ class UserNetwork:
                 tweet_id, count=self.TWIKIT_COUNT
             )
             if retweeters:
-                parsed_retweeters = self.parse_users(retweeters)
+                parsed_retweeters = self.parse_twikit_users(retweeters)
                 retweeters_list.extend(parsed_retweeters)
         except twikit.errors.TooManyRequests:
             print("Retweeters: Too Many Requests")
@@ -134,11 +278,16 @@ class UserNetwork:
                     print(f"Made {self.retweeters_counter} retweets requests")
                     self.retweeters_maxed_out = True
                     return retweeters_list
-                except twikit.error.BadRequest:
+                except twikit.errors.BadRequest:
                     print("Retweeters: Bad Request")
                     return retweeters_list
+                except twikit.errors.TwitterException as e:
+                    print(f"Retweeters: Twitter Exception {e}")
+                    return retweeters_list
                 if more_retweeters:
-                    more_parsed_retweeters = self.parse_users(more_retweeters)
+                    more_parsed_retweeters = self.parse_twikit_users(
+                        more_retweeters
+                    )
                     retweeters_list.extend(more_parsed_retweeters)
                 else:
                     more_retweeters_available = False
@@ -152,7 +301,7 @@ class UserNetwork:
 
         return retweeters_list
 
-    async def add_retweeters(self, tweets_list):
+    async def twikit_add_retweeters(self, tweets_list):
         """
         For every tweet in a list of dictionaries, attempt to
         get all possible retweeters.
@@ -193,10 +342,71 @@ class UserNetwork:
 
         return new_tweets_list
 
-    async def get_user_tweets(self, user_id):
+    def x_get_single_tweet_retweeters(self, tweet_id):
+        """
+        Pull up to 500 retweeters via v2, then parse.
+        """
+        retweeters_list = []
+        next_token = None
+
+        while len(retweeters_list) < X_MAX_RETWEETERS:
+            response = self.x_client.get_retweeters(
+                id=tweet_id,
+                max_results=X_MAX_RETWEETERS,
+                pagination_token=next_token,
+                user_fields=[
+                    "id",
+                    "username",
+                    "description",
+                    "location",
+                    "public_metrics",
+                    "verified",
+                    "created_at",
+                ],
+            )
+
+            retweeters = (
+                [user.data for user in response.data] if response.data else []
+            )
+            if not retweeters:
+                break
+            retweeters_list.extend(retweeters)
+
+            if len(retweeters) >= X_MAX_RETWEETERS:
+                break
+
+            next_token = response.meta.get("next_token")
+            if not next_token:
+                break
+
+        return self.parse_x_users(retweeters)
+
+    def x_add_retweeters(self, tweets_list):
+        """
+        For each tweet in tweets_list:
+        - skip it if it's a pure retweet
+        - if retweet_count > 0, fetch its retweeters
+        - add a "retweeters" key to the tweet's dict
+        """
+        for tweet in tweets_list:
+            # skip pure RTs
+            refs = tweet.get("referenced_tweets") or []
+            if any(ref.get("type") == "retweeted" for ref in refs):
+                continue
+
+            # only fetch if there actually are retweets
+            if tweet.get("retweet_count", 0) > 0:
+                tweet_id = tweet["tweet_id"]
+                tweet["retweeters"] = self.x_get_single_tweet_retweeters(
+                    tweet_id
+                )
+
+        return tweets_list
+
+    async def twikit_get_user_tweets(self, user_id):
         """
         For a given user, we get as many of their tweets as possible
-        and parse them into a list
+        and parse them into a list using twikit
 
         Args
         -------
@@ -215,7 +425,7 @@ class UserNetwork:
         user_tweets = await self.client.get_user_tweets(
             user_id, "Tweets", count=self.TWIKIT_COUNT
         )
-        tweets_list = self.parse_tweets(user_tweets)
+        tweets_list = self.parse_twikit_tweets(user_tweets)
         dict_list.extend(tweets_list)
 
         while more_tweets_available:
@@ -227,7 +437,7 @@ class UserNetwork:
                     next_tweets = await next_tweets.next()
                 if next_tweets:
                     # Parse next tweets
-                    next_tweets_list = self.parse_tweets(next_tweets)
+                    next_tweets_list = self.parse_twikit_tweets(next_tweets)
                     dict_list.extend(next_tweets_list)
                 else:
                     more_tweets_available = False
@@ -245,7 +455,45 @@ class UserNetwork:
 
         return dict_list
 
-    async def get_followers(self, user_id):
+    def x_get_user_tweets(self, user_id):
+        """
+        For a given user, we get as many of their tweets as possible
+        and parse them into a list using x
+
+        Args
+        -------
+            - client: Twikit client obj
+
+        Returns:
+        ---------
+            - dict_list (list): list of dictionaries
+        """
+        user_tweets = []
+        next_token = None
+        while len(user_tweets) < X_MAX_USER_TWEETS:
+            response = self.x_client.get_users_tweets(
+                id=user_id,
+                max_results=X_TWEETS_PAGE_SIZE,
+                pagination_token=next_token,
+                tweet_fields=["created_at", "public_metrics"],
+            )
+
+            page = response.date or []
+            if not page:
+                break
+
+            user_tweets.extend(page)
+
+            if (len(user_tweets) >= X_MAX_USER_TWEETS) or not (
+                response.meta.get("next_token")
+            ):
+                break
+
+        parsed_tweets = self.parse_x_tweets(user_tweets)
+
+        return parsed_tweets
+
+    async def twikit_get_followers(self, user_id):
         """
         Gets a given user's followers
 
@@ -257,13 +505,41 @@ class UserNetwork:
             - tweet_list(list): List of dicts with followers info
         """
         followers_list = []
-        followers = await self.client.get_user_followers(
-            user_id, count=self.TWIKIT_COUNT
-        )
+        max_retries = 3
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                # try to fetch
+                followers = await self.client.get_user_followers(
+                    user_id, count=self.TWIKIT_COUNT
+                )
+                break
+            except twikit.errors.NotFound as error:
+                if attempt < max_retries:
+                    print(str(error))
+                    print(
+                        f"Followers: Not Found - retrying (attempt {attempt})"
+                    )
+                    time.sleep(90)
+                else:
+                    print(
+                        f"Followers: Not Found after {max_retries} attempts - giving up"
+                    )
+                    return followers_list  # final failure
+            except twikit.errors.TooManyRequests:
+                print("Followers: Too Many Requests - stopping early")
+                return followers_list
+            except twikit.errors.BadRequest:
+                print("Followers: Bad Request - stopping early")
+                return followers_list
+            except twikit.errors.TwitterException as e:
+                print(f"Followers: Twitter Exception - {e}")
+                return followers_list
+
         more_followers_available = True
         num_iter = 0
 
-        parsed_followers = self.parse_users(followers)
+        parsed_followers = self.parse_twikit_users(followers)
         followers_list.extend(parsed_followers)
 
         # Keeping track of currently extracted users
@@ -279,7 +555,9 @@ class UserNetwork:
                 else:
                     more_followers = await more_followers.next()
                 if more_followers:
-                    more_parsed_followers = self.parse_users(more_followers)
+                    more_parsed_followers = self.parse_twikit_users(
+                        more_followers
+                    )
                     for parsed_follower in more_parsed_followers:
                         if parsed_follower["user_id"] not in extracted_users:
                             followers_list.append(parsed_follower)
@@ -292,6 +570,15 @@ class UserNetwork:
             except twikit.errors.TooManyRequests:
                 print("Followers: too many requests, stopping...")
                 return followers_list
+            except twikit.errors.BadRequest:
+                print("Followers: Bad Request")
+                return followers_list
+            except twikit.errors.NotFound:
+                print("Followers: Not Found")
+                return followers_list
+            except twikit.errors.TwitterException as e:
+                print(f"Followers: Twitter Exception {e}")
+                return followers_list
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} follower batches, sleeping...")
                 time.sleep(self.SLEEP_TIME)
@@ -299,43 +586,121 @@ class UserNetwork:
                 print("Followers: maxed out number of requests")
                 return followers_list
 
-        # Check user location (?)
         # TODO: Upload users data to DynamoDB - store_data('user')
         # TODO: Send to SQS for network processing
         return followers_list
 
-    async def run(self, user_id):
+    def x_get_followers(self, user_id):
+        """
+        Pull up to 1 000 followers via v1.1, convert each to a dict
+        shape that parse_x_users expects, then parse.
+        """
+        legacy_users = tweepy.Cursor(
+            self.api_v1.followers, user_id=user_id, count=X_FOLLOWERS_PAGE_SIZE
+        ).items(X_MAX_FOLLOWERS)
+
+        # Convert to dicts
+        normalized = []
+        for legacy_user in legacy_users:
+            normalized.append(
+                {
+                    "id": legacy_user.id_str,
+                    "username": legacy_user.screen_name,
+                    "description": legacy_user.description,
+                    "location": legacy_user.location,
+                    "created_at": legacy_user.created_at.isoformat(),
+                    "verified": legacy_user.verified,
+                    "public_metrics": {
+                        "followers_count": legacy_user.followers_count,
+                        "following_count": legacy_user.friends_count,
+                        "tweet_count": legacy_user.statuses_count,
+                        "listed_count": legacy_user.listed_count,
+                    },
+                }
+            )
+
+        return self.parse_x_users(normalized)
+
+    async def run_twikit(self, user_dict):
         """
         Runs the pertinent functions by getting a user's retweeters and
-        followers
+        followers with twikit
 
         Args:
-            - user_id (str): User id to get info from
+            - user_dict (dict): User dict
         """
-        user_dict = {}
-        user_dict["user_id"] = user_id
-
-        # Get source user information
-        user_obj = await self.client.get_user_by_id(user_id)
-        user_dict["username"] = user_obj.screen_name
-        user_dict["followers_count"] = user_obj.followers_count
-        user_dict["following_count"] = user_obj.following_count
+        # TODO: processing_status is pending
+        # extracted_at is null - take midpoint for when we got these root users
+        # last_modified is null
 
         # First get tweets, without retweeters
+        user_dict["processing_status"] = "in progress"
         print("Getting user tweets")
-        user_tweets = await self.get_user_tweets(user_id)
+        user_tweets = await self.twikit_get_user_tweets(user_dict["user_id"])
 
+        time.sleep(30)
         print("Getting user retweeters")
-        user_tweets = await self.add_retweeters(user_tweets)
+        user_tweets = await self.twikit_add_retweeters(user_tweets)
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
-        followers = await self.get_followers(user_id)
+        time.sleep(45)
+        followers = await self.twikit_get_followers(user_dict["user_id"])
         user_dict["followers"] = followers
 
         # Will put the extracted data into a list
         # Easier to extend future data
         user_dict_list = [user_dict]
+        user_dict["last_processed"] = datetime.now().isoformat()
+        user_dict["processing_status"] = "completed"
 
         network_json_maker(self.output_file_path, user_dict_list)
-        print(f"Stored {user_id} data")
+        print(f"Stored {user_dict['user_id']} data")
+
+    def run_x(self, user_dict):
+        """
+        Runs the pertinent functions by getting a user's retweeters and
+        followers
+
+        Args:
+            - user_dict (dict): User dict
+        """
+        # TODO: processing_status is pending
+        # extracted_at is null - take midpoint for when we got these root users
+        # last_modified is null
+        # First get tweets, without retweeters
+        user_dict["processing_status"] = "in progress"
+        print("Getting user tweets")
+        user_tweets = self.x_get_user_tweets(user_dict["user_id"])
+
+        print("Getting user retweeters")
+        user_tweets = self.x_add_retweeters(user_tweets)
+        user_dict["tweets"] = user_tweets
+
+        print("Getting user followers...")
+        followers = self.x_get_followers(user_dict["user_id"])
+        user_dict["followers"] = followers
+
+        # Will put the extracted data into a list
+        # Easier to extend future data
+        user_dict_list = [user_dict]
+        user_dict["last_processed"] = datetime.now().isoformat()
+        user_dict["processing_status"] = "completed"
+
+        network_json_maker(self.output_file_path, user_dict_list)
+        print(f"Stored {user_dict['user_id']} data")
+
+    async def run(self, user_dict, extraction_type):
+        """
+        Gets the network data either using Twikit or X
+
+        Args:
+            - user_dict (dict): Dict with user data
+            - extraction_type: str
+        """
+        if extraction_type == "x":
+            self.run_x()
+        else:
+            # If file or twikit extraction method, use twikit
+            await self.run_twikit(user_dict)
+            time.sleep(SIXTEEN_MINUTES)

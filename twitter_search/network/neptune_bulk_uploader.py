@@ -37,7 +37,7 @@ class NeptuneBulkUploader:
             self.base_dir
             / f"networks/{location}/{location}_{interaction_type}_edges.csv"
         )
-        self.s3_path = f"networks/{location}/{interaction_type}/"
+        self.s3_path = f"networks/{location}/{interaction_type}"
 
     def convert_json_to_csv(self):
         """
@@ -115,7 +115,7 @@ class NeptuneBulkUploader:
                 "~to",
                 "~label",
                 "weight",
-                "tweet_ids:list",
+                "tweet_ids:String",
                 "location",
             ]
         else:
@@ -139,7 +139,7 @@ class NeptuneBulkUploader:
                 if self.interaction_type == "retweet":
                     row["weight"] = props["weight"]
                     # join tweet_ids with semicolon
-                    row["tweet_ids:list"] = ";".join(props["tweet_ids"])
+                    row["tweet_ids:String"] = ",".join(props["tweet_ids"])
                 writer.writerow(row)
 
     def upload_to_s3(self, file_path, s3_key):
@@ -179,11 +179,11 @@ class NeptuneBulkUploader:
         # Upload vertices
         self.upload_to_s3(
             self.vertices_csv_path,
-            f"{self.s3_path}/{self.location}_{self.interaction_type}_vertices.csv",
+            f"{self.s3_path}/{self.location}_{self.interaction_type}_nodes.csv",
         )
         # Upload edges
         self.upload_to_s3(
             self.edges_csv_path,
             f"{self.s3_path}/{self.location}_{self.interaction_type}_edges.csv",
         )
-        self.bulk_load_to_neptune(self.s3_path)
+        # self.bulk_load_to_neptune(self.s3_path)

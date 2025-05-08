@@ -8,7 +8,7 @@ import time
 from argparse import ArgumentParser
 
 from config_utils.constants import FIFTEEN_MINUTES
-from network.network_handler import NetworkHandler
+from network.user_attributes import UserAttributes
 
 
 if __name__ == "__main__":
@@ -19,22 +19,10 @@ if __name__ == "__main__":
         "location", type=str, help="Location to read users from"
     )
     parser.add_argument(
-        "extraction_type",
-        type=str,
-        choices=["twikit", "x"],
-        help="Choose how to get users",
-    )
-    parser.add_argument(
         "wait",
         type=str,
         choices=["Yes", "No"],
         help="Decide whether to wait 15 mins or not",
-    )
-    parser.add_argument(
-        "file_flag",
-        type=str,
-        choices=["Yes", "No"],
-        help="Determines if root users will be extracted from the .csv file",
     )
 
     args = parser.parse_args()
@@ -43,8 +31,5 @@ if __name__ == "__main__":
         print("Sleeping for 15 minutes...")
         time.sleep(FIFTEEN_MINUTES)
 
-    file_flag = True if args.file_flag == "Yes" else False
-    network_handler = NetworkHandler(args.location)
-    asyncio.run(
-        network_handler.create_user_network(args.extraction_type, file_flag)
-    )
+    user_attributes = UserAttributes(args.location)
+    asyncio.run(user_attributes.run())

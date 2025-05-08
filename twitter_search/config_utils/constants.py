@@ -66,7 +66,6 @@ LIST_FIELDS = ["id", "name", "description"]
 USER_FIELDS = [
     "created_at",
     "description",
-    "entities",
     "id",
     "location",
     "most_recent_tweet_id",
@@ -77,6 +76,7 @@ USER_FIELDS = [
     "public_metrics",
     "url",
     "username",
+    "verified",
 ]
 
 # CONSTANTS FOR SEARCH USERS AND GET LISTS SCRIPTS
@@ -104,21 +104,6 @@ TWEET_FIELDS = [
     "text",
     "withheld",
 ]
-USER_FIELDS = [
-    "created_at",
-    "description",
-    "entities",
-    "id",
-    "location",
-    "most_recent_tweet_id",
-    "name",
-    "pinned_tweet_id",
-    "profile_image_url",
-    "protected",
-    "public_metrics",
-    "url",
-    "username",
-]
 
 # THRESHOLDS FOR GETTING LISTS
 COUNT_THRESHOLD = 240
@@ -133,15 +118,26 @@ for char in PUNCTUATIONS:
 
 # Twikit and Network Construction Constants
 TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
+TWIKIT_FDM_COOKIES_DIR = "twitter_search/config_utils/fdm_cookies.json"
 SINGLE_ACCOUNT_THRESHOLD = 10
 TWIKIT_TWEETS_THRESHOLD = 50
 TWIKIT_FOLLOWERS_THRESHOLD = 50
 TWIKIT_RETWEETERS_THRESHOLD = 500
+TWIKIT_USER_ATTRIBUTES_THRESHOLD = 400
 # Number of tweets / followers to get
 TWIKIT_COUNT = 1000
 FIFTEEN_MINUTES = 900
+SIXTEEN_MINUTES = 960
+SEVENTEEN_MINUTES = 1020
 TWO_MINUTES = 120
 ONE_MINUTE = 60
+
+# X Constants
+X_MAX_USER_TWEETS = 1000
+X_TWEETS_PAGE_SIZE = 100
+X_FOLLOWERS_PAGE_SIZE = 200
+X_MAX_RETWEETERS = 500
+X_MAX_FOLLOWERS = 1000
 
 # Neptune constants
 NEPTUNE_ENDPOINT = (

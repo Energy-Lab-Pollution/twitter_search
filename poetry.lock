@@ -1182,6 +1182,22 @@ files = [
 ]
 
 [[package]]
+name = "js2py-3-13"
+version = "0.74.1"
+description = "JavaScript to Python Translator & JavaScript interpreter written in 100% pure Python."
+optional = false
+python-versions = "*"
+files = [
+    {file = "Js2Py_3.13-0.74.1-py3-none-any.whl", hash = "sha256:5c60a80a43197775986c27f33becaf9ebf3731e8e79030c925f44025ed6f0e8b"},
+    {file = "js2py_3_13-0.74.1.tar.gz", hash = "sha256:91e214f717312f9d510eaf36fcc5325b0b15a22a49831fe2b434bca4a33c1f77"},
+]
+
+[package.dependencies]
+pyjsparser = ">=2.5.1"
+six = ">=1.10"
+tzlocal = ">=1.2"
+
+[[package]]
 name = "kiwisolver"
 version = "1.4.8"
 description = "A fast implementation of the Cassowary constraint solver"
@@ -1437,6 +1453,17 @@ html-clean = ["lxml-html-clean"]
 html5 = ["html5lib"]
 htmlsoup = ["BeautifulSoup4"]
 source = ["Cython (>=3.0.11)"]
+
+[[package]]
+name = "m3u8"
+version = "6.0.0"
+description = "Python m3u8 parser"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "m3u8-6.0.0-py3-none-any.whl", hash = "sha256:566d0748739c552dad10f8c87150078de6a0ec25071fa48e6968e96fc6dcba5d"},
+    {file = "m3u8-6.0.0.tar.gz", hash = "sha256:7ade990a1667d7a653bcaf9413b16c3eb5cd618982ff46aaff57fe6d9fa9c0fd"},
+]
 
 [[package]]
 name = "markupsafe"
@@ -2372,6 +2399,17 @@ numpy = ">=1.16.6"
 test = ["cffi", "hypothesis", "pandas", "pytest", "pytz"]
 
 [[package]]
+name = "pyjsparser"
+version = "2.7.1"
+description = "Fast javascript parser (based on esprima.js)"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pyjsparser-2.7.1-py2-none-any.whl", hash = "sha256:2b12842df98d83f65934e0772fa4a5d8b123b3bc79f1af1789172ac70265dd21"},
+    {file = "pyjsparser-2.7.1.tar.gz", hash = "sha256:be60da6b778cc5a5296a69d8e7d614f1f870faf94e1b1b6ac591f2ad5d729579"},
+]
+
+[[package]]
 name = "pyotp"
 version = "2.9.0"
 description = "Python One Time Password Library"
@@ -3292,21 +3330,24 @@ test = ["vcrpy (>=1.10.3)"]
 
 [[package]]
 name = "twikit"
-version = "2.2.0"
+version = "2.3.3"
 description = "Twitter API wrapper for python with **no API key required**."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "twikit-2.2.0-py3-none-any.whl", hash = "sha256:8d70b4a9fb87a6753c2c2eebacc757fb113908d6e9c45e04dd1b374a6fc15766"},
-    {file = "twikit-2.2.0.tar.gz", hash = "sha256:fac9221fcc070ec26191e6b024fd5ac2ff929f0ea4d9175964635fc123faf52a"},
+    {file = "twikit-2.3.3-py3-none-any.whl", hash = "sha256:0d745895bb243f84a1bbb8c9c821f165a0f60e20db27dee66fdb77d05af748fd"},
+    {file = "twikit-2.3.3.tar.gz", hash = "sha256:081177a8a1b05f3d67e5622d839bba2a63422c07cea31b906f89df67ae8166da"},
 ]
 
 [package.dependencies]
 beautifulsoup4 = "*"
 filetype = "*"
 httpx = {version = "*", extras = ["socks"]}
+"Js2Py-3.13" = "*"
 lxml = "*"
+m3u8 = "*"
 pyotp = "*"
+webvtt-py = "*"
 
 [[package]]
 name = "typing-extensions"
@@ -3329,6 +3370,23 @@ files = [
     {file = "tzdata-2024.1-py2.py3-none-any.whl", hash = "sha256:9068bc196136463f5245e51efda838afa15aaeca9903f49050dfa2679db4d252"},
     {file = "tzdata-2024.1.tar.gz", hash = "sha256:2674120f8d891909751c38abcdfd386ac0a5a1127954fbc332af6b5ceae07efd"},
 ]
+
+[[package]]
+name = "tzlocal"
+version = "5.3.1"
+description = "tzinfo object for the local timezone"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "tzlocal-5.3.1-py3-none-any.whl", hash = "sha256:eb1a66c3ef5847adf7a834f1be0800581b683b5608e74f86ecbcef8ab91bb85d"},
+    {file = "tzlocal-5.3.1.tar.gz", hash = "sha256:cceffc7edecefea1f595541dbd6e990cb1ea3d19bf01b2809f362a03dd7921fd"},
+]
+
+[package.dependencies]
+tzdata = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+devenv = ["check-manifest", "pytest (>=4.3)", "pytest-cov", "pytest-mock (>=3.3)", "zest.releaser"]
 
 [[package]]
 name = "urllib3"
@@ -3382,6 +3440,17 @@ files = [
 docs = ["Sphinx (>=6.0)", "myst-parser (>=2.0.0)", "sphinx-rtd-theme (>=1.1.0)"]
 optional = ["python-socks", "wsaccel"]
 test = ["websockets"]
+
+[[package]]
+name = "webvtt-py"
+version = "0.5.1"
+description = "WebVTT reader, writer and segmenter"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "webvtt-py-0.5.1.tar.gz", hash = "sha256:2040dd325277ddadc1e0c6cc66cbc4a1d9b6b49b24c57a0c3364374c3e8a3dc1"},
+    {file = "webvtt_py-0.5.1-py3-none-any.whl", hash = "sha256:9d517d286cfe7fc7825e9d4e2079647ce32f5678eb58e39ef544ffbb932610b7"},
+]
 
 [[package]]
 name = "xxhash"
