@@ -1,7 +1,7 @@
 """
 Util script with different functions used throughout the project
 """
-
+import re
 import json
 import os
 from datetime import datetime
@@ -11,8 +11,8 @@ import tweepy
 
 # Local imports
 from config_utils import config
-from config_utils.constants import GEOCODE_TIMEOUT
 from config_utils.cities import ALIAS_DICT
+from config_utils.constants import GEOCODE_TIMEOUT
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 
 
