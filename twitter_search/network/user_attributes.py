@@ -209,7 +209,7 @@ class UserAttributes:
                 print(f"Already processed {user_dict['user_id']}.. skipping")
                 continue
 
-            print(f"Processing user {user_dict["user_id"]}...")
+            print(f"Processing user {user_dict['user_id']}...")
             # Getting add
             user_attributes_dict = await self.get_user_attributes(
                 client, str(user_dict["user_id"])

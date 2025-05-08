@@ -202,7 +202,7 @@ class UserAttributes:
             tweets = user_dict["tweets"]
             followers = user_dict["followers"]
 
-            print(f"Processing user {user_dict["user_id"]}...")
+            print(f"Processing user {user_dict['user_id']}...")
             if not self.user_attributes_exist(user_dict["user_id"]):
                 user_dict_copy = user_dict.copy()
                 del user_dict_copy["tweets"]

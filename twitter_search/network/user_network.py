@@ -655,7 +655,7 @@ class UserNetwork:
         user_dict["processing_status"] = "completed"
 
         network_json_maker(self.output_file_path, user_dict_list)
-        print(f"Stored {user_dict["user_id"]} data")
+        print(f"Stored {user_dict['user_id']} data")
 
     def run_x(self, user_dict):
         """
