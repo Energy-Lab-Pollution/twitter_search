@@ -221,10 +221,13 @@ class CityUsers:
         # TODO: Send users to queue
         queue_url = self.sqs_client.get_queue_url(QueueName="")["QueueUrl"]
         for user in users_list:
-            message = {
-                "user_id": str(user["user_id"]),
-                "location": self.location,
-            }
-            self.sqs_client.send_message(
-                QueueUrl=queue_url, MessageBody=json.dumps(message)
-            )
+            if user["city"]:
+                message = {
+                    "user_id": str(user["user_id"]),
+                    "location": self.location,
+                }
+                self.sqs_client.send_message(
+                    QueueUrl=queue_url,
+                    messageGroupId=self.location,
+                    messageBody=json.dumps(message)
+                )
