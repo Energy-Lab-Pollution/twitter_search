@@ -2,13 +2,12 @@
 Script to search tweets and users from a particular location.
 The users who match a certain criteria will be sent to a processing queue.
 """
+
+import datetime
 import json
 
 import boto3
-import datetime
-import tweepy
 import twikit
-
 from config_utils.constants import (
     EXPANSIONS,
     MAX_RESULTS,
@@ -68,9 +67,7 @@ class CityUsers:
             user_dict["last_processed"] = datetime.now().isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
-            location_match = check_location(
-                user["location"], self.location
-            )
+            location_match = check_location(user["location"], self.location)
             user_dict["city"] = self.location if location_match else None
             user_dicts.append(user_dict)
 
@@ -112,9 +109,7 @@ class CityUsers:
                 user_dict["last_processed"] = datetime.now().isoformat()
                 user_dict["last_updated"] = datetime.now().isoformat()
                 # See if location matches to add city
-                location_match = check_location(
-                    user.location, self.location
-                )
+                location_match = check_location(user.location, self.location)
                 user_dict["city"] = self.location if location_match else None
                 users_list.append(user_dict)
 
@@ -221,15 +216,15 @@ class CityUsers:
         elif extraction_type == "x":
             users_list = self._get_x_city_users()
 
-        #TODO: Upload user attributes to Neptune ?
+        # TODO: Upload user attributes to Neptune ?
 
-        #TODO: Send users to queue
+        # TODO: Send users to queue
         queue_url = self.sqs_client.get_queue_url(QueueName="")["QueueUrl"]
         for user in users_list:
-            message = {"user_id": str(user['user_id']),
-                       "location": self.location}
+            message = {
+                "user_id": str(user["user_id"]),
+                "location": self.location,
+            }
             self.sqs_client.send_message(
-                QueueUrl=queue_url,
-                MessageBody=json.dumps(message)
+                QueueUrl=queue_url, MessageBody=json.dumps(message)
             )
-

@@ -2,13 +2,11 @@
 Script to pull tweets and retweeters from a particular user,
 """
 
-import re
 import time
 from datetime import datetime
 
 import tweepy
 import twikit
-from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
@@ -92,9 +90,7 @@ class UserNetwork:
             user_dict["last_processed"] = datetime.now().isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
-            location_match = check_location(
-                user["location"], self.location
-            )
+            location_match = check_location(user["location"], self.location)
             user_dict["city"] = self.location if location_match else None
             user_dicts.append(user_dict)
 
@@ -136,9 +132,7 @@ class UserNetwork:
                 user_dict["last_processed"] = datetime.now().isoformat()
                 user_dict["last_updated"] = datetime.now().isoformat()
                 # See if location matches to add city
-                location_match = check_location(
-                    user.location, self.location
-                )
+                location_match = check_location(user.location, self.location)
                 user_dict["city"] = self.location if location_match else None
                 users_list.append(user_dict)
 
