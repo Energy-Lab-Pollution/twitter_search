@@ -10,7 +10,7 @@ import tweepy
 import twikit
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
-    SIXTEEN_MINUTES,
+    FIFTEEN_MINUTES,
     TWIKIT_COOKIES_DIR,
     TWIKIT_COUNT,
     TWIKIT_FOLLOWERS_THRESHOLD,
@@ -520,7 +520,7 @@ class UserNetwork:
                     print(
                         f"Followers: Not Found - retrying (attempt {attempt})"
                     )
-                    time.sleep(120)
+                    time.sleep(300)
                 else:
                     print(
                         f"Followers: Not Found after {max_retries} attempts - giving up"
@@ -644,7 +644,7 @@ class UserNetwork:
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
-        time.sleep(45)
+        time.sleep(90)
         followers = await self.twikit_get_followers(user_dict["user_id"])
         user_dict["followers"] = followers
 
@@ -703,4 +703,4 @@ class UserNetwork:
         else:
             # If file or twikit extraction method, use twikit
             await self.run_twikit(user_dict)
-            time.sleep(SIXTEEN_MINUTES)
+            time.sleep(FIFTEEN_MINUTES)
