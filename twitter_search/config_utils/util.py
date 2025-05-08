@@ -12,6 +12,7 @@ import tweepy
 # Local imports
 from config_utils import config
 from config_utils.constants import GEOCODE_TIMEOUT
+from config_utils.cities import ALIAS_DICT
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 
 
@@ -331,6 +332,37 @@ def api_v1_creator():
         retry_delay=5,
         retry_errors={401, 404, 500, 502, 503, 504},
     )
+
+
+def check_location(raw_location, target_location):
+    """
+    Uses regex to see if the raw location matches
+    the target location
+    """
+
+    target_locations = [target_location]
+
+    # alias is the key, target loc is the value
+    for alias, value in ALIAS_DICT.items():
+        if value == target_location:
+            target_locations.append(alias)
+
+    if isinstance(raw_location, str):
+        raw_location = raw_location.lower().strip()
+        location_regex = re.findall(r"\w+", raw_location)
+
+        if location_regex:
+            for target_location in target_locations:
+                if target_location in location_regex:
+                    return True
+                elif target_location in raw_location:
+                    return True
+            else:
+                return False
+        else:
+            return False
+    else:
+        return False
 
 
 def flatten_and_remove_empty(input_list):
