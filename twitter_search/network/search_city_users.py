@@ -25,8 +25,9 @@ from config_utils.util import (
 
 
 class CityUsers:
-    def __init__(self, location):
+    def __init__(self, location, account_num):
         self.location = location
+        self.account_num = account_num
         self.sqs_client = boto3.client("sqs", region_name="")
 
     def parse_x_users(self, user_list):
@@ -223,15 +224,31 @@ class CityUsers:
         # TODO: Upload user attributes to Neptune ?
 
         # TODO: Send users to queue
-        queue_url = self.sqs_client.get_queue_url(QueueName="")["QueueUrl"]
+        # Queue to get 1. user tweets
+        # Queue to get 2. user followers
+        user_tweets_queue_url = self.sqs_client.get_queue_url(QueueName="UserTweets")["QueueUrl"]
+        user_followers_queue_url = self.sqs_client.get_queue_url(QueueName="UserFollowers")["QueueUrl"]
         for user in users_list:
             if user["city"]:
                 message = {
                     "user_id": str(user["user_id"]),
                     "location": self.location,
                 }
-                self.sqs_client.send_message(
-                    QueueUrl=queue_url,
-                    messageGroupId=self.location,
-                    messageBody=json.dumps(message),
-                )
+                try:
+                    # Send to user tweets
+                    self.sqs_client.send_message(
+                        QueueUrl=user_tweets_queue_url,
+                        messageBody=json.dumps(message),
+                    )
+                except Exception as err:
+                    print(err)
+                    continue
+                # Send to user followers
+                try:
+                    self.sqs_client.send_message(
+                        QueueUrl=user_followers_queue_url,
+                        messageBody=json.dumps(message),
+                    )
+                except Exception as err:
+                    print(err)
+                    continue

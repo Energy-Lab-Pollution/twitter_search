@@ -117,6 +117,7 @@ for char in PUNCTUATIONS:
     PUNC += char
 
 # Twikit and Network Construction Constants
+# TODO: rename to account # 1, etc
 TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
 TWIKIT_FDM_COOKIES_DIR = "twitter_search/config_utils/fdm_cookies.json"
 TWIKIT_ZM_COOKIES_DIR = "twitter_search/config_utils/zm_cookies.json"

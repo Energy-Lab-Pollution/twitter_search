@@ -12,6 +12,7 @@ from network.network_handler import NetworkHandler
 
 
 if __name__ == "__main__":
+    #TODO: Add dash-dash to avoid order and be more flexible
     parser = ArgumentParser(
         "Parameters to get users data to generate a network"
     )

@@ -600,9 +600,7 @@ class UserNetwork:
         Args:
             - user_dict (dict): User dict
         """
-        # TODO: processing_status is pending
         # extracted_at is null - take midpoint for when we got these root users
-        # last_modified is null
 
         # First get tweets, without retweeters
         print("Getting user tweets")
