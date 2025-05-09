@@ -80,7 +80,7 @@ class UserAttributes:
         else:
             return False
 
-    async def get_user_attributes(self, client, user_id):
+    async def get_user_attributes(self, client, user_id, root_user):
         """
         Function to get all user attributes when we only get their
         ids from the existing file
@@ -124,11 +124,13 @@ class UserAttributes:
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
-            user_dict["processing_status"] = "pending"
-            user_dict["extracted_at"] = datetime.now().isoformat()
             # TODO: Needs to be a value of our choice
             last_date = datetime.now() - timedelta(days=14)
-            user_dict["last_processed"] = last_date.isoformat()
+            user_dict["extracted_at"] = last_date
+            user_dict["retweeter_status"] = "completed" if root_user else "pending"
+            user_dict["retweeter_last_processed"] = last_date.isoformat() if root_user else None
+            user_dict["follower_status"] = "completed" if root_user else "pending"
+            user_dict["follower_last_processed"] = last_date.isoformat() if root_user else None
             user_dict["last_updated"] = datetime.now().isoformat()
 
             # See if location matches to add city
@@ -168,6 +170,11 @@ class UserAttributes:
         """
         for existing_user in self.existing_users:
             if user_id == existing_user["user_id"]:
+                # Adding pending fields
+                existing_user["retweeter_status"] = "pending"
+                existing_user["retweeter_last_processed"] = None
+                existing_user["follower_status"] = "pending"
+                existing_user["follower_last_processed"] = None
                 return existing_user
 
     def _get_already_processed_users(self):
@@ -210,7 +217,7 @@ class UserAttributes:
             print(f"Processing user {user_dict['user_id']}...")
             # Getting add
             user_attributes_dict = await self.get_user_attributes(
-                client, str(user_dict["user_id"])
+                client, str(user_dict["user_id"]), root_user=True
             )
             if "last_processed" not in user_attributes_dict:
                 continue
@@ -236,11 +243,13 @@ class UserAttributes:
                             try:
                                 retweeter_attributes_dict = (
                                     await self.get_user_attributes(
-                                        client, str(retweeter["user_id"])
+                                        client,
+                                        str(retweeter["user_id"]),
+                                        root_user=False
                                     )
                                 )
                                 self.store_user_attributes(
-                                    retweeter_attributes_dict
+                                    retweeter_attributes_dict,
                                 )
                                 processed_retweeters.append(
                                     retweeter_attributes_dict
@@ -274,7 +283,9 @@ class UserAttributes:
                     try:
                         follower_attributes_dict = (
                             await self.get_user_attributes(
-                                client, str(follower["user_id"])
+                                client,
+                                str(follower["user_id"]),
+                                root_user=False
                             )
                         )
                         self.store_user_attributes(follower_attributes_dict)
