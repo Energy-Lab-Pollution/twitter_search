@@ -85,9 +85,12 @@ class UserNetwork:
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
-            user_dict["processing_status"] = "pending"
+            # Followers and retweeters status
+            user_dict["retweeter_status"] = "pending"
+            user_dict["retweeter_last_processed"] = None
+            user_dict["follower_status"] = "pending"
+            user_dict["follower_last_processed"] = None
             user_dict["extracted_at"] = datetime.now().isoformat()
-            user_dict["last_processed"] = datetime.now().isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
             location_match = check_location(user["location"], self.location)
@@ -127,9 +130,11 @@ class UserNetwork:
                 # TODO: Adding new attributes
                 user_dict["category"] = None
                 user_dict["treatment_arm"] = None
-                user_dict["processing_status"] = "pending"
+                user_dict["retweeter_status"] = "pending"
+                user_dict["retweeter_last_processed"] = None
+                user_dict["follower_status"] = "pending"
+                user_dict["follower_last_processed"] = None
                 user_dict["extracted_at"] = datetime.now().isoformat()
-                user_dict["last_processed"] = datetime.now().isoformat()
                 user_dict["last_updated"] = datetime.now().isoformat()
                 # See if location matches to add city
                 location_match = check_location(user.location, self.location)
@@ -598,26 +603,28 @@ class UserNetwork:
         # last_modified is null
 
         # First get tweets, without retweeters
-        user_dict["processing_status"] = "in progress"
         print("Getting user tweets")
         user_tweets = await self.twikit_get_user_tweets(user_dict["user_id"])
 
         time.sleep(30)
+        user_dict["retweeter_status"] = "in progress"
         print("Getting user retweeters")
         user_tweets = await self.twikit_add_retweeters(user_tweets)
+        user_dict["retweeter_last_processed"] = datetime.now().isoformat()
+        user_dict["retweeter_status"] = "completed"
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
         time.sleep(60)
+        user_dict["follower_status"] = "in progress"
         followers = await self.twikit_get_followers(user_dict["user_id"])
+        user_dict["follower_last_processed"] = datetime.now().isoformat()
+        user_dict["follower_status"] = "completed" if followers else "failed"
         user_dict["followers"] = followers
 
         # Will put the extracted data into a list
         # Easier to extend future data
         user_dict_list = [user_dict]
-        user_dict["last_processed"] = datetime.now().isoformat()
-        user_dict["processing_status"] = "completed"
-
         network_json_maker(self.output_file_path, user_dict_list)
         print(f"Stored {user_dict['user_id']} data")
 
@@ -633,23 +640,24 @@ class UserNetwork:
         # extracted_at is null - take midpoint for when we got these root users
         # last_modified is null
         # First get tweets, without retweeters
-        user_dict["processing_status"] = "in progress"
         print("Getting user tweets")
         user_tweets = self.x_get_user_tweets(user_dict["user_id"])
 
         print("Getting user retweeters")
         user_tweets = self.x_add_retweeters(user_tweets)
+        user_dict["retweeter_last_processed"] = datetime.now().isoformat()
+        user_dict["retweeter_status"] = "completed"
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
         followers = self.x_get_followers(user_dict["user_id"])
+        user_dict["follower_last_processed"] = datetime.now().isoformat()
+        user_dict["follower_status"] = "completed" if followers else "failed"
         user_dict["followers"] = followers
 
         # Will put the extracted data into a list
         # Easier to extend future data
         user_dict_list = [user_dict]
-        user_dict["last_processed"] = datetime.now().isoformat()
-        user_dict["processing_status"] = "completed"
 
         network_json_maker(self.output_file_path, user_dict_list)
         print(f"Stored {user_dict['user_id']} data")

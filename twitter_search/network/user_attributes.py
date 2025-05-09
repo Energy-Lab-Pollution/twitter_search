@@ -292,8 +292,8 @@ class UserAttributes:
 
             print("Deduplicating users")
             self.existing_users = load_json(self.location_users_path)
-            self.existing_users = remove_duplicate_records(self.existing_users)
-            network_json_maker(self.location_users_path, self.existing_users)
+            # self.existing_users = remove_duplicate_records(self.existing_users)
+            # network_json_maker(self.location_users_path, self.existing_users)
 
             # New JSON saved with a new filename
             network_json_maker(
