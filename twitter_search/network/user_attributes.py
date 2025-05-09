@@ -15,7 +15,7 @@ from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     SIXTEEN_MINUTES,
-    TWIKIT_COOKIES_DIR,
+    TWIKIT_COOKIES_DICT,
 )
 from config_utils.util import (
     convert_to_iso_format,
@@ -33,8 +33,10 @@ class UserAttributes:
 
     FIFTEEN_MINUTES = FIFTEEN_MINUTES
     ALIAS_DICT = ALIAS_DICT
+    TWIKIT_COOKIES_DICT = TWIKIT_COOKIES_DICT
 
-    def __init__(self, location):
+    def __init__(self, location, account_num):
+        self.account_num = account_num
         self.location = location.lower()
         self.base_dir = Path(__file__).parent.parent / "data/"
         # Building location output path
@@ -126,7 +128,7 @@ class UserAttributes:
             user_dict["treatment_arm"] = None
             # TODO: Needs to be a value of our choice
             last_date = datetime.now() - timedelta(days=14)
-            user_dict["extracted_at"] = last_date
+            user_dict["extracted_at"] = last_date.isoformat()
             user_dict["retweeter_status"] = "completed" if root_user else "pending"
             user_dict["retweeter_last_processed"] = last_date.isoformat() if root_user else None
             user_dict["follower_status"] = "completed" if root_user else "pending"
@@ -204,7 +206,7 @@ class UserAttributes:
             users_list = json.load(f)
 
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DIR)
+        client.load_cookies(self.TWIKIT_COOKIES_DICT[f"account_{self.account_num}"])
 
         for user_dict in users_list:
             tweets = user_dict["tweets"]
@@ -219,7 +221,7 @@ class UserAttributes:
             user_attributes_dict = await self.get_user_attributes(
                 client, str(user_dict["user_id"]), root_user=True
             )
-            if "last_processed" not in user_attributes_dict:
+            if "retweeter_status" not in user_attributes_dict:
                 continue
             # Adding attributes to retweeters
             new_user_tweets = []
