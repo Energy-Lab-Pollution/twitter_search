@@ -713,7 +713,8 @@ class NetworkHandler:
 
         return user_dict
 
-    async def create_user_network(self, extraction_type, file_flag):
+    async def create_user_network(self, extraction_type, account_num,
+                                  file_flag):
         """
         Gets the user network data for a given number of
         users.
@@ -721,7 +722,8 @@ class NetworkHandler:
         Args:
             - extraction_type (str): Determines if the users' network data will be
             obtained via twikit or X
-            - file_flag (boolean): Determines
+            - account_num (int): Account number to use with twikit
+            - file_flag (boolean): Determines if root users are obtained via the .csv file
         """
         # Get city users and users to process
         users_list = await self._get_city_users(extraction_type, file_flag)
@@ -744,7 +746,7 @@ class NetworkHandler:
                 user_to_process_dict = await self.get_csv_user_attributes(
                     client, user_to_process
                 )
-            user_network = UserNetwork(self.location_file_path, self.location)
+            user_network = UserNetwork(self.location_file_path, self.location, account_num)
             print(f"Processing user {user_to_process}...")
             await user_network.run(user_to_process_dict, extraction_type)
         # except Exception as error:

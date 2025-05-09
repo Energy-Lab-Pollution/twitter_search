@@ -9,7 +9,7 @@ import tweepy
 import twikit
 from config_utils.constants import (
     FIFTEEN_MINUTES,
-    TWIKIT_COOKIES_DIR,
+    TWIKIT_COOKIES_DICT,
     TWIKIT_COUNT,
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
@@ -33,14 +33,14 @@ class UserNetwork:
     TWIKIT_THRESHOLD = TWIKIT_TWEETS_THRESHOLD
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_RETWEETERS_THRESHOLD = TWIKIT_RETWEETERS_THRESHOLD
-    TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
+    TWIKIT_COOKIES_DICT = TWIKIT_COOKIES_DICT
     TWIKIT_COUNT = TWIKIT_COUNT
     SLEEP_TIME = 2
 
-    def __init__(self, output_file_path, location):
+    def __init__(self, output_file_path, location, account_num=1):
         # Twikit Client
         self.client = twikit.Client("en-US")
-        self.client.load_cookies(self.TWIKIT_COOKIES_DIR)
+        self.client.load_cookies(self.TWIKIT_COOKIES_DICT[f"account_{account_num}"])
 
         # X Tweepy Client
         self.x_client = client_creator()

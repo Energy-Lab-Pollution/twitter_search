@@ -15,7 +15,7 @@ from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     SIXTEEN_MINUTES,
-    TWIKIT_FDM_COOKIES_DIR,
+    TWIKIT_COOKIES_DIR,
 )
 from config_utils.util import (
     convert_to_iso_format,
@@ -204,7 +204,7 @@ class UserAttributes:
             users_list = json.load(f)
 
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_FDM_COOKIES_DIR)
+        client.load_cookies(TWIKIT_COOKIES_DIR)
 
         for user_dict in users_list:
             tweets = user_dict["tweets"]
