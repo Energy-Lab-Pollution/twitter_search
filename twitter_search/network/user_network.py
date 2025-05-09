@@ -40,7 +40,9 @@ class UserNetwork:
     def __init__(self, output_file_path, location, account_num=1):
         # Twikit Client
         self.client = twikit.Client("en-US")
-        self.client.load_cookies(self.TWIKIT_COOKIES_DICT[f"account_{account_num}"])
+        self.client.load_cookies(
+            self.TWIKIT_COOKIES_DICT[f"account_{account_num}"]
+        )
 
         # X Tweepy Client
         self.x_client = client_creator()

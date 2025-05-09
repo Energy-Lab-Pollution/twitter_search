@@ -21,7 +21,6 @@ from config_utils.util import (
     convert_to_iso_format,
     load_json,
     network_json_maker,
-    remove_duplicate_records,
 )
 from tqdm import tqdm
 
@@ -129,10 +128,18 @@ class UserAttributes:
             # TODO: Needs to be a value of our choice
             last_date = datetime.now() - timedelta(days=14)
             user_dict["extracted_at"] = last_date.isoformat()
-            user_dict["retweeter_status"] = "completed" if root_user else "pending"
-            user_dict["retweeter_last_processed"] = last_date.isoformat() if root_user else None
-            user_dict["follower_status"] = "completed" if root_user else "pending"
-            user_dict["follower_last_processed"] = last_date.isoformat() if root_user else None
+            user_dict["retweeter_status"] = (
+                "completed" if root_user else "pending"
+            )
+            user_dict["retweeter_last_processed"] = (
+                last_date.isoformat() if root_user else None
+            )
+            user_dict["follower_status"] = (
+                "completed" if root_user else "pending"
+            )
+            user_dict["follower_last_processed"] = (
+                last_date.isoformat() if root_user else None
+            )
             user_dict["last_updated"] = datetime.now().isoformat()
 
             # See if location matches to add city
@@ -206,7 +213,9 @@ class UserAttributes:
             users_list = json.load(f)
 
         client = twikit.Client("en-US")
-        client.load_cookies(self.TWIKIT_COOKIES_DICT[f"account_{self.account_num}"])
+        client.load_cookies(
+            self.TWIKIT_COOKIES_DICT[f"account_{self.account_num}"]
+        )
 
         for user_dict in users_list:
             tweets = user_dict["tweets"]
@@ -247,7 +256,7 @@ class UserAttributes:
                                     await self.get_user_attributes(
                                         client,
                                         str(retweeter["user_id"]),
-                                        root_user=False
+                                        root_user=False,
                                     )
                                 )
                                 self.store_user_attributes(
@@ -287,7 +296,7 @@ class UserAttributes:
                             await self.get_user_attributes(
                                 client,
                                 str(follower["user_id"]),
-                                root_user=False
+                                root_user=False,
                             )
                         )
                         self.store_user_attributes(follower_attributes_dict)

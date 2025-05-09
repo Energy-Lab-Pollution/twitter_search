@@ -233,5 +233,5 @@ class CityUsers:
                 self.sqs_client.send_message(
                     QueueUrl=queue_url,
                     messageGroupId=self.location,
-                    messageBody=json.dumps(message)
+                    messageBody=json.dumps(message),
                 )

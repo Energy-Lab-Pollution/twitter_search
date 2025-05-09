@@ -713,8 +713,9 @@ class NetworkHandler:
 
         return user_dict
 
-    async def create_user_network(self, extraction_type, account_num,
-                                  file_flag):
+    async def create_user_network(
+        self, extraction_type, account_num, file_flag
+    ):
         """
         Gets the user network data for a given number of
         users.
@@ -746,7 +747,9 @@ class NetworkHandler:
                 user_to_process_dict = await self.get_csv_user_attributes(
                     client, user_to_process
                 )
-            user_network = UserNetwork(self.location_file_path, self.location, account_num)
+            user_network = UserNetwork(
+                self.location_file_path, self.location, account_num
+            )
             print(f"Processing user {user_to_process}...")
             await user_network.run(user_to_process_dict, extraction_type)
         # except Exception as error:

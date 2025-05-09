@@ -123,7 +123,7 @@ TWIKIT_ZM_COOKIES_DIR = "twitter_search/config_utils/zm_cookies.json"
 TWIKIT_COOKIES_DICT = {
     "account_1": TWIKIT_COOKIES_DIR,
     "account_2": TWIKIT_FDM_COOKIES_DIR,
-    "account_3": TWIKIT_ZM_COOKIES_DIR
+    "account_3": TWIKIT_ZM_COOKIES_DIR,
 }
 SINGLE_ACCOUNT_THRESHOLD = 10
 TWIKIT_TWEETS_THRESHOLD = 50

@@ -50,6 +50,7 @@ if __name__ == "__main__":
     file_flag = True if args.file_flag == "Yes" else False
     network_handler = NetworkHandler(args.location)
     asyncio.run(
-        network_handler.create_user_network(args.extraction_type, args.account_number,
-                                            file_flag)
+        network_handler.create_user_network(
+            args.extraction_type, args.account_number, file_flag
+        )
     )
