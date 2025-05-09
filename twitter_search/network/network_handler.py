@@ -113,9 +113,11 @@ class NetworkHandler:
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
-            user_dict["processing_status"] = "pending"
+            user_dict["retweeter_status"] = "pending"
+            user_dict["retweeter_last_processed"] = None
+            user_dict["follower_status"] = "pending"
+            user_dict["follower_last_processed"] = None
             user_dict["extracted_at"] = datetime.now().isoformat()
-            user_dict["last_processed"] = datetime.now().isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
             location_match = self.check_location(
@@ -159,9 +161,11 @@ class NetworkHandler:
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
-            user_dict["processing_status"] = "pending"
+            user_dict["retweeter_status"] = "pending"
+            user_dict["retweeter_last_processed"] = None
+            user_dict["follower_status"] = "pending"
+            user_dict["follower_last_processed"] = None
             user_dict["extracted_at"] = datetime.now().isoformat()
-            user_dict["last_processed"] = None
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
             location_match = self.check_location(
@@ -696,9 +700,11 @@ class NetworkHandler:
         # TODO: Adding new attributes
         user_dict["category"] = None
         user_dict["treatment_arm"] = None
-        user_dict["processing_status"] = "pending"
+        user_dict["retweeter_status"] = "pending"
+        user_dict["retweeter_last_processed"] = None
+        user_dict["follower_status"] = "pending"
+        user_dict["follower_last_processed"] = None
         user_dict["extracted_at"] = datetime.now().isoformat()
-        user_dict["last_processed"] = datetime.now().isoformat()
         user_dict["last_updated"] = datetime.now().isoformat()
 
         # See if location matches to add city
