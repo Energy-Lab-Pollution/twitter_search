@@ -8,6 +8,8 @@ import json
 
 import boto3
 import twikit
+from argparse import ArgumentParser
+
 from config_utils.constants import (
     EXPANSIONS,
     MAX_RESULTS,
@@ -25,10 +27,10 @@ from config_utils.util import (
 
 
 class CityUsers:
-    def __init__(self, location, account_num):
+    def __init__(self, location, tweet_count):
         self.location = location
-        self.account_num = account_num
-        self.sqs_client = boto3.client("sqs", region_name="")
+        self.sqs_client = boto3.client("sqs")
+        self.tweet_count = tweet_count
 
     def parse_x_users(self, user_list):
         """
@@ -134,7 +136,7 @@ class CityUsers:
         users_list = []
 
         tweets = await client.search_tweet(
-            self.location, "Latest", count=TWIKIT_COUNT
+            self.location, "Latest", count=self.tweet_count
         )
         # TODO: Add set operation to keep unique users only
         users_list = self.parse_twikit_users(tweets)
@@ -217,15 +219,14 @@ class CityUsers:
         to the corresponding queue
         """
         if extraction_type == "twikit":
+            # TODO: Pass account details here
             users_list = await self._get_twikit_city_users()
         elif extraction_type == "x":
             users_list = self._get_x_city_users()
 
-        # TODO: Upload user attributes to Neptune ?
+        # TODO: Upload user attributes to Neptune -- Neptune handler class
 
-        # TODO: Send users to queue
-        # Queue to get 1. user tweets
-        # Queue to get 2. user followers
+        # TODO: Create one method to send messages to the queue
         user_tweets_queue_url = self.sqs_client.get_queue_url(QueueName="UserTweets")["QueueUrl"]
         user_followers_queue_url = self.sqs_client.get_queue_url(QueueName="UserFollowers")["QueueUrl"]
         for user in users_list:
@@ -252,3 +253,12 @@ class CityUsers:
                 except Exception as err:
                     print(err)
                     continue
+
+if __name__ == "__main__":
+
+    pass
+    # unpack cli parameters
+    # instantiate CityUsers class (city_user)
+    # parameters: [location, tweet_count, keywords (both hashtags, timeperiod and keywords)]
+    # check extraction type here
+    # call relevant methods on the city user class

@@ -52,7 +52,7 @@ QUERIES_ES = {
                     OR investigadora OR universitario OR universitaria)
                     -is:retweet""",
     "environment": """location ((contaminacion del aire) OR contaminacion OR
-                    (salud publica) OR (poor air) OR asma OR contaminado OR contaminada
+                    (salud publica) OR asma OR contaminado OR contaminada
                     OR smog OR (calidad del aire) OR (medio ambiente))
                     -is:retweet""",
     "healthcare": """location ((doctor OR doctora OR medico OR medica OR cirujano OR cirujana OR cardiologo

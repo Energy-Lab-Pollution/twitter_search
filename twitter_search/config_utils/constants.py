@@ -119,12 +119,14 @@ for char in PUNCTUATIONS:
 # Twikit and Network Construction Constants
 # TODO: rename to account # 1, etc
 TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
-TWIKIT_FDM_COOKIES_DIR = "twitter_search/config_utils/fdm_cookies.json"
-TWIKIT_ZM_COOKIES_DIR = "twitter_search/config_utils/zm_cookies.json"
+TWIKIT_COOKIES_DIR_2 = "twitter_search/config_utils/fdm_cookies.json"
+TWIKIT_COOKIES_DIR_3 = "twitter_search/config_utils/zm_cookies.json"
+TWIKIT_COOKIES_DIR_4 = "twitter_search/config_utils/lg_cookies.json"
 TWIKIT_COOKIES_DICT = {
     "account_1": TWIKIT_COOKIES_DIR,
-    "account_2": TWIKIT_FDM_COOKIES_DIR,
-    "account_3": TWIKIT_ZM_COOKIES_DIR,
+    "account_2": TWIKIT_COOKIES_DIR_2,
+    "account_3": TWIKIT_COOKIES_DIR_3,
+    "account_4": TWIKIT_COOKIES_DIR_4
 }
 SINGLE_ACCOUNT_THRESHOLD = 10
 TWIKIT_TWEETS_THRESHOLD = 50
