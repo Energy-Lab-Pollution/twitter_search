@@ -12,10 +12,7 @@ from network.sqs_city_users import CityUsers
 
 
 if __name__ == "__main__":
-    # unpack cli parameters
-    # instantiate CityUsers class (city_user)
     # parameters: [location, tweet_count, keywords (both hashtags, timeperiod and keywords)]
-    # check extraction type here
     # call relevant methods on the city user class
     #TODO: Add dash-dash to avoid order and be more flexible
 
@@ -23,7 +20,10 @@ if __name__ == "__main__":
         "Parameters to get users data to generate a network"
     )
     parser.add_argument(
-        "location", type=str, help="Location to read users from"
+        "--location", type=str, help="Location to search users from"
+    )
+    parser.add_argument(
+        "--tweet_count", type=str, help="Number of tweets to get"
     )
     parser.add_argument(
         "--extraction_type",
