@@ -42,8 +42,77 @@ class CityUsers:
                 f"Getting language and queries for {self.location} - {main_city}"
             )
 
-            language = CITIES_LANGS[main_city]
-            queries = QUERIES_DICT[language]
+        language = CITIES_LANGS[main_city]
+        self.queries = QUERIES_DICT[language]
+
+    def get_account_num_requests(self, city_requests):
+        """
+        Gets number of requests for each particular account.
+
+        Twikit can only process 50 requests to get tweets in a 15 min
+        interval. Therefore, for several cities, we need to determine
+        how many requests each city will get.
+
+        Args:
+            city_requests: int determining the number of requests per city
+        """
+        account_requests = city_requests / len(self.queries)
+        remainder_requests = city_requests % len(self.queries)
+
+        if account_requests < 1:
+            print(
+                "Account requests: Not enough requests to extract all accounts"
+            )
+            return None
+
+        # Create list of num requests per account
+        requests_list = []
+        for _ in range(0, len(account_requests)):
+            # round to nearest int
+            account_requests = round(account_requests)
+            requests_list.append(account_requests)
+
+        # If remainder exists, add to last account
+        if remainder_requests > 0:
+            num_requests = requests_list[-1]
+            num_requests += remainder_requests
+            requests_list[-1] = num_requests
+
+        return requests_list
+
+    def run_all_account_types(self, city_requests, skip_media=False):
+        """
+        Runs the entire process for all the available
+        account types for a particular location.
+
+        Args
+        ----------
+            city_requests: int with max number of requests for a given city
+            skip_media: str
+                Determines if we should skip the search for media accounts
+                (there are tons of them)
+
+        """
+        account_types = self.queries.copy()
+        self.skip_media = skip_media
+
+        if skip_media:
+            if "media" in account_types:
+                del account_types["media"]
+                # Number of account types
+                self.num_accounts = len(account_types)
+
+        accounts_requests = self.get_account_num_requests(city_requests)
+
+        for account_type, account_requests in zip(
+            account_types, accounts_requests
+        ):
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
+            self.account_type = account_type
+            self.run(account_requests)
+
 
     def parse_x_users(self, user_list):
         """
