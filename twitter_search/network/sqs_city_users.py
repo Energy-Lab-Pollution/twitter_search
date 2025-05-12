@@ -8,7 +8,6 @@ import json
 
 import boto3
 import twikit
-from argparse import ArgumentParser
 
 from config_utils.constants import (
     EXPANSIONS,
@@ -17,6 +16,14 @@ from config_utils.constants import (
     TWIKIT_COOKIES_DIR,
     TWIKIT_TWEETS_THRESHOLD,
     USER_FIELDS,
+)
+from config_utils.cities import (
+    ALIAS_DICT,
+    CITIES,
+    CITIES_LANGS
+)
+from config_utils.queries import (
+    QUERIES_DICT
 )
 from config_utils.util import (
     check_location,
@@ -30,6 +37,17 @@ class CityUsers:
         self.location = location
         self.sqs_client = boto3.client("sqs")
         self.tweet_count = tweet_count
+
+        if self.location in ALIAS_DICT:
+            print(f"{self.location} found in alias dict")
+            main_city = ALIAS_DICT[self.location]
+
+            print(
+                f"Getting language and queries for {self.location} - {main_city}"
+            )       
+
+            language = CITIES_LANGS[main_city]
+            queries = QUERIES_DICT[language]
 
     def parse_x_users(self, user_list):
         """
@@ -62,12 +80,12 @@ class CityUsers:
                 user_dict[key] = value
 
             # TODO: Adding new attributes
-            user_dict["category"] = None
-            user_dict["treatment_arm"] = None
+            user_dict["category"] = "null"
+            user_dict["treatment_arm"] = "null"
             user_dict["retweeter_status"] = "pending"
-            user_dict["retweeter_last_processed"] = None
+            user_dict["retweeter_last_processed"] = "null"
             user_dict["follower_status"] = "pending"
-            user_dict["follower_last_processed"] = None
+            user_dict["follower_last_processed"] = "null"
             user_dict["extracted_at"] = datetime.now().isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
@@ -251,12 +269,3 @@ class CityUsers:
                 except Exception as err:
                     print(err)
                     continue
-
-if __name__ == "__main__":
-
-    pass
-    # unpack cli parameters
-    # instantiate CityUsers class (city_user)
-    # parameters: [location, tweet_count, keywords (both hashtags, timeperiod and keywords)]
-    # check extraction type here
-    # call relevant methods on the city user class
