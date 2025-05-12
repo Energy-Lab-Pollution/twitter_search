@@ -3,6 +3,7 @@ Script to search tweets and users from a particular location.
 The users who match a certain criteria will be sent to a processing queue.
 """
 
+import asyncio
 import datetime
 import json
 import time
@@ -32,9 +33,9 @@ from config_utils.util import (
 
 class CityUsers:
     def __init__(self, location, tweet_count, extraction_type, account_num=1):
-        self.base_dir = Path(__file__).parent.parent / "data/"
+        self.base_dir = Path(__file__).parent/ "data/"
         self.location = location
-        self.sqs_client = boto3.client("sqs")
+        self.sqs_client = boto3.client("sqs", region_name="us-west-1")
         self.tweet_count = tweet_count
         self.extraction_type = extraction_type
         self.account_num = account_num
@@ -235,7 +236,7 @@ class CityUsers:
 
         return users_list
 
-    async def _get_twikit_city_users(self, query):
+    async def _get_twikit_city_users(self, num_tweets, query):
         """
         Method used to search for tweets, with twikit,
         using a given query
@@ -253,7 +254,7 @@ class CityUsers:
         users_list = []
 
         tweets = await client.search_tweet(
-            query, "Latest", count=self.tweet_count
+            query, "Latest", count=num_tweets
         )
         # TODO: Add set operation to keep unique users only
         users_list = self.parse_twikit_users(tweets)
@@ -288,7 +289,7 @@ class CityUsers:
 
         return users_list
 
-    def _get_x_city_users(self, query):
+    def _get_x_city_users(self, query, num_tweets):
         """
         Method used to search for tweets, with the X API,
         using a given query
@@ -302,11 +303,11 @@ class CityUsers:
         users_list = []
         tweets_list = []
 
-        while result_count < self.tweet_count:
+        while result_count < num_tweets:
             print(f"Max results is: {result_count}")
             response = x_client.search_recent_tweets(
                 query=query,
-                max_results=self.tweet_count,
+                max_results=num_tweets,
                 next_token=next_token,
                 expansions=EXPANSIONS,
                 tweet_fields=TWEET_FIELDS,
@@ -330,7 +331,7 @@ class CityUsers:
 
         return users_list
 
-    async def _get_city_users(self, query):
+    async def _get_city_users(self, num_tweets, query):
         """
         Searches for city users with either twikit or X, then sends them
         to the corresponding queue
@@ -340,44 +341,47 @@ class CityUsers:
         """
         # TODO: Insert / Check city node
         if self.extraction_type == "twikit":
-            users_list = await self._get_twikit_city_users(query, account_num)
+            users_list = await self._get_twikit_city_users(num_tweets, query)
         elif self.extraction_type == "x":
-            users_list = self._get_x_city_users(query)
+            users_list = self._get_x_city_users(num_tweets, query)
         elif self.extraction_type == "file":
             users_list = self._get_file_city_users()
+            print("Got users from file")
 
         # TODO: Upload user attributes to Neptune -- Neptune handler class
         # TODO: Create one method to send messages to the queue
         user_tweets_queue_url = self.sqs_client.get_queue_url(
             QueueName="UserTweets"
         )["QueueUrl"]
-        user_followers_queue_url = self.sqs_client.get_queue_url(
-            QueueName="UserFollowers"
-        )["QueueUrl"]
+        # user_followers_queue_url = self.sqs_client.get_queue_url(
+        #     QueueName="UserFollowers"
+        # )["QueueUrl"]
         for user in users_list:
-            if user["city"]:
+            # if user["city"] and user["num_followers"] > 100:
+                print(f"Sending user {user}")
                 message = {
-                    "user_id": str(user["user_id"]),
+                    "user_id": user,
                     "location": self.main_city,
                 }
                 try:
                     # Send to user tweets
                     self.sqs_client.send_message(
-                        QueueUrl=user_tweets_queue_url,
-                        messageBody=json.dumps(message),
-                    )
+                            QueueUrl=user_tweets_queue_url,
+                            MessageBody=json.dumps(message),
+                        )
+                    print("Success :)")
                 except Exception as err:
-                    print(f"Unable to send user {user['user_id']} to  User Tweets SQS: {err}")
-                    continue
+                    print(f"Unable to send user {user} to  User Tweets SQS: {err}")
                 # Send to user followers
-                try:
-                    self.sqs_client.send_message(
-                        QueueUrl=user_followers_queue_url,
-                        messageBody=json.dumps(message),
-                    )
-                except Exception as err:
-                    print(f"Unable to send user {user['user_id']} to  User Followers SQS: {err}")
-                    continue
+                # try:
+                #     self.sqs_client.send_message(
+                #         QueueUrl=user_followers_queue_url,
+                #         messageBody=json.dumps(message),
+                #     )
+                # except Exception as err:
+                #     print(f"Unable to send user {user['user_id']} to  User Followers SQS: {err}")
+                #     continue
+                break
 
 
 if __name__ == "__main__":
@@ -414,6 +418,5 @@ if __name__ == "__main__":
         print("Sleeping for 15 minutes...")
         time.sleep(FIFTEEN_MINUTES)
 
-    file_flag = True if args.file_flag == "Yes" else False
     city_users = CityUsers(args.location, args.tweet_count, args.extraction_type, args.account_num)
-    city_users.run_all_account_types()
+    asyncio.run(city_users._get_city_users(args.tweet_count, query=""))
