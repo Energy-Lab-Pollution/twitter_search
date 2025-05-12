@@ -31,12 +31,13 @@ from config_utils.util import (
 
 
 class CityUsers:
-    def __init__(self, location, tweet_count, extraction_type):
+    def __init__(self, location, tweet_count, extraction_type, account_num=1):
         self.base_dir = Path(__file__).parent.parent / "data/"
         self.location = location
         self.sqs_client = boto3.client("sqs")
         self.tweet_count = tweet_count
         self.extraction_type = extraction_type
+        self.account_num = account_num
 
         # Define main city depending on if we're using an alias
         if self.location in ALIAS_DICT:
@@ -229,10 +230,12 @@ class CityUsers:
             self.user_df.loc[:, "location_match"], :
         ]
         self.user_df.reset_index(drop=True, inplace=True)
-
         print(f"Users in .csv: {len(self.user_df)}")
+        users_list = self.user_df.loc[:, "user_id"].astype(str).unique().tolist()
 
-    async def _get_twikit_city_users(self, query, account_num=1):
+        return users_list
+
+    async def _get_twikit_city_users(self, query):
         """
         Method used to search for tweets, with twikit,
         using a given query
@@ -246,7 +249,7 @@ class CityUsers:
             - account_num (int): Determines which account to use from twikit
         """
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_num_{account_num}"])
+        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_num_{self.account_num}"])
         users_list = []
 
         tweets = await client.search_tweet(
@@ -337,11 +340,11 @@ class CityUsers:
         """
         # TODO: Insert / Check city node
         if self.extraction_type == "twikit":
-            users_list = await self._get_twikit_city_users(query)
+            users_list = await self._get_twikit_city_users(query, account_num)
         elif self.extraction_type == "x":
             users_list = self._get_x_city_users(query)
         elif self.extraction_type == "file":
-            us
+            users_list = self._get_file_city_users()
 
         # TODO: Upload user attributes to Neptune -- Neptune handler class
         # TODO: Create one method to send messages to the queue
@@ -379,7 +382,6 @@ class CityUsers:
 
 if __name__ == "__main__":
     # parameters: [location, tweet_count, keywords (both hashtags, timeperiod and keywords)]
-    # call relevant methods on the city user class
     parser = ArgumentParser(
         "Parameters to get users data to generate a network"
     )
@@ -402,7 +404,7 @@ if __name__ == "__main__":
         help="Decide whether to wait 15 mins or not",
     )
     parser.add_argument(
-        "--account_number",
+        "--account_num",
         type=int,
         help="Account number to use with twikit",
     )
@@ -413,5 +415,5 @@ if __name__ == "__main__":
         time.sleep(FIFTEEN_MINUTES)
 
     file_flag = True if args.file_flag == "Yes" else False
-    city_users = CityUsers(args.location, args.tweet_count, args.extraction_type)
+    city_users = CityUsers(args.location, args.tweet_count, args.extraction_type, args.account_num)
     city_users.run_all_account_types()
