@@ -108,9 +108,9 @@ class UserAttributes:
             except twikit.errors.NotFound:
                 print("User Attributes: Not Found")
                 return user_dict
-            # except twikit.errors.TwitterException as err:
-            #     print(f"User Attributes: Twitter Error ({err} - {user_id})")
-            #     return user_dict
+            except twikit.errors.TwitterException as err:
+                print(f"User Attributes: Twitter Error ({err} - {user_id})")
+                return user_dict
             user_dict["user_id"] = user_obj.id
             user_dict["username"] = user_obj.screen_name
             user_dict["description"] = user_obj.description
@@ -311,11 +311,10 @@ class UserAttributes:
                             continue
             # Add newly processed followers
             user_attributes_dict["followers"] = new_user_followers
-
-            print("Deduplicating users")
             self.existing_users = load_json(self.location_users_path)
             # self.existing_users = remove_duplicate_records(self.existing_users)
             # network_json_maker(self.location_users_path, self.existing_users)
+            # processed_users = self._get_already_processed_users()
 
             # New JSON saved with a new filename
             network_json_maker(
