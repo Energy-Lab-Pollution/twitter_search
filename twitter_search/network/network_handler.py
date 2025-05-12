@@ -729,10 +729,10 @@ class NetworkHandler:
         users_list = await self._get_city_users(extraction_type, file_flag)
         # list of user dicts that gets proccessed (no ids )
         if file_flag:
-            user_df = self.user_df.sort_values(by="user_id", ascending=ascending)
-            users_list = (
-                user_df.loc[:, "user_id"].astype(str).unique().tolist()
+            user_df = self.user_df.sort_values(
+                by="user_id", ascending=ascending
             )
+            users_list = user_df.loc[:, "user_id"].astype(str).unique().tolist()
             missing_users = list(
                 set(users_list).difference(set(self.already_processed_users))
             )

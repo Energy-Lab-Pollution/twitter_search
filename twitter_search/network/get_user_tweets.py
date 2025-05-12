@@ -1,13 +1,13 @@
 """
 Script to get a given user's tweets
 """
+
 import datetime
 import json
+from argparse import ArgumentParser
 
 import boto3
 import twikit
-from argparse import ArgumentParser
-
 from config_utils.constants import (
     EXPANSIONS,
     MAX_RESULTS,
@@ -21,6 +21,7 @@ from config_utils.util import (
     client_creator,
     convert_to_iso_format,
 )
+
 
 class UserTweets:
     def __init__(self, location, tweet_count):

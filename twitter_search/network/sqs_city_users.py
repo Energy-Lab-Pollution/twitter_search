@@ -3,14 +3,14 @@ Script to search tweets and users from a particular location.
 The users who match a certain criteria will be sent to a processing queue.
 """
 
-import time
 import datetime
 import json
+import time
+from argparse import ArgumentParser
 
 import boto3
 import twikit
-from argparse import ArgumentParser
-
+from config_utils.cities import ALIAS_DICT, CITIES_LANGS
 from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
@@ -20,13 +20,7 @@ from config_utils.constants import (
     TWIKIT_TWEETS_THRESHOLD,
     USER_FIELDS,
 )
-from config_utils.cities import (
-    ALIAS_DICT,
-    CITIES_LANGS
-)
-from config_utils.queries import (
-    QUERIES_DICT
-)
+from config_utils.queries import QUERIES_DICT
 from config_utils.util import (
     check_location,
     client_creator,
@@ -46,7 +40,7 @@ class CityUsers:
 
             print(
                 f"Getting language and queries for {self.location} - {main_city}"
-            )       
+            )
 
             language = CITIES_LANGS[main_city]
             queries = QUERIES_DICT[language]
@@ -245,8 +239,12 @@ class CityUsers:
         # TODO: Upload user attributes to Neptune -- Neptune handler class
 
         # TODO: Create one method to send messages to the queue
-        user_tweets_queue_url = self.sqs_client.get_queue_url(QueueName="UserTweets")["QueueUrl"]
-        user_followers_queue_url = self.sqs_client.get_queue_url(QueueName="UserFollowers")["QueueUrl"]
+        user_tweets_queue_url = self.sqs_client.get_queue_url(
+            QueueName="UserTweets"
+        )["QueueUrl"]
+        user_followers_queue_url = self.sqs_client.get_queue_url(
+            QueueName="UserFollowers"
+        )["QueueUrl"]
         for user in users_list:
             if user["city"]:
                 message = {
@@ -272,10 +270,11 @@ class CityUsers:
                     print(err)
                     continue
 
+
 if __name__ == "__main__":
     # parameters: [location, tweet_count, keywords (both hashtags, timeperiod and keywords)]
     # call relevant methods on the city user class
-    #TODO: Add dash-dash to avoid order and be more flexible
+    # TODO: Add dash-dash to avoid order and be more flexible
 
     parser = ArgumentParser(
         "Parameters to get users data to generate a network"

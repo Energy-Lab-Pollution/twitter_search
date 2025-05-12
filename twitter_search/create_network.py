@@ -12,7 +12,7 @@ from network.network_handler import NetworkHandler
 
 
 if __name__ == "__main__":
-    #TODO: Add dash-dash to avoid order and be more flexible
+    # TODO: Add dash-dash to avoid order and be more flexible
     parser = ArgumentParser(
         "Parameters to get users data to generate a network"
     )
@@ -61,7 +61,6 @@ if __name__ == "__main__":
 
     asyncio.run(
         network_handler.create_user_network(
-            args.extraction_type, args.account_number, file_flag,
-            ascending
+            args.extraction_type, args.account_number, file_flag, ascending
         )
     )

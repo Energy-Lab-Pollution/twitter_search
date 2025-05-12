@@ -113,9 +113,7 @@ class UserAttributes:
             user_dict["last_updated"] = datetime.now().isoformat()
 
             # See if location matches to add city
-            location_match = check_location(
-                user_obj.location, self.location
-            )
+            location_match = check_location(user_obj.location, self.location)
             user_dict["city"] = self.location if location_match else None
             success = True
 

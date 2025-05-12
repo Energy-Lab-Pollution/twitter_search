@@ -442,7 +442,7 @@ def network_json_maker(file_path, data_to_append):
     try:
         with open(file_path, "r") as f:
             existing_data = json.load(f)
-    except (FileNotFoundError):
+    except FileNotFoundError:
         existing_data = []
 
     # Extend new data to existing data
