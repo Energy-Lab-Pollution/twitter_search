@@ -10,6 +10,9 @@ from argparse import ArgumentParser
 
 import boto3
 import twikit
+import pandas as pd
+
+from pathlib import Path
 from config_utils.cities import ALIAS_DICT, CITIES_LANGS
 from config_utils.constants import (
     EXPANSIONS,
@@ -29,6 +32,7 @@ from config_utils.util import (
 
 class CityUsers:
     def __init__(self, location, tweet_count, extraction_type):
+        self.base_dir = Path(__file__).parent.parent / "data/"
         self.location = location
         self.sqs_client = boto3.client("sqs")
         self.tweet_count = tweet_count
@@ -208,6 +212,26 @@ class CityUsers:
 
         return users_list
 
+    def _get_file_city_users(self):
+        """
+        Method to get users whose location match the desired
+        location
+        """
+        # Users .csv with location matching
+        users_file_path = (
+            self.base_dir / "analysis_outputs/location_matches.csv"
+        )
+        self.user_df = pd.read_csv(users_file_path)
+        self.user_df = self.user_df.loc[
+            self.user_df.loc[:, "search_location"] == self.location
+        ]
+        self.user_df = self.user_df.loc[
+            self.user_df.loc[:, "location_match"], :
+        ]
+        self.user_df.reset_index(drop=True, inplace=True)
+
+        print(f"Users in .csv: {len(self.user_df)}")
+
     async def _get_twikit_city_users(self, query, account_num=1):
         """
         Method used to search for tweets, with twikit,
@@ -253,9 +277,9 @@ class CityUsers:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} batches")
 
-            # TODO: We may leave this entire process running
+            # Leave process running until tweets are recollected
             if num_iter == TWIKIT_TWEETS_THRESHOLD:
-                break
+                time.sleep(FIFTEEN_MINUTES)
 
             num_iter += 1
 
@@ -316,6 +340,8 @@ class CityUsers:
             users_list = await self._get_twikit_city_users(query)
         elif self.extraction_type == "x":
             users_list = self._get_x_city_users(query)
+        elif self.extraction_type == "file":
+            us
 
         # TODO: Upload user attributes to Neptune -- Neptune handler class
         # TODO: Create one method to send messages to the queue
@@ -366,7 +392,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--extraction_type",
         type=str,
-        choices=["twikit", "x"],
+        choices=["file", "twikit", "x"],
         help="Choose how to get users",
     )
     parser.add_argument(
@@ -374,12 +400,6 @@ if __name__ == "__main__":
         type=str,
         choices=["Yes", "No"],
         help="Decide whether to wait 15 mins or not",
-    )
-    parser.add_argument(
-        "--file_flag",
-        type=str,
-        choices=["Yes", "No"],
-        help="Determines if root users will be extracted from the .csv file",
     )
     parser.add_argument(
         "--account_number",
