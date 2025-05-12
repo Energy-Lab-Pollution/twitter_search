@@ -301,11 +301,9 @@ class NetworkHandler:
             return users_list
 
         if extraction_type == "twikit":
-            users_list = await self._get_twikit_city_users()
+            self.users_list = await self._get_twikit_city_users()
         elif extraction_type == "x":
-            users_list = self._get_x_city_users()
-
-        return users_list
+            self.users_list = self._get_x_city_users()
 
     def _get_already_processed_users(self):
         """
@@ -714,7 +712,7 @@ class NetworkHandler:
         return user_dict
 
     async def create_user_network(
-        self, extraction_type, account_num, file_flag
+        self, extraction_type, account_num, file_flag, reverse=False
     ):
         """
         Gets the user network data for a given number of
@@ -730,6 +728,16 @@ class NetworkHandler:
         users_list = await self._get_city_users(extraction_type, file_flag)
         # list of user dicts that gets proccessed (no ids )
         if file_flag:
+            if reverse:
+                user_df = self.user_df.sort_values(by="user_id", ascending=False)
+                users_list = (
+                    user_df.loc[:, "user_id"].astype(str).unique().tolist()
+                )
+            else:
+                user_df = self.user_df.sort_values(by="user_id", ascending=True)
+                users_list = (
+                    user_df.loc[:, "user_id"].astype(str).unique().tolist()
+                )         
             missing_users = list(
                 set(users_list).difference(set(self.already_processed_users))
             )
@@ -740,9 +748,10 @@ class NetworkHandler:
             print(f"Missing {len(set(missing_users))} to process")
 
         # TODO: user_id will come from a queue
-        for user_to_process in tqdm(missing_users):
-            # try:
-            # Only get attributes if file flag is true
+        for user_to_process in tqdm(users_list):
+            if str(user_to_process['user_id']) in self.already_processed_users:
+                print(f"Already processed {user_to_process['user_id']}, skipping...")
+                continue
             if file_flag:
                 user_to_process_dict = await self.get_csv_user_attributes(
                     client, user_to_process
