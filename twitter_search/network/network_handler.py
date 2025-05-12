@@ -738,7 +738,6 @@ class NetworkHandler:
             )
             client = twikit.Client("en-US")
             client.load_cookies(TWIKIT_COOKIES_DIR)
-
             print(f"Already processed {len(set(self.already_processed_users))}")
             print(f"Missing {len(set(missing_users))} to process")
 

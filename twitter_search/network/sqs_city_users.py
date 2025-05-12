@@ -45,9 +45,9 @@ class CityUsers:
         language = CITIES_LANGS[main_city]
         self.queries = QUERIES_DICT[language]
 
-    def get_account_num_requests(self, city_requests):
+    def get_account_type_requests(self, city_requests):
         """
-        Gets number of requests for each particular account.
+        Gets number of requests for each particular account type.
 
         Twikit can only process 50 requests to get tweets in a 15 min
         interval. Therefore, for several cities, we need to determine
@@ -102,7 +102,7 @@ class CityUsers:
                 # Number of account types
                 self.num_accounts = len(account_types)
 
-        accounts_requests = self.get_account_num_requests(city_requests)
+        accounts_requests = self.get_account_type_requests(city_requests)
 
         for account_type, account_requests in zip(
             account_types, accounts_requests
@@ -185,7 +185,6 @@ class CityUsers:
                 user_dict["followers_count"] = user.followers_count
                 user_dict["following_count"] = user.following_count
                 user_dict["tweets_count"] = user.statuses_count
-                # TODO: Check difference between verified and is_blue_verified
                 user_dict["verified"] = user.verified
                 user_dict["created_at"] = convert_to_iso_format(user.created_at)
                 user_dict["category"] = "null"
