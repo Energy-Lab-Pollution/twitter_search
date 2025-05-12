@@ -42,7 +42,7 @@ def load_json(path):
     try:
         with open(path, "r") as f:
             existing_data = json.load(f)
-    except (json.JSONDecodeError, FileNotFoundError):
+    except (FileNotFoundError):
         existing_data = []
 
     return existing_data
