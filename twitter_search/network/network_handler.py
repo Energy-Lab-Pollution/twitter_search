@@ -712,7 +712,7 @@ class NetworkHandler:
         return user_dict
 
     async def create_user_network(
-        self, extraction_type, account_num, file_flag, reverse=False
+        self, extraction_type, account_num, file_flag, ascending=True
     ):
         """
         Gets the user network data for a given number of
@@ -723,21 +723,16 @@ class NetworkHandler:
             obtained via twikit or X
             - account_num (int): Account number to use with twikit
             - file_flag (boolean): Determines if root users are obtained via the .csv file
+            - ascending (boolean): Sorts the user list either ascending or descending
         """
         # Get city users and users to process
         users_list = await self._get_city_users(extraction_type, file_flag)
         # list of user dicts that gets proccessed (no ids )
         if file_flag:
-            if reverse:
-                user_df = self.user_df.sort_values(by="user_id", ascending=False)
-                users_list = (
-                    user_df.loc[:, "user_id"].astype(str).unique().tolist()
-                )
-            else:
-                user_df = self.user_df.sort_values(by="user_id", ascending=True)
-                users_list = (
-                    user_df.loc[:, "user_id"].astype(str).unique().tolist()
-                )         
+            user_df = self.user_df.sort_values(by="user_id", ascending=ascending)
+            users_list = (
+                user_df.loc[:, "user_id"].astype(str).unique().tolist()
+            )
             missing_users = list(
                 set(users_list).difference(set(self.already_processed_users))
             )

@@ -42,6 +42,13 @@ if __name__ == "__main__":
         type=int,
         help="Account number to use with twikit",
     )
+    parser.add_argument(
+        "--ascending",
+        type=str,
+        choices=["Yes", "No"],
+        help="Account number to use with twikit",
+    )
+
     args = parser.parse_args()
 
     if args.wait == "Yes":
@@ -49,9 +56,12 @@ if __name__ == "__main__":
         time.sleep(FIFTEEN_MINUTES)
 
     file_flag = True if args.file_flag == "Yes" else False
+    ascending = True if args.reverse == "Yes" else False
     network_handler = NetworkHandler(args.location)
+
     asyncio.run(
         network_handler.create_user_network(
-            args.extraction_type, args.account_number, file_flag
+            args.extraction_type, args.account_number, file_flag,
+            ascending
         )
     )
