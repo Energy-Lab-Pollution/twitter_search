@@ -56,7 +56,7 @@ if __name__ == "__main__":
         time.sleep(FIFTEEN_MINUTES)
 
     file_flag = True if args.file_flag == "Yes" else False
-    ascending = True if args.reverse == "Yes" else False
+    ascending = True if args.ascending == "Yes" else False
     network_handler = NetworkHandler(args.location)
 
     asyncio.run(

@@ -316,7 +316,7 @@ class NetworkHandler:
         if existing_data:
             for user_dict in existing_data:
                 user_id = user_dict["user_id"]
-                users_list.append(user_id)
+                users_list.append(str(user_id))
 
         return users_list
 
@@ -744,7 +744,7 @@ class NetworkHandler:
 
         # TODO: user_id will come from a queue
         for user_to_process in tqdm(users_list):
-            if str(user_to_process['user_id']) in self.already_processed_users:
+            if str(user_to_process) in self.already_processed_users:
                 print(f"Already processed {user_to_process['user_id']}, skipping...")
                 continue
             if file_flag:
