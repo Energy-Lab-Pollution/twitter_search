@@ -126,10 +126,8 @@ class UserNetwork:
                 user_dict["followers_count"] = user.followers_count
                 user_dict["following_count"] = user.following_count
                 user_dict["tweets_count"] = user.statuses_count
-                # TODO: Check difference between verified and is_blue_verified
                 user_dict["verified"] = user.verified
                 user_dict["created_at"] = convert_to_iso_format(user.created_at)
-                # TODO: Adding new attributes
                 user_dict["category"] = "null"
                 user_dict["treatment_arm"] = "null"
                 user_dict["retweeter_status"] = "pending"

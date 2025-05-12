@@ -343,8 +343,6 @@ class CityUsers:
 if __name__ == "__main__":
     # parameters: [location, tweet_count, keywords (both hashtags, timeperiod and keywords)]
     # call relevant methods on the city user class
-    # TODO: Add dash-dash to avoid order and be more flexible
-
     parser = ArgumentParser(
         "Parameters to get users data to generate a network"
     )

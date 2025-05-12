@@ -111,12 +111,12 @@ class NetworkHandler:
                 tweet.user.created_at
             )
             # TODO: Adding new attributes
-            user_dict["category"] = None
-            user_dict["treatment_arm"] = None
+            user_dict["category"] = "null"
+            user_dict["treatment_arm"] = "null"
             user_dict["retweeter_status"] = "pending"
-            user_dict["retweeter_last_processed"] = None
+            user_dict["retweeter_last_processed"] = "null"
             user_dict["follower_status"] = "pending"
-            user_dict["follower_last_processed"] = None
+            user_dict["follower_last_processed"] = "null"
             user_dict["extracted_at"] = datetime.now().isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
@@ -696,12 +696,12 @@ class NetworkHandler:
         user_dict["verified"] = user_obj.verified
         user_dict["created_at"] = convert_to_iso_format(user_obj.created_at)
         # TODO: Adding new attributes
-        user_dict["category"] = None
-        user_dict["treatment_arm"] = None
+        user_dict["category"] = "null"
+        user_dict["treatment_arm"] = "null"
         user_dict["retweeter_status"] = "pending"
-        user_dict["retweeter_last_processed"] = None
+        user_dict["retweeter_last_processed"] = "null"
         user_dict["follower_status"] = "pending"
-        user_dict["follower_last_processed"] = None
+        user_dict["follower_last_processed"] = "null"
         user_dict["extracted_at"] = datetime.now().isoformat()
         user_dict["last_updated"] = datetime.now().isoformat()
 
