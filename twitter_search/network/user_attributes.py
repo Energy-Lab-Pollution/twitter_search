@@ -18,6 +18,7 @@ from config_utils.constants import (
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.util import (
+    check_location,
     convert_to_iso_format,
     load_json,
     network_json_maker,
@@ -49,37 +50,6 @@ class UserAttributes:
             self.base_dir
             / f"networks/{self.location}/{self.location}_users.json"
         )
-
-    @staticmethod
-    def check_location(raw_location, target_location):
-        """
-        Uses regex to see if the raw location matches
-        the target location
-        """
-
-        target_locations = [target_location]
-
-        # alias is the key, target loc is the value
-        for alias, value in ALIAS_DICT.items():
-            if value == target_location:
-                target_locations.append(alias)
-
-        if isinstance(raw_location, str):
-            raw_location = raw_location.lower().strip()
-            location_regex = re.findall(r"\w+", raw_location)
-
-            if location_regex:
-                for target_location in target_locations:
-                    if target_location in location_regex:
-                        return True
-                    elif target_location in raw_location:
-                        return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
 
     async def get_user_attributes(self, client, user_id, root_user):
         """
@@ -143,7 +113,7 @@ class UserAttributes:
             user_dict["last_updated"] = datetime.now().isoformat()
 
             # See if location matches to add city
-            location_match = self.check_location(
+            location_match = check_location(
                 user_obj.location, self.location
             )
             user_dict["city"] = self.location if location_match else None

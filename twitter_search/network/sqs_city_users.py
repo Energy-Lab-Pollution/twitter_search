@@ -3,14 +3,17 @@ Script to search tweets and users from a particular location.
 The users who match a certain criteria will be sent to a processing queue.
 """
 
+import time
 import datetime
 import json
 
 import boto3
 import twikit
+from argparse import ArgumentParser
 
 from config_utils.constants import (
     EXPANSIONS,
+    FIFTEEN_MINUTES,
     MAX_RESULTS,
     TWEET_FIELDS,
     TWIKIT_COOKIES_DIR,
@@ -19,7 +22,6 @@ from config_utils.constants import (
 )
 from config_utils.cities import (
     ALIAS_DICT,
-    CITIES,
     CITIES_LANGS
 )
 from config_utils.queries import (
@@ -269,3 +271,49 @@ class CityUsers:
                 except Exception as err:
                     print(err)
                     continue
+
+if __name__ == "__main__":
+    # parameters: [location, tweet_count, keywords (both hashtags, timeperiod and keywords)]
+    # call relevant methods on the city user class
+    #TODO: Add dash-dash to avoid order and be more flexible
+
+    parser = ArgumentParser(
+        "Parameters to get users data to generate a network"
+    )
+    parser.add_argument(
+        "--location", type=str, help="Location to search users from"
+    )
+    parser.add_argument(
+        "--tweet_count", type=str, help="Number of tweets to get"
+    )
+    parser.add_argument(
+        "--extraction_type",
+        type=str,
+        choices=["twikit", "x"],
+        help="Choose how to get users",
+    )
+    parser.add_argument(
+        "--wait",
+        type=str,
+        choices=["Yes", "No"],
+        help="Decide whether to wait 15 mins or not",
+    )
+    parser.add_argument(
+        "--file_flag",
+        type=str,
+        choices=["Yes", "No"],
+        help="Determines if root users will be extracted from the .csv file",
+    )
+    parser.add_argument(
+        "--account_number",
+        type=int,
+        help="Account number to use with twikit",
+    )
+    args = parser.parse_args()
+
+    if args.wait == "Yes":
+        print("Sleeping for 15 minutes...")
+        time.sleep(FIFTEEN_MINUTES)
+
+    file_flag = True if args.file_flag == "Yes" else False
+    city_users = CityUsers(args.location)
