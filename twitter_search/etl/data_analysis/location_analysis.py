@@ -29,8 +29,8 @@ class LocationAnalyzer:
         the target location
         """
 
+        # We dont want to consider 'guatemala' in this case
         if target_location == self.EDGE_CASE:
-            target_location = "guatemala city"
             target_locations = []
         else:
             target_locations = [target_location]

@@ -53,6 +53,8 @@ ALIAS_DICT = {
     "bengaluru": "bangalore",
     "ciudad de guatemala": "guatemala",
     "cd. de guatemala": "guatemala",
+    "guatemala, ciudad": "guatemala",
+    "guatemala ciudad": "guatemala",
     "guatemala city": "guatemala",
     "guatemala, guatemala": "guatemala",
     "new delhi": "delhi",

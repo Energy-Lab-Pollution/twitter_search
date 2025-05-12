@@ -340,8 +340,10 @@ def check_location(raw_location, target_location):
     Uses regex to see if the raw location matches
     the target location
     """
-
-    target_locations = [target_location]
+    if target_location in ["guatemala"]:
+        target_locations = []
+    else:
+        target_locations = [target_location]
 
     # alias is the key, target loc is the value
     for alias, value in ALIAS_DICT.items():
