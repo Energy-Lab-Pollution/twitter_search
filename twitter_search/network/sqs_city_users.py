@@ -29,23 +29,27 @@ from config_utils.util import (
 
 
 class CityUsers:
-    def __init__(self, location, tweet_count):
+    def __init__(self, location, tweet_count, extraction_type):
         self.location = location
         self.sqs_client = boto3.client("sqs")
         self.tweet_count = tweet_count
+        self.extraction_type = extraction_type
 
+        # Define main city depending on if we're using an alias
         if self.location in ALIAS_DICT:
             print(f"{self.location} found in alias dict")
-            main_city = ALIAS_DICT[self.location]
+            self.main_city = ALIAS_DICT[self.location]
 
             print(
-                f"Getting language and queries for {self.location} - {main_city}"
+                f"Getting language and queries for {self.location} - {self.main_city}"
             )
+        else:
+            self.main_city = location
 
-        language = CITIES_LANGS[main_city]
+        language = CITIES_LANGS[self.main_city]
         self.queries = QUERIES_DICT[language]
 
-    def get_account_type_requests(self, city_requests):
+    def get_account_type_requests(self, city_requests, num_account_types):
         """
         Gets number of requests for each particular account type.
 
@@ -56,8 +60,8 @@ class CityUsers:
         Args:
             city_requests: int determining the number of requests per city
         """
-        account_requests = city_requests / len(self.queries)
-        remainder_requests = city_requests % len(self.queries)
+        account_requests = city_requests / num_account_types
+        remainder_requests = city_requests % num_account_types
 
         if account_requests < 1:
             print(
@@ -100,18 +104,22 @@ class CityUsers:
             if "media" in account_types:
                 del account_types["media"]
                 # Number of account types
-                self.num_accounts = len(account_types)
-
-        accounts_requests = self.get_account_type_requests(city_requests)
+        num_account_types = len(account_types)
+        accounts_requests = self.get_account_type_requests(city_requests, num_account_types)
 
         for account_type, account_requests in zip(
             account_types, accounts_requests
         ):
             print(
-                f" =============== PROCESSING: {account_type} ======================"
+                f" =============== PROCESSING: {query} ======================"
             )
-            self.account_type = account_type
-            self.run(account_requests)
+            query = self.queries[account_type]
+            query = query.replace("location", self.location)
+            query = query.replace("\n", " ").strip()
+            query = query.replace("  ", " ")
+            query = query.replace("\t", " ")
+
+            self._get_city_users(account_requests, query)
 
 
     def parse_x_users(self, user_list):
@@ -154,8 +162,8 @@ class CityUsers:
             user_dict["extracted_at"] = datetime.now().isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
-            location_match = check_location(user["location"], self.location)
-            user_dict["city"] = self.location if location_match else None
+            location_match = check_location(user["location"], self.main_city)
+            user_dict["city"] = self.main_city if location_match else None
             user_dicts.append(user_dict)
 
         return user_dicts
@@ -196,13 +204,13 @@ class CityUsers:
                 user_dict["extracted_at"] = datetime.now().isoformat()
                 user_dict["last_updated"] = datetime.now().isoformat()
                 # See if location matches to add city
-                location_match = check_location(user.location, self.location)
-                user_dict["city"] = self.location if location_match else None
+                location_match = check_location(user.location, self.main_city)
+                user_dict["city"] = self.main_city if location_match else None
                 users_list.append(user_dict)
 
         return users_list
 
-    async def _get_twikit_city_users(self):
+    async def _get_twikit_city_users(self, query):
         """
         Method used to search for tweets, with twikit,
         using a given query
@@ -216,7 +224,7 @@ class CityUsers:
         users_list = []
 
         tweets = await client.search_tweet(
-            self.location, "Latest", count=self.tweet_count
+            query, "Latest", count=self.tweet_count
         )
         # TODO: Add set operation to keep unique users only
         users_list = self.parse_twikit_users(tweets)
@@ -251,7 +259,7 @@ class CityUsers:
 
         return users_list
 
-    def _get_x_city_users(self):
+    def _get_x_city_users(self, query):
         """
         Method used to search for tweets, with the X API,
         using a given query
@@ -268,7 +276,7 @@ class CityUsers:
         while result_count < MAX_RESULTS:
             print(f"Max results is: {result_count}")
             response = x_client.search_recent_tweets(
-                query=self.location,
+                query=query,
                 max_results=MAX_RESULTS,
                 next_token=next_token,
                 expansions=EXPANSIONS,
@@ -293,19 +301,21 @@ class CityUsers:
 
         return users_list
 
-    async def _get_city_users(self, extraction_type):
+    async def _get_city_users(self, query):
         """
         Searches for city users with either twikit or X, then sends them
         to the corresponding queue
+
+        Args:
+            - query (str): Query with keywords and the corresponding location
         """
-        if extraction_type == "twikit":
-            # TODO: Pass account details here
-            users_list = await self._get_twikit_city_users()
-        elif extraction_type == "x":
-            users_list = self._get_x_city_users()
+        # TODO: Insert / Check city node
+        if self.extraction_type == "twikit":
+            users_list = await self._get_twikit_city_users(query)
+        elif self.extraction_type == "x":
+            users_list = self._get_x_city_users(query)
 
         # TODO: Upload user attributes to Neptune -- Neptune handler class
-
         # TODO: Create one method to send messages to the queue
         user_tweets_queue_url = self.sqs_client.get_queue_url(
             QueueName="UserTweets"
@@ -317,7 +327,7 @@ class CityUsers:
             if user["city"]:
                 message = {
                     "user_id": str(user["user_id"]),
-                    "location": self.location,
+                    "location": self.main_city,
                 }
                 try:
                     # Send to user tweets
