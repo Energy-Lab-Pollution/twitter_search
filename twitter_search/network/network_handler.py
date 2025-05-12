@@ -743,9 +743,9 @@ class NetworkHandler:
             print(f"Missing {len(set(missing_users))} to process")
 
         # TODO: user_id will come from a queue
-        for user_to_process in tqdm(users_list, len(missing_users)):
+        for user_to_process in tqdm(users_list, total=len(missing_users)):
             if str(user_to_process) in self.already_processed_users:
-                print(f"Already processed {user_to_process['user_id']}, skipping...")
+                print(f"Already processed {user_to_process}, skipping...")
                 continue
             if file_flag:
                 user_to_process_dict = await self.get_csv_user_attributes(
