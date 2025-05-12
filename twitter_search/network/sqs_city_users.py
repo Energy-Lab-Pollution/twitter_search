@@ -14,9 +14,8 @@ from config_utils.cities import ALIAS_DICT, CITIES_LANGS
 from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
-    MAX_RESULTS,
     TWEET_FIELDS,
-    TWIKIT_COOKIES_DIR,
+    TWIKIT_COOKIES_DICT,
     TWIKIT_TWEETS_THRESHOLD,
     USER_FIELDS,
 )
@@ -49,7 +48,7 @@ class CityUsers:
         language = CITIES_LANGS[self.main_city]
         self.queries = QUERIES_DICT[language]
 
-    def get_account_type_requests(self, city_requests, num_account_types):
+    def get_account_type_tweets(self, num_account_types):
         """
         Gets number of requests for each particular account type.
 
@@ -60,8 +59,8 @@ class CityUsers:
         Args:
             city_requests: int determining the number of requests per city
         """
-        account_requests = city_requests / num_account_types
-        remainder_requests = city_requests % num_account_types
+        account_requests = self.tweet_count / num_account_types
+        remainder_requests = self.tweet_count % num_account_types
 
         if account_requests < 1:
             print(
@@ -70,19 +69,19 @@ class CityUsers:
             return None
 
         # Create list of num requests per account
-        requests_list = []
+        tweet_counts_list = []
         for _ in range(0, len(account_requests)):
             # round to nearest int
             account_requests = round(account_requests)
-            requests_list.append(account_requests)
+            tweet_counts_list.append(account_requests)
 
         # If remainder exists, add to last account
         if remainder_requests > 0:
-            num_requests = requests_list[-1]
+            num_requests = tweet_counts_list[-1]
             num_requests += remainder_requests
-            requests_list[-1] = num_requests
+            tweet_counts_list[-1] = num_requests
 
-        return requests_list
+        return tweet_counts_list
 
     def run_all_account_types(self, city_requests, skip_media=False):
         """
@@ -105,10 +104,10 @@ class CityUsers:
                 del account_types["media"]
                 # Number of account types
         num_account_types = len(account_types)
-        accounts_requests = self.get_account_type_requests(city_requests, num_account_types)
+        accounts_num_tweets = self.get_account_type_tweets(city_requests, num_account_types)
 
-        for account_type, account_requests in zip(
-            account_types, accounts_requests
+        for account_type, account_num_tweets in zip(
+            account_types, accounts_num_tweets
         ):
             print(
                 f" =============== PROCESSING: {query} ======================"
@@ -119,7 +118,7 @@ class CityUsers:
             query = query.replace("  ", " ")
             query = query.replace("\t", " ")
 
-            self._get_city_users(account_requests, query)
+            self._get_city_users(accounts_num_tweets, query)
 
 
     def parse_x_users(self, user_list):
@@ -210,7 +209,7 @@ class CityUsers:
 
         return users_list
 
-    async def _get_twikit_city_users(self, query):
+    async def _get_twikit_city_users(self, query, account_num=1):
         """
         Method used to search for tweets, with twikit,
         using a given query
@@ -218,9 +217,13 @@ class CityUsers:
         This method uses twikit's "await next" function
         to get more tweets with the given query. The corresponding
         users are then parsed from such tweets.
+
+        Args:
+            - query (str): Query with keywords and location
+            - account_num (int): Determines which account to use from twikit
         """
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DIR)
+        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_num_{account_num}"])
         users_list = []
 
         tweets = await client.search_tweet(
@@ -273,11 +276,11 @@ class CityUsers:
         users_list = []
         tweets_list = []
 
-        while result_count < MAX_RESULTS:
+        while result_count < self.tweet_count:
             print(f"Max results is: {result_count}")
             response = x_client.search_recent_tweets(
                 query=query,
-                max_results=MAX_RESULTS,
+                max_results=self.tweet_count,
                 next_token=next_token,
                 expansions=EXPANSIONS,
                 tweet_fields=TWEET_FIELDS,
