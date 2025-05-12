@@ -743,7 +743,7 @@ class NetworkHandler:
             print(f"Missing {len(set(missing_users))} to process")
 
         # TODO: user_id will come from a queue
-        for user_to_process in tqdm(users_list):
+        for user_to_process in tqdm(users_list, len(missing_users)):
             if str(user_to_process) in self.already_processed_users:
                 print(f"Already processed {user_to_process['user_id']}, skipping...")
                 continue
@@ -756,6 +756,3 @@ class NetworkHandler:
             )
             print(f"Processing user {user_to_process}...")
             await user_network.run(user_to_process_dict, extraction_type)
-        # except Exception as error:
-        # print(f"Error getting user: {error}")
-        # continue
