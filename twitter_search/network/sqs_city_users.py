@@ -83,14 +83,13 @@ class CityUsers:
 
         return tweet_counts_list
 
-    def run_all_account_types(self, city_requests, skip_media=False):
+    def run_all_account_types(self, skip_media=False):
         """
         Runs the entire process for all the available
         account types for a particular location.
 
         Args
         ----------
-            city_requests: int with max number of requests for a given city
             skip_media: str
                 Determines if we should skip the search for media accounts
                 (there are tons of them)
@@ -104,7 +103,7 @@ class CityUsers:
                 del account_types["media"]
                 # Number of account types
         num_account_types = len(account_types)
-        accounts_num_tweets = self.get_account_type_tweets(city_requests, num_account_types)
+        accounts_num_tweets = self.get_account_type_tweets(num_account_types)
 
         for account_type, account_num_tweets in zip(
             account_types, accounts_num_tweets
@@ -118,7 +117,7 @@ class CityUsers:
             query = query.replace("  ", " ")
             query = query.replace("\t", " ")
 
-            self._get_city_users(accounts_num_tweets, query)
+            self._get_city_users(account_num_tweets, query)
 
 
     def parse_x_users(self, user_list):
@@ -394,4 +393,5 @@ if __name__ == "__main__":
         time.sleep(FIFTEEN_MINUTES)
 
     file_flag = True if args.file_flag == "Yes" else False
-    city_users = CityUsers(args.location)
+    city_users = CityUsers(args.location, args.tweet_count, args.extraction_type)
+    city_users.run_all_account_types()
