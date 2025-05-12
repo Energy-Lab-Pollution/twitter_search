@@ -17,11 +17,11 @@ from tqdm import tqdm
 BUCKET_NAME = "global-rct-users"
 REGION_NAME = "us-west-1"
 FOLDERS = [
-    "raw_data",
-    "cleaned_data",
-    "analysis_outputs",
-    "twikit_raw_data",
-    "twikit_cleaned_data",
+    # "raw_data",
+    # "cleaned_data",
+    # "analysis_outputs",
+    # "twikit_raw_data",
+    # "twikit_cleaned_data",
     "networks",
 ]
 

@@ -615,7 +615,7 @@ class UserNetwork:
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
-        time.sleep(60)
+        time.sleep(30)
         user_dict["follower_status"] = "in progress"
         followers = await self.twikit_get_followers(user_dict["user_id"])
         user_dict["follower_last_processed"] = datetime.now().isoformat()
