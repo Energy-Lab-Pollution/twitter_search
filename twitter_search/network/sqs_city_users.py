@@ -338,7 +338,7 @@ class CityUsers:
                         messageBody=json.dumps(message),
                     )
                 except Exception as err:
-                    print(err)
+                    print(f"Unable to send user {user['user_id']} to  User Tweets SQS: {err}")
                     continue
                 # Send to user followers
                 try:
@@ -347,7 +347,7 @@ class CityUsers:
                         messageBody=json.dumps(message),
                     )
                 except Exception as err:
-                    print(err)
+                    print(f"Unable to send user {user['user_id']} to  User Followers SQS: {err}")
                     continue
 
 
