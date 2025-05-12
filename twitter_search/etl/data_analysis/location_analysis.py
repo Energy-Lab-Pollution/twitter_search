@@ -10,6 +10,7 @@ from config_utils.constants import analysis_project_root
 
 
 class LocationAnalyzer:
+    EDGE_CASE = "guatemala"
     def __init__(self):
         self.ANALYSIS_OUTPUT = (
             analysis_project_root / "data" / "analysis_outputs"
@@ -22,15 +23,17 @@ class LocationAnalyzer:
             encoding="utf-8-sig",
         )
 
-    @staticmethod
-    def check_location(raw_location, target_location):
+    def check_location(self, raw_location, target_location):
         """
         Uses regex to see if the raw location matches
         the target location
         """
 
-        target_locations = [target_location]
-
+        if target_location == self.EDGE_CASE:
+            target_location = "guatemala city"
+            target_locations = []
+        else:
+            target_locations = [target_location]
         # alias is the key, target loc is the value
         for alias, value in ALIAS_DICT.items():
             if value == target_location:
@@ -39,7 +42,6 @@ class LocationAnalyzer:
         if isinstance(raw_location, str):
             raw_location = raw_location.lower().strip()
             location_regex = re.findall(r"\w+", raw_location)
-
             if location_regex:
                 for target_location in target_locations:
                     if target_location in location_regex:
