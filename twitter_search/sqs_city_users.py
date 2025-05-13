@@ -40,14 +40,14 @@ class CityUsers:
 
     def extract_queries_num_tweets(self, tweet_count):
         """
-        Runs the entire process for all the available
-        account types for a particular location.
+        This method gets all the queries with the appropiate aliases
+        for the desired location, along with the allocated number of
+        tweets for each query / account type
 
         Args
         ----------
-            skip_media: str
-                Determines if we should skip the search for media accounts
-                (there are tons of them)
+            tweet_count (str): Total number of tweets to be distributed for each
+                         account type
 
         """
         queries = QUERIES_DICT[self.language]
@@ -74,7 +74,7 @@ class CityUsers:
 
             new_query_dict[account_type] = query
 
-        return new_query_dict
+        return new_query_dict, num_tweets_per_account
 
 
     def parse_x_users(self, user_list):
@@ -187,7 +187,7 @@ class CityUsers:
 
         return users_list
 
-    async def _get_twikit_city_users(self, num_tweets, query):
+    async def _get_twikit_city_users(self, queries_dict, num_tweets):
         """
         Method used to search for tweets, with twikit,
         using a given query
@@ -197,46 +197,48 @@ class CityUsers:
         users are then parsed from such tweets.
 
         Args:
-            - query (str): Query with keywords and location
-            - account_num (int): Determines which account to use from twikit
+            - queries_dict (dict): Query dictionary with keywords and location
+            - num_tweets (int): Determines the number of tweets to use **per query**
         """
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DICT[f"account_num_{self.account_num}"])
         users_list = []
 
-        tweets = await client.search_tweet(
-            query, "Latest", count=num_tweets
-        )
-        # TODO: Add set operation to keep unique users only
-        users_list = self.parse_twikit_users(tweets)
+        for query in queries_dict:
 
-        more_tweets_available = True
-        num_iter = 1
+            tweets = await client.search_tweet(
+                query, "Latest", count=num_tweets
+            )
+            # TODO: Add set operation to keep unique users only
+            users_list = self.parse_twikit_users(tweets)
 
-        next_tweets = await tweets.next()
-        if next_tweets:
-            next_users_list = self.parse_twikit_users(next_tweets)
-            users_list.extend(next_users_list)
-        else:
-            more_tweets_available = False
+            more_tweets_available = True
+            num_iter = 1
 
-        while more_tweets_available:
-            next_tweets = await next_tweets.next()
+            next_tweets = await tweets.next()
             if next_tweets:
                 next_users_list = self.parse_twikit_users(next_tweets)
                 users_list.extend(next_users_list)
-
             else:
                 more_tweets_available = False
 
-            if num_iter % 5 == 0:
-                print(f"Processed {num_iter} batches")
+            while more_tweets_available:
+                next_tweets = await next_tweets.next()
+                if next_tweets:
+                    next_users_list = self.parse_twikit_users(next_tweets)
+                    users_list.extend(next_users_list)
 
-            # Leave process running until tweets are recollected
-            if num_iter == TWIKIT_TWEETS_THRESHOLD:
-                time.sleep(FIFTEEN_MINUTES)
+                else:
+                    more_tweets_available = False
 
-            num_iter += 1
+                if num_iter % 5 == 0:
+                    print(f"Processed {num_iter} batches")
+
+                # Leave process running until tweets are recollected
+                if num_iter == TWIKIT_TWEETS_THRESHOLD:
+                    time.sleep(FIFTEEN_MINUTES)
+
+                num_iter += 1
 
         return users_list
 
@@ -282,7 +284,7 @@ class CityUsers:
 
         return users_list
 
-    async def _get_city_users(self, extraction_type, num_tweets=None):
+    async def _get_city_users(self, extraction_type, tweet_count):
         """
         Searches for city users with either twikit or X, then sends them
         to the corresponding queue
@@ -293,10 +295,13 @@ class CityUsers:
         # TODO: Insert / Check city node
 
         if extraction_type == "twikit":
-            users_list = await self._get_twikit_city_users(num_tweets, query)
+            new_query_dict, num_tweets_per_account = self.extract_queries_num_tweets(tweet_count)
+            users_list = await self._get_twikit_city_users(num_tweets_per_account, new_query_dict)
         elif extraction_type == "X":
-            users_list = self._get_x_city_users(num_tweets, query)
+            new_query_dict, num_tweets_per_account = self.extract_queries_num_tweets(tweet_count)
+            users_list = self._get_x_city_users(num_tweets_per_account, new_query_dict)
         elif extraction_type == "file":
+            # TODO: add method to get user attributes
             users_list = self._get_file_city_users()
             print("Got users from file")
 
