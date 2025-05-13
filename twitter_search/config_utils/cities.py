@@ -66,14 +66,16 @@ ALIAS_DICT = {
 
 
 LOCATION_ALIAS_DICT = {
-    'new york': ['new york city', 'nyc'],
-    'mexico city': ['cdmx', 'ciudad de mexico', 'ciudad de méxico', 'distrito federal', 'mexico df'],
-    'bogota': ['bogotá'],
-    'bangalore': ['bengaluru'],
-    'guatemala': ['ciudad de guatemala', 'cd. de guatemala', 'guatemala, ciudad', 'guatemala ciudad', 'guatemala city', 'guatemala, guatemala'],
-    'delhi': ['new delhi'],
-    'kolkata': ['calcutta', 'kolkatta', 'calcuta'],
-    'mumbai': ['bombay']
+    'bangalore': ['bangalore', 'bengaluru'],
+    'bogota': ['bogota','bogotá'],
+    'chiang mai': ['chiang mai'], 
+    'delhi': ['delhi', 'new delhi'],
+    'guatemala': ['guatemala', 'ciudad de guatemala', 'cd. de guatemala', 'guatemala, ciudad', 'guatemala ciudad', 'guatemala city', 'guatemala, guatemala'],
+    'kolkata': ['kolkata', 'calcutta', 'kolkatta', 'calcuta'],
+    'mexico city': ['mexico city', 'cdmx', 'ciudad de mexico', 'ciudad de méxico', 'distrito federal', 'mexico df'],
+    'mumbai': ['mumbai', 'bombay'],
+    'new york': ['new york', 'new york city', 'nyc'],
+
 }
 
 
