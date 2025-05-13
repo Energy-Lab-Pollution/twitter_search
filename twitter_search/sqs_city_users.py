@@ -124,7 +124,26 @@ class CityUsers:
 
         return user_dicts
 
-    def parse_twikit_users(self, users):
+    def filter_users(self, user_list):
+        """
+        Removes users that have been repeated
+        """
+        new_user_list = []
+        unique_ids = []
+
+        for user_dict in user_list:
+            user_id = user_dict["user_id"]
+            if user_id in unique_ids:
+                continue
+            elif user_id["city"] and user_id["followers_count"] > 0:
+                unique_ids.append(user_id)
+                new_user_list.append(user_dict)
+            else:
+                continue
+
+        return new_user_list
+
+    def parse_twikit_users(self, tweets):
         """
         Parse retweeters (user objects) and put them
         into a list of dictionaries
@@ -137,20 +156,23 @@ class CityUsers:
             - dict_list (list): list of dictionaries with users' info
         """
         users_list = []
-
-        if users:
-            for user in users:
+        # TODO: Add logic to only process unique users at a global level
+        # Check user attributes in neptune (retweeter_status in progress or completed)
+        # If retweeter_status is completed / in progress - skip
+        if tweets:
+            for tweet in tweets:
+                #if tweet.user.id
                 user_dict = {}
-                user_dict["user_id"] = user.id
-                user_dict["username"] = user.screen_name
-                user_dict["description"] = user.description
-                user_dict["profile_location"] = user.location
+                user_dict["user_id"] = tweet.user.id
+                user_dict["username"] = tweet.user.screen_name
+                user_dict["description"] = tweet.user.description
+                user_dict["profile_location"] = tweet.user.location
                 user_dict["target_location"] = self.location
-                user_dict["followers_count"] = user.followers_count
-                user_dict["following_count"] = user.following_count
-                user_dict["tweets_count"] = user.statuses_count
-                user_dict["verified"] = user.verified
-                user_dict["created_at"] = convert_to_iso_format(user.created_at)
+                user_dict["followers_count"] = tweet.user.followers_count
+                user_dict["following_count"] = tweet.user.following_count
+                user_dict["tweets_count"] = tweet.user.statuses_count
+                user_dict["verified"] = tweet.user.verified
+                user_dict["created_at"] = convert_to_iso_format(tweet.user.created_at)
                 user_dict["category"] = "null"
                 user_dict["treatment_arm"] = "null"
                 user_dict["retweeter_status"] = "pending"
@@ -160,7 +182,7 @@ class CityUsers:
                 user_dict["extracted_at"] = datetime.now().isoformat()
                 user_dict["last_updated"] = datetime.now().isoformat()
                 # See if location matches to add city
-                location_match = check_location(user.location, self.location)
+                location_match = check_location(tweet.user.location, self.location)
                 user_dict["city"] = self.location if location_match else None
                 users_list.append(user_dict)
 
@@ -271,7 +293,6 @@ class CityUsers:
         more_tweets_available = True
 
         for query in queries_dict:
-
             try:
                 tweets = await client.search_tweet(
                     query, "Latest", count=num_tweets
@@ -281,8 +302,6 @@ class CityUsers:
                 tweets = await client.search_tweet(
                     query, "Latest", count=num_tweets
                 )          
-
-            # TODO: Add set operation to keep unique users only
             users_list = self.parse_twikit_users(tweets)
             while more_tweets_available:
                 num_iter += 1
@@ -292,7 +311,6 @@ class CityUsers:
                     else:
                         next_tweets = await next_tweets.next()
                     if next_tweets:
-                        # Parse next tweets
                         next_users_list = self.parse_twikit_users(next_tweets)
                         users_list.extend(next_users_list)
                     else:
@@ -303,7 +321,6 @@ class CityUsers:
                 if num_iter % 5 == 0:
                     print(f"Processed {num_iter} batches")
                 # Leave process running until tweets are recollected
-
         return users_list
 
     def _get_x_city_users(self, queries_dict, num_tweets):
@@ -359,26 +376,24 @@ class CityUsers:
             - users_list (list)
             - queue_name (str)
         """
-        user_tweets_queue_url = self.sqs_client.get_queue_url(
+        queue_url = self.sqs_client.get_queue_url(
             QueueName=queue_name
         )["QueueUrl"]
         for user in users_list:
-            if user["city"] and user["num_followers"] > self.followers_threshold:
-                print(f"Sending user {user['user_id']}")
-                message = {
-                    "user_id": user['user_id'],
-                    "location": self.location,
-                }
-                try:
-                    # Send to user tweets
-                    self.sqs_client.send_message(
-                            QueueUrl=user_tweets_queue_url,
-                            MessageBody=json.dumps(message),
-                        )
-                    print("Success :)")
-                except Exception as err:
-                    print(f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}")
-                break
+            print(f"Sending user {user['user_id']}")
+            message = {
+                "user_id": user['user_id'],
+                "location": self.location,
+            }
+            try:
+                self.sqs_client.send_message(
+                        QueueUrl=queue_url,
+                        MessageBody=json.dumps(message),
+                    )
+                print("Success :)")
+            except Exception as err:
+                print(f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}")
+            break
 
 
 if __name__ == "__main__":
@@ -418,9 +433,12 @@ if __name__ == "__main__":
         print("Got users from file")
         users_list = city_users.get_user_attributes(users_list, args.account_num)
         print("Getting user attributes")
+    
+    users_list = city_users.filter_users(users_list)
+
+    # TODO: Insert / Check city node
+    # TODO: Upload user attributes to Neptune -- Neptune handler class
 
     city_users.send_to_queue(users_list, "UserTweets")
     # city_users.send_to_queue(users_list, "UserFollowers")
 
-    # TODO: Insert / Check city node
-    # TODO: Upload user attributes to Neptune -- Neptune handler class
