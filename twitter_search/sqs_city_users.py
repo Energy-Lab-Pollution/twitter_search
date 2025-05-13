@@ -166,7 +166,7 @@ class CityUsers:
 
         return users_list
 
-    async def get_user_attributes(self, client, users_list):
+    async def get_user_attributes(self, users_list, account_num):
         """
         Function to get all user attributes when we only get their
         ids from the existing file
@@ -175,6 +175,9 @@ class CityUsers:
             - client: twikit.client object
             - user_id: str
         """
+        client = twikit.Client("en-US")
+        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_num_{account_num}"])
+        
         new_users_list = []
         for user in users_list:
             user_dict = {}
@@ -248,7 +251,7 @@ class CityUsers:
 
         return users_list
 
-    async def _get_twikit_city_users(self, queries_dict, num_tweets):
+    async def _get_twikit_city_users(self, queries_dict, num_tweets, account_num):
         """
         Method used to search for tweets, with twikit,
         using a given query
@@ -262,8 +265,10 @@ class CityUsers:
             - num_tweets (int): Determines the number of tweets to use **per query**
         """
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_num_{self.account_num}"])
+        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_num_{account_num}"])
         users_list = []
+        num_iter = 0
+        more_tweets_available = True
 
         for query in queries_dict:
 
@@ -279,34 +284,25 @@ class CityUsers:
 
             # TODO: Add set operation to keep unique users only
             users_list = self.parse_twikit_users(tweets)
-
-            more_tweets_available = True
-            num_iter = 1
-
-            next_tweets = await tweets.next()
-            if next_tweets:
-                next_users_list = self.parse_twikit_users(next_tweets)
-                users_list.extend(next_users_list)
-            else:
-                more_tweets_available = False
-
             while more_tweets_available:
-                next_tweets = await next_tweets.next()
-                if next_tweets:
-                    next_users_list = self.parse_twikit_users(next_tweets)
-                    users_list.extend(next_users_list)
-
-                else:
-                    more_tweets_available = False
-
+                num_iter += 1
+                try:
+                    if num_iter == 1:
+                        next_tweets = await tweets.next()
+                    else:
+                        next_tweets = await next_tweets.next()
+                    if next_tweets:
+                        # Parse next tweets
+                        next_users_list = self.parse_twikit_users(next_tweets)
+                        users_list.extend(next_users_list)
+                    else:
+                        more_tweets_available = False 
+                except twikit.errors.TooManyRequests:
+                        print("Tweets: too many requests, sleeping...")
+                        time.sleep(FIFTEEN_MINUTES)
                 if num_iter % 5 == 0:
                     print(f"Processed {num_iter} batches")
-
                 # Leave process running until tweets are recollected
-                if num_iter == TWIKIT_TWEETS_THRESHOLD:
-                    time.sleep(FIFTEEN_MINUTES)
-
-                num_iter += 1
 
         return users_list
 
@@ -409,19 +405,19 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    city_users = CityUsers(args.location, args.account_num)
+    city_users = CityUsers(args.location)
 
     if args.extraction_type == "twikit":
         new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
-        users_list = asyncio.run(city_users._get_twikit_city_users(num_tweets_per_account, new_query_dict))
+        users_list = asyncio.run(city_users._get_twikit_city_users(num_tweets_per_account, new_query_dict, args.account_num))
     elif args.extraction_type == "X":
         new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
         users_list = city_users._get_x_city_users(num_tweets_per_account, new_query_dict)
     elif args.extraction_type == "file":
-        # TODO: add method to get user attributes
         users_list = city_users._get_file_city_users()
         print("Got users from file")
-        users_list = city_users.get_user_attributes("", users_list)
+        users_list = city_users.get_user_attributes(users_list, args.account_num)
+        print("Getting user attributes")
 
     city_users.send_to_queue(users_list, "UserTweets")
 
