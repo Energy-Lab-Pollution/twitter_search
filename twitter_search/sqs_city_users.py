@@ -4,7 +4,7 @@ The users who match a certain criteria will be sent to a processing queue.
 """
 
 import asyncio
-import datetime
+from datetime import datetime
 import json
 import time
 from argparse import ArgumentParser
@@ -62,9 +62,6 @@ class CityUsers:
         new_query_dict = {}
 
         for account_type in queries:
-            print(
-                f" =============== PROCESSING: {query} ======================"
-            )
             query = queries[account_type]
             aliases_str = " OR ".join(aliases)
             # TODO: combination of all aliases
@@ -135,7 +132,7 @@ class CityUsers:
             user_id = user_dict["user_id"]
             if user_id in unique_ids:
                 continue
-            elif user_id["city"] and user_id["followers_count"] > 0:
+            elif user_dict["city"] and user_dict["followers_count"] > 0:
                 unique_ids.append(user_id)
                 new_user_list.append(user_dict)
             else:
@@ -287,17 +284,21 @@ class CityUsers:
             - num_tweets (int): Determines the number of tweets to use **per query**
         """
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_num_{account_num}"])
+        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
         users_list = []
         num_iter = 0
         more_tweets_available = True
 
-        for query in queries_dict:
+        for account_type, query in queries_dict.items():
+            print(
+                f" =============== PROCESSING: {account_type} ======================"
+            )
             try:
                 tweets = await client.search_tweet(
                     query, "Latest", count=num_tweets
                 )
             except twikit.errors.TooManyRequests:
+                print("Tweets: Too Many Requests...")
                 time.sleep(FIFTEEN_MINUTES)
                 tweets = await client.search_tweet(
                     query, "Latest", count=num_tweets
@@ -390,7 +391,7 @@ class CityUsers:
                         QueueUrl=queue_url,
                         MessageBody=json.dumps(message),
                     )
-                print("Success :)")
+                print(f"Success for {user['user_id']}:)")
             except Exception as err:
                 print(f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}")
             break
@@ -405,7 +406,7 @@ if __name__ == "__main__":
         "--location", type=str, help="Location to search users from"
     )
     parser.add_argument(
-        "--tweet_count", type=str, help="Number of tweets to get"
+        "--tweet_count", type=int, help="Number of tweets to get"
     )
     parser.add_argument(
         "--extraction_type",
@@ -424,17 +425,20 @@ if __name__ == "__main__":
 
     if args.extraction_type == "twikit":
         new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
-        users_list = asyncio.run(city_users._get_twikit_city_users(num_tweets_per_account, new_query_dict, args.account_num))
+        print(num_tweets_per_account)
+        users_list = asyncio.run(city_users._get_twikit_city_users(new_query_dict, num_tweets_per_account, args.account_num))
     elif args.extraction_type == "X":
         new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
-        users_list = city_users._get_x_city_users(num_tweets_per_account, new_query_dict)
+        users_list = city_users._get_x_city_users(new_query_dict, num_tweets_per_account)
     elif args.extraction_type == "file":
         users_list = city_users._get_file_city_users()
         print("Got users from file")
         users_list = city_users.get_user_attributes(users_list, args.account_num)
         print("Getting user attributes")
     
+    print(f"Before filtering: {users_list}")
     users_list = city_users.filter_users(users_list)
+    print(f"After filtering: {users_list}")
 
     # TODO: Insert / Check city node
     # TODO: Upload user attributes to Neptune -- Neptune handler class

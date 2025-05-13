@@ -4,26 +4,26 @@ Dictionary with the current queries for searching users
 
 # QUERY DICTIONARY
 QUERIES_EN = {
-    "media": """location (media OR press OR coverage OR broadcasting
+    "media": """(location) (media OR press OR coverage OR broadcasting
                 OR (breaking news) OR journalism OR journalist
                 OR local OR news) -is:retweet""",
     "organizations": """((NGO location) OR (organization location)
                        OR (non-profit location) OR (location institution) OR
                        (non-governmental organization location) OR (nonprofit location))
                        -is:retweet""",
-    "policymaker": """location ((member of parliament) OR governor OR minister
+    "policymaker": """(location) ((member of parliament) OR governor OR minister
                     OR magistrate OR (district magistrate) OR IAS OR officer
                     OR cabinet OR mayor OR councillor OR (local government)
                     OR (city official) OR (MLA) OR (MP) OR government OR municipality)
                     -is:retweet""",
-    "politicians": """location (politics OR politicians OR politician) -is:retweet""",
-    "researcher": """location ((environmental research) OR (environmental researcher)
+    "politicians": """(location) (politics OR politicians OR politician) -is:retweet""",
+    "researcher": """(location) ((environmental research) OR (environmental researcher)
                     OR science OR academic OR research OR university OR professor OR
                     postdoc OR postdoctoral OR PhD) -is:retweet""",
-    "environment": """location ((air pollution) OR pollution OR (poor air)
+    "environment": """(location) ((air pollution) OR pollution OR (poor air)
                     OR asthma OR polluted OR (pollution control board)
                     OR smog OR (air quality)) -is:retweet""",
-    "healthcare": """location ((MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist
+    "healthcare": """(location) ((MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist
                         OR pediatrician OR nurse OR (healthcare professional) OR (medical expert) OR therapist
                         OR clinician OR specialist OR pharmacist OR pulmonologist OR (medical practitioner)
                         OR (medical doctor) OR (resident physician))
