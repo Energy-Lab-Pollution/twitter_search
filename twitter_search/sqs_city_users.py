@@ -420,6 +420,7 @@ if __name__ == "__main__":
         print("Getting user attributes")
 
     city_users.send_to_queue(users_list, "UserTweets")
+    # city_users.send_to_queue(users_list, "UserFollowers")
 
     # TODO: Insert / Check city node
     # TODO: Upload user attributes to Neptune -- Neptune handler class
