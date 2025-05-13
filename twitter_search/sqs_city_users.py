@@ -37,6 +37,7 @@ class CityUsers:
         self.location = location
         self.sqs_client = boto3.client("sqs", region_name="us-west-1")
         self.language = CITIES_LANGS[self.location]
+        self.followers_threshold = 100
 
     def extract_queries_num_tweets(self, tweet_count):
         """
@@ -206,9 +207,16 @@ class CityUsers:
 
         for query in queries_dict:
 
-            tweets = await client.search_tweet(
-                query, "Latest", count=num_tweets
-            )
+            try:
+                tweets = await client.search_tweet(
+                    query, "Latest", count=num_tweets
+                )
+            except twikit.errors.TooManyRequests:
+                time.sleep(FIFTEEN_MINUTES)
+                tweets = await client.search_tweet(
+                    query, "Latest", count=num_tweets
+                )          
+
             # TODO: Add set operation to keep unique users only
             users_list = self.parse_twikit_users(tweets)
 
@@ -287,41 +295,23 @@ class CityUsers:
 
         return users_list
 
-    async def _get_city_users(self, extraction_type, tweet_count):
+    def send_to_queue(self, users_list, queue_name):
         """
-        Searches for city users with either twikit or X, then sends them
-        to the corresponding queue
+        Sends twikit or X users to the corresponding queue
 
         Args:
-            - query (str): Query with keywords and the corresponding location
+            - users_list (list)
+            - queue_name (str)
         """
-        # TODO: Insert / Check city node
-
-        if extraction_type == "twikit":
-            new_query_dict, num_tweets_per_account = self.extract_queries_num_tweets(tweet_count)
-            users_list = await self._get_twikit_city_users(num_tweets_per_account, new_query_dict)
-        elif extraction_type == "X":
-            new_query_dict, num_tweets_per_account = self.extract_queries_num_tweets(tweet_count)
-            users_list = self._get_x_city_users(num_tweets_per_account, new_query_dict)
-        elif extraction_type == "file":
-            # TODO: add method to get user attributes
-            users_list = self._get_file_city_users()
-            print("Got users from file")
-
-        # TODO: Upload user attributes to Neptune -- Neptune handler class
-        # TODO: Create one method to send messages to the queue
         user_tweets_queue_url = self.sqs_client.get_queue_url(
-            QueueName="UserTweets"
+            QueueName=queue_name
         )["QueueUrl"]
-        # user_followers_queue_url = self.sqs_client.get_queue_url(
-        #     QueueName="UserFollowers"
-        # )["QueueUrl"]
         for user in users_list:
-            # if user["city"] and user["num_followers"] > 100:
-                print(f"Sending user {user}")
+            if user["city"] and user["num_followers"] > self.followers_threshold:
+                print(f"Sending user {user['user_id']}")
                 message = {
-                    "user_id": user,
-                    "location": self.main_city,
+                    "user_id": user['user_id'],
+                    "location": self.location,
                 }
                 try:
                     # Send to user tweets
@@ -331,16 +321,7 @@ class CityUsers:
                         )
                     print("Success :)")
                 except Exception as err:
-                    print(f"Unable to send user {user} to  User Tweets SQS: {err}")
-                # Send to user followers
-                # try:
-                #     self.sqs_client.send_message(
-                #         QueueUrl=user_followers_queue_url,
-                #         messageBody=json.dumps(message),
-                #     )
-                # except Exception as err:
-                #     print(f"Unable to send user {user['user_id']} to  User Followers SQS: {err}")
-                #     continue
+                    print(f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}")
                 break
 
 
@@ -369,4 +350,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     city_users = CityUsers(args.location, args.account_num)
-    asyncio.run(city_users._get_city_users(args.extraction_type, num_tweets=args.tweet_count))
+
+    if args.extraction_type == "twikit":
+        new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
+        users_list = asyncio.run(city_users._get_twikit_city_users(num_tweets_per_account, new_query_dict))
+    elif args.extraction_type == "X":
+        new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
+        users_list = city_users._get_x_city_users(num_tweets_per_account, new_query_dict)
+    elif args.extraction_type == "file":
+        # TODO: add method to get user attributes
+        users_list = city_users._get_file_city_users()
+        print("Got users from file")
+
+    # TODO: Insert / Check city node
+    # TODO: Upload user attributes to Neptune -- Neptune handler class
