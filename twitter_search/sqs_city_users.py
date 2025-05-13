@@ -242,7 +242,7 @@ class CityUsers:
 
         return users_list
 
-    def _get_x_city_users(self, query, num_tweets):
+    def _get_x_city_users(self, queries_dict, num_tweets):
         """
         Method used to search for tweets, with the X API,
         using a given query
@@ -256,31 +256,34 @@ class CityUsers:
         users_list = []
         tweets_list = []
 
-        while result_count < num_tweets:
-            print(f"Max results is: {result_count}")
-            response = x_client.search_recent_tweets(
-                query=query,
-                max_results=num_tweets,
-                next_token=next_token,
-                expansions=EXPANSIONS,
-                tweet_fields=TWEET_FIELDS,
-                user_fields=USER_FIELDS,
-            )
-            if response.meta["result_count"] == 0:
-                print("No more results found.")
-                break
-            result_count += response.meta["result_count"]
-            tweets_list.extend(response.data)
-            users_list.extend(response.includes["users"])
-            users_list = self.parse_x_users(users_list)
-            try:
-                next_token = response.meta["next_token"]
-            except Exception as err:
-                print(err)
-                next_token = None
+        for query in queries_dict:
 
-            if next_token is None:
-                break
+            # TODO: Check if this is correct
+            while result_count < num_tweets:
+                print(f"Max results is: {result_count}")
+                response = x_client.search_recent_tweets(
+                    query=query,
+                    max_results=num_tweets,
+                    next_token=next_token,
+                    expansions=EXPANSIONS,
+                    tweet_fields=TWEET_FIELDS,
+                    user_fields=USER_FIELDS,
+                )
+                if response.meta["result_count"] == 0:
+                    print("No more results found.")
+                    break
+                result_count += response.meta["result_count"]
+                tweets_list.extend(response.data)
+                users_list.extend(response.includes["users"])
+                users_list = self.parse_x_users(users_list)
+                try:
+                    next_token = response.meta["next_token"]
+                except Exception as err:
+                    print(err)
+                    next_token = None
+
+                if next_token is None:
+                    break
 
         return users_list
 
