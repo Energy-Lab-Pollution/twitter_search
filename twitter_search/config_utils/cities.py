@@ -64,6 +64,19 @@ ALIAS_DICT = {
     "bombay": "mumbai",
 }
 
+
+LOCATION_ALIAS_DICT = {
+    'new york': ['new york city', 'nyc'],
+    'mexico city': ['cdmx', 'ciudad de mexico', 'ciudad de méxico', 'distrito federal', 'mexico df'],
+    'bogota': ['bogotá'],
+    'bangalore': ['bengaluru'],
+    'guatemala': ['ciudad de guatemala', 'cd. de guatemala', 'guatemala, ciudad', 'guatemala ciudad', 'guatemala city', 'guatemala, guatemala'],
+    'delhi': ['new delhi'],
+    'kolkata': ['calcutta', 'kolkatta', 'calcuta'],
+    'mumbai': ['bombay']
+}
+
+
 CITIES_LANGS = {
     "abuja": "en",
     "accra": "en",
