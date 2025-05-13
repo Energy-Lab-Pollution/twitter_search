@@ -14,7 +14,7 @@ import twikit
 import pandas as pd
 
 from pathlib import Path
-from config_utils.cities import ALIAS_DICT, CITIES_LANGS
+from config_utils.cities import ALIAS_DICT, CITIES_LANGS, LOCATION_ALIAS_DICT
 from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
@@ -32,64 +32,13 @@ from config_utils.util import (
 
 
 class CityUsers:
-    def __init__(self, location, tweet_count, extraction_type, account_num=1):
+    def __init__(self, location):
         self.base_dir = Path(__file__).parent/ "data/"
         self.location = location
         self.sqs_client = boto3.client("sqs", region_name="us-west-1")
-        self.tweet_count = tweet_count
-        self.extraction_type = extraction_type
-        self.account_num = account_num
+        self.language = CITIES_LANGS[self.location]
 
-        # Define main city depending on if we're using an alias
-        if self.location in ALIAS_DICT:
-            print(f"{self.location} found in alias dict")
-            self.main_city = ALIAS_DICT[self.location]
-
-            print(
-                f"Getting language and queries for {self.location} - {self.main_city}"
-            )
-        else:
-            self.main_city = location
-
-        language = CITIES_LANGS[self.main_city]
-        self.queries = QUERIES_DICT[language]
-
-    def get_account_type_tweets(self, num_account_types):
-        """
-        Gets number of requests for each particular account type.
-
-        Twikit can only process 50 requests to get tweets in a 15 min
-        interval. Therefore, for several cities, we need to determine
-        how many requests each city will get.
-
-        Args:
-            city_requests: int determining the number of requests per city
-        """
-        account_requests = self.tweet_count / num_account_types
-        remainder_requests = self.tweet_count % num_account_types
-
-        if account_requests < 1:
-            print(
-                "Account requests: Not enough requests to extract all accounts"
-            )
-            return None
-
-        # Create list of num requests per account
-        tweet_counts_list = []
-        for _ in range(0, len(account_requests)):
-            # round to nearest int
-            account_requests = round(account_requests)
-            tweet_counts_list.append(account_requests)
-
-        # If remainder exists, add to last account
-        if remainder_requests > 0:
-            num_requests = tweet_counts_list[-1]
-            num_requests += remainder_requests
-            tweet_counts_list[-1] = num_requests
-
-        return tweet_counts_list
-
-    def run_all_account_types(self, skip_media=False):
+    def extract_queries_num_tweets(self, tweet_count):
         """
         Runs the entire process for all the available
         account types for a particular location.
@@ -101,29 +50,31 @@ class CityUsers:
                 (there are tons of them)
 
         """
-        account_types = self.queries.copy()
-        self.skip_media = skip_media
+        queries = QUERIES_DICT[self.language]
 
-        if skip_media:
-            if "media" in account_types:
-                del account_types["media"]
-                # Number of account types
-        num_account_types = len(account_types)
-        accounts_num_tweets = self.get_account_type_tweets(num_account_types)
+        if self.location in LOCATION_ALIAS_DICT:
+            aliases = LOCATION_ALIAS_DICT[self.location]
+        else:
+            aliases = [self.location]
 
-        for account_type, account_num_tweets in zip(
-            account_types, accounts_num_tweets
-        ):
+        num_tweets_per_account = tweet_count // len(queries)
+        new_query_dict = {}
+
+        for account_type in queries:
             print(
                 f" =============== PROCESSING: {query} ======================"
             )
-            query = self.queries[account_type]
-            query = query.replace("location", self.location)
+            query = queries[account_type]
+            aliases_str = " OR ".join(aliases)
+            # TODO: combination of all aliases
+            query = query.replace("location", aliases_str)
             query = query.replace("\n", " ").strip()
             query = query.replace("  ", " ")
             query = query.replace("\t", " ")
 
-            self._get_city_users(account_num_tweets, query)
+            new_query_dict[account_type] = query
+
+        return new_query_dict
 
 
     def parse_x_users(self, user_list):
@@ -331,7 +282,7 @@ class CityUsers:
 
         return users_list
 
-    async def _get_city_users(self, num_tweets, query):
+    async def _get_city_users(self, extraction_type, num_tweets=None):
         """
         Searches for city users with either twikit or X, then sends them
         to the corresponding queue
@@ -340,11 +291,12 @@ class CityUsers:
             - query (str): Query with keywords and the corresponding location
         """
         # TODO: Insert / Check city node
-        if self.extraction_type == "twikit":
+
+        if extraction_type == "twikit":
             users_list = await self._get_twikit_city_users(num_tweets, query)
-        elif self.extraction_type == "x":
+        elif extraction_type == "X":
             users_list = self._get_x_city_users(num_tweets, query)
-        elif self.extraction_type == "file":
+        elif extraction_type == "file":
             users_list = self._get_file_city_users()
             print("Got users from file")
 
@@ -398,14 +350,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--extraction_type",
         type=str,
-        choices=["file", "twikit", "x"],
+        choices=["file", "twikit", "X"],
         help="Choose how to get users",
-    )
-    parser.add_argument(
-        "--wait",
-        type=str,
-        choices=["Yes", "No"],
-        help="Decide whether to wait 15 mins or not",
     )
     parser.add_argument(
         "--account_num",
@@ -414,9 +360,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if args.wait == "Yes":
-        print("Sleeping for 15 minutes...")
-        time.sleep(FIFTEEN_MINUTES)
-
-    city_users = CityUsers(args.location, args.tweet_count, args.extraction_type, args.account_num)
-    asyncio.run(city_users._get_city_users(args.tweet_count, query=""))
+    city_users = CityUsers(args.location, args.account_num)
+    asyncio.run(city_users._get_city_users(args.extraction_type, num_tweets=args.tweet_count))
