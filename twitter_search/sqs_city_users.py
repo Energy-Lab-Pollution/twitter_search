@@ -14,7 +14,7 @@ import twikit
 import pandas as pd
 
 from pathlib import Path
-from config_utils.cities import ALIAS_DICT, CITIES_LANGS, LOCATION_ALIAS_DICT
+from config_utils.cities import CITIES_LANGS, LOCATION_ALIAS_DICT
 from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
@@ -166,7 +166,7 @@ class CityUsers:
 
         return users_list
 
-    async def get_user_attributes(self, client, user_id):
+    async def get_user_attributes(self, client, users_list):
         """
         Function to get all user attributes when we only get their
         ids from the existing file
@@ -175,54 +175,56 @@ class CityUsers:
             - client: twikit.client object
             - user_id: str
         """
-        user_dict = {}
-        user_dict["user_id"] = user_id
-        success = False
+        new_users_list = []
+        for user in users_list:
+            user_dict = {}
+            user_dict["user_id"] = user['user_id']
+            success = False
+            while not success:
+                # Get source user information
+                try:
+                    user_obj = await client.get_user_by_id(user['user_id'])
+                except twikit.errors.TooManyRequests:
+                    print("User Attributes: Too Many Requests...")
+                    time.sleep(FIFTEEN_MINUTES)
+                    user_obj = await client.get_user_by_id(user['user_id'])
+                except twikit.errors.BadRequest:
+                    print("User Attributes: Bad Request")
+                    continue
+                except twikit.errors.NotFound:
+                    print("User Attributes: Not Found")
+                    continue
+                except twikit.errors.TwitterException as err:
+                    print(f"User Attributes: Twitter Error ({err} - {user['user_id']})")
+                    continue
+                user_dict["user_id"] = user_obj.id
+                user_dict["username"] = user_obj.screen_name
+                user_dict["description"] = user_obj.description
+                user_dict["profile_location"] = user_obj.location
+                user_dict["target_location"] = self.location
+                user_dict["followers_count"] = user_obj.followers_count
+                user_dict["following_count"] = user_obj.following_count
+                user_dict["tweets_count"] = user_obj.statuses_count
+                user_dict["verified"] = user_obj.verified
+                user_dict["created_at"] = convert_to_iso_format(user_obj.created_at)
+                user_dict["category"] = "null"
+                user_dict["treatment_arm"] = "null"
+                user_dict["retweeter_status"] = "pending"
+                user_dict["retweeter_last_processed"] = "null"
+                user_dict["follower_status"] = "pending"
+                user_dict["follower_last_processed"] = "null"
+                user_dict["extracted_at"] = datetime.now().isoformat()
+                user_dict["last_updated"] = datetime.now().isoformat()
 
-        while not success:
-            # Get source user information
-            try:
-                user_obj = await client.get_user_by_id(user_id)
-            except twikit.errors.TooManyRequests:
-                print("User Attributes: Too Many Requests...")
-                time.sleep(FIFTEEN_MINUTES)
-                user_obj = await client.get_user_by_id(user_id)
-            except twikit.errors.BadRequest:
-                print("User Attributes: Bad Request")
-                return user_dict
-            except twikit.errors.NotFound:
-                print("User Attributes: Not Found")
-                return user_dict
-            except twikit.errors.TwitterException as err:
-                print(f"User Attributes: Twitter Error ({err} - {user_id})")
-                return user_dict
-            user_dict["user_id"] = user_obj.id
-            user_dict["username"] = user_obj.screen_name
-            user_dict["description"] = user_obj.description
-            user_dict["profile_location"] = user_obj.location
-            user_dict["target_location"] = self.location
-            user_dict["followers_count"] = user_obj.followers_count
-            user_dict["following_count"] = user_obj.following_count
-            user_dict["tweets_count"] = user_obj.statuses_count
-            user_dict["verified"] = user_obj.verified
-            user_dict["created_at"] = convert_to_iso_format(user_obj.created_at)
-            user_dict["category"] = "null"
-            user_dict["treatment_arm"] = "null"
-            user_dict["retweeter_status"] = "pending"
-            user_dict["retweeter_last_processed"] = "null"
-            user_dict["follower_status"] = "pending"
-            user_dict["follower_last_processed"] = "null"
-            user_dict["extracted_at"] = datetime.now().isoformat()
-            user_dict["last_updated"] = datetime.now().isoformat()
+                # See if location matches to add city
+                location_match = check_location(
+                    user_obj.location, self.location
+                )
+                user_dict["city"] = self.location if location_match else None
+                new_users_list.append(user_dict)
+                success = True
 
-            # See if location matches to add city
-            location_match = check_location(
-                user_obj.location, self.location
-            )
-            user_dict["city"] = self.location if location_match else None
-            success = True
-
-        return user_dict
+        return new_users_list
 
     def _get_file_city_users(self):
         """
@@ -419,6 +421,7 @@ if __name__ == "__main__":
         # TODO: add method to get user attributes
         users_list = city_users._get_file_city_users()
         print("Got users from file")
+        users_list = city_users.get_user_attributes("", users_list)
 
     city_users.send_to_queue(users_list, "UserTweets")
 
