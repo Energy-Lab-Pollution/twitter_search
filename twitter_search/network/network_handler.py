@@ -49,7 +49,7 @@ class NetworkHandler:
 
         # Building location output path
         self.location_file_path = (
-            self.base_dir / f"networks/{self.location}/{self.location}_new.json"
+            self.base_dir / f"networks/{self.location}/{self.location}.json"
         )
 
     @staticmethod
@@ -449,6 +449,9 @@ class NetworkHandler:
             num_original_tweets = 0
             num_tweets_with_retweeters = 0
             num_tweets_with_retweeters_twikit = 0
+            if not "followers_count" in user_dict:
+                print(user_dict)
+                continue
             if user_dict["followers_count"] > 0:
                 followers_list.append(user_dict["followers_count"])
             if user_dict["following_count"] > 0:
@@ -621,7 +624,7 @@ class NetworkHandler:
                         for retweeter in tweet["retweeters"]:
                             if tweet["tweet_id"] not in existing_tweets:
                                 location_matches = self.check_location(
-                                    retweeter["location"], self.location
+                                    retweeter["profile_location"], self.location
                                 )
                                 if location_matches:
                                     retweeter_dict = self.parse_edge_dict(
@@ -640,7 +643,7 @@ class NetworkHandler:
                 for follower in followers:
                     if follower["user_id"] not in existing_followers:
                         location_matches = self.check_location(
-                            follower["location"], self.location
+                            follower["target_location"], self.location
                         )
                         if location_matches:
                             follower_dict = self.parse_edge_dict(
