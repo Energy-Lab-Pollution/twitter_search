@@ -20,7 +20,6 @@ from config_utils.constants import (
     FIFTEEN_MINUTES,
     TWEET_FIELDS,
     TWIKIT_COOKIES_DICT,
-    TWIKIT_TWEETS_THRESHOLD,
     USER_FIELDS,
 )
 from config_utils.queries import QUERIES_DICT
@@ -105,7 +104,6 @@ class CityUsers:
             for key, value in user["public_metrics"].items():
                 user_dict[key] = value
 
-            # TODO: Adding new attributes
             user_dict["category"] = "null"
             user_dict["treatment_arm"] = "null"
             user_dict["retweeter_status"] = "pending"
@@ -297,13 +295,16 @@ class CityUsers:
                 tweets = await client.search_tweet(
                     query, "Latest", count=num_tweets
                 )
+                print(f"First request, got : {len(tweets)} tweets")
+                print(tweets)
             except twikit.errors.TooManyRequests:
                 print("Tweets: Too Many Requests...")
                 time.sleep(FIFTEEN_MINUTES)
                 tweets = await client.search_tweet(
                     query, "Latest", count=num_tweets
                 )          
-            users_list = self.parse_twikit_users(tweets)
+            parsed_users = self.parse_twikit_users(tweets)
+            users_list.extend(parsed_users)
             while more_tweets_available:
                 num_iter += 1
                 try:
@@ -314,7 +315,10 @@ class CityUsers:
                     if next_tweets:
                         next_users_list = self.parse_twikit_users(next_tweets)
                         users_list.extend(next_users_list)
+                        print(f"Request {num_iter}, got : {len(next_tweets)} tweets")
+                        print(next_tweets)
                     else:
+                        print("No more tweets, moving on to next query")
                         more_tweets_available = False 
                 except twikit.errors.TooManyRequests:
                         print("Tweets: too many requests, sleeping...")
@@ -380,6 +384,9 @@ class CityUsers:
         queue_url = self.sqs_client.get_queue_url(
             QueueName=queue_name
         )["QueueUrl"]
+        if not users_list:
+            print("No users to send to queue")
+            return
         for user in users_list:
             print(f"Sending user {user['user_id']}")
             message = {
@@ -425,7 +432,7 @@ if __name__ == "__main__":
 
     if args.extraction_type == "twikit":
         new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
-        print(num_tweets_per_account)
+        print(f"Number of tweets per account: {num_tweets_per_account}")
         users_list = asyncio.run(city_users._get_twikit_city_users(new_query_dict, num_tweets_per_account, args.account_num))
     elif args.extraction_type == "X":
         new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
@@ -443,6 +450,6 @@ if __name__ == "__main__":
     # TODO: Insert / Check city node
     # TODO: Upload user attributes to Neptune -- Neptune handler class
 
-    city_users.send_to_queue(users_list, "UserTweets")
+    # city_users.send_to_queue(users_list, "UserTweets")
     # city_users.send_to_queue(users_list, "UserFollowers")
 
