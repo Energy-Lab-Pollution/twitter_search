@@ -1,6 +1,9 @@
 """
 Script to search tweets and users from a particular location.
 The users who match a certain criteria will be sent to a processing queue.
+
+Author: Federico Dominguez Molina & Vishal Joseph
+Last Updated: May 2025
 """
 
 import asyncio
@@ -73,11 +76,10 @@ class CityUsers:
 
         return new_query_dict, num_tweets_per_account
 
-
     def parse_x_users(self, user_list):
         """
         This function takes a list of user objects and
-        transformis it into a list of dictionaries
+        transforms it into a list of dictionaries
 
         Parameters
         ----------
@@ -416,13 +418,12 @@ class CityUsers:
                         QueueUrl=queue_url,
                         MessageBody=json.dumps(message),
                     )
-                print(f"User {user['user_id']} sent to queue :)")
+                print(f"User {user['user_id']} sent to {queue_name} queue :)")
             except Exception as err:
                 print(f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}")
 
 
 if __name__ == "__main__":
-    # parameters: [location, tweet_count, keywords (both hashtags, timeperiod and keywords)]
     parser = ArgumentParser(
         "Parameters to get users data to generate a network"
     )
@@ -476,5 +477,5 @@ if __name__ == "__main__":
     # TODO: Upload user attributes to Neptune -- Neptune handler class
 
     city_users.send_to_queue(users_list, "UserTweets")
-    # city_users.send_to_queue(users_list, "UserFollowers")
+    city_users.send_to_queue(users_list, "UserFollowers")
 
