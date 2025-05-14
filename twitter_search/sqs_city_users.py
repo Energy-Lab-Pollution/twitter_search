@@ -201,21 +201,21 @@ class CityUsers:
             - user_id: str
         """
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_num_{account_num}"])
+        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
         
         new_users_list = []
         for user in users_list:
             user_dict = {}
-            user_dict["user_id"] = user['user_id']
+            user_dict["user_id"] = user
             success = False
             while not success:
                 # Get source user information
                 try:
-                    user_obj = await client.get_user_by_id(user['user_id'])
+                    user_obj = await client.get_user_by_id(user_dict['user_id'])
                 except twikit.errors.TooManyRequests:
                     print("User Attributes: Too Many Requests...")
                     time.sleep(FIFTEEN_MINUTES)
-                    user_obj = await client.get_user_by_id(user['user_id'])
+                    user_obj = await client.get_user_by_id(user_dict['user_id'])
                 except twikit.errors.BadRequest:
                     print("User Attributes: Bad Request")
                     continue
@@ -254,7 +254,7 @@ class CityUsers:
 
         return new_users_list
 
-    def _get_file_city_users(self):
+    def _get_file_city_users(self, num_users = None):
         """
         Method to get users whose location match the desired
         location
@@ -273,6 +273,9 @@ class CityUsers:
         self.user_df.reset_index(drop=True, inplace=True)
         print(f"Users in .csv: {len(self.user_df)}")
         users_list = self.user_df.loc[:, "user_id"].astype(str).unique().tolist()
+        if num_users:
+            print(f"Only selecting {num_users}")
+            users_list = users_list[:num_users]
 
         return users_list
 
@@ -413,10 +416,9 @@ class CityUsers:
                         QueueUrl=queue_url,
                         MessageBody=json.dumps(message),
                     )
-                print(f"Success for {user['user_id']}:)")
+                print(f"User {user['user_id']} sent to queue :)")
             except Exception as err:
                 print(f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}")
-            break
 
 
 if __name__ == "__main__":
@@ -441,6 +443,11 @@ if __name__ == "__main__":
         type=int,
         help="Account number to use with twikit",
     )
+    parser.add_argument(
+        "--num_users",
+        type=int,
+        help="Number of users to get (file based system)"
+    )
     args = parser.parse_args()
 
     city_users = CityUsers(args.location)
@@ -453,20 +460,20 @@ if __name__ == "__main__":
         new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
         users_list = city_users._get_x_city_users(new_query_dict, num_tweets_per_account)
     elif args.extraction_type == "file":
-        users_list = city_users._get_file_city_users()
+        users_list = city_users._get_file_city_users(args.num_users)
         print("Got users from file")
-        users_list = city_users.get_user_attributes(users_list, args.account_num)
-        print("Getting user attributes")
+        users_list = asyncio.run(city_users.get_user_attributes(users_list, args.account_num))
+        print("Got user attributes")
     
     print(f" =========================== Before filtering ==================:\n {len(users_list)} users")
     users_list = city_users.filter_users(users_list)
-    print(f" =========================== After filtering ==================:\n: {len(users_list)} users")
+    print(f" =========================== After filtering ==================:\n {len(users_list)} users")
     print("\n")
     print(users_list)
 
     # TODO: Insert / Check city node
     # TODO: Upload user attributes to Neptune -- Neptune handler class
 
-    # city_users.send_to_queue(users_list, "UserTweets")
+    city_users.send_to_queue(users_list, "UserTweets")
     # city_users.send_to_queue(users_list, "UserFollowers")
 
