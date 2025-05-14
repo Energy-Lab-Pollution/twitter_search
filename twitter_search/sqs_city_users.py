@@ -285,9 +285,9 @@ class CityUsers:
         client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
         users_list = []
         num_iter = 0
-        more_tweets_available = True
 
         for account_type, query in queries_dict.items():
+            num_extracted_tweets = 0
             print(
                 f" =============== PROCESSING: {account_type} ======================"
             )
@@ -297,15 +297,18 @@ class CityUsers:
                 )
                 print(f"First request, got : {len(tweets)} tweets")
                 print(tweets)
+                num_extracted_tweets += len(tweets)
             except twikit.errors.TooManyRequests:
                 print("Tweets: Too Many Requests...")
                 time.sleep(FIFTEEN_MINUTES)
                 tweets = await client.search_tweet(
                     query, "Latest", count=num_tweets
-                )          
+                )
+                num_extracted_tweets += len(tweets)    
             parsed_users = self.parse_twikit_users(tweets)
             users_list.extend(parsed_users)
-            while more_tweets_available:
+
+            while num_extracted_tweets < num_tweets:
                 num_iter += 1
                 try:
                     if num_iter == 1:
@@ -315,11 +318,12 @@ class CityUsers:
                     if next_tweets:
                         next_users_list = self.parse_twikit_users(next_tweets)
                         users_list.extend(next_users_list)
+                        num_extracted_tweets += len(next_tweets)
                         print(f"Request {num_iter}, got : {len(next_tweets)} tweets")
                         print(next_tweets)
                     else:
                         print("No more tweets, moving on to next query")
-                        more_tweets_available = False 
+                        break
                 except twikit.errors.TooManyRequests:
                         print("Tweets: too many requests, sleeping...")
                         time.sleep(FIFTEEN_MINUTES)
@@ -443,9 +447,9 @@ if __name__ == "__main__":
         users_list = city_users.get_user_attributes(users_list, args.account_num)
         print("Getting user attributes")
     
-    print(f"Before filtering: {users_list}")
+    print(f" =========================== Before filtering ==================:\n {len(users_list)} users")
     users_list = city_users.filter_users(users_list)
-    print(f"After filtering: {users_list}")
+    print(f" =========================== After filtering ==================:\n: {len(users_list)} users")
 
     # TODO: Insert / Check city node
     # TODO: Upload user attributes to Neptune -- Neptune handler class
