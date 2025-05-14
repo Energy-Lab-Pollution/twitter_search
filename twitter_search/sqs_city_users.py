@@ -18,6 +18,7 @@ from config_utils.cities import CITIES_LANGS, LOCATION_ALIAS_DICT
 from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
+    INFLUENCER_FOLLOWERS_THRESHOLD,
     TWEET_FIELDS,
     TWIKIT_COOKIES_DICT,
     USER_FIELDS,
@@ -36,7 +37,6 @@ class CityUsers:
         self.location = location
         self.sqs_client = boto3.client("sqs", region_name="us-west-1")
         self.language = CITIES_LANGS[self.location]
-        self.followers_threshold = 100
 
     def extract_queries_num_tweets(self, tweet_count):
         """
@@ -315,7 +315,9 @@ class CityUsers:
                         next_tweets = await tweets.next()
                     else:
                         next_tweets = await next_tweets.next()
+
                     if next_tweets:
+                        # Just getting the exactly necessary tweets - It will be more than required!
                         next_users_list = self.parse_twikit_users(next_tweets)
                         users_list.extend(next_users_list)
                         num_extracted_tweets += len(next_tweets)
@@ -330,6 +332,7 @@ class CityUsers:
                 if num_iter % 5 == 0:
                     print(f"Processed {num_iter} batches")
                 # Leave process running until tweets are recollected
+        
         return users_list
 
     def _get_x_city_users(self, queries_dict, num_tweets):
@@ -450,6 +453,8 @@ if __name__ == "__main__":
     print(f" =========================== Before filtering ==================:\n {len(users_list)} users")
     users_list = city_users.filter_users(users_list)
     print(f" =========================== After filtering ==================:\n: {len(users_list)} users")
+    print("\n")
+    print(users_list)
 
     # TODO: Insert / Check city node
     # TODO: Upload user attributes to Neptune -- Neptune handler class
