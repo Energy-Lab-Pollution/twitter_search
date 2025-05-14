@@ -18,19 +18,17 @@ from config_utils.constants import (
     USER_FIELDS,
 )
 from config_utils.util import (
-    check_location,
     client_creator,
     convert_to_iso_format,
 )
 
 
 class UserTweets:
-    def __init__(self, location, tweet_count):
+    def __init__(self, location):
         self.location = location
-        self.sqs_client = boto3.client("sqs")
-        self.tweet_count = tweet_count
+        self.sqs_client = boto3.client("sqs", region='us-west-1')
 
-    async def twikit_get_user_tweets(self, user_id):
+    async def twikit_get_user_tweets(self, user_id, num_tweets):
         """
         For a given user, we get as many of their tweets as possible
         and parse them into a list using twikit
@@ -45,17 +43,18 @@ class UserTweets:
         """
         # We need to get tweets first
         dict_list = []
-        more_tweets_available = True
         num_iter = 0
+        num_extracted_tweets = 0
 
         # Parse first set of tweets
         user_tweets = await self.client.get_user_tweets(
-            user_id, "Tweets", count=self.TWIKIT_COUNT
+            user_id, "Tweets", count=num_tweets
         )
         tweets_list = self.parse_twikit_tweets(user_tweets)
+        num_extracted_tweets += len(tweets_list)
         dict_list.extend(tweets_list)
 
-        while more_tweets_available:
+        while num_extracted_tweets < num_tweets:
             num_iter += 1
             try:
                 if num_iter == 1:
@@ -66,8 +65,10 @@ class UserTweets:
                     # Parse next tweets
                     next_tweets_list = self.parse_twikit_tweets(next_tweets)
                     dict_list.extend(next_tweets_list)
+                    num_extracted_tweets += len(next_tweets_list)
                 else:
-                    more_tweets_available = False
+                    print("No more tweets, moving on to next query")
+                    break
             # If errored out on requests, just return what you already have
             except twikit.errors.TooManyRequests:
                 print("Tweets: too many requests, stopping...")
@@ -82,7 +83,7 @@ class UserTweets:
 
         return dict_list
 
-    def x_get_user_tweets(self, user_id):
+    def x_get_user_tweets(self, user_id, num_tweets):
         """
         For a given user, we get as many of their tweets as possible
         and parse them into a list using x
@@ -97,10 +98,10 @@ class UserTweets:
         """
         user_tweets = []
         next_token = None
-        while len(user_tweets) < X_MAX_USER_TWEETS:
+        while len(user_tweets) < num_tweets:
             response = self.x_client.get_users_tweets(
                 id=user_id,
-                max_results=X_TWEETS_PAGE_SIZE,
+                max_results=num_tweets,
                 pagination_token=next_token,
                 tweet_fields=["created_at", "public_metrics"],
             )
@@ -111,7 +112,7 @@ class UserTweets:
 
             user_tweets.extend(page)
 
-            if (len(user_tweets) >= X_MAX_USER_TWEETS) or not (
+            if (len(user_tweets) >= num_tweets) or not (
                 response.meta.get("next_token")
             ):
                 break
