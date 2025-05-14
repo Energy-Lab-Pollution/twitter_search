@@ -11,6 +11,7 @@ from config_utils.constants import analysis_project_root
 
 class LocationAnalyzer:
     EDGE_CASE = "guatemala"
+
     def __init__(self):
         self.ANALYSIS_OUTPUT = (
             analysis_project_root / "data" / "analysis_outputs"

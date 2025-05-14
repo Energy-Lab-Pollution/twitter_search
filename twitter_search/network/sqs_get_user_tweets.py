@@ -2,9 +2,9 @@
 Script to get a given user's tweets
 """
 
-import time
 import datetime
 import json
+import time
 from argparse import ArgumentParser
 
 import boto3
@@ -29,7 +29,6 @@ class UserTweets:
         self.location = location
         self.sqs_client = boto3.client("sqs")
         self.tweet_count = tweet_count
-
 
     async def twikit_get_user_tweets(self, user_id):
         """

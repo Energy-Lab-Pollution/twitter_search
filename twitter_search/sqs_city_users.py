@@ -7,16 +7,15 @@ Last Updated: May 2025
 """
 
 import asyncio
-from datetime import datetime
 import json
 import time
 from argparse import ArgumentParser
+from datetime import datetime
+from pathlib import Path
 
 import boto3
-import twikit
 import pandas as pd
-
-from pathlib import Path
+import twikit
 from config_utils.cities import CITIES_LANGS, LOCATION_ALIAS_DICT
 from config_utils.constants import (
     EXPANSIONS,
@@ -36,7 +35,7 @@ from config_utils.util import (
 
 class CityUsers:
     def __init__(self, location):
-        self.base_dir = Path(__file__).parent/ "data/"
+        self.base_dir = Path(__file__).parent / "data/"
         self.location = location
         self.sqs_client = boto3.client("sqs", region_name="us-west-1")
         self.language = CITIES_LANGS[self.location]
@@ -127,7 +126,7 @@ class CityUsers:
             - are unique
             - have more than 100 followers
             - match the location
-        
+
         Args:
             - user_list (list)
         Returns:
@@ -140,7 +139,11 @@ class CityUsers:
             user_id = user_dict["user_id"]
             if user_id in unique_ids:
                 continue
-            elif user_dict["city"] and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD:
+            elif (
+                user_dict["city"]
+                and user_dict["followers_count"]
+                > INFLUENCER_FOLLOWERS_THRESHOLD
+            ):
                 unique_ids.append(user_id)
                 new_user_list.append(user_dict)
             else:
@@ -166,7 +169,7 @@ class CityUsers:
         # If retweeter_status is completed / in progress - skip
         if tweets:
             for tweet in tweets:
-                #if tweet.user.id
+                # if tweet.user.id
                 user_dict = {}
                 user_dict["user_id"] = tweet.user.id
                 user_dict["username"] = tweet.user.screen_name
@@ -177,7 +180,9 @@ class CityUsers:
                 user_dict["following_count"] = tweet.user.following_count
                 user_dict["tweets_count"] = tweet.user.statuses_count
                 user_dict["verified"] = tweet.user.verified
-                user_dict["created_at"] = convert_to_iso_format(tweet.user.created_at)
+                user_dict["created_at"] = convert_to_iso_format(
+                    tweet.user.created_at
+                )
                 user_dict["category"] = "null"
                 user_dict["treatment_arm"] = "null"
                 user_dict["retweeter_status"] = "pending"
@@ -187,7 +192,9 @@ class CityUsers:
                 user_dict["extracted_at"] = datetime.now().isoformat()
                 user_dict["last_updated"] = datetime.now().isoformat()
                 # See if location matches to add city
-                location_match = check_location(tweet.user.location, self.location)
+                location_match = check_location(
+                    tweet.user.location, self.location
+                )
                 user_dict["city"] = self.location if location_match else None
                 users_list.append(user_dict)
 
@@ -204,7 +211,7 @@ class CityUsers:
         """
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
-        
+
         new_users_list = []
         for user in users_list:
             user_dict = {}
@@ -213,11 +220,11 @@ class CityUsers:
             while not success:
                 # Get source user information
                 try:
-                    user_obj = await client.get_user_by_id(user_dict['user_id'])
+                    user_obj = await client.get_user_by_id(user_dict["user_id"])
                 except twikit.errors.TooManyRequests:
                     print("User Attributes: Too Many Requests...")
                     time.sleep(FIFTEEN_MINUTES)
-                    user_obj = await client.get_user_by_id(user_dict['user_id'])
+                    user_obj = await client.get_user_by_id(user_dict["user_id"])
                 except twikit.errors.BadRequest:
                     print("User Attributes: Bad Request")
                     continue
@@ -225,7 +232,9 @@ class CityUsers:
                     print("User Attributes: Not Found")
                     continue
                 except twikit.errors.TwitterException as err:
-                    print(f"User Attributes: Twitter Error ({err} - {user['user_id']})")
+                    print(
+                        f"User Attributes: Twitter Error ({err} - {user['user_id']})"
+                    )
                     continue
                 user_dict["user_id"] = user_obj.id
                 user_dict["username"] = user_obj.screen_name
@@ -236,7 +245,9 @@ class CityUsers:
                 user_dict["following_count"] = user_obj.following_count
                 user_dict["tweets_count"] = user_obj.statuses_count
                 user_dict["verified"] = user_obj.verified
-                user_dict["created_at"] = convert_to_iso_format(user_obj.created_at)
+                user_dict["created_at"] = convert_to_iso_format(
+                    user_obj.created_at
+                )
                 user_dict["category"] = "null"
                 user_dict["treatment_arm"] = "null"
                 user_dict["retweeter_status"] = "pending"
@@ -256,7 +267,7 @@ class CityUsers:
 
         return new_users_list
 
-    def _get_file_city_users(self, num_users = None):
+    def _get_file_city_users(self, num_users=None):
         """
         Method to get users whose location match the desired
         location
@@ -274,14 +285,18 @@ class CityUsers:
         ]
         self.user_df.reset_index(drop=True, inplace=True)
         print(f"Users in .csv: {len(self.user_df)}")
-        users_list = self.user_df.loc[:, "user_id"].astype(str).unique().tolist()
+        users_list = (
+            self.user_df.loc[:, "user_id"].astype(str).unique().tolist()
+        )
         if num_users:
             print(f"Only selecting {num_users}")
             users_list = users_list[:num_users]
 
         return users_list
 
-    async def _get_twikit_city_users(self, queries_dict, num_tweets, account_num):
+    async def _get_twikit_city_users(
+        self, queries_dict, num_tweets, account_num
+    ):
         """
         Method used to search for tweets, with twikit,
         using a given query
@@ -317,7 +332,7 @@ class CityUsers:
                 tweets = await client.search_tweet(
                     query, "Latest", count=num_tweets
                 )
-                num_extracted_tweets += len(tweets)    
+                num_extracted_tweets += len(tweets)
             parsed_users = self.parse_twikit_users(tweets)
             users_list.extend(parsed_users)
 
@@ -334,18 +349,20 @@ class CityUsers:
                         next_users_list = self.parse_twikit_users(next_tweets)
                         users_list.extend(next_users_list)
                         num_extracted_tweets += len(next_tweets)
-                        print(f"Request {num_iter}, got : {len(next_tweets)} tweets")
+                        print(
+                            f"Request {num_iter}, got : {len(next_tweets)} tweets"
+                        )
                         print(next_tweets)
                     else:
                         print("No more tweets, moving on to next query")
                         break
                 except twikit.errors.TooManyRequests:
-                        print("Tweets: too many requests, sleeping...")
-                        time.sleep(FIFTEEN_MINUTES)
+                    print("Tweets: too many requests, sleeping...")
+                    time.sleep(FIFTEEN_MINUTES)
                 if num_iter % 5 == 0:
                     print(f"Processed {num_iter} batches")
                 # Leave process running until tweets are recollected
-        
+
         return users_list
 
     def _get_x_city_users(self, queries_dict, num_tweets):
@@ -401,26 +418,28 @@ class CityUsers:
             - users_list (list)
             - queue_name (str)
         """
-        queue_url = self.sqs_client.get_queue_url(
-            QueueName=queue_name
-        )["QueueUrl"]
+        queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)[
+            "QueueUrl"
+        ]
         if not users_list:
             print("No users to send to queue")
             return
         for user in users_list:
             print(f"Sending user {user['user_id']}")
             message = {
-                "user_id": user['user_id'],
+                "user_id": user["user_id"],
                 "location": self.location,
             }
             try:
                 self.sqs_client.send_message(
-                        QueueUrl=queue_url,
-                        MessageBody=json.dumps(message),
-                    )
+                    QueueUrl=queue_url,
+                    MessageBody=json.dumps(message),
+                )
                 print(f"User {user['user_id']} sent to {queue_name} queue :)")
             except Exception as err:
-                print(f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}")
+                print(
+                    f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}"
+                )
 
 
 if __name__ == "__main__":
@@ -447,28 +466,44 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_users",
         type=int,
-        help="Number of users to get (file based system)"
+        help="Number of users to get (file based system)",
     )
     args = parser.parse_args()
 
     city_users = CityUsers(args.location)
 
     if args.extraction_type == "twikit":
-        new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
+        new_query_dict, num_tweets_per_account = (
+            city_users.extract_queries_num_tweets(args.tweet_count)
+        )
         print(f"Number of tweets per account: {num_tweets_per_account}")
-        users_list = asyncio.run(city_users._get_twikit_city_users(new_query_dict, num_tweets_per_account, args.account_num))
+        users_list = asyncio.run(
+            city_users._get_twikit_city_users(
+                new_query_dict, num_tweets_per_account, args.account_num
+            )
+        )
     elif args.extraction_type == "X":
-        new_query_dict, num_tweets_per_account = city_users.extract_queries_num_tweets(args.tweet_count)
-        users_list = city_users._get_x_city_users(new_query_dict, num_tweets_per_account)
+        new_query_dict, num_tweets_per_account = (
+            city_users.extract_queries_num_tweets(args.tweet_count)
+        )
+        users_list = city_users._get_x_city_users(
+            new_query_dict, num_tweets_per_account
+        )
     elif args.extraction_type == "file":
         users_list = city_users._get_file_city_users(args.num_users)
         print("Got users from file")
-        users_list = asyncio.run(city_users.get_user_attributes(users_list, args.account_num))
+        users_list = asyncio.run(
+            city_users.get_user_attributes(users_list, args.account_num)
+        )
         print("Got user attributes")
-    
-    print(f" =========================== Before filtering ==================:\n {len(users_list)} users")
+
+    print(
+        f" =========================== Before filtering ==================:\n {len(users_list)} users"
+    )
     users_list = city_users.filter_users(users_list)
-    print(f" =========================== After filtering ==================:\n {len(users_list)} users")
+    print(
+        f" =========================== After filtering ==================:\n {len(users_list)} users"
+    )
     print("\n")
     print(users_list)
 
@@ -478,4 +513,3 @@ if __name__ == "__main__":
 
     city_users.send_to_queue(users_list, "UserTweets")
     city_users.send_to_queue(users_list, "UserFollowers")
-
