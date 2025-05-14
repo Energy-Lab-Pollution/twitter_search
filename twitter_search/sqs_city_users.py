@@ -121,7 +121,15 @@ class CityUsers:
 
     def filter_users(self, user_list):
         """
-        Removes users that have been repeated
+        Keeps users that:
+            - are unique
+            - have more than 100 followers
+            - match the location
+        
+        Args:
+            - user_list (list)
+        Returns:
+            - new_user_list (list)
         """
         new_user_list = []
         unique_ids = []
@@ -130,7 +138,7 @@ class CityUsers:
             user_id = user_dict["user_id"]
             if user_id in unique_ids:
                 continue
-            elif user_dict["city"] and user_dict["followers_count"] > 0:
+            elif user_dict["city"] and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD:
                 unique_ids.append(user_id)
                 new_user_list.append(user_dict)
             else:
