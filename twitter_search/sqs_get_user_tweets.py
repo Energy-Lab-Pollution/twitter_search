@@ -10,11 +10,8 @@ from argparse import ArgumentParser
 import boto3
 import twikit
 from config_utils.constants import (
-    EXPANSIONS,
-    MAX_RESULTS,
-    TWEET_FIELDS,
-    TWIKIT_COOKIES_DIR,
-    TWIKIT_TWEETS_THRESHOLD,
+    FIFTEEN_MINUTES,
+    TWIKIT_COOKIES_DICT,
     USER_FIELDS,
 )
 from config_utils.util import (
@@ -28,7 +25,7 @@ class UserTweets:
         self.location = location
         self.sqs_client = boto3.client("sqs", region='us-west-1')
 
-    async def twikit_get_user_tweets(self, user_id, num_tweets):
+    async def twikit_get_user_tweets(self, user_id, num_tweets, account_num):
         """
         For a given user, we get as many of their tweets as possible
         and parse them into a list using twikit
@@ -42,17 +39,29 @@ class UserTweets:
             - dict_list (list): list of dictionaries
         """
         # We need to get tweets first
-        dict_list = []
+        client = twikit.Client("en-US")
+        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
+        parsed_tweets_list = []
         num_iter = 0
         num_extracted_tweets = 0
 
         # Parse first set of tweets
-        user_tweets = await self.client.get_user_tweets(
-            user_id, "Tweets", count=num_tweets
-        )
+
+        try:
+            user_tweets = await self.client.get_user_tweets(
+                user_id, "Tweets", count=num_tweets
+            )
+            num_extracted_tweets += len(tweets_list)
+        except twikit.errors.TooManyRequests:
+            print("User Tweets: Too Many Requests...")
+            time.sleep(FIFTEEN_MINUTES)
+            user_tweets = await self.client.get_user_tweets(
+                user_id, "Tweets", count=num_tweets
+            )
+            num_extracted_tweets += len(tweets_list)
+    
         tweets_list = self.parse_twikit_tweets(user_tweets)
-        num_extracted_tweets += len(tweets_list)
-        dict_list.extend(tweets_list)
+        parsed_tweets_list.extend(tweets_list)
 
         while num_extracted_tweets < num_tweets:
             num_iter += 1
@@ -64,24 +73,19 @@ class UserTweets:
                 if next_tweets:
                     # Parse next tweets
                     next_tweets_list = self.parse_twikit_tweets(next_tweets)
-                    dict_list.extend(next_tweets_list)
+                    parsed_tweets_list.extend(next_tweets_list)
                     num_extracted_tweets += len(next_tweets_list)
                 else:
                     print("No more tweets, moving on to next query")
-                    break
+                    return parsed_tweets_list
             # If errored out on requests, just return what you already have
             except twikit.errors.TooManyRequests:
                 print("Tweets: too many requests, stopping...")
-                return dict_list
+                time.sleep(FIFTEEN_MINUTES)
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
-                time.sleep(self.SLEEP_TIME)
 
-            if num_iter >= self.TWIKIT_THRESHOLD:
-                print("Tweets: Maxed out on requests")
-                return dict_list
-
-        return dict_list
+        return parsed_tweets_list
 
     def x_get_user_tweets(self, user_id, num_tweets):
         """
