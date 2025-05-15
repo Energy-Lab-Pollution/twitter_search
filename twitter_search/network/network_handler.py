@@ -49,7 +49,7 @@ class NetworkHandler:
 
         # Building location output path
         self.location_file_path = (
-            self.base_dir / f"networks/{self.location}/{self.location}.json"
+            self.base_dir / f"networks/{self.location}/{self.location}_new.json"
         )
 
     @staticmethod
@@ -566,11 +566,11 @@ class NetworkHandler:
             f"f) Median retweeters with twikit in {self.location}: {statistics.median(city_retweeters)}"
         )
         print(
-            f"g) Median sum of kolkata retweeters / median sum of twikit retweeters: "
+            f"g) Median sum of {self.location} retweeters / median sum of twikit retweeters: "
             f"{round(statistics.median(city_retweeters) / statistics.median(twikit_retweeters), 2)}"
         )
         print(
-            f"h) Median sum of kolkata retweeters / median sum of all-time retweeters: "
+            f"h) Median sum of {self.location} retweeters / median sum of all-time retweeters: "
             f"{round(statistics.median(city_retweeters) / statistics.median(retweets_list), 2)}"
         )
         self.calculate_rt_queries(location_json)

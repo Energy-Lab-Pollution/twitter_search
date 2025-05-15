@@ -391,9 +391,14 @@ class UserNetwork:
         num_iter = 0
 
         # Parse first set of tweets
-        user_tweets = await self.client.get_user_tweets(
-            user_id, "Tweets", count=self.TWIKIT_COUNT
-        )
+        try:
+            user_tweets = await self.client.get_user_tweets(
+                user_id, "Tweets", count=self.TWIKIT_COUNT
+            )
+        except KeyError:
+            print(f"No Tweets available for user: {user_id}")
+            return dict_list
+
         tweets_list = self.parse_twikit_tweets(user_tweets)
         dict_list.extend(tweets_list)
 
