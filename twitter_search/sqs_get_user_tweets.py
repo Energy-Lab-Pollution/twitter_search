@@ -12,7 +12,6 @@ import twikit
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     TWIKIT_COOKIES_DICT,
-    USER_FIELDS,
 )
 from config_utils.util import (
     client_creator,
@@ -24,6 +23,62 @@ class UserTweets:
     def __init__(self, location):
         self.location = location
         self.sqs_client = boto3.client("sqs", region='us-west-1')
+
+    @staticmethod
+    def parse_twikit_tweets(tweets):
+        """
+        Given a set of tweets, we get a list of dictionaries
+        with the tweets' and retweeters' information
+
+        Args:
+        ----------
+            - tweets (list): list of twikit.Tweet objects
+        Returns:
+        ----------
+            - dict_list (list): list of dictionaries with tweets info
+        """
+        dict_list = []
+        if tweets:
+            for tweet in tweets:
+                tweet_dict = {}
+                tweet_dict["tweet_id"] = tweet.id
+                tweet_dict["tweet_text"] = tweet.text
+                tweet_dict["created_at"] = convert_to_iso_format(
+                    tweet.created_at
+                )
+                tweet_dict["retweet_count"] = tweet.retweet_count
+                tweet_dict["favorite_count"] = tweet.favorite_count
+                dict_list.append(tweet_dict)
+
+        return dict_list
+
+    @staticmethod
+    def parse_x_tweets(tweets_list):
+        """
+        Normalize Tweepy v2 Tweet objects into dicts like your Twikit parser.
+        """
+        parsed_tweets = []
+        for tweet in tweets_list:
+            # t.created_at is a datetime
+            created = (
+                tweet.created_at.isoformat()
+                if isinstance(tweet.created_at, datetime)
+                else tweet.created_at
+            )
+
+            parsed_tweets.append(
+                {
+                    "tweet_id": tweet.id,
+                    "tweet_text": tweet.text,
+                    "created_at": created,
+                    "retweet_count": tweet.public_metrics.get(
+                        "retweet_count", 0
+                    ),
+                    "favorite_count": tweet.public_metrics.get("like_count", 0),
+                }
+            )
+
+        return parsed_tweets
 
     async def twikit_get_user_tweets(self, user_id, num_tweets, account_num):
         """
@@ -102,8 +157,9 @@ class UserTweets:
         """
         user_tweets = []
         next_token = None
+        x_client = client_creator()
         while len(user_tweets) < num_tweets:
-            response = self.x_client.get_users_tweets(
+            response = x_client.get_users_tweets(
                 id=user_id,
                 max_results=num_tweets,
                 pagination_token=next_token,
