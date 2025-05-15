@@ -151,9 +151,11 @@ class UserTweets:
             user_tweets = await self.client.get_user_tweets(
                 user_id, "Tweets", count=num_tweets
             )
-            num_extracted_tweets += len(tweets_list)
 
+        # Parsing and filtering tweets
         tweets_list = self.parse_twikit_tweets(user_tweets)
+        tweets_list = self.filter_tweets(tweets_list)
+        num_extracted_tweets += len(tweets_list)
         parsed_tweets_list.extend(tweets_list)
 
         while num_extracted_tweets < num_tweets:
@@ -164,8 +166,9 @@ class UserTweets:
                 else:
                     next_tweets = await next_tweets.next()
                 if next_tweets:
-                    # Parse next tweets
+                    # Parse next tweets and filter them as well
                     next_tweets_list = self.parse_twikit_tweets(next_tweets)
+                    next_tweets_list = self.filter_tweets(next_tweets_list)
                     parsed_tweets_list.extend(next_tweets_list)
                     num_extracted_tweets += len(next_tweets_list)
                 else:
@@ -314,8 +317,6 @@ if __name__ == "__main__":
             tweets_list = user_tweets.x_get_user_tweets(
                 user_id=root_user_id, num_tweets=args.tweet_count
             )
-
-        tweets_list = user_tweets.filter_tweets(tweets_list)
 
         # TODO: Dump tweets_list to S3
 
