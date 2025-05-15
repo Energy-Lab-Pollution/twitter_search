@@ -180,3 +180,40 @@ class UserTweets:
         parsed_tweets = self.parse_x_tweets(user_tweets)
 
         return parsed_tweets
+
+    def send_to_queue(self, tweets_list, user_id, queue_name):
+        """
+        Sends tweet objects to the corresponding queue
+
+        Args:
+            - tweets_list (list): List with the root user's tweet objects 
+            - user_id (str): String with the root user's id
+            - queue_name (str): Queue Name
+        """
+        queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)[
+            "QueueUrl"
+        ]
+        if not tweets_list:
+            print("No tweets to send to queue")
+            return
+        for tweet in tweets_list:
+            print(f"Sending tweet {tweet['tweet_id']}")
+            message = {
+                "tweet_id": tweet["tweet_id"],
+                "target_user_id": user_id,
+                "location": self.location,
+            }
+            try:
+                self.sqs_client.send_message(
+                    QueueUrl=queue_url,
+                    MessageBody=json.dumps(message),
+                )
+                print(f"Tweet {tweet['tweet_id']} for {user_id} sent to {queue_name} queue :)")
+            except Exception as err:
+                print(
+                    f"Unable to send tweet {tweet['tweet_id']} for {user_id} to {queue_name} SQS: {err}"
+                )
+
+
+if __name__ == "__main__":
+    pass
