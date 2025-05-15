@@ -1,6 +1,7 @@
 """
 Script to get a given user's tweets
 """
+
 import asyncio
 import datetime
 import json
@@ -19,7 +20,9 @@ from config_utils.util import (
     convert_to_iso_format,
 )
 
-SQS_CLIENT = boto3.client("sqs", region='us-west-1')
+
+SQS_CLIENT = boto3.client("sqs", region="us-west-1")
+
 
 class UserTweets:
     def __init__(self, location):
@@ -143,7 +146,7 @@ class UserTweets:
                 user_id, "Tweets", count=num_tweets
             )
             num_extracted_tweets += len(tweets_list)
-    
+
         tweets_list = self.parse_twikit_tweets(user_tweets)
         parsed_tweets_list.extend(tweets_list)
 
@@ -215,13 +218,11 @@ class UserTweets:
         Sends tweet objects to the corresponding queue
 
         Args:
-            - tweets_list (list): List with the root user's tweet objects 
+            - tweets_list (list): List with the root user's tweet objects
             - user_id (str): String with the root user's id
             - queue_name (str): Queue Name
         """
-        queue_url = SQS_CLIENT.get_queue_url(QueueName=queue_name)[
-            "QueueUrl"
-        ]
+        queue_url = SQS_CLIENT.get_queue_url(QueueName=queue_name)["QueueUrl"]
         if not tweets_list:
             print("No tweets to send to queue")
             return
@@ -237,7 +238,9 @@ class UserTweets:
                     QueueUrl=queue_url,
                     MessageBody=json.dumps(message),
                 )
-                print(f"Tweet {tweet['tweet_id']} for {user_id} sent to {queue_name} queue :)")
+                print(
+                    f"Tweet {tweet['tweet_id']} for {user_id} sent to {queue_name} queue :)"
+                )
             except Exception as err:
                 print(
                     f"Unable to send tweet {tweet['tweet_id']} for {user_id} to {queue_name} SQS: {err}"
@@ -255,7 +258,7 @@ if __name__ == "__main__":
         "--extraction_type",
         type=str,
         choices=["twikit", "X"],
-        help="Choose how to get users",
+        help="Choose how to get user's tweets",
     )
     parser.add_argument(
         "--account_num",
@@ -293,24 +296,28 @@ if __name__ == "__main__":
 
         if args.extraction_type == "twikit":
             tweets_list = asyncio.run(
-                user_tweets.twikit_get_user_tweets(user_id=root_user_id,
-                                                num_tweets=args.tweet_count,
-                                                account_num=args.account_num)
+                user_tweets.twikit_get_user_tweets(
+                    user_id=root_user_id,
+                    num_tweets=args.tweet_count,
+                    account_num=args.account_num,
+                )
             )
         elif args.extraction_type == "X":
-            tweets_list = user_tweets.x_get_user_tweets(user_id=root_user_id,
-                                                        num_tweets=args.tweet_count)
-        
+            tweets_list = user_tweets.x_get_user_tweets(
+                user_id=root_user_id, num_tweets=args.tweet_count
+            )
+
         tweets_list = user_tweets.filter_tweets(tweets_list)
 
         # TODO: Dump tweets_list to S3
 
         # Send tweets to retweeters queue
-        user_tweets.send_to_queue(tweets_list, user_id=root_user_id, queue_name="UserRetweeters")
+        user_tweets.send_to_queue(
+            tweets_list, user_id=root_user_id, queue_name="UserRetweeters"
+        )
 
         # Delete root user message from queue so it is not picked up again
         SQS_CLIENT.delete_message(
-                QueueUrl=AWS_SQS_USER_TWEETS_URL,
-                ReceiptHandle=receipt_handle,
-            )
-    
+            QueueUrl=AWS_SQS_USER_TWEETS_URL,
+            ReceiptHandle=receipt_handle,
+        )
