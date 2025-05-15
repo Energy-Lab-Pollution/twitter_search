@@ -7,7 +7,7 @@ import os
 import re
 from datetime import datetime
 
-import googlemaps
+import boto3
 import tweepy
 
 # Local imports
@@ -33,19 +33,6 @@ USER_FIELDS = [
     "url",
     "username",
 ]
-
-
-def load_json(path):
-    """
-    Reads a JSON file and returns the data
-    """
-    try:
-        with open(path, "r") as f:
-            existing_data = json.load(f)
-    except FileNotFoundError:
-        existing_data = []
-
-    return existing_data
 
 
 def strtobool(val):
@@ -118,6 +105,20 @@ def list_filter_keywords(all_lists, location):
 
     return list(filtered_lists)
 
+# JSON manipulation util functions
+
+def load_json(path):
+    """
+    Reads a JSON file and returns the data
+    """
+    try:
+        with open(path, "r") as f:
+            existing_data = json.load(f)
+    except FileNotFoundError:
+        existing_data = []
+
+    return existing_data
+
 
 def remove_duplicate_records(records):
     """
@@ -155,6 +156,95 @@ def remove_duplicate_records(records):
             seen_records.add(record_id)
 
     return unique_records
+
+def flatten_and_remove_empty(input_list):
+    """
+    Flatten a list of lists into a single list and remove any empty lists within it.
+
+    Args:
+        input_list (list): The list of lists to be flattened and cleaned.
+
+    Returns:
+        list: The flattened list with empty lists removed.
+    """
+    new_list = []
+    for item in input_list:
+        if isinstance(item, list):
+            subitems = [subitem for subitem in item]
+            new_list.extend(subitems)
+        else:
+            new_list.append(item)
+
+    return new_list
+
+# ================== GeoLocation ======================
+
+def geocode_address(address, geolocator):
+    """
+    Geocodes an address using the geopy library
+    """
+    try:
+        location = geolocator.geocode(address, timeout=GEOCODE_TIMEOUT)
+
+        if location:
+            return location.latitude, location.longitude
+        else:
+            print(f"Address '{address}' could not be geocoded.")
+            return None, None
+
+    except GeocoderTimedOut:
+        print(f"Geocoding service timed out for address: '{address}'")
+        return None, None
+
+    except GeocoderServiceError as e:
+        print(f"Geocoding service error: {e}")
+        return None, None
+
+
+# ================= Tweepy utils =========================
+
+def client_creator():
+    """
+    Creates a wrapper for the Twitter API client.
+    """
+    consumer_key = config.consumer_key
+    consumer_secret = config.consumer_secret
+    access_token = config.access_token
+    access_token_secret = config.access_token_secret
+    bearer_token = config.bearer_token
+
+    return tweepy.Client(
+        bearer_token=bearer_token,
+        consumer_key=consumer_key,
+        consumer_secret=consumer_secret,
+        access_token=access_token,
+        access_token_secret=access_token_secret,
+        wait_on_rate_limit=True,
+    )
+
+
+def api_v1_creator():
+    """
+    Creates a tweepy.API wrapper for Twitter v1.1 endpoints (e.g. followers/list).
+    """
+    consumer_key = config.consumer_key
+    consumer_secret = config.consumer_secret
+    access_token = config.access_token
+    access_token_secret = config.access_token_secret
+
+    # 1) Build the OAuth1 handler
+    auth = tweepy.OAuth1UserHandler(
+        consumer_key, consumer_secret, access_token, access_token_secret
+    )
+
+    # 2) Create and return the API object, with rate-limit handling turned on
+    return tweepy.API(
+        auth,
+        wait_on_rate_limit=True,
+        retry_count=3,  # auto-retry transient network errors
+        retry_delay=5,
+        retry_errors={401, 404, 500, 502, 503, 504},
+    )
 
 
 def tweet_dictmaker(tweet_list):
@@ -262,78 +352,7 @@ def list_dictmaker(incoming_datastruct):
     return dict_list
 
 
-def gmaps_client():
-    """
-    Creates google maps client
-    """
-    return googlemaps.Client(key=config.SECRET_KEY)
-
-
-def geocode_address(address, geolocator):
-    """
-    Geocodes an address using the geopy library
-    """
-    try:
-        location = geolocator.geocode(address, timeout=GEOCODE_TIMEOUT)
-
-        if location:
-            return location.latitude, location.longitude
-        else:
-            print(f"Address '{address}' could not be geocoded.")
-            return None, None
-
-    except GeocoderTimedOut:
-        print(f"Geocoding service timed out for address: '{address}'")
-        return None, None
-
-    except GeocoderServiceError as e:
-        print(f"Geocoding service error: {e}")
-        return None, None
-
-
-def client_creator():
-    """
-    Creates a wrapper for the Twitter API client.
-    """
-    consumer_key = config.consumer_key
-    consumer_secret = config.consumer_secret
-    access_token = config.access_token
-    access_token_secret = config.access_token_secret
-    bearer_token = config.bearer_token
-
-    return tweepy.Client(
-        bearer_token=bearer_token,
-        consumer_key=consumer_key,
-        consumer_secret=consumer_secret,
-        access_token=access_token,
-        access_token_secret=access_token_secret,
-        wait_on_rate_limit=True,
-    )
-
-
-def api_v1_creator():
-    """
-    Creates a tweepy.API wrapper for Twitter v1.1 endpoints (e.g. followers/list).
-    """
-    consumer_key = config.consumer_key
-    consumer_secret = config.consumer_secret
-    access_token = config.access_token
-    access_token_secret = config.access_token_secret
-
-    # 1) Build the OAuth1 handler
-    auth = tweepy.OAuth1UserHandler(
-        consumer_key, consumer_secret, access_token, access_token_secret
-    )
-
-    # 2) Create and return the API object, with rate-limit handling turned on
-    return tweepy.API(
-        auth,
-        wait_on_rate_limit=True,
-        retry_count=3,  # auto-retry transient network errors
-        retry_delay=5,
-        retry_errors={401, 404, 500, 502, 503, 504},
-    )
-
+# ================== Location checking util function ===========
 
 def check_location(raw_location, target_location):
     """
@@ -368,29 +387,7 @@ def check_location(raw_location, target_location):
         return False
 
 
-def flatten_and_remove_empty(input_list):
-    """
-    Flatten a list of lists into a single list and remove any empty lists within it.
-
-    Args:
-        input_list (list): The list of lists to be flattened and cleaned.
-
-    Returns:
-        list: The flattened list with empty lists removed.
-    """
-    new_list = []
-    for item in input_list:
-        if isinstance(item, list):
-            subitems = [subitem for subitem in item]
-            new_list.extend(subitems)
-        else:
-            new_list.append(item)
-
-    return new_list
-
-
-# JSON Creators
-
+# ============================== JSON Creators =========================
 
 def json_maker(file_path, data_to_append):
     """
