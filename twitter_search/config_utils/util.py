@@ -8,12 +8,13 @@ import re
 from datetime import datetime
 
 import boto3
+import botocore
 import tweepy
 
 # Local imports
 from config_utils import config
 from config_utils.cities import ALIAS_DICT
-from config_utils.constants import GEOCODE_TIMEOUT
+from config_utils.constants import GEOCODE_TIMEOUT, REGION_NAME
 from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 
 
@@ -475,3 +476,19 @@ def convert_to_iso_format(date_string):
     except ValueError:
         print(f"Invalid date format: {date_string}")
         return None
+
+# ========================== AWS Utils ================================
+
+
+def upload_to_s3(local_filename, s3_filename, bucket_name):
+    """
+    Uploads a given file to S3
+    """
+    s3_client = boto3.client("s3", region_name=REGION_NAME)
+    try:
+        s3_client.upload_file(
+            Filename=local_filename, Bucket=bucket_name, Key=s3_filename
+        )
+
+    except botocore.exceptions.ClientError:
+        print("Upload unsuccessful")
