@@ -1,5 +1,9 @@
 """
-Script to get a given user's tweets
+Script to get a given user's tweets from a Queue,
+the tweets are sent to a separate SQS queue to get retweeters
+
+Author: Federico Dominguez Molina & Vishal Joseph
+Last Updated: May 2025
 """
 
 import asyncio
