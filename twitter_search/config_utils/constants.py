@@ -18,9 +18,9 @@ BUCKET_NAME = "global-rct-users"
 REGION_NAME = "us-west-1"
 
 # SQS Constants
-AWS_SQS_USER_TWEETS_URL = (
-    "https://sqs.us-west-1.amazonaws.com/597088024424/UserTweets"
-)
+SQS_USER_TWEETS = "UserTweets"
+SQS_USER_FOLLOWERS = "UserFollowers"
+SQS_USER_RETWEETERS = "UserRetweeters"
 
 # Construct the path to the cleaned_data directory
 RAW_DATA_PATH = project_root / "data" / "raw_data"

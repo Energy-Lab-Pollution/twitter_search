@@ -11,8 +11,9 @@ from argparse import ArgumentParser
 import boto3
 import twikit
 from config_utils.constants import (
-    AWS_SQS_USER_TWEETS_URL,
     FIFTEEN_MINUTES,
+    SQS_USER_RETWEETERS,    
+    SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.util import (
@@ -134,11 +135,12 @@ class UserTweets:
 
         # Parse first set of tweets
 
+        # TODO: Get user tweets
         try:
             user_tweets = await self.client.get_user_tweets(
                 user_id, "Tweets", count=num_tweets
             )
-            num_extracted_tweets += len(user_tweets_list)
+            num_extracted_tweets += len(user_tweets)
         except twikit.errors.TooManyRequests:
             print("User Tweets: Too Many Requests...")
             time.sleep(FIFTEEN_MINUTES)
@@ -234,7 +236,7 @@ class UserTweets:
                 "location": self.location,
             }
             try:
-                self.sqs_client.send_message(
+                SQS_CLIENT.send_message(
                     QueueUrl=queue_url,
                     MessageBody=json.dumps(message),
                 )
@@ -245,6 +247,7 @@ class UserTweets:
                 print(
                     f"Unable to send tweet {tweet['tweet_id']} for {user_id} to {queue_name} SQS: {err}"
                 )
+                continue
 
 
 if __name__ == "__main__":
@@ -267,10 +270,12 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    user_tweets_queue_url = SQS_CLIENT.get_queue_url(QueueName=SQS_USER_TWEETS)["QueueUrl"]
 
     while True:
+        # Pass Queue Name and get its URL
         response = SQS_CLIENT.receive_message(
-            QueueUrl=AWS_SQS_USER_TWEETS_URL,
+            QueueUrl=user_tweets_queue_url,
             MaxNumberOfMessages=1,
             WaitTimeSeconds=10,
         )
@@ -290,7 +295,6 @@ if __name__ == "__main__":
 
         root_user_id = str(clean_data["user_id"])
         location = clean_data["location"]
-        s3_key_result_file = clean_data["s3_key_result_file"]
 
         user_tweets = UserTweets(location)
 
@@ -313,11 +317,11 @@ if __name__ == "__main__":
 
         # Send tweets to retweeters queue
         user_tweets.send_to_queue(
-            tweets_list, user_id=root_user_id, queue_name="UserRetweeters"
+            tweets_list, user_id=root_user_id, queue_name=SQS_USER_RETWEETERS
         )
 
         # Delete root user message from queue so it is not picked up again
         SQS_CLIENT.delete_message(
-            QueueUrl=AWS_SQS_USER_TWEETS_URL,
+            QueueUrl=user_tweets_queue_url,
             ReceiptHandle=receipt_handle,
         )
