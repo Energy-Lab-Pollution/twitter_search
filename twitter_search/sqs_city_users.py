@@ -21,6 +21,8 @@ from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
     INFLUENCER_FOLLOWERS_THRESHOLD,
+    SQS_USER_FOLLOWERS,
+    SQS_USER_TWEETS,
     TWEET_FIELDS,
     TWIKIT_COOKIES_DICT,
     USER_FIELDS,
@@ -512,5 +514,5 @@ if __name__ == "__main__":
 
     # TODO: Upload user attributes to Neptune -- Neptune handler class
 
-    city_users.send_to_queue(users_list, "UserTweets")
-    city_users.send_to_queue(users_list, "UserFollowers")
+    city_users.send_to_queue(users_list, SQS_USER_TWEETS)
+    city_users.send_to_queue(users_list, SQS_USER_FOLLOWERS)
