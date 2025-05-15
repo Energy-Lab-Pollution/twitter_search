@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 
 import boto3
+import botocore
 import pandas as pd
 import twikit
 from config_utils.cities import CITIES_LANGS, LOCATION_ALIAS_DICT
@@ -21,6 +22,8 @@ from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
     INFLUENCER_FOLLOWERS_THRESHOLD,
+    REGION_NAME,
+    NEPTUNE_S3_BUCKET,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
     TWEET_FIELDS,
@@ -444,6 +447,22 @@ class CityUsers:
                     f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}"
                 )
 
+    def insert_descriptions_to_s3(self, users_list):
+        """
+        Function to insert each user's description as
+        a txt file to S3
+        """
+        s3_client = boto3.client("s3", region_name=REGION_NAME)
+        for user in users_list:
+            s3_path = f"networks/{self.location}/classification/description_{user['user_id']}.txt"
+            try:
+                s3_client.put_object(
+                    Bucket=NEPTUNE_S3_BUCKET,
+                    Key=s3_path,
+                    Body=user["description"]
+                )
+            except botocore.exceptions.ClientError:
+                print(f"Unable to upload description for {user['user_id']}")
 
 if __name__ == "__main__":
     parser = ArgumentParser(
