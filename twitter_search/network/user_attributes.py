@@ -3,7 +3,6 @@ Script to add missing user attributes for Kolkata and Kanpur
 """
 
 import json
-import re
 import time
 from datetime import datetime, timedelta
 from pathlib import Path

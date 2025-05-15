@@ -449,7 +449,7 @@ class NetworkHandler:
             num_original_tweets = 0
             num_tweets_with_retweeters = 0
             num_tweets_with_retweeters_twikit = 0
-            if not "followers_count" in user_dict:
+            if "followers_count" not in user_dict:
                 print(user_dict)
                 continue
             if user_dict["followers_count"] > 0:

@@ -104,7 +104,7 @@ class UserTweets:
             if (not tweet_dict["tweet_text"].startswith("RT @")) and (
                 tweet_dict["retweet_count"] > 0
             ):
-                if not tweet_id in unique_ids:
+                if tweet_id not in unique_ids:
                     unique_ids.append(str(tweet_id))
                     new_tweets_list.append(new_tweets_list)
             else:
@@ -138,7 +138,7 @@ class UserTweets:
             user_tweets = await self.client.get_user_tweets(
                 user_id, "Tweets", count=num_tweets
             )
-            num_extracted_tweets += len(tweets_list)
+            num_extracted_tweets += len(user_tweets_list)
         except twikit.errors.TooManyRequests:
             print("User Tweets: Too Many Requests...")
             time.sleep(FIFTEEN_MINUTES)
