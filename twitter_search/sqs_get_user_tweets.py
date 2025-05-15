@@ -1,7 +1,7 @@
 """
 Script to get a given user's tweets
 """
-
+import asyncio
 import datetime
 import json
 import time
@@ -10,6 +10,7 @@ from argparse import ArgumentParser
 import boto3
 import twikit
 from config_utils.constants import (
+    AWS_SQS_USER_TWEETS_URL,
     FIFTEEN_MINUTES,
     TWIKIT_COOKIES_DICT,
 )
@@ -18,11 +19,11 @@ from config_utils.util import (
     convert_to_iso_format,
 )
 
+SQS_CLIENT = boto3.client("sqs", region='us-west-1')
 
 class UserTweets:
     def __init__(self, location):
         self.location = location
-        self.sqs_client = boto3.client("sqs", region='us-west-1')
 
     @staticmethod
     def parse_twikit_tweets(tweets):
@@ -79,6 +80,34 @@ class UserTweets:
             )
 
         return parsed_tweets
+
+    @staticmethod
+    def filter_tweets(tweets_list):
+        """
+        Keeps tweets that:
+        - are unique
+        - are original tweets (not retweets)
+
+        Args:
+            - tweets_list (list)
+        Returns:
+            - new_tweets_list (list)
+        """
+        new_tweets_list = []
+        unique_ids = []
+
+        for tweet_dict in tweets_list:
+            tweet_id = tweet_dict["tweet_id"]
+            if (not tweet_dict["tweet_text"].startswith("RT @")) and (
+                tweet_dict["retweet_count"] > 0
+            ):
+                if not tweet_id in unique_ids:
+                    unique_ids.append(str(tweet_id))
+                    new_tweets_list.append(new_tweets_list)
+            else:
+                continue
+
+        return new_tweets_list
 
     async def twikit_get_user_tweets(self, user_id, num_tweets, account_num):
         """
@@ -190,7 +219,7 @@ class UserTweets:
             - user_id (str): String with the root user's id
             - queue_name (str): Queue Name
         """
-        queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)[
+        queue_url = SQS_CLIENT.get_queue_url(QueueName=queue_name)[
             "QueueUrl"
         ]
         if not tweets_list:
@@ -216,4 +245,72 @@ class UserTweets:
 
 
 if __name__ == "__main__":
-    pass
+    parser = ArgumentParser(
+        "Parameters to get users data to generate a network"
+    )
+    parser.add_argument(
+        "--tweet_count", type=int, help="Number of tweets to get"
+    )
+    parser.add_argument(
+        "--extraction_type",
+        type=str,
+        choices=["twikit", "X"],
+        help="Choose how to get users",
+    )
+    parser.add_argument(
+        "--account_num",
+        type=int,
+        help="Account number to use with twikit",
+    )
+
+    args = parser.parse_args()
+
+    while True:
+        response = SQS_CLIENT.receive_message(
+            QueueUrl=AWS_SQS_USER_TWEETS_URL,
+            MaxNumberOfMessages=1,
+            WaitTimeSeconds=10,
+        )
+        try:
+            message = response["Messages"][0]
+            receipt_handle = message["ReceiptHandle"]
+            data = json.loads(message["Body"])
+
+        except KeyError:
+            # Empty queue
+            print("Empty queue")
+            continue
+
+        # Getting information from body message
+        data = data["Message"]
+        clean_data = json.loads(data)
+
+        root_user_id = str(clean_data["user_id"])
+        location = clean_data["location"]
+        s3_key_result_file = clean_data["s3_key_result_file"]
+
+        user_tweets = UserTweets(location)
+
+        if args.extraction_type == "twikit":
+            tweets_list = asyncio.run(
+                user_tweets.twikit_get_user_tweets(user_id=root_user_id,
+                                                num_tweets=args.tweet_count,
+                                                account_num=args.account_num)
+            )
+        elif args.extraction_type == "X":
+            tweets_list = user_tweets.x_get_user_tweets(user_id=root_user_id,
+                                                        num_tweets=args.tweet_count)
+        
+        tweets_list = user_tweets.filter_tweets(tweets_list)
+
+        # TODO: Dump tweets_list to S3
+
+        # Send tweets to retweeters queue
+        user_tweets.send_to_queue(tweets_list, user_id=root_user_id, queue_name="UserRetweeters")
+
+        # Delete root user message from queue so it is not picked up again
+        SQS_CLIENT.delete_message(
+                QueueUrl=AWS_SQS_USER_TWEETS_URL,
+                ReceiptHandle=receipt_handle,
+            )
+    

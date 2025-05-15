@@ -120,7 +120,8 @@ class CityUsers:
 
         return user_dicts
 
-    def filter_users(self, user_list):
+    @staticmethod
+    def filter_users(user_list):
         """
         Keeps users that:
             - are unique

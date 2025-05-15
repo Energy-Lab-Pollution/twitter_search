@@ -17,6 +17,9 @@ analysis_project_root = script_path.parents[1]
 BUCKET_NAME = "global-rct-users"
 REGION_NAME = "us-west-1"
 
+# SQS Constants
+AWS_SQS_USER_TWEETS_URL = "https://sqs.us-west-1.amazonaws.com/597088024424/UserTweets"
+
 # Construct the path to the cleaned_data directory
 RAW_DATA_PATH = project_root / "data" / "raw_data"
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
