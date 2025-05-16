@@ -10,7 +10,7 @@ import asyncio
 import json
 import time
 from argparse import ArgumentParser
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import boto3
@@ -58,6 +58,12 @@ class CityUsers:
 
         """
         queries = QUERIES_DICT[self.language]
+        date_until = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        date_since = (datetime.now(timezone.utc) - timedelta(days=14))
+
+        date_range = f"since:{date_since} until:{date_until}"
+        # date_range = f"since:2024-10-14 until:2024-10-21"
+        
 
         if self.location in LOCATION_ALIAS_DICT:
             aliases = LOCATION_ALIAS_DICT[self.location]
@@ -75,6 +81,9 @@ class CityUsers:
             query = query.replace("\n", " ").strip()
             query = query.replace("  ", " ")
             query = query.replace("\t", " ")
+
+            query = f"{query} {date_range}"
+            print(query)
 
             new_query_dict[account_type] = query
 
@@ -528,7 +537,7 @@ if __name__ == "__main__":
         f" =========================== After filtering ==================:\n {len(users_list)} users"
     )
     print("\n")
-    print(users_list)
+    # print(users_list)
 
     # TODO: Insert / Check city node
 
