@@ -228,20 +228,20 @@ class UserTweets:
 
     def insert_tweets_to_s3(self, user_id, tweets_list):
         """
-        Function to insert each user's description as
-        a txt file to S3
+        Function to insert each user's tweets as
+        a txt files to S3
         """
         s3_client = boto3.client("s3", region_name=REGION_NAME)
         for tweet in tweets_list:
-            s3_path = f"networks/{self.location}/classification/{user_id}/input/description.txt"
+            s3_path = f"networks/{self.location}/classification/{user_id}/input/tweet_{tweet['tweet_id']}.txt"
             try:
                 s3_client.put_object(
                     Bucket=NEPTUNE_S3_BUCKET,
                     Key=s3_path,
-                    Body=tweet['text']
+                    Body=tweet['tweet_text'].encode('utf-8')
                 )
             except botocore.exceptions.ClientError:
-                print(f"Unable to upload description for {user_id}")
+                print(f"Unable to upload {tweet['tweet_id']} for {user_id}")
                 continue
 
 

@@ -468,7 +468,7 @@ class CityUsers:
                 s3_client.put_object(
                     Bucket=NEPTUNE_S3_BUCKET,
                     Key=s3_path,
-                    Body=user["description"]
+                    Body=user["description"].encode('utf-8')
                 )
             except botocore.exceptions.ClientError:
                 print(f"Unable to upload description for {user['user_id']}")
