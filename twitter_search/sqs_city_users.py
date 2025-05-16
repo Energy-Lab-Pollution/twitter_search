@@ -10,7 +10,7 @@ import asyncio
 import json
 import time
 from argparse import ArgumentParser
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import boto3
@@ -116,8 +116,8 @@ class CityUsers:
             user_dict["retweeter_last_processed"] = "null"
             user_dict["follower_status"] = "pending"
             user_dict["follower_last_processed"] = "null"
-            user_dict["extracted_at"] = datetime.now().isoformat()
-            user_dict["last_updated"] = datetime.now().isoformat()
+            user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
+            user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
             # See if location matches to add city
             location_match = check_location(user["location"], self.location)
             user_dict["city"] = self.location if location_match else None
@@ -195,8 +195,8 @@ class CityUsers:
                 user_dict["retweeter_last_processed"] = "null"
                 user_dict["follower_status"] = "pending"
                 user_dict["follower_last_processed"] = "null"
-                user_dict["extracted_at"] = datetime.now().isoformat()
-                user_dict["last_updated"] = datetime.now().isoformat()
+                user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
+                user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
                 # See if location matches to add city
                 location_match = check_location(
                     tweet.user.location, self.location
@@ -260,8 +260,8 @@ class CityUsers:
                 user_dict["retweeter_last_processed"] = "null"
                 user_dict["follower_status"] = "pending"
                 user_dict["follower_last_processed"] = "null"
-                user_dict["extracted_at"] = datetime.now().isoformat()
-                user_dict["last_updated"] = datetime.now().isoformat()
+                user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
+                user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
 
                 # See if location matches to add city
                 location_match = check_location(
@@ -454,7 +454,7 @@ class CityUsers:
         """
         s3_client = boto3.client("s3", region_name=REGION_NAME)
         for user in users_list:
-            s3_path = f"networks/{self.location}/classification/description_{user['user_id']}.txt"
+            s3_path = f"networks/{self.location}/classification/{user['user_id']}/input/description.txt"
             try:
                 s3_client.put_object(
                     Bucket=NEPTUNE_S3_BUCKET,
@@ -463,6 +463,7 @@ class CityUsers:
                 )
             except botocore.exceptions.ClientError:
                 print(f"Unable to upload description for {user['user_id']}")
+                continue
 
 if __name__ == "__main__":
     parser = ArgumentParser(
@@ -533,5 +534,10 @@ if __name__ == "__main__":
 
     # TODO: Upload user attributes to Neptune -- Neptune handler class
 
+    city_users.insert_descriptions_to_s3(users_list)
+
     city_users.send_to_queue(users_list, SQS_USER_TWEETS)
     city_users.send_to_queue(users_list, SQS_USER_FOLLOWERS)
+
+    # TODO: "follower_status": pending, queued, in_progress, completed, failed
+    # here, follower_status will be set as queued

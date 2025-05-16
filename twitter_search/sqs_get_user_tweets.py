@@ -325,6 +325,9 @@ if __name__ == "__main__":
             tweets_list, user_id=root_user_id, queue_name=SQS_USER_RETWEETERS
         )
 
+        # TODO: "retweeter_status": pending, queued, in_progress, "completed", "failed
+        # here, retweeter_status will be set as queued
+
         # Delete root user message from queue so it is not picked up again
         SQS_CLIENT.delete_message(
             QueueUrl=user_tweets_queue_url,
