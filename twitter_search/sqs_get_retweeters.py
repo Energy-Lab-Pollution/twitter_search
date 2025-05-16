@@ -119,7 +119,7 @@ class TweetRetweeters:
 
         return users_list
 
-    async def get_single_tweet_retweeters(self, tweet_id, num_retweeters):
+    async def get_single_tweet_retweeters(self, tweet_id, num_retweeters, account_num):
         """
         For a particular tweet, get all the possible retweeters
 
@@ -130,6 +130,9 @@ class TweetRetweeters:
         ---------
             - retweeters_list (list): List with retweeters info
         """
+        client = twikit.Client("en-US")
+        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
+        
         retweeters_list = []
         more_retweeters_available = True
         self.retweeters_counter += 1
@@ -191,9 +194,10 @@ class TweetRetweeters:
         """
         retweeters_list = []
         next_token = None
+        x_client = client_creator()
 
         while len(retweeters_list) < num_retweeters:
-            response = self.x_client.get_retweeters(
+            response = x_client.get_retweeters(
                 id=tweet_id,
                 max_results=num_retweeters,
                 pagination_token=next_token,

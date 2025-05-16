@@ -487,7 +487,6 @@ class UserNetwork:
                 followers = await self.client.get_user_followers(
                     user_id, count=self.TWIKIT_COUNT
                 )
-                break
             except twikit.errors.NotFound as error:
                 if attempt < max_retries:
                     print(str(error))
