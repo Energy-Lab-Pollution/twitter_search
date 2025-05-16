@@ -26,6 +26,7 @@ from config_utils.constants import (
     NEPTUNE_S3_BUCKET,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
+    THIRTY_DAYS,
     TWEET_FIELDS,
     TWIKIT_COOKIES_DICT,
     USER_FIELDS,
@@ -45,7 +46,7 @@ class CityUsers:
         self.sqs_client = boto3.client("sqs", region_name="us-west-1")
         self.language = CITIES_LANGS[self.location]
 
-    def extract_queries_num_tweets(self, tweet_count):
+    def extract_queries_num_tweets(self, tweet_count, date_since=None, date_until=None):
         """
         This method gets all the queries with the appropiate aliases
         for the desired location, along with the allocated number of
@@ -53,17 +54,18 @@ class CityUsers:
 
         Args
         ----------
-            tweet_count (str): Total number of tweets to be distributed for each
+            - tweet_count (str): Total number of tweets to be distributed for each
                          account type
-
+            - date_since (str): Lower bound date (YYYY-MM-DD) for tweet search
+            - date_until (str): Upper bound date (YYYY-MM-DD) for tweet search
         """
         queries = QUERIES_DICT[self.language]
-        date_until = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        date_since = (datetime.now(timezone.utc) - timedelta(days=14))
+        if not date_until:
+            date_until = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        if not date_since:
+            date_since = (datetime.now(timezone.utc) - timedelta(days=THIRTY_DAYS))
 
-        date_range = f"since:{date_since} until:{date_until}"
-        # date_range = f"since:2024-10-14 until:2024-10-21"
-        
+        date_range = f"since:{date_since} until:{date_until}"        
 
         if self.location in LOCATION_ALIAS_DICT:
             aliases = LOCATION_ALIAS_DICT[self.location]
@@ -75,15 +77,13 @@ class CityUsers:
 
         for account_type in queries:
             query = queries[account_type]
+            # Adding combination of all aliases
             aliases_str = " OR ".join(aliases)
-            # TODO: combination of all aliases
             query = query.replace("location", aliases_str)
             query = query.replace("\n", " ").strip()
             query = query.replace("  ", " ")
             query = query.replace("\t", " ")
-
             query = f"{query} {date_range}"
-            print(query)
 
             new_query_dict[account_type] = query
 
@@ -496,7 +496,17 @@ if __name__ == "__main__":
         help="Account number to use with twikit",
     )
     parser.add_argument(
-        "--num_users",
+        "--date_since",
+        type=int,
+        help="Number of users to get (file based system)",
+    )
+    parser.add_argument(
+        "--date_until",
+        type=int,
+        help="Number of users to get (file based system)",
+    )
+    parser.add_argument(
+        "--date_since",
         type=int,
         help="Number of users to get (file based system)",
     )
@@ -504,10 +514,18 @@ if __name__ == "__main__":
 
     city_users = CityUsers(args.location)
 
+    # Getting dict queries and num of tweets per account
+    if args.extraction_type in ["twikit", "X"]:
+        if args.date_since and args.date_until:
+            new_query_dict, num_tweets_per_account = (
+                city_users.extract_queries_num_tweets(args.tweet_count, args.date_since, args.date_until)
+            )
+        else:
+            new_query_dict, num_tweets_per_account = (
+                city_users.extract_queries_num_tweets(args.tweet_count)
+            )
+
     if args.extraction_type == "twikit":
-        new_query_dict, num_tweets_per_account = (
-            city_users.extract_queries_num_tweets(args.tweet_count)
-        )
         print(f"Number of tweets per account: {num_tweets_per_account}")
         users_list = asyncio.run(
             city_users._get_twikit_city_users(
