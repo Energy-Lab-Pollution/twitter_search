@@ -6,7 +6,7 @@ import asyncio
 
 import twikit
 from config_utils.constants import TWIKIT_COOKIES_DIR, TWIKIT_COUNT
-from config_utils.util import convert_to_yyyy_mm_dd, json_maker
+from config_utils.util import convert_to_iso_format, json_maker
 
 
 class TwikitUserSearcher:
@@ -47,7 +47,7 @@ class TwikitUserSearcher:
             tweet_dict["created_at"] = tweet.created_at
             tweet_dict["author_id"] = tweet.user.id
 
-            parsed_date = convert_to_yyyy_mm_dd(tweet.created_at)
+            parsed_date = convert_to_iso_format(tweet.created_at)
 
             user_dict = {}
             user_dict["user_id"] = tweet.user.id
