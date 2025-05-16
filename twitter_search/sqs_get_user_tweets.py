@@ -13,9 +13,13 @@ import time
 from argparse import ArgumentParser
 
 import boto3
+import botocore
 import twikit
+
 from config_utils.constants import (
     FIFTEEN_MINUTES,
+    NEPTUNE_S3_BUCKET,
+    REGION_NAME,
     SQS_USER_RETWEETERS,    
     SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
@@ -221,6 +225,25 @@ class UserTweets:
         parsed_tweets = self.parse_x_tweets(user_tweets)
 
         return parsed_tweets
+
+    def insert_tweets_to_s3(self, user_id, tweets_list):
+        """
+        Function to insert each user's description as
+        a txt file to S3
+        """
+        s3_client = boto3.client("s3", region_name=REGION_NAME)
+        for tweet in tweets_list:
+            s3_path = f"networks/{self.location}/classification/{user_id}/input/description.txt"
+            try:
+                s3_client.put_object(
+                    Bucket=NEPTUNE_S3_BUCKET,
+                    Key=s3_path,
+                    Body=tweet['text']
+                )
+            except botocore.exceptions.ClientError:
+                print(f"Unable to upload description for {user_id}")
+                continue
+
 
     def send_to_queue(self, tweets_list, user_id, queue_name):
         """
