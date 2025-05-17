@@ -2,16 +2,14 @@
 Script to pull tweets and retweeters from a particular user,
 """
 
-import re
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 import tweepy
 import twikit
-from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
-    SIXTEEN_MINUTES,
-    TWIKIT_COOKIES_DIR,
+    FIFTEEN_MINUTES,
+    TWIKIT_COOKIES_DICT,
     TWIKIT_COUNT,
     TWIKIT_FOLLOWERS_THRESHOLD,
     TWIKIT_RETWEETERS_THRESHOLD,
@@ -24,6 +22,7 @@ from config_utils.constants import (
 )
 from config_utils.util import (
     api_v1_creator,
+    check_location,
     client_creator,
     convert_to_iso_format,
     network_json_maker,
@@ -34,14 +33,16 @@ class UserNetwork:
     TWIKIT_THRESHOLD = TWIKIT_TWEETS_THRESHOLD
     TWIKIT_FOLLOWERS_THRESHOLD = TWIKIT_FOLLOWERS_THRESHOLD
     TWIKIT_RETWEETERS_THRESHOLD = TWIKIT_RETWEETERS_THRESHOLD
-    TWIKIT_COOKIES_DIR = TWIKIT_COOKIES_DIR
+    TWIKIT_COOKIES_DICT = TWIKIT_COOKIES_DICT
     TWIKIT_COUNT = TWIKIT_COUNT
     SLEEP_TIME = 2
 
-    def __init__(self, output_file_path, location):
+    def __init__(self, output_file_path, location, account_num=1):
         # Twikit Client
         self.client = twikit.Client("en-US")
-        self.client.load_cookies(self.TWIKIT_COOKIES_DIR)
+        self.client.load_cookies(
+            self.TWIKIT_COOKIES_DICT[f"account_{account_num}"]
+        )
 
         # X Tweepy Client
         self.x_client = client_creator()
@@ -52,37 +53,6 @@ class UserNetwork:
 
         # Setting retweeters counter at the top level
         self.retweeters_counter = 0
-
-    @staticmethod
-    def check_location(raw_location, target_location):
-        """
-        Uses regex to see if the raw location matches
-        the target location
-        """
-
-        target_locations = [target_location]
-
-        # alias is the key, target loc is the value
-        for alias, value in ALIAS_DICT.items():
-            if value == target_location:
-                target_locations.append(alias)
-
-        if isinstance(raw_location, str):
-            raw_location = raw_location.lower().strip()
-            location_regex = re.findall(r"\w+", raw_location)
-
-            if location_regex:
-                for target_location in target_locations:
-                    if target_location in location_regex:
-                        return True
-                    elif target_location in raw_location:
-                        return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
 
     def parse_x_users(self, user_list):
         """
@@ -115,16 +85,17 @@ class UserNetwork:
                 user_dict[key] = value
 
             # TODO: Adding new attributes
-            user_dict["category"] = None
-            user_dict["treatment_arm"] = None
-            user_dict["processing_status"] = "pending"
-            user_dict["extracted_at"] = datetime.now().isoformat()
-            user_dict["last_processed"] = datetime.now().isoformat()
-            user_dict["last_updated"] = datetime.now().isoformat()
+            user_dict["category"] = "null"
+            user_dict["treatment_arm"] = "null"
+            # Followers and retweeters status
+            user_dict["retweeter_status"] = "pending"
+            user_dict["retweeter_last_processed"] = "null"
+            user_dict["follower_status"] = "pending"
+            user_dict["follower_last_processed"] = "null"
+            user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
+            user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
             # See if location matches to add city
-            location_match = self.check_location(
-                user["location"], self.location
-            )
+            location_match = check_location(user["location"], self.location)
             user_dict["city"] = self.location if location_match else None
             user_dicts.append(user_dict)
 
@@ -155,20 +126,22 @@ class UserNetwork:
                 user_dict["followers_count"] = user.followers_count
                 user_dict["following_count"] = user.following_count
                 user_dict["tweets_count"] = user.statuses_count
-                # TODO: Check difference between verified and is_blue_verified
                 user_dict["verified"] = user.verified
                 user_dict["created_at"] = convert_to_iso_format(user.created_at)
-                # TODO: Adding new attributes
-                user_dict["category"] = None
-                user_dict["treatment_arm"] = None
-                user_dict["processing_status"] = "pending"
-                user_dict["extracted_at"] = datetime.now().isoformat()
-                user_dict["last_processed"] = datetime.now().isoformat()
-                user_dict["last_updated"] = datetime.now().isoformat()
+                user_dict["category"] = "null"
+                user_dict["treatment_arm"] = "null"
+                user_dict["retweeter_status"] = "pending"
+                user_dict["retweeter_last_processed"] = "null"
+                user_dict["follower_status"] = "pending"
+                user_dict["follower_last_processed"] = "null"
+                user_dict["extracted_at"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
+                user_dict["last_updated"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
                 # See if location matches to add city
-                location_match = self.check_location(
-                    user.location, self.location
-                )
+                location_match = check_location(user.location, self.location)
                 user_dict["city"] = self.location if location_match else None
                 users_list.append(user_dict)
 
@@ -422,9 +395,14 @@ class UserNetwork:
         num_iter = 0
 
         # Parse first set of tweets
-        user_tweets = await self.client.get_user_tweets(
-            user_id, "Tweets", count=self.TWIKIT_COUNT
-        )
+        try:
+            user_tweets = await self.client.get_user_tweets(
+                user_id, "Tweets", count=self.TWIKIT_COUNT
+            )
+        except KeyError:
+            print(f"No Tweets available for user: {user_id}")
+            return dict_list
+
         tweets_list = self.parse_twikit_tweets(user_tweets)
         dict_list.extend(tweets_list)
 
@@ -520,7 +498,7 @@ class UserNetwork:
                     print(
                         f"Followers: Not Found - retrying (attempt {attempt})"
                     )
-                    time.sleep(90)
+                    time.sleep(60)
                 else:
                     print(
                         f"Followers: Not Found after {max_retries} attempts - giving up"
@@ -629,31 +607,35 @@ class UserNetwork:
         Args:
             - user_dict (dict): User dict
         """
-        # TODO: processing_status is pending
         # extracted_at is null - take midpoint for when we got these root users
-        # last_modified is null
 
         # First get tweets, without retweeters
-        user_dict["processing_status"] = "in progress"
         print("Getting user tweets")
         user_tweets = await self.twikit_get_user_tweets(user_dict["user_id"])
 
         time.sleep(30)
+        user_dict["retweeter_status"] = "in progress"
         print("Getting user retweeters")
         user_tweets = await self.twikit_add_retweeters(user_tweets)
+        user_dict["retweeter_last_processed"] = datetime.now(
+            timezone.utc
+        ).isoformat()
+        user_dict["retweeter_status"] = "completed"
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
-        time.sleep(45)
+        time.sleep(30)
+        user_dict["follower_status"] = "in progress"
         followers = await self.twikit_get_followers(user_dict["user_id"])
+        user_dict["follower_last_processed"] = datetime.now(
+            timezone.utc
+        ).isoformat()
+        user_dict["follower_status"] = "completed" if followers else "failed"
         user_dict["followers"] = followers
 
         # Will put the extracted data into a list
         # Easier to extend future data
         user_dict_list = [user_dict]
-        user_dict["last_processed"] = datetime.now().isoformat()
-        user_dict["processing_status"] = "completed"
-
         network_json_maker(self.output_file_path, user_dict_list)
         print(f"Stored {user_dict['user_id']} data")
 
@@ -669,23 +651,28 @@ class UserNetwork:
         # extracted_at is null - take midpoint for when we got these root users
         # last_modified is null
         # First get tweets, without retweeters
-        user_dict["processing_status"] = "in progress"
         print("Getting user tweets")
         user_tweets = self.x_get_user_tweets(user_dict["user_id"])
 
         print("Getting user retweeters")
         user_tweets = self.x_add_retweeters(user_tweets)
+        user_dict["retweeter_last_processed"] = datetime.now(
+            timezone.utc
+        ).isoformat()
+        user_dict["retweeter_status"] = "completed"
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
         followers = self.x_get_followers(user_dict["user_id"])
+        user_dict["follower_last_processed"] = datetime.now(
+            timezone.utc
+        ).isoformat()
+        user_dict["follower_status"] = "completed" if followers else "failed"
         user_dict["followers"] = followers
 
         # Will put the extracted data into a list
         # Easier to extend future data
         user_dict_list = [user_dict]
-        user_dict["last_processed"] = datetime.now().isoformat()
-        user_dict["processing_status"] = "completed"
 
         network_json_maker(self.output_file_path, user_dict_list)
         print(f"Stored {user_dict['user_id']} data")
@@ -703,4 +690,4 @@ class UserNetwork:
         else:
             # If file or twikit extraction method, use twikit
             await self.run_twikit(user_dict)
-            time.sleep(SIXTEEN_MINUTES)
+            time.sleep(FIFTEEN_MINUTES)

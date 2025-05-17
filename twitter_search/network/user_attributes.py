@@ -3,7 +3,6 @@ Script to add missing user attributes for Kolkata and Kanpur
 """
 
 import json
-import re
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -15,9 +14,10 @@ from config_utils.cities import ALIAS_DICT
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     SIXTEEN_MINUTES,
-    TWIKIT_FDM_COOKIES_DIR,
+    TWIKIT_COOKIES_DICT,
 )
 from config_utils.util import (
+    check_location,
     convert_to_iso_format,
     load_json,
     network_json_maker,
@@ -32,9 +32,10 @@ class UserAttributes:
 
     FIFTEEN_MINUTES = FIFTEEN_MINUTES
     ALIAS_DICT = ALIAS_DICT
-    PROBLEMATIC_USERS = ["1249023238488768512", "147195485"]
+    TWIKIT_COOKIES_DICT = TWIKIT_COOKIES_DICT
 
-    def __init__(self, location):
+    def __init__(self, location, account_num):
+        self.account_num = account_num
         self.location = location.lower()
         self.base_dir = Path(__file__).parent.parent / "data/"
         # Building location output path
@@ -49,38 +50,7 @@ class UserAttributes:
             / f"networks/{self.location}/{self.location}_users.json"
         )
 
-    @staticmethod
-    def check_location(raw_location, target_location):
-        """
-        Uses regex to see if the raw location matches
-        the target location
-        """
-
-        target_locations = [target_location]
-
-        # alias is the key, target loc is the value
-        for alias, value in ALIAS_DICT.items():
-            if value == target_location:
-                target_locations.append(alias)
-
-        if isinstance(raw_location, str):
-            raw_location = raw_location.lower().strip()
-            location_regex = re.findall(r"\w+", raw_location)
-
-            if location_regex:
-                for target_location in target_locations:
-                    if target_location in location_regex:
-                        return True
-                    elif target_location in raw_location:
-                        return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
-
-    async def get_user_attributes(self, client, user_id):
+    async def get_user_attributes(self, client, user_id, root_user):
         """
         Function to get all user attributes when we only get their
         ids from the existing file
@@ -107,9 +77,9 @@ class UserAttributes:
             except twikit.errors.NotFound:
                 print("User Attributes: Not Found")
                 return user_dict
-            # except twikit.errors.TwitterException as err:
-            #     print(f"User Attributes: Twitter Error ({err} - {user_id})")
-            #     return user_dict
+            except twikit.errors.TwitterException as err:
+                print(f"User Attributes: Twitter Error ({err} - {user_id})")
+                return user_dict
             user_dict["user_id"] = user_obj.id
             user_dict["username"] = user_obj.screen_name
             user_dict["description"] = user_obj.description
@@ -124,17 +94,25 @@ class UserAttributes:
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
-            user_dict["processing_status"] = "pending"
-            user_dict["extracted_at"] = datetime.now().isoformat()
             # TODO: Needs to be a value of our choice
             last_date = datetime.now() - timedelta(days=14)
-            user_dict["last_processed"] = last_date.isoformat()
+            user_dict["extracted_at"] = last_date.isoformat()
+            user_dict["retweeter_status"] = (
+                "completed" if root_user else "pending"
+            )
+            user_dict["retweeter_last_processed"] = (
+                last_date.isoformat() if root_user else None
+            )
+            user_dict["follower_status"] = (
+                "completed" if root_user else "pending"
+            )
+            user_dict["follower_last_processed"] = (
+                last_date.isoformat() if root_user else None
+            )
             user_dict["last_updated"] = datetime.now().isoformat()
 
             # See if location matches to add city
-            location_match = self.check_location(
-                user_obj.location, self.location
-            )
+            location_match = check_location(user_obj.location, self.location)
             user_dict["city"] = self.location if location_match else None
             success = True
 
@@ -168,6 +146,11 @@ class UserAttributes:
         """
         for existing_user in self.existing_users:
             if user_id == existing_user["user_id"]:
+                # Adding pending fields
+                existing_user["retweeter_status"] = "pending"
+                existing_user["retweeter_last_processed"] = None
+                existing_user["follower_status"] = "pending"
+                existing_user["follower_last_processed"] = None
                 return existing_user
 
     def _get_already_processed_users(self):
@@ -189,8 +172,6 @@ class UserAttributes:
         Gets the user attributes for root users, followers
         and retweeters
         """
-        new_location_json = []
-
         # Already re-processed users with all attributes:
         processed_users = self._get_already_processed_users()
 
@@ -199,7 +180,9 @@ class UserAttributes:
             users_list = json.load(f)
 
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_FDM_COOKIES_DIR)
+        client.load_cookies(
+            self.TWIKIT_COOKIES_DICT[f"account_{self.account_num}"]
+        )
 
         for user_dict in users_list:
             tweets = user_dict["tweets"]
@@ -212,9 +195,9 @@ class UserAttributes:
             print(f"Processing user {user_dict['user_id']}...")
             # Getting add
             user_attributes_dict = await self.get_user_attributes(
-                client, str(user_dict["user_id"])
+                client, str(user_dict["user_id"]), root_user=True
             )
-            if "last_processed" not in user_attributes_dict:
+            if "retweeter_status" not in user_attributes_dict:
                 continue
             # Adding attributes to retweeters
             new_user_tweets = []
@@ -238,11 +221,13 @@ class UserAttributes:
                             try:
                                 retweeter_attributes_dict = (
                                     await self.get_user_attributes(
-                                        client, str(retweeter["user_id"])
+                                        client,
+                                        str(retweeter["user_id"]),
+                                        root_user=False,
                                     )
                                 )
                                 self.store_user_attributes(
-                                    retweeter_attributes_dict
+                                    retweeter_attributes_dict,
                                 )
                                 processed_retweeters.append(
                                     retweeter_attributes_dict
@@ -276,7 +261,9 @@ class UserAttributes:
                     try:
                         follower_attributes_dict = (
                             await self.get_user_attributes(
-                                client, str(follower["user_id"])
+                                client,
+                                str(follower["user_id"]),
+                                root_user=False,
                             )
                         )
                         self.store_user_attributes(follower_attributes_dict)
@@ -292,7 +279,10 @@ class UserAttributes:
             # Add newly processed followers
             user_attributes_dict["followers"] = new_user_followers
             self.existing_users = load_json(self.location_users_path)
-            new_location_json.append(user_attributes_dict)
+            # self.existing_users = remove_duplicate_records(self.existing_users)
+            # network_json_maker(self.location_users_path, self.existing_users)
+            # processed_users = self._get_already_processed_users()
+
             # New JSON saved with a new filename
             network_json_maker(
                 self.new_location_file_path, [user_attributes_dict]

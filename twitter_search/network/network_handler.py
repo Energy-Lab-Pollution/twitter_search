@@ -111,11 +111,13 @@ class NetworkHandler:
                 tweet.user.created_at
             )
             # TODO: Adding new attributes
-            user_dict["category"] = None
-            user_dict["treatment_arm"] = None
-            user_dict["processing_status"] = "pending"
+            user_dict["category"] = "null"
+            user_dict["treatment_arm"] = "null"
+            user_dict["retweeter_status"] = "pending"
+            user_dict["retweeter_last_processed"] = "null"
+            user_dict["follower_status"] = "pending"
+            user_dict["follower_last_processed"] = "null"
             user_dict["extracted_at"] = datetime.now().isoformat()
-            user_dict["last_processed"] = datetime.now().isoformat()
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
             location_match = self.check_location(
@@ -159,9 +161,11 @@ class NetworkHandler:
             # TODO: Adding new attributes
             user_dict["category"] = None
             user_dict["treatment_arm"] = None
-            user_dict["processing_status"] = "pending"
+            user_dict["retweeter_status"] = "pending"
+            user_dict["retweeter_last_processed"] = None
+            user_dict["follower_status"] = "pending"
+            user_dict["follower_last_processed"] = None
             user_dict["extracted_at"] = datetime.now().isoformat()
-            user_dict["last_processed"] = None
             user_dict["last_updated"] = datetime.now().isoformat()
             # See if location matches to add city
             location_match = self.check_location(
@@ -297,11 +301,9 @@ class NetworkHandler:
             return users_list
 
         if extraction_type == "twikit":
-            users_list = await self._get_twikit_city_users()
+            self.users_list = await self._get_twikit_city_users()
         elif extraction_type == "x":
-            users_list = self._get_x_city_users()
-
-        return users_list
+            self.users_list = self._get_x_city_users()
 
     def _get_already_processed_users(self):
         """
@@ -314,7 +316,7 @@ class NetworkHandler:
         if existing_data:
             for user_dict in existing_data:
                 user_id = user_dict["user_id"]
-                users_list.append(user_id)
+                users_list.append(str(user_id))
 
         return users_list
 
@@ -447,6 +449,9 @@ class NetworkHandler:
             num_original_tweets = 0
             num_tweets_with_retweeters = 0
             num_tweets_with_retweeters_twikit = 0
+            if "followers_count" not in user_dict:
+                print(user_dict)
+                continue
             if user_dict["followers_count"] > 0:
                 followers_list.append(user_dict["followers_count"])
             if user_dict["following_count"] > 0:
@@ -561,11 +566,11 @@ class NetworkHandler:
             f"f) Median retweeters with twikit in {self.location}: {statistics.median(city_retweeters)}"
         )
         print(
-            f"g) Median sum of kolkata retweeters / median sum of twikit retweeters: "
+            f"g) Median sum of {self.location} retweeters / median sum of twikit retweeters: "
             f"{round(statistics.median(city_retweeters) / statistics.median(twikit_retweeters), 2)}"
         )
         print(
-            f"h) Median sum of kolkata retweeters / median sum of all-time retweeters: "
+            f"h) Median sum of {self.location} retweeters / median sum of all-time retweeters: "
             f"{round(statistics.median(city_retweeters) / statistics.median(retweets_list), 2)}"
         )
         self.calculate_rt_queries(location_json)
@@ -619,7 +624,7 @@ class NetworkHandler:
                         for retweeter in tweet["retweeters"]:
                             if tweet["tweet_id"] not in existing_tweets:
                                 location_matches = self.check_location(
-                                    retweeter["location"], self.location
+                                    retweeter["profile_location"], self.location
                                 )
                                 if location_matches:
                                     retweeter_dict = self.parse_edge_dict(
@@ -638,7 +643,7 @@ class NetworkHandler:
                 for follower in followers:
                     if follower["user_id"] not in existing_followers:
                         location_matches = self.check_location(
-                            follower["location"], self.location
+                            follower["target_location"], self.location
                         )
                         if location_matches:
                             follower_dict = self.parse_edge_dict(
@@ -694,11 +699,13 @@ class NetworkHandler:
         user_dict["verified"] = user_obj.verified
         user_dict["created_at"] = convert_to_iso_format(user_obj.created_at)
         # TODO: Adding new attributes
-        user_dict["category"] = None
-        user_dict["treatment_arm"] = None
-        user_dict["processing_status"] = "pending"
+        user_dict["category"] = "null"
+        user_dict["treatment_arm"] = "null"
+        user_dict["retweeter_status"] = "pending"
+        user_dict["retweeter_last_processed"] = "null"
+        user_dict["follower_status"] = "pending"
+        user_dict["follower_last_processed"] = "null"
         user_dict["extracted_at"] = datetime.now().isoformat()
-        user_dict["last_processed"] = datetime.now().isoformat()
         user_dict["last_updated"] = datetime.now().isoformat()
 
         # See if location matches to add city
@@ -707,7 +714,9 @@ class NetworkHandler:
 
         return user_dict
 
-    async def create_user_network(self, extraction_type, file_flag):
+    async def create_user_network(
+        self, extraction_type, account_num, file_flag, ascending=True
+    ):
         """
         Gets the user network data for a given number of
         users.
@@ -715,32 +724,37 @@ class NetworkHandler:
         Args:
             - extraction_type (str): Determines if the users' network data will be
             obtained via twikit or X
-            - file_flag (boolean): Determines
+            - account_num (int): Account number to use with twikit
+            - file_flag (boolean): Determines if root users are obtained via the .csv file
+            - ascending (boolean): Sorts the user list either ascending or descending
         """
         # Get city users and users to process
         users_list = await self._get_city_users(extraction_type, file_flag)
         # list of user dicts that gets proccessed (no ids )
         if file_flag:
+            user_df = self.user_df.sort_values(
+                by="user_id", ascending=ascending
+            )
+            users_list = user_df.loc[:, "user_id"].astype(str).unique().tolist()
             missing_users = list(
                 set(users_list).difference(set(self.already_processed_users))
             )
             client = twikit.Client("en-US")
             client.load_cookies(TWIKIT_COOKIES_DIR)
-
             print(f"Already processed {len(set(self.already_processed_users))}")
             print(f"Missing {len(set(missing_users))} to process")
 
         # TODO: user_id will come from a queue
-        for user_to_process in tqdm(missing_users):
-            # try:
-            # Only get attributes if file flag is true
+        for user_to_process in tqdm(users_list):
+            if str(user_to_process) in self.already_processed_users:
+                print(f"Already processed {user_to_process}, skipping...")
+                continue
             if file_flag:
                 user_to_process_dict = await self.get_csv_user_attributes(
                     client, user_to_process
                 )
-            user_network = UserNetwork(self.location_file_path, self.location)
+            user_network = UserNetwork(
+                self.location_file_path, self.location, account_num
+            )
             print(f"Processing user {user_to_process}...")
             await user_network.run(user_to_process_dict, extraction_type)
-        # except Exception as error:
-        # print(f"Error getting user: {error}")
-        # continue

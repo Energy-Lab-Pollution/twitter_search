@@ -12,6 +12,7 @@ from network.network_handler import NetworkHandler
 
 
 if __name__ == "__main__":
+    # TODO: Add dash-dash to avoid order and be more flexible
     parser = ArgumentParser(
         "Parameters to get users data to generate a network"
     )
@@ -36,6 +37,17 @@ if __name__ == "__main__":
         choices=["Yes", "No"],
         help="Determines if root users will be extracted from the .csv file",
     )
+    parser.add_argument(
+        "account_number",
+        type=int,
+        help="Account number to use with twikit",
+    )
+    parser.add_argument(
+        "--ascending",
+        type=str,
+        choices=["Yes", "No"],
+        help="Account number to use with twikit",
+    )
 
     args = parser.parse_args()
 
@@ -44,7 +56,11 @@ if __name__ == "__main__":
         time.sleep(FIFTEEN_MINUTES)
 
     file_flag = True if args.file_flag == "Yes" else False
+    ascending = True if args.ascending == "Yes" else False
     network_handler = NetworkHandler(args.location)
+
     asyncio.run(
-        network_handler.create_user_network(args.extraction_type, file_flag)
+        network_handler.create_user_network(
+            args.extraction_type, args.account_number, file_flag, ascending
+        )
     )

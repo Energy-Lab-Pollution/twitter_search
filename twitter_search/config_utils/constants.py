@@ -17,6 +17,11 @@ analysis_project_root = script_path.parents[1]
 BUCKET_NAME = "global-rct-users"
 REGION_NAME = "us-west-1"
 
+# SQS Constants
+SQS_USER_TWEETS = "UserTweets"
+SQS_USER_FOLLOWERS = "UserFollowers"
+SQS_USER_RETWEETERS = "UserRetweeters"
+
 # Construct the path to the cleaned_data directory
 RAW_DATA_PATH = project_root / "data" / "raw_data"
 CLEAN_DATA_PATH = project_root / "data" / "cleaned_data"
@@ -117,13 +122,27 @@ for char in PUNCTUATIONS:
     PUNC += char
 
 # Twikit and Network Construction Constants
+# TODO: rename to account # 1, etc
 TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
-TWIKIT_FDM_COOKIES_DIR = "twitter_search/config_utils/fdm_cookies.json"
+TWIKIT_COOKIES_DIR_2 = "twitter_search/config_utils/fdm_cookies.json"
+TWIKIT_COOKIES_DIR_3 = "twitter_search/config_utils/zm_cookies.json"
+TWIKIT_COOKIES_DIR_4 = "twitter_search/config_utils/lg_cookies.json"
+TWIKIT_COOKIES_DIR_5 = "twitter_search/config_utils/cookies_5.json"
+TWIKIT_COOKIES_DICT = {
+    "account_1": TWIKIT_COOKIES_DIR,
+    "account_2": TWIKIT_COOKIES_DIR_2,
+    "account_3": TWIKIT_COOKIES_DIR_3,
+    "account_4": TWIKIT_COOKIES_DIR_4,
+    "account_5": TWIKIT_COOKIES_DIR_5,
+}
 SINGLE_ACCOUNT_THRESHOLD = 10
 TWIKIT_TWEETS_THRESHOLD = 50
 TWIKIT_FOLLOWERS_THRESHOLD = 50
 TWIKIT_RETWEETERS_THRESHOLD = 500
 TWIKIT_USER_ATTRIBUTES_THRESHOLD = 400
+TWIKIT_TWEETS_PER_REQUEST = 20
+# Number of followers required to be processed
+INFLUENCER_FOLLOWERS_THRESHOLD = 100
 # Number of tweets / followers to get
 TWIKIT_COUNT = 1000
 FIFTEEN_MINUTES = 900
@@ -131,6 +150,7 @@ SIXTEEN_MINUTES = 960
 SEVENTEEN_MINUTES = 1020
 TWO_MINUTES = 120
 ONE_MINUTE = 60
+THIRTY_DAYS = 30
 
 # X Constants
 X_MAX_USER_TWEETS = 1000

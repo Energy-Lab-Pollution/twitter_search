@@ -24,6 +24,11 @@ if __name__ == "__main__":
         choices=["Yes", "No"],
         help="Decide whether to wait 15 mins or not",
     )
+    parser.add_argument(
+        "account_number",
+        type=int,
+        help="Account number to use with twikit",
+    )
 
     args = parser.parse_args()
 
@@ -31,5 +36,5 @@ if __name__ == "__main__":
         print("Sleeping for 15 minutes...")
         time.sleep(FIFTEEN_MINUTES)
 
-    user_attributes = UserAttributes(args.location)
+    user_attributes = UserAttributes(args.location, args.account_number)
     asyncio.run(user_attributes.run())
