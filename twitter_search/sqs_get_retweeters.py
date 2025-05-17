@@ -264,3 +264,19 @@ if __name__ == "__main__":
         # Getting information from body message
         data = data["Message"]
         clean_data = json.loads(data)
+
+        tweet_id = str(clean_data['tweet_id'])
+        target_user_id = str(clean_data["target_user_id"])
+
+        if args.extraction_type == "twikit":
+            user_retweeters = asyncio.run(
+                tweet_retweeters.get_single_tweet_retweeters(
+                    tweet_id=tweet_id,
+                    num_retweeters=args.num_retweeters,
+                    account_num=args.account_num,
+                )
+            )
+        elif args.extraction_type == "X":
+            user_retweeters = tweet_retweeters.x_get_single_tweet_retweeters(
+                tweet_id=tweet_id, num_retweeters=args.num_retweeters
+            )
