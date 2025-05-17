@@ -30,7 +30,7 @@ from config_utils.util import (
 )
 
 
-SQS_CLIENT = boto3.client("sqs", region="us-west-1")
+SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
 
 
 class UserTweets:

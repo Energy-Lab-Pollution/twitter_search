@@ -15,10 +15,8 @@ import twikit
 
 from config_utils.constants import (
     FIFTEEN_MINUTES,
-    NEPTUNE_S3_BUCKET,
     REGION_NAME,
-    SQS_USER_RETWEETERS,    
-    SQS_USER_TWEETS,
+    SQS_USER_FOLLOWERS,    
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.util import (
@@ -26,6 +24,10 @@ from config_utils.util import (
     api_v1_creator,
     convert_to_iso_format,
 )
+
+
+SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
+
 
 class UserFollowers:
 
@@ -133,34 +135,25 @@ class UserFollowers:
             - tweet_list(list): List of dicts with followers info
         """
         followers_list = []
-        max_retries = 3
+        num_iter = 0
+        extracted_followers = 0
         client = twikit.Client("en-US")
         client.load_cookies(
             TWIKIT_COOKIES_DICT[f"account_{account_num}"]
         )
 
-        for attempt in range(1, max_retries + 1):
+        while extracted_followers < follower_count:
             try:
                 # try to fetch
-                followers = await self.client.get_user_followers(
+                followers = await client.get_user_followers(
                     user_id, count=follower_count
                 )
-                break
             except twikit.errors.NotFound as error:
-                if attempt < max_retries:
-                    print(str(error))
-                    print(
-                        f"Followers: Not Found - retrying (attempt {attempt})"
-                    )
-                    time.sleep(60)
-                else:
-                    print(
-                        f"Followers: Not Found after {max_retries} attempts - giving up"
-                    )
-                    return followers_list  # final failure
+                print("Followers: Not Found")
+                return followers_list
             except twikit.errors.TooManyRequests:
                 print("Followers: Too Many Requests - stopping early")
-                return followers_list
+                time.sleep(FIFTEEN_MINUTES)
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request - stopping early")
                 return followers_list
@@ -168,18 +161,9 @@ class UserFollowers:
                 print(f"Followers: Twitter Exception - {e}")
                 return followers_list
 
-        more_followers_available = True
-        num_iter = 0
-
-        parsed_followers = self.parse_twikit_users(followers)
-        followers_list.extend(parsed_followers)
-
-        # Keeping track of currently extracted users
-        extracted_users = [
-            parsed_follower["user_id"] for parsed_follower in parsed_followers
-        ]
-
-        while more_followers_available:
+            parsed_followers = self.parse_twikit_users(followers)
+            followers_list.extend(parsed_followers)
+            extracted_followers += len(parsed_followers)
             num_iter += 1
             try:
                 if num_iter == 1:
@@ -190,18 +174,12 @@ class UserFollowers:
                     more_parsed_followers = self.parse_twikit_users(
                         more_followers
                     )
-                    for parsed_follower in more_parsed_followers:
-                        if parsed_follower["user_id"] not in extracted_users:
-                            followers_list.append(parsed_follower)
-                            extracted_users.append(parsed_follower["user_id"])
-                        else:
-                            continue
-                else:
-                    more_followers_available = False
+                    followers_list.extend(more_parsed_followers)
+                    extracted_followers += len(more_parsed_followers)
             # Stop here and just return what you got
             except twikit.errors.TooManyRequests:
-                print("Followers: too many requests, stopping...")
-                return followers_list
+                print("Followers: too many requests...")
+                time.sleep(FIFTEEN_MINUTES)
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request")
                 return followers_list
@@ -213,24 +191,21 @@ class UserFollowers:
                 return followers_list
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} follower batches, sleeping...")
-                time.sleep(self.SLEEP_TIME)
-            if num_iter == self.TWIKIT_FOLLOWERS_THRESHOLD:
-                print("Followers: maxed out number of requests")
-                return followers_list
+                time.sleep(1)
 
         # TODO: Upload users data to DynamoDB - store_data('user')
         # TODO: Send to SQS for network processing
         return followers_list
 
-    def x_get_followers(self, user_id):
+    def x_get_followers(self, user_id, follower_count):
         """
         Pull up to 1 000 followers via v1.1, convert each to a dict
         shape that parse_x_users expects, then parse.
         """
-        x_v1_client = api_v1_creator()
+        api_v1_client = api_v1_creator()
         legacy_users = tweepy.Cursor(
-            self.api_v1.followers, user_id=user_id, count=X_FOLLOWERS_PAGE_SIZE
-        ).items(X_MAX_FOLLOWERS)
+            api_v1_client.followers, user_id=user_id, count=follower_count
+        ).items(follower_count)
 
         # Convert to dicts
         normalized = []
@@ -253,3 +228,48 @@ class UserFollowers:
             )
 
         return self.parse_x_users(normalized)
+    
+if __name__ == "__main__":
+    parser = ArgumentParser(
+        "Parameters to get users data to generate a network"
+    )
+    parser.add_argument(
+        "--num_followers", type=int, help="Number of tweets to get"
+    )
+    parser.add_argument(
+        "--extraction_type",
+        type=str,
+        choices=["twikit", "X"],
+        help="Choose how to get user's tweets",
+    )
+    parser.add_argument(
+        "--account_num",
+        type=int,
+        help="Account number to use with twikit",
+    )
+
+    args = parser.parse_args()
+    
+    tweet_retweeters = UserFollowers(args.location)
+    user_tweets_queue_url = SQS_CLIENT.get_queue_url(QueueName=SQS_USER_FOLLOWERS)["QueueUrl"]
+
+    while True:
+        # Pass Queue Name and get its URL
+        response = SQS_CLIENT.receive_message(
+            QueueUrl=user_tweets_queue_url,
+            MaxNumberOfMessages=1,
+            WaitTimeSeconds=10,
+        )
+        try:
+            message = response["Messages"][0]
+            receipt_handle = message["ReceiptHandle"]
+            data = json.loads(message["Body"])
+
+        except KeyError:
+            # Empty queue
+            print("Empty queue")
+            continue
+
+        # Getting information from body message
+        data = data["Message"]
+        clean_data = json.loads(data)

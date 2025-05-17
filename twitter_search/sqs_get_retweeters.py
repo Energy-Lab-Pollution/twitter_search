@@ -8,15 +8,12 @@ import time
 from argparse import ArgumentParser
 
 import boto3
-import botocore
 import twikit
 
 from config_utils.constants import (
     FIFTEEN_MINUTES,
-    NEPTUNE_S3_BUCKET,
     REGION_NAME,
     SQS_USER_RETWEETERS,    
-    SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.util import (
@@ -24,6 +21,10 @@ from config_utils.util import (
     client_creator,
     convert_to_iso_format,
 )
+
+
+SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
+
 
 class TweetRetweeters:
     
@@ -134,57 +135,48 @@ class TweetRetweeters:
         client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
         
         retweeters_list = []
-        more_retweeters_available = True
-        self.retweeters_counter += 1
+        extracted_retweeters = 0
         attempt_number = 1
 
         # Maxed out retweeters threshold
         try:
-            retweeters = await self.client.get_retweeters(
+            retweeters = await client.get_retweeters(
                 tweet_id, count=num_retweeters
             )
             if retweeters:
                 parsed_retweeters = self.parse_twikit_users(retweeters)
                 retweeters_list.extend(parsed_retweeters)
+                extracted_retweeters += len(retweeters_list)
         except twikit.errors.TooManyRequests:
             print("Retweeters: Too Many Requests")
-            self.retweeters_maxed_out = True
+            time.sleep(FIFTEEN_MINUTES)
             return None
 
-        while more_retweeters_available:
-            self.retweeters_counter += 1
-            if self.retweeters_counter < self.TWIKIT_RETWEETERS_THRESHOLD:
-                try:
-                    if attempt_number == 1:
-                        more_retweeters = await retweeters.next()
-                    else:
-                        more_retweeters = await more_retweeters.next()
-                # Stop here if failure and return what you had so far
-                except twikit.errors.TooManyRequests:
-                    print("Retweeters: Too Many Requests")
-                    print(f"Made {self.retweeters_counter} retweets requests")
-                    self.retweeters_maxed_out = True
-                    return retweeters_list
-                except twikit.errors.BadRequest:
-                    print("Retweeters: Bad Request")
-                    return retweeters_list
-                except twikit.errors.TwitterException as e:
-                    print(f"Retweeters: Twitter Exception {e}")
-                    return retweeters_list
-                if more_retweeters:
-                    more_parsed_retweeters = self.parse_twikit_users(
-                        more_retweeters
-                    )
-                    retweeters_list.extend(more_parsed_retweeters)
+        while extracted_retweeters < num_retweeters:
+            try:
+                if attempt_number == 1:
+                    more_retweeters = await retweeters.next()
                 else:
-                    more_retweeters_available = False
-            else:
-                print("Maxed out on retweeters threshold")
-                print(f"Made {self.retweeters_counter} retweets requests")
-                self.retweeters_maxed_out = True
+                    more_retweeters = await more_retweeters.next()
+            # Stop here if failure and return what you had so far
+            except twikit.errors.TooManyRequests:
+                print("Retweeters: Too Many Requests")
+                time.sleep(FIFTEEN_MINUTES)
+            except twikit.errors.BadRequest:
+                print("Retweeters: Bad Request")
                 return retweeters_list
-
-            attempt_number += 1
+            except twikit.errors.TwitterException as e:
+                print(f"Retweeters: Twitter Exception {e}")
+                return retweeters_list
+            if more_retweeters:
+                more_parsed_retweeters = self.parse_twikit_users(
+                    more_retweeters
+                )
+                retweeters_list.extend(more_parsed_retweeters)
+                extracted_retweeters += len(more_parsed_retweeters)
+            else:
+                print("No more retweeters available")
+                break
 
         return retweeters_list
 
@@ -233,7 +225,7 @@ if __name__ == "__main__":
         "Parameters to get users data to generate a network"
     )
     parser.add_argument(
-        "--tweet_count", type=int, help="Number of tweets to get"
+        "--num_retweeters", type=int, help="Number of tweets to get"
     )
     parser.add_argument(
         "--extraction_type",
@@ -248,3 +240,27 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    
+    tweet_retweeters = TweetRetweeters(args.location)
+    user_tweets_queue_url = SQS_CLIENT.get_queue_url(QueueName=SQS_USER_RETWEETERS)["QueueUrl"]
+
+    while True:
+        # Pass Queue Name and get its URL
+        response = SQS_CLIENT.receive_message(
+            QueueUrl=user_tweets_queue_url,
+            MaxNumberOfMessages=1,
+            WaitTimeSeconds=10,
+        )
+        try:
+            message = response["Messages"][0]
+            receipt_handle = message["ReceiptHandle"]
+            data = json.loads(message["Body"])
+
+        except KeyError:
+            # Empty queue
+            print("Empty queue")
+            continue
+
+        # Getting information from body message
+        data = data["Message"]
+        clean_data = json.loads(data)
