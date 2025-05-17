@@ -226,6 +226,16 @@ If you want to concatenate and run the exploratory analysis across the entire da
 make concatenate_and_analyze
 ```
 
+## SQS Scripts for automatic extraction (WIP)
+
+With the latest AWS implementations, we have developed certain scripts to automate the network extraction with SQS. This is still work in progress.
+
+This is an example on how to get users from Kinshasa with Twikit, sending them to other queues for the network extraction.
+
+```bash
+python3 twitter_search/sqs_city_users.py --location "kinshasa" --tweet_count 100 --extraction_type "twikit" --account_num 1 --num_users 5
+```
+
 ## Constants
 
 Several constants are used in the code.
