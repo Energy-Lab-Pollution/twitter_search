@@ -3,7 +3,7 @@ Script to pull tweets and retweeters from a particular user,
 """
 
 import time
-from datetime import datetime,timezone
+from datetime import datetime, timezone
 
 import tweepy
 import twikit
@@ -134,8 +134,12 @@ class UserNetwork:
                 user_dict["retweeter_last_processed"] = "null"
                 user_dict["follower_status"] = "pending"
                 user_dict["follower_last_processed"] = "null"
-                user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
-                user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
+                user_dict["extracted_at"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
+                user_dict["last_updated"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
                 # See if location matches to add city
                 location_match = check_location(user.location, self.location)
                 user_dict["city"] = self.location if location_match else None
@@ -613,7 +617,9 @@ class UserNetwork:
         user_dict["retweeter_status"] = "in progress"
         print("Getting user retweeters")
         user_tweets = await self.twikit_add_retweeters(user_tweets)
-        user_dict["retweeter_last_processed"] = datetime.now(timezone.utc).isoformat()
+        user_dict["retweeter_last_processed"] = datetime.now(
+            timezone.utc
+        ).isoformat()
         user_dict["retweeter_status"] = "completed"
         user_dict["tweets"] = user_tweets
 
@@ -621,7 +627,9 @@ class UserNetwork:
         time.sleep(30)
         user_dict["follower_status"] = "in progress"
         followers = await self.twikit_get_followers(user_dict["user_id"])
-        user_dict["follower_last_processed"] = datetime.now(timezone.utc).isoformat()
+        user_dict["follower_last_processed"] = datetime.now(
+            timezone.utc
+        ).isoformat()
         user_dict["follower_status"] = "completed" if followers else "failed"
         user_dict["followers"] = followers
 
@@ -648,13 +656,17 @@ class UserNetwork:
 
         print("Getting user retweeters")
         user_tweets = self.x_add_retweeters(user_tweets)
-        user_dict["retweeter_last_processed"] = datetime.now(timezone.utc).isoformat()
+        user_dict["retweeter_last_processed"] = datetime.now(
+            timezone.utc
+        ).isoformat()
         user_dict["retweeter_status"] = "completed"
         user_dict["tweets"] = user_tweets
 
         print("Getting user followers...")
         followers = self.x_get_followers(user_dict["user_id"])
-        user_dict["follower_last_processed"] = datetime.now(timezone.utc).isoformat()
+        user_dict["follower_last_processed"] = datetime.now(
+            timezone.utc
+        ).isoformat()
         user_dict["follower_status"] = "completed" if followers else "failed"
         user_dict["followers"] = followers
 

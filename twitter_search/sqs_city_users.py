@@ -22,8 +22,8 @@ from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
     INFLUENCER_FOLLOWERS_THRESHOLD,
-    REGION_NAME,
     NEPTUNE_S3_BUCKET,
+    REGION_NAME,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
     THIRTY_DAYS,
@@ -46,7 +46,9 @@ class CityUsers:
         self.sqs_client = boto3.client("sqs", region_name="us-west-1")
         self.language = CITIES_LANGS[self.location]
 
-    def extract_queries_num_tweets(self, tweet_count, date_since=None, date_until=None):
+    def extract_queries_num_tweets(
+        self, tweet_count, date_since=None, date_until=None
+    ):
         """
         This method gets all the queries with the appropiate aliases
         for the desired location, along with the allocated number of
@@ -63,9 +65,11 @@ class CityUsers:
         if not date_until:
             date_until = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         if not date_since:
-            date_since = (datetime.now(timezone.utc) - timedelta(days=THIRTY_DAYS))
+            date_since = datetime.now(timezone.utc) - timedelta(
+                days=THIRTY_DAYS
+            )
 
-        date_range = f"since:{date_since} until:{date_until}"        
+        date_range = f"since:{date_since} until:{date_until}"
 
         if self.location in LOCATION_ALIAS_DICT:
             aliases = LOCATION_ALIAS_DICT[self.location]
@@ -204,8 +208,12 @@ class CityUsers:
                 user_dict["retweeter_last_processed"] = "null"
                 user_dict["follower_status"] = "pending"
                 user_dict["follower_last_processed"] = "null"
-                user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
-                user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
+                user_dict["extracted_at"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
+                user_dict["last_updated"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
                 # See if location matches to add city
                 location_match = check_location(
                     tweet.user.location, self.location
@@ -269,8 +277,12 @@ class CityUsers:
                 user_dict["retweeter_last_processed"] = "null"
                 user_dict["follower_status"] = "pending"
                 user_dict["follower_last_processed"] = "null"
-                user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
-                user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
+                user_dict["extracted_at"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
+                user_dict["last_updated"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
 
                 # See if location matches to add city
                 location_match = check_location(
@@ -468,11 +480,12 @@ class CityUsers:
                 s3_client.put_object(
                     Bucket=NEPTUNE_S3_BUCKET,
                     Key=s3_path,
-                    Body=user["description"].encode('utf-8', errors='ignore')
+                    Body=user["description"].encode("utf-8", errors="ignore"),
                 )
             except botocore.exceptions.ClientError:
                 print(f"Unable to upload description for {user['user_id']}")
                 continue
+
 
 if __name__ == "__main__":
     parser = ArgumentParser(
@@ -518,7 +531,9 @@ if __name__ == "__main__":
     if args.extraction_type in ["twikit", "X"]:
         if args.date_since and args.date_until:
             new_query_dict, num_tweets_per_account = (
-                city_users.extract_queries_num_tweets(args.tweet_count, args.date_since, args.date_until)
+                city_users.extract_queries_num_tweets(
+                    args.tweet_count, args.date_since, args.date_until
+                )
             )
         else:
             new_query_dict, num_tweets_per_account = (

@@ -15,12 +15,11 @@ from argparse import ArgumentParser
 import boto3
 import botocore
 import twikit
-
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     NEPTUNE_S3_BUCKET,
     REGION_NAME,
-    SQS_USER_RETWEETERS,    
+    SQS_USER_RETWEETERS,
     SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
 )
@@ -238,12 +237,11 @@ class UserTweets:
                 s3_client.put_object(
                     Bucket=NEPTUNE_S3_BUCKET,
                     Key=s3_path,
-                    Body=tweet['tweet_text'].encode('utf-8', errors='ignore')
+                    Body=tweet["tweet_text"].encode("utf-8", errors="ignore"),
                 )
             except botocore.exceptions.ClientError:
                 print(f"Unable to upload {tweet['tweet_id']} for {user_id}")
                 continue
-
 
     def send_to_queue(self, tweets_list, user_id, queue_name):
         """
@@ -300,7 +298,9 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    user_tweets_queue_url = SQS_CLIENT.get_queue_url(QueueName=SQS_USER_TWEETS)["QueueUrl"]
+    user_tweets_queue_url = SQS_CLIENT.get_queue_url(QueueName=SQS_USER_TWEETS)[
+        "QueueUrl"
+    ]
 
     while True:
         # Pass Queue Name and get its URL

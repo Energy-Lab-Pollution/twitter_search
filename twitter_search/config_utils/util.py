@@ -106,7 +106,9 @@ def list_filter_keywords(all_lists, location):
 
     return list(filtered_lists)
 
+
 # JSON manipulation util functions
+
 
 def load_json(path):
     """
@@ -158,6 +160,7 @@ def remove_duplicate_records(records):
 
     return unique_records
 
+
 def flatten_and_remove_empty(input_list):
     """
     Flatten a list of lists into a single list and remove any empty lists within it.
@@ -178,7 +181,9 @@ def flatten_and_remove_empty(input_list):
 
     return new_list
 
+
 # ================== GeoLocation ======================
+
 
 def geocode_address(address, geolocator):
     """
@@ -203,6 +208,7 @@ def geocode_address(address, geolocator):
 
 
 # ================= Tweepy utils =========================
+
 
 def client_creator():
     """
@@ -355,6 +361,7 @@ def list_dictmaker(incoming_datastruct):
 
 # ================== Location checking util function ===========
 
+
 def check_location(raw_location, target_location):
     """
     Uses regex to see if the raw location matches
@@ -389,6 +396,7 @@ def check_location(raw_location, target_location):
 
 
 # ============================== JSON Creators =========================
+
 
 def json_maker(file_path, data_to_append):
     """
@@ -476,6 +484,7 @@ def convert_to_iso_format(date_string):
     except ValueError:
         print(f"Invalid date format: {date_string}")
         return None
+
 
 # ========================== AWS Utils ================================
 
