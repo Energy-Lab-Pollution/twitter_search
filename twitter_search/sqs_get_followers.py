@@ -11,13 +11,12 @@ from datetime import datetime, timezone
 import boto3
 import tweepy
 import twikit
-
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     INFLUENCER_FOLLOWERS_THRESHOLD,
     REGION_NAME,
-    SQS_USER_TWEETS,
     SQS_USER_FOLLOWERS,
+    SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.util import (
@@ -184,7 +183,7 @@ class UserFollowers:
                     user_id, count=follower_count
                 )
             except twikit.errors.NotFound as error:
-                print("Followers: Not Found - {error}")
+                print(f"Followers: Not Found - {error}")
                 return followers_list
             except twikit.errors.TooManyRequests:
                 print("Followers: Too Many Requests - stopping early")
@@ -264,7 +263,6 @@ class UserFollowers:
 
         return self.parse_x_users(normalized)
 
-
     def send_to_queue(self, users_list, queue_name):
         """
         Sends twikit or X users to the corresponding queue
@@ -273,9 +271,7 @@ class UserFollowers:
             - users_list (list)
             - queue_name (str)
         """
-        queue_url = SQS_CLIENT.get_queue_url(QueueName=queue_name)[
-            "QueueUrl"
-        ]
+        queue_url = SQS_CLIENT.get_queue_url(QueueName=queue_name)["QueueUrl"]
         if not users_list:
             print("No users to send to queue")
             return
@@ -367,7 +363,6 @@ if __name__ == "__main__":
             followers_list = user_followers.x_get_followers(
                 user_id=root_user_id, follower_count=args.num_followers
             )
-
 
         followers_list = user_followers.filter_users(followers_list)
 

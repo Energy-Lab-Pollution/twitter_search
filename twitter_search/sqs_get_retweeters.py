@@ -14,8 +14,8 @@ from config_utils.constants import (
     FIFTEEN_MINUTES,
     INFLUENCER_FOLLOWERS_THRESHOLD,
     REGION_NAME,
-    SQS_USER_TWEETS,
     SQS_USER_RETWEETERS,
+    SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.util import (
@@ -260,7 +260,6 @@ class TweetRetweeters:
 
         return self.parse_x_users(retweeters)
 
-
     def send_to_queue(self, users_list, queue_name):
         """
         Sends twikit or X users to the corresponding queue
@@ -269,9 +268,7 @@ class TweetRetweeters:
             - users_list (list)
             - queue_name (str)
         """
-        queue_url = SQS_CLIENT.get_queue_url(QueueName=queue_name)[
-            "QueueUrl"
-        ]
+        queue_url = SQS_CLIENT.get_queue_url(QueueName=queue_name)["QueueUrl"]
         if not users_list:
             print("No users to send to queue")
             return
@@ -364,7 +361,7 @@ if __name__ == "__main__":
                 tweet_id=tweet_id, num_retweeters=args.num_retweeters
             )
 
-        retweeters_list = tweet_retweeters.filter_users(retweeters_list)
+        user_retweeters = tweet_retweeters.filter_users(user_retweeters)
 
         # TODO: Check if users exist on neptune
 
@@ -372,7 +369,7 @@ if __name__ == "__main__":
         if further_extraction:
             print("Getting retweeters' information...")
             tweet_retweeters.send_to_queue(
-                retweeters_list, queue_name=SQS_USER_TWEETS
+                user_retweeters, queue_name=SQS_USER_TWEETS
             )
 
         # TODO: "retweeter_status": pending, queued, in_progress, "completed", "failed
