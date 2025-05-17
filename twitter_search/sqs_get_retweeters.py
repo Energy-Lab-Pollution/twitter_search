@@ -1,19 +1,21 @@
 """
 Script to get a determined tweet's retweeters
 """
+
 import asyncio
-from datetime import datetime, timezone
 import json
 import time
 from argparse import ArgumentParser
+from datetime import datetime, timezone
 
 import boto3
 import twikit
-
 from config_utils.constants import (
     FIFTEEN_MINUTES,
+    INFLUENCER_FOLLOWERS_THRESHOLD,
     REGION_NAME,
-    SQS_USER_RETWEETERS,    
+    SQS_USER_TWEETS,
+    SQS_USER_RETWEETERS,
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.util import (
@@ -27,9 +29,41 @@ SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
 
 
 class TweetRetweeters:
-    
+
     def __init__(self, location):
         self.location = location
+
+    @staticmethod
+    def filter_users(user_list):
+        """
+        Keeps users that:
+            - are unique
+            - have more than 100 followers
+            - match the location
+
+        Args:
+            - user_list (list)
+        Returns:
+            - new_user_list (list)
+        """
+        new_user_list = []
+        unique_ids = []
+
+        for user_dict in user_list:
+            user_id = user_dict["user_id"]
+            if user_id in unique_ids:
+                continue
+            elif (
+                user_dict["city"]
+                and user_dict["followers_count"]
+                > INFLUENCER_FOLLOWERS_THRESHOLD
+            ):
+                unique_ids.append(user_id)
+                new_user_list.append(user_dict)
+            else:
+                continue
+
+        return new_user_list
 
     def parse_x_users(self, user_list):
         """
@@ -111,8 +145,12 @@ class TweetRetweeters:
                 user_dict["retweeter_last_processed"] = "null"
                 user_dict["follower_status"] = "pending"
                 user_dict["follower_last_processed"] = "null"
-                user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
-                user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
+                user_dict["extracted_at"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
+                user_dict["last_updated"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
                 # See if location matches to add city
                 location_match = check_location(user.location, self.location)
                 user_dict["city"] = self.location if location_match else None
@@ -120,7 +158,9 @@ class TweetRetweeters:
 
         return users_list
 
-    async def get_single_tweet_retweeters(self, tweet_id, num_retweeters, account_num):
+    async def get_single_tweet_retweeters(
+        self, tweet_id, num_retweeters, account_num
+    ):
         """
         For a particular tweet, get all the possible retweeters
 
@@ -133,7 +173,7 @@ class TweetRetweeters:
         """
         client = twikit.Client("en-US")
         client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
-        
+
         retweeters_list = []
         extracted_retweeters = 0
         attempt_number = 1
@@ -220,6 +260,39 @@ class TweetRetweeters:
 
         return self.parse_x_users(retweeters)
 
+
+    def send_to_queue(self, users_list, queue_name):
+        """
+        Sends twikit or X users to the corresponding queue
+
+        Args:
+            - users_list (list)
+            - queue_name (str)
+        """
+        queue_url = SQS_CLIENT.get_queue_url(QueueName=queue_name)[
+            "QueueUrl"
+        ]
+        if not users_list:
+            print("No users to send to queue")
+            return
+        for user in users_list:
+            print(f"Sending user {user['user_id']}")
+            message = {
+                "user_id": user["user_id"],
+                "location": self.location,
+            }
+            try:
+                self.sqs_client.send_message(
+                    QueueUrl=queue_url,
+                    MessageBody=json.dumps(message),
+                )
+                print(f"User {user['user_id']} sent to {queue_name} queue :)")
+            except Exception as err:
+                print(
+                    f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}"
+                )
+
+
 if __name__ == "__main__":
     parser = ArgumentParser(
         "Parameters to get users data to generate a network"
@@ -239,10 +312,20 @@ if __name__ == "__main__":
         help="Account number to use with twikit",
     )
 
+    parser.add_argument(
+        "--further_extraction",
+        type=str,
+        choices=["True", "False"],
+        help="Decide if we will get retweeters and followers for extracted users",
+    )
+
     args = parser.parse_args()
-    
+    further_extraction = True if args.further_extraction is True else False
+
     tweet_retweeters = TweetRetweeters(args.location)
-    user_tweets_queue_url = SQS_CLIENT.get_queue_url(QueueName=SQS_USER_RETWEETERS)["QueueUrl"]
+    user_tweets_queue_url = SQS_CLIENT.get_queue_url(
+        QueueName=SQS_USER_RETWEETERS
+    )["QueueUrl"]
 
     while True:
         # Pass Queue Name and get its URL
@@ -265,7 +348,7 @@ if __name__ == "__main__":
         data = data["Message"]
         clean_data = json.loads(data)
 
-        tweet_id = str(clean_data['tweet_id'])
+        tweet_id = str(clean_data["tweet_id"])
         target_user_id = str(clean_data["target_user_id"])
 
         if args.extraction_type == "twikit":
@@ -280,3 +363,22 @@ if __name__ == "__main__":
             user_retweeters = tweet_retweeters.x_get_single_tweet_retweeters(
                 tweet_id=tweet_id, num_retweeters=args.num_retweeters
             )
+
+        retweeters_list = tweet_retweeters.filter_users(retweeters_list)
+
+        # TODO: Check if users exist on neptune
+
+        # Send users to ser tweets queue
+        if further_extraction:
+            print("Getting retweeters' information...")
+            tweet_retweeters.send_to_queue(
+                retweeters_list, queue_name=SQS_USER_TWEETS
+            )
+
+        # TODO: "retweeter_status": pending, queued, in_progress, "completed", "failed
+
+        # Delete root user message from queue so it is not picked up again
+        SQS_CLIENT.delete_message(
+            QueueUrl=user_tweets_queue_url,
+            ReceiptHandle=receipt_handle,
+        )
