@@ -26,7 +26,7 @@ from config_utils.util import (
 )
 
 
-SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
+SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
 class UserFollowers:
@@ -363,6 +363,7 @@ if __name__ == "__main__":
             )
 
         followers_list = user_followers.filter_users(followers_list)
+        print(followers_list)
 
         # TODO: Check if users exist on neptune
 
