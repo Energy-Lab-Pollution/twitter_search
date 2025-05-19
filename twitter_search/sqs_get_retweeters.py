@@ -381,3 +381,14 @@ if __name__ == "__main__":
             QueueUrl=user_retweeters_queue_url,
             ReceiptHandle=receipt_handle,
         )
+
+# Vishal's pseudocode:
+
+# 1) While True (keeps going):
+# Query Neptune and get all of the user nodes that have retweeter status = queued --
+# 2) For user in neptune_users:
+# for each user, run bit where messageGroupId = user_id
+# 3) while true (listening to SQS):
+# Its true as long as there are messages from a given user in the queue
+# break if done with this user (internal while loop)
+#  Go back to line 388
