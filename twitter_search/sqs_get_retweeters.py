@@ -25,7 +25,7 @@ from config_utils.util import (
 )
 
 
-SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
+SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
 class UserRetweeters:
@@ -317,7 +317,10 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    further_extraction = True if args.further_extraction == "True" else False
+    if args.further_extraction:
+        further_extraction = True if args.further_extraction == "True" else False
+    else:
+        further_extraction = False
     user_retweeters_queue_url = SQS_CLIENT.get_queue_url(
         QueueName=SQS_USER_RETWEETERS
     )["QueueUrl"]
