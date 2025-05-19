@@ -327,6 +327,7 @@ if __name__ == "__main__":
 
     while True:
         # Pass Queue Name and get its URL
+        # TODO: Provide UserGroupId
         response = SQS_CLIENT.receive_message(
             QueueUrl=user_retweeters_queue_url,
             MaxNumberOfMessages=1,
