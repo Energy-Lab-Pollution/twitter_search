@@ -510,19 +510,15 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--date_since",
-        type=int,
-        help="Number of users to get (file based system)",
+        type=str,
+        help="Lower bound date to get tweets",
     )
     parser.add_argument(
         "--date_until",
-        type=int,
-        help="Number of users to get (file based system)",
+        type=str,
+        help="Upper bound date to get the tweets",
     )
-    parser.add_argument(
-        "--date_since",
-        type=int,
-        help="Number of users to get (file based system)",
-    )
+
     args = parser.parse_args()
 
     city_users = CityUsers(args.location)
@@ -578,7 +574,9 @@ if __name__ == "__main__":
 
     city_users.insert_descriptions_to_s3(users_list)
 
+    print("Sending to UserTweets Queue")
     city_users.send_to_queue(users_list, SQS_USER_TWEETS)
+    print("Sending to UserFollowers Queue")
     city_users.send_to_queue(users_list, SQS_USER_FOLLOWERS)
 
     # TODO: "follower_status": pending, queued, in_progress, completed, failed
