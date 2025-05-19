@@ -229,6 +229,8 @@ class UserTweets:
         """
         Function to insert each user's tweets as
         a txt files to S3
+
+        These tweets are already filtered
         """
         s3_client = boto3.client("s3", region_name=REGION_NAME)
         for tweet in tweets_list:
@@ -258,6 +260,7 @@ class UserTweets:
             return
         for tweet in tweets_list:
             print(f"Sending tweet {tweet['tweet_id']}")
+            # TODO: Modify group
             message = {
                 "tweet_id": tweet["tweet_id"],
                 "target_user_id": user_id,
@@ -267,6 +270,7 @@ class UserTweets:
                 SQS_CLIENT.send_message(
                     QueueUrl=queue_url,
                     MessageBody=json.dumps(message),
+                    MessageGroupId=user_id,
                 )
                 print(
                     f"Tweet {tweet['tweet_id']} for {user_id} sent to {queue_name} queue :)"
@@ -342,6 +346,8 @@ if __name__ == "__main__":
             )
 
         # TODO: Dump tweets_list to S3
+        tweets_list = user_tweets.filter_tweets(tweets_list)
+        user_tweets.insert_tweets_to_s3(root_user_id, tweets_list)
 
         # Send tweets to retweeters queue
         user_tweets.send_to_queue(
