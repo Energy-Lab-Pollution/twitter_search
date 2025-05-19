@@ -348,7 +348,7 @@ if __name__ == "__main__":
         user_retweeters = UserRetweeters(location)
 
         if args.extraction_type == "twikit":
-            user_retweeters = asyncio.run(
+            user_retweeters_list = asyncio.run(
                 user_retweeters.get_single_tweet_retweeters(
                     tweet_id=tweet_id,
                     num_retweeters=args.num_retweeters,
@@ -356,19 +356,18 @@ if __name__ == "__main__":
                 )
             )
         elif args.extraction_type == "X":
-            user_retweeters = user_retweeters.x_get_single_tweet_retweeters(
+            user_retweeters_list = user_retweeters.x_get_single_tweet_retweeters(
                 tweet_id=tweet_id, num_retweeters=args.num_retweeters
             )
-
-        user_retweeters = user_retweeters.filter_users(user_retweeters)
 
         # TODO: Check if users exist on neptune
 
         # Send users to ser tweets queue
         if further_extraction:
             print("Getting retweeters' information...")
+            user_retweeters_list = user_retweeters.filter_users(user_retweeters_list)
             user_retweeters.send_to_queue(
-                user_retweeters, queue_name=SQS_USER_TWEETS
+                user_retweeters_list, queue_name=SQS_USER_TWEETS
             )
 
         # TODO: "retweeter_status": pending, queued, in_progress, "completed", "failed
