@@ -20,7 +20,7 @@ REGION_NAME = "us-west-1"
 # SQS Constants
 SQS_USER_TWEETS = "UserTweets"
 SQS_USER_FOLLOWERS = "UserFollowers"
-SQS_USER_RETWEETERS = "UserRetweeters"
+SQS_USER_RETWEETERS = "UserRetweeters.fifo"
 
 # Construct the path to the cleaned_data directory
 RAW_DATA_PATH = project_root / "data" / "raw_data"
