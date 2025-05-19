@@ -29,7 +29,7 @@ from config_utils.util import (
 )
 
 
-SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
+SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
 class UserTweets:
@@ -114,7 +114,7 @@ class UserTweets:
             ):
                 if tweet_id not in unique_ids:
                     unique_ids.append(str(tweet_id))
-                    new_tweets_list.append(new_tweets_list)
+                    new_tweets_list.append(tweet_dict)
             else:
                 continue
 
@@ -142,16 +142,16 @@ class UserTweets:
 
         # Parse first set of tweets
 
-        # TODO: Get user tweets
+        # TODO: Filter inside this function
         try:
-            user_tweets = await self.client.get_user_tweets(
+            user_tweets = await client.get_user_tweets(
                 user_id, "Tweets", count=num_tweets
             )
             num_extracted_tweets += len(user_tweets)
         except twikit.errors.TooManyRequests:
             print("User Tweets: Too Many Requests...")
             time.sleep(FIFTEEN_MINUTES)
-            user_tweets = await self.client.get_user_tweets(
+            user_tweets = await client.get_user_tweets(
                 user_id, "Tweets", count=num_tweets
             )
 
@@ -316,7 +316,7 @@ if __name__ == "__main__":
         try:
             message = response["Messages"][0]
             receipt_handle = message["ReceiptHandle"]
-            data = json.loads(message["Body"])
+            clean_data = json.loads(message["Body"])
 
         except KeyError:
             # Empty queue
@@ -324,9 +324,7 @@ if __name__ == "__main__":
             continue
 
         # Getting information from body message
-        data = data["Message"]
-        clean_data = json.loads(data)
-
+        print(clean_data)
         root_user_id = str(clean_data["user_id"])
         location = clean_data["location"]
 
@@ -346,7 +344,8 @@ if __name__ == "__main__":
             )
 
         # TODO: Dump tweets_list to S3
-        tweets_list = user_tweets.filter_tweets(tweets_list)
+        # tweets_list = user_tweets.filter_tweets(tweets_list)
+        print(tweets_list)
         user_tweets.insert_tweets_to_s3(root_user_id, tweets_list)
 
         # Send tweets to retweeters queue

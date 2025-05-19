@@ -335,7 +335,7 @@ if __name__ == "__main__":
         try:
             message = response["Messages"][0]
             receipt_handle = message["ReceiptHandle"]
-            data = json.loads(message["Body"])
+            clean_data = json.loads(message["Body"])
 
         except KeyError:
             # Empty queue
@@ -343,9 +343,7 @@ if __name__ == "__main__":
             continue
 
         # Getting information from body message
-        data = data["Message"]
-        clean_data = json.loads(data)
-
+        print(clean_data)
         root_user_id = str(clean_data["user_id"])
         location = clean_data["location"]
 
