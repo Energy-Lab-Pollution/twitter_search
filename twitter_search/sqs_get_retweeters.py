@@ -350,12 +350,16 @@ if __name__ == "__main__":
         tweet_id = str(clean_data["tweet_id"])
         target_user_id = str(clean_data["target_user_id"])
         location = clean_data["location"]
+        print(f"Tmp user: {tmp_user_id}")
+        print(f"Target user id: {target_user_id}")
 
         # Check if tmp_user is not
         if tmp_user_id != target_user_id:
-            #TODO: Update Retweeter status and retweeter last procesed for target_user_id
+            if tmp_user_id is not None:
+                print("Update retweeter status and last processed for tmp_user_id")
+                #TODO: Update Retweeter status and retweeter last procesed for tmp_user_id
             tmp_user_id = target_user_id
-            # This means the user is done
+            # This means the user is already processed :)
 
         user_retweeters = UserRetweeters(location)
 
@@ -373,6 +377,7 @@ if __name__ == "__main__":
             )
 
         # TODO: Check if users exist on neptune
+        print(f"Got {len(user_retweeters_list)} for {target_user_id}")
 
         # Send users to ser tweets queue
         if further_extraction:
