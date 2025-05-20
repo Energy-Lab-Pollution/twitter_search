@@ -318,7 +318,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     if args.further_extraction:
-        further_extraction = True if args.further_extraction == "True" else False
+        further_extraction = (
+            True if args.further_extraction == "True" else False
+        )
     else:
         further_extraction = False
     user_retweeters_queue_url = SQS_CLIENT.get_queue_url(
@@ -356,8 +358,10 @@ if __name__ == "__main__":
         # Check if tmp_user is not
         if tmp_user_id != target_user_id:
             if tmp_user_id is not None:
-                print("Update retweeter status and last processed for tmp_user_id")
-                #TODO: Update Retweeter status and retweeter last procesed for tmp_user_id
+                print(
+                    "Update retweeter status and last processed for tmp_user_id"
+                )
+                # TODO: Update Retweeter status and retweeter last procesed for tmp_user_id
             tmp_user_id = target_user_id
             # This means the user is already processed :)
 
@@ -372,8 +376,10 @@ if __name__ == "__main__":
                 )
             )
         elif args.extraction_type == "X":
-            user_retweeters_list = user_retweeters.x_get_single_tweet_retweeters(
-                tweet_id=tweet_id, num_retweeters=args.num_retweeters
+            user_retweeters_list = (
+                user_retweeters.x_get_single_tweet_retweeters(
+                    tweet_id=tweet_id, num_retweeters=args.num_retweeters
+                )
             )
 
         # TODO: Check if users exist on neptune
@@ -382,7 +388,9 @@ if __name__ == "__main__":
         # Send users to ser tweets queue
         if further_extraction:
             print("Getting retweeters' information...")
-            user_retweeters_list = user_retweeters.filter_users(user_retweeters_list)
+            user_retweeters_list = user_retweeters.filter_users(
+                user_retweeters_list
+            )
             user_retweeters.send_to_queue(
                 user_retweeters_list, queue_name=SQS_USER_TWEETS
             )

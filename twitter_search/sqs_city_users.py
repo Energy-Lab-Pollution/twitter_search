@@ -30,8 +30,8 @@ from config_utils.constants import (
     TWEET_FIELDS,
     TWIKIT_COOKIES_DICT,
     USER_FIELDS,
-    X_SEARCH_MIN_TWEETS,
     X_SEARCH_MAX_TWEETS,
+    X_SEARCH_MIN_TWEETS,
 )
 from config_utils.queries import QUERIES_DICT
 from config_utils.util import (
@@ -52,7 +52,7 @@ class CityUsers:
     def get_default_date_range(date_since=None, date_until=None):
         """
         Gets a default date range where the most
-        recent date is today and the last date is 
+        recent date is today and the last date is
         30 days before
         """
         if not date_until:
@@ -81,10 +81,12 @@ class CityUsers:
             - date_until (str): Upper bound date (YYYY-MM-DD) for tweet search
         """
         queries = QUERIES_DICT[self.language]
-        
+
         # date_since and date_until just supported in X Enterprise
         if extraction_type in ["twikit"]:
-            date_since, date_until = self.get_default_date_range(date_since, date_until)
+            date_since, date_until = self.get_default_date_range(
+                date_since, date_until
+            )
             date_range = f"since:{date_since} until:{date_until}"
         else:
             date_range = ""
@@ -411,7 +413,9 @@ class CityUsers:
 
         return users_list
 
-    def _get_x_city_users(self, queries_dict, num_tweets, date_since=None, date_until=None):
+    def _get_x_city_users(
+        self, queries_dict, num_tweets, date_since=None, date_until=None
+    ):
         """
         Method used to search for tweets, with the X API,
         using a given query
@@ -426,11 +430,15 @@ class CityUsers:
         tweets_list = []
 
         # Gets default date range if necessary
-        date_since, date_until = self.get_default_date_range(date_since, date_until)
+        date_since, date_until = self.get_default_date_range(
+            date_since, date_until
+        )
 
         for account_type, query in queries_dict.items():
             print(query)
-            print(f"=============== Processing {account_type} ==================")
+            print(
+                f"=============== Processing {account_type} =================="
+            )
             # TODO: Check if this is correct
             while result_count < num_tweets:
                 print(f"Max results is: {result_count}")
@@ -442,7 +450,7 @@ class CityUsers:
                     tweet_fields=TWEET_FIELDS,
                     user_fields=USER_FIELDS,
                     start_time=date_since,
-                    end_time=date_until
+                    end_time=date_until,
                 )
                 if response.meta["result_count"] == 0:
                     print("No more results found.")
@@ -459,7 +467,7 @@ class CityUsers:
 
                 if next_token is None:
                     break
-            
+
             print(f"Extracted len({tweets_list})")
             print(tweets_list)
 
@@ -549,8 +557,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.extraction_type == "X" and ((args.tweet_count < X_SEARCH_MIN_TWEETS) or (args.tweet_count > X_SEARCH_MAX_TWEETS)):
-        raise ValueError(f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}")
+    if args.extraction_type == "X" and (
+        (args.tweet_count < X_SEARCH_MIN_TWEETS)
+        or (args.tweet_count > X_SEARCH_MAX_TWEETS)
+    ):
+        raise ValueError(
+            f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}"
+        )
 
     city_users = CityUsers(args.location)
 
@@ -559,12 +572,17 @@ if __name__ == "__main__":
         if args.date_since and args.date_until:
             new_query_dict, num_tweets_per_account = (
                 city_users.extract_queries_num_tweets(
-                    args.tweet_count, args.extraction_type, args.date_since, args.date_until
+                    args.tweet_count,
+                    args.extraction_type,
+                    args.date_since,
+                    args.date_until,
                 )
             )
         else:
             new_query_dict, num_tweets_per_account = (
-                city_users.extract_queries_num_tweets(args.tweet_count, args.extraction_type)
+                city_users.extract_queries_num_tweets(
+                    args.tweet_count, args.extraction_type
+                )
             )
 
     if args.extraction_type == "twikit":
@@ -576,7 +594,9 @@ if __name__ == "__main__":
         )
     elif args.extraction_type == "X":
         new_query_dict, num_tweets_per_account = (
-            city_users.extract_queries_num_tweets(args.tweet_count, args.extraction_type)
+            city_users.extract_queries_num_tweets(
+                args.tweet_count, args.extraction_type
+            )
         )
         users_list = city_users._get_x_city_users(
             new_query_dict, num_tweets_per_account
