@@ -325,6 +325,8 @@ if __name__ == "__main__":
         QueueName=SQS_USER_RETWEETERS
     )["QueueUrl"]
 
+    tmp_user_id = None
+
     while True:
         # Pass Queue Name and get its URL
         # TODO: Provide UserGroupId
@@ -348,6 +350,12 @@ if __name__ == "__main__":
         tweet_id = str(clean_data["tweet_id"])
         target_user_id = str(clean_data["target_user_id"])
         location = clean_data["location"]
+
+        # Check if tmp_user is not
+        if tmp_user_id != target_user_id:
+            #TODO: Update Retweeter status and retweeter last procesed for target_user_id
+            tmp_user_id = target_user_id
+            # This means the user is done
 
         user_retweeters = UserRetweeters(location)
 
@@ -381,14 +389,3 @@ if __name__ == "__main__":
             QueueUrl=user_retweeters_queue_url,
             ReceiptHandle=receipt_handle,
         )
-
-# Vishal's pseudocode:
-
-# 1) While True (keeps going):
-# Query Neptune and get all of the user nodes that have retweeter status = queued --
-# 2) For user in neptune_users:
-# for each user, run bit where messageGroupId = user_id
-# 3) while true (listening to SQS):
-# Its true as long as there are messages from a given user in the queue
-# break if done with this user (internal while loop)
-#  Go back to line 388
