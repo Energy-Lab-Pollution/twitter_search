@@ -362,8 +362,9 @@ if __name__ == "__main__":
                 user_id=root_user_id, follower_count=args.num_followers
             )
 
+        print(f"Got {len(followers_list)} for {root_user_id} before filtering")
         followers_list = user_followers.filter_users(followers_list)
-        print(followers_list)
+        print(f"Got {len(followers_list)} for {root_user_id} after filtering")
 
         # TODO: Check if users exist on neptune
 
