@@ -71,7 +71,7 @@ class CityUsers:
             date_since = date_since.strftime("%Y-%m-%d")
 
         
-        if extraction_type in ["twikit", "X"]:
+        if extraction_type in ["twikit", "file"]:
             date_range = f"since:{date_since} until:{date_until}"
         else:
             date_range = ""
@@ -397,7 +397,7 @@ class CityUsers:
 
         return users_list
 
-    def _get_x_city_users(self, queries_dict, num_tweets):
+    def _get_x_city_users(self, queries_dict, num_tweets, date_since=None, date_until=None):
         """
         Method used to search for tweets, with the X API,
         using a given query
@@ -431,6 +431,8 @@ class CityUsers:
                     expansions=EXPANSIONS,
                     tweet_fields=TWEET_FIELDS,
                     user_fields=USER_FIELDS,
+                    start_time=date_since,
+                    end_time=date_until
                 )
                 if response.meta["result_count"] == 0:
                     print("No more results found.")
