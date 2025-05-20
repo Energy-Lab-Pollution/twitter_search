@@ -47,7 +47,7 @@ class CityUsers:
         self.language = CITIES_LANGS[self.location]
 
     def extract_queries_num_tweets(
-        self, tweet_count, date_since=None, date_until=None
+        self, tweet_count, extraction_type, date_since=None, date_until=None
     ):
         """
         This method gets all the queries with the appropiate aliases
@@ -68,8 +68,13 @@ class CityUsers:
             date_since = datetime.now(timezone.utc) - timedelta(
                 days=THIRTY_DAYS
             )
+            date_since = date_since.strftime("%Y-%m-%d")
 
-        date_range = f"since:{date_since} until:{date_until}"
+        
+        if extraction_type in ["twikit", "X"]:
+            date_range = f"since:{date_since} until:{date_until}"
+        else:
+            date_range = ""
 
         if self.location in LOCATION_ALIAS_DICT:
             aliases = LOCATION_ALIAS_DICT[self.location]
@@ -406,8 +411,16 @@ class CityUsers:
         users_list = []
         tweets_list = []
 
-        for query in queries_dict:
+        if num_tweets < 10:
+            num_tweets = 10
+        elif num_tweets > 100:
+            num_tweets = 100
+        else:
+            num_tweets = num_tweets
 
+        for account_type, query in queries_dict.items():
+            print(query)
+            print(f"=============== Processing {account_type} ==================")
             # TODO: Check if this is correct
             while result_count < num_tweets:
                 print(f"Max results is: {result_count}")
@@ -434,6 +447,9 @@ class CityUsers:
 
                 if next_token is None:
                     break
+            
+            print(f"Extracted len({tweets_list})")
+            print(tweets_list)
 
         return users_list
 
@@ -528,12 +544,12 @@ if __name__ == "__main__":
         if args.date_since and args.date_until:
             new_query_dict, num_tweets_per_account = (
                 city_users.extract_queries_num_tweets(
-                    args.tweet_count, args.date_since, args.date_until
+                    args.tweet_count, args.extraction_type, args.date_since, args.date_until
                 )
             )
         else:
             new_query_dict, num_tweets_per_account = (
-                city_users.extract_queries_num_tweets(args.tweet_count)
+                city_users.extract_queries_num_tweets(args.tweet_count, args.extraction_type)
             )
 
     if args.extraction_type == "twikit":
@@ -545,7 +561,7 @@ if __name__ == "__main__":
         )
     elif args.extraction_type == "X":
         new_query_dict, num_tweets_per_account = (
-            city_users.extract_queries_num_tweets(args.tweet_count)
+            city_users.extract_queries_num_tweets(args.tweet_count, args.extraction_type)
         )
         users_list = city_users._get_x_city_users(
             new_query_dict, num_tweets_per_account
@@ -561,12 +577,13 @@ if __name__ == "__main__":
     print(
         f" =========================== Before filtering ==================:\n {len(users_list)} users"
     )
+    print(users_list)
     users_list = city_users.filter_users(users_list)
     print(
         f" =========================== After filtering ==================:\n {len(users_list)} users"
     )
     print("\n")
-    # print(users_list)
+    print(users_list)
 
     # TODO: Insert / Check city node
 
