@@ -30,6 +30,8 @@ from config_utils.constants import (
     TWEET_FIELDS,
     TWIKIT_COOKIES_DICT,
     USER_FIELDS,
+    X_SEARCH_MIN_TWEETS,
+    X_SEARCH_MAX_TWEETS,
 )
 from config_utils.queries import QUERIES_DICT
 from config_utils.util import (
@@ -45,6 +47,23 @@ class CityUsers:
         self.location = location
         self.sqs_client = boto3.client("sqs", region_name="us-west-1")
         self.language = CITIES_LANGS[self.location]
+
+    @staticmethod
+    def get_default_date_range(date_since=None, date_until=None):
+        """
+        Gets a default date range where the most
+        recent date is today and the last date is 
+        30 days before
+        """
+        if not date_until:
+            date_until = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        if not date_since:
+            date_since = datetime.now(timezone.utc) - timedelta(
+                days=THIRTY_DAYS
+            )
+            date_since = date_since.strftime("%Y-%m-%d")
+
+        return date_since, date_until
 
     def extract_queries_num_tweets(
         self, tweet_count, extraction_type, date_since=None, date_until=None
@@ -62,16 +81,10 @@ class CityUsers:
             - date_until (str): Upper bound date (YYYY-MM-DD) for tweet search
         """
         queries = QUERIES_DICT[self.language]
-        if not date_until:
-            date_until = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        if not date_since:
-            date_since = datetime.now(timezone.utc) - timedelta(
-                days=THIRTY_DAYS
-            )
-            date_since = date_since.strftime("%Y-%m-%d")
-
         
-        if extraction_type in ["twikit", "file"]:
+        # date_since and date_until just supported in X Enterprise
+        if extraction_type in ["twikit"]:
+            date_since, date_until = self.get_default_date_range(date_since, date_until)
             date_range = f"since:{date_since} until:{date_until}"
         else:
             date_range = ""
@@ -122,7 +135,8 @@ class CityUsers:
                 "profile_location": user["location"],
                 "target_location": self.location,
                 "verified": user["verified"],
-                "created_at": user["created_at"],
+                #  datetime.datetime(2008, 6, 6, 21, 49, 51, tzinfo=datetime.timezone.utc)
+                "created_at": user["created_at"].isoformat(),
                 "processing_status": "pending",
             }
             for key, value in user["public_metrics"].items():
@@ -411,12 +425,8 @@ class CityUsers:
         users_list = []
         tweets_list = []
 
-        if num_tweets < 10:
-            num_tweets = 10
-        elif num_tweets > 100:
-            num_tweets = 100
-        else:
-            num_tweets = num_tweets
+        # Gets default date range if necessary
+        date_since, date_until = self.get_default_date_range(date_since, date_until)
 
         for account_type, query in queries_dict.items():
             print(query)
@@ -538,6 +548,9 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
+    if args.extraction_type == "X" and ((args.tweet_count < X_SEARCH_MIN_TWEETS) or (args.tweet_count > X_SEARCH_MAX_TWEETS)):
+        raise ValueError(f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}")
 
     city_users = CityUsers(args.location)
 
