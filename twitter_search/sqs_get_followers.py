@@ -358,9 +358,10 @@ if __name__ == "__main__":
                 )
             )
         elif args.extraction_type == "X":
-            followers_list = user_followers.x_get_followers(
-                user_id=root_user_id, follower_count=args.num_followers
-            )
+            raise Exception("X API Followers endpoint is only supported for Enterprise")
+            # followers_list = user_followers.x_get_followers(
+            #     user_id=root_user_id, follower_count=args.num_followers
+            # )
 
         print(f"Got {len(followers_list)} for {root_user_id} before filtering")
         followers_list = user_followers.filter_users(followers_list)
