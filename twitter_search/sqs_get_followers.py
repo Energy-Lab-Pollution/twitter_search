@@ -358,7 +358,9 @@ if __name__ == "__main__":
                 )
             )
         elif args.extraction_type == "X":
-            raise Exception("X API Followers endpoint is only supported for Enterprise")
+            raise Exception(
+                "X API Followers endpoint is only supported for Enterprise"
+            )
             # followers_list = user_followers.x_get_followers(
             #     user_id=root_user_id, follower_count=args.num_followers
             # )
