@@ -238,7 +238,7 @@ class UserFollowers:
         """
         api_v1_client = api_v1_creator()
         legacy_users = tweepy.Cursor(
-            api_v1_client.followers, user_id=user_id, count=follower_count
+            api_v1_client.get_followers, user_id=user_id, count=follower_count
         ).items(follower_count)
 
         # Convert to dicts
