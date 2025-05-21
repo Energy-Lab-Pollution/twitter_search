@@ -74,7 +74,7 @@ class UserTweets:
             # t.created_at is a datetime
             created = (
                 tweet.created_at.isoformat()
-                if isinstance(tweet.created_at, datetime)
+                if isinstance(tweet.created_at, datetime.datetime)
                 else tweet.created_at
             )
 
@@ -210,7 +210,7 @@ class UserTweets:
                 tweet_fields=["created_at", "public_metrics"],
             )
 
-            page = response.date or []
+            page = response.data or []
             if not page:
                 break
 
@@ -343,9 +343,9 @@ if __name__ == "__main__":
                 user_id=root_user_id, num_tweets=args.tweet_count
             )
 
-        # TODO: Dump tweets_list to S3
-        # tweets_list = user_tweets.filter_tweets(tweets_list)
-        print(tweets_list)
+        print(f"Got {len(tweets_list)}")
+        # print(tweets_list)
+        print("Uploading tweets to S3...")
         user_tweets.insert_tweets_to_s3(root_user_id, tweets_list)
 
         # Send tweets to retweeters queue
