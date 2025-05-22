@@ -13,16 +13,13 @@ if __name__ == "__main__":
         "Parameters to get users data to generate a network"
     )
     parser.add_argument(
-        "location", type=str, help="Location to read users from"
-    )
-    parser.add_argument(
-        "edge_type",
-        type=str,
-        help="Edge type to choose",
-        choices=["retweet", "follower"],
+        "--location", type=str, help="Location to read users from"
     )
 
     args = parser.parse_args()
     network_handler = NetworkHandler(args.location)
-    network_handler.create_edges(edge_type=args.edge_type)
+    print(f"Calculating retweet edges for {args.location}...")
+    network_handler.create_edges("retweet")
+    print(f"Calculating follower edges for {args.location}...")
+    network_handler.create_edges("follower")
     network_handler.calculate_stats()

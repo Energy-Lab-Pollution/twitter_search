@@ -29,7 +29,7 @@ from config_utils.util import (
 )
 
 
-SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
+SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
 class UserTweets:
@@ -74,7 +74,7 @@ class UserTweets:
             # t.created_at is a datetime
             created = (
                 tweet.created_at.isoformat()
-                if isinstance(tweet.created_at, datetime)
+                if isinstance(tweet.created_at, datetime.datetime)
                 else tweet.created_at
             )
 
@@ -114,7 +114,7 @@ class UserTweets:
             ):
                 if tweet_id not in unique_ids:
                     unique_ids.append(str(tweet_id))
-                    new_tweets_list.append(new_tweets_list)
+                    new_tweets_list.append(tweet_dict)
             else:
                 continue
 
@@ -142,16 +142,16 @@ class UserTweets:
 
         # Parse first set of tweets
 
-        # TODO: Get user tweets
+        # TODO: Filter inside this function
         try:
-            user_tweets = await self.client.get_user_tweets(
+            user_tweets = await client.get_user_tweets(
                 user_id, "Tweets", count=num_tweets
             )
             num_extracted_tweets += len(user_tweets)
         except twikit.errors.TooManyRequests:
             print("User Tweets: Too Many Requests...")
             time.sleep(FIFTEEN_MINUTES)
-            user_tweets = await self.client.get_user_tweets(
+            user_tweets = await client.get_user_tweets(
                 user_id, "Tweets", count=num_tweets
             )
 
@@ -210,7 +210,7 @@ class UserTweets:
                 tweet_fields=["created_at", "public_metrics"],
             )
 
-            page = response.date or []
+            page = response.data or []
             if not page:
                 break
 
@@ -229,6 +229,8 @@ class UserTweets:
         """
         Function to insert each user's tweets as
         a txt files to S3
+
+        These tweets are already filtered
         """
         s3_client = boto3.client("s3", region_name=REGION_NAME)
         for tweet in tweets_list:
@@ -258,6 +260,7 @@ class UserTweets:
             return
         for tweet in tweets_list:
             print(f"Sending tweet {tweet['tweet_id']}")
+            # TODO: Modify group
             message = {
                 "tweet_id": tweet["tweet_id"],
                 "target_user_id": user_id,
@@ -267,6 +270,7 @@ class UserTweets:
                 SQS_CLIENT.send_message(
                     QueueUrl=queue_url,
                     MessageBody=json.dumps(message),
+                    MessageGroupId=user_id,
                 )
                 print(
                     f"Tweet {tweet['tweet_id']} for {user_id} sent to {queue_name} queue :)"
@@ -312,7 +316,7 @@ if __name__ == "__main__":
         try:
             message = response["Messages"][0]
             receipt_handle = message["ReceiptHandle"]
-            data = json.loads(message["Body"])
+            clean_data = json.loads(message["Body"])
 
         except KeyError:
             # Empty queue
@@ -320,9 +324,7 @@ if __name__ == "__main__":
             continue
 
         # Getting information from body message
-        data = data["Message"]
-        clean_data = json.loads(data)
-
+        print(clean_data)
         root_user_id = str(clean_data["user_id"])
         location = clean_data["location"]
 
@@ -341,7 +343,10 @@ if __name__ == "__main__":
                 user_id=root_user_id, num_tweets=args.tweet_count
             )
 
-        # TODO: Dump tweets_list to S3
+        print(f"Got {len(tweets_list)}")
+        # print(tweets_list)
+        print("Uploading tweets to S3...")
+        user_tweets.insert_tweets_to_s3(root_user_id, tweets_list)
 
         # Send tweets to retweeters queue
         user_tweets.send_to_queue(

@@ -26,7 +26,7 @@ from config_utils.util import (
 )
 
 
-SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
+SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
 class UserFollowers:
@@ -238,7 +238,7 @@ class UserFollowers:
         """
         api_v1_client = api_v1_creator()
         legacy_users = tweepy.Cursor(
-            api_v1_client.followers, user_id=user_id, count=follower_count
+            api_v1_client.get_followers, user_id=user_id, count=follower_count
         ).items(follower_count)
 
         # Convert to dicts
@@ -335,7 +335,7 @@ if __name__ == "__main__":
         try:
             message = response["Messages"][0]
             receipt_handle = message["ReceiptHandle"]
-            data = json.loads(message["Body"])
+            clean_data = json.loads(message["Body"])
 
         except KeyError:
             # Empty queue
@@ -343,9 +343,7 @@ if __name__ == "__main__":
             continue
 
         # Getting information from body message
-        data = data["Message"]
-        clean_data = json.loads(data)
-
+        print(clean_data)
         root_user_id = str(clean_data["user_id"])
         location = clean_data["location"]
 
@@ -360,11 +358,16 @@ if __name__ == "__main__":
                 )
             )
         elif args.extraction_type == "X":
-            followers_list = user_followers.x_get_followers(
-                user_id=root_user_id, follower_count=args.num_followers
+            raise Exception(
+                "X API Followers endpoint is only supported for Enterprise"
             )
+            # followers_list = user_followers.x_get_followers(
+            #     user_id=root_user_id, follower_count=args.num_followers
+            # )
 
+        print(f"Got {len(followers_list)} for {root_user_id} before filtering")
         followers_list = user_followers.filter_users(followers_list)
+        print(f"Got {len(followers_list)} for {root_user_id} after filtering")
 
         # TODO: Check if users exist on neptune
 

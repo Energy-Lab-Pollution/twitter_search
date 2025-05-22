@@ -25,10 +25,10 @@ from config_utils.util import (
 )
 
 
-SQS_CLIENT = boto3.client("sqs", region=REGION_NAME)
+SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
-class TweetRetweeters:
+class UserRetweeters:
 
     def __init__(self, location):
         self.location = location
@@ -279,7 +279,7 @@ class TweetRetweeters:
                 "location": self.location,
             }
             try:
-                self.sqs_client.send_message(
+                SQS_CLIENT.send_message(
                     QueueUrl=queue_url,
                     MessageBody=json.dumps(message),
                 )
@@ -317,24 +317,30 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    further_extraction = True if args.further_extraction is True else False
-
-    tweet_retweeters = TweetRetweeters(args.location)
-    user_tweets_queue_url = SQS_CLIENT.get_queue_url(
+    if args.further_extraction:
+        further_extraction = (
+            True if args.further_extraction == "True" else False
+        )
+    else:
+        further_extraction = False
+    user_retweeters_queue_url = SQS_CLIENT.get_queue_url(
         QueueName=SQS_USER_RETWEETERS
     )["QueueUrl"]
 
+    tmp_user_id = None
+
     while True:
         # Pass Queue Name and get its URL
+        # TODO: Provide UserGroupId
         response = SQS_CLIENT.receive_message(
-            QueueUrl=user_tweets_queue_url,
+            QueueUrl=user_retweeters_queue_url,
             MaxNumberOfMessages=1,
             WaitTimeSeconds=10,
         )
         try:
             message = response["Messages"][0]
             receipt_handle = message["ReceiptHandle"]
-            data = json.loads(message["Body"])
+            clean_data = json.loads(message["Body"])
 
         except KeyError:
             # Empty queue
@@ -342,40 +348,57 @@ if __name__ == "__main__":
             continue
 
         # Getting information from body message
-        data = data["Message"]
-        clean_data = json.loads(data)
-
+        print(clean_data)
         tweet_id = str(clean_data["tweet_id"])
         target_user_id = str(clean_data["target_user_id"])
+        location = clean_data["location"]
+        print(f"Tmp user: {tmp_user_id}")
+        print(f"Target user id: {target_user_id}")
+
+        # Check if tmp_user is not
+        if tmp_user_id != target_user_id:
+            if tmp_user_id is not None:
+                print(
+                    "Update retweeter status and last processed for tmp_user_id"
+                )
+                # TODO: Update Retweeter status and retweeter last procesed for tmp_user_id
+            tmp_user_id = target_user_id
+            # This means the user is already processed :)
+
+        user_retweeters = UserRetweeters(location)
 
         if args.extraction_type == "twikit":
-            user_retweeters = asyncio.run(
-                tweet_retweeters.get_single_tweet_retweeters(
+            user_retweeters_list = asyncio.run(
+                user_retweeters.get_single_tweet_retweeters(
                     tweet_id=tweet_id,
                     num_retweeters=args.num_retweeters,
                     account_num=args.account_num,
                 )
             )
         elif args.extraction_type == "X":
-            user_retweeters = tweet_retweeters.x_get_single_tweet_retweeters(
-                tweet_id=tweet_id, num_retweeters=args.num_retweeters
+            user_retweeters_list = (
+                user_retweeters.x_get_single_tweet_retweeters(
+                    tweet_id=tweet_id, num_retweeters=args.num_retweeters
+                )
             )
 
-        user_retweeters = tweet_retweeters.filter_users(user_retweeters)
-
         # TODO: Check if users exist on neptune
+        print(f"Got {len(user_retweeters_list)} for {target_user_id}")
 
         # Send users to ser tweets queue
         if further_extraction:
             print("Getting retweeters' information...")
-            tweet_retweeters.send_to_queue(
-                user_retweeters, queue_name=SQS_USER_TWEETS
+            user_retweeters_list = user_retweeters.filter_users(
+                user_retweeters_list
+            )
+            user_retweeters.send_to_queue(
+                user_retweeters_list, queue_name=SQS_USER_TWEETS
             )
 
         # TODO: "retweeter_status": pending, queued, in_progress, "completed", "failed
 
         # Delete root user message from queue so it is not picked up again
         SQS_CLIENT.delete_message(
-            QueueUrl=user_tweets_queue_url,
+            QueueUrl=user_retweeters_queue_url,
             ReceiptHandle=receipt_handle,
         )

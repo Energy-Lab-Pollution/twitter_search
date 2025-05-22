@@ -20,7 +20,7 @@ REGION_NAME = "us-west-1"
 # SQS Constants
 SQS_USER_TWEETS = "UserTweets"
 SQS_USER_FOLLOWERS = "UserFollowers"
-SQS_USER_RETWEETERS = "UserRetweeters"
+SQS_USER_RETWEETERS = "UserRetweeters.fifo"
 
 # Construct the path to the cleaned_data directory
 RAW_DATA_PATH = project_root / "data" / "raw_data"
@@ -158,6 +158,9 @@ X_TWEETS_PAGE_SIZE = 100
 X_FOLLOWERS_PAGE_SIZE = 200
 X_MAX_RETWEETERS = 500
 X_MAX_FOLLOWERS = 1000
+# For the search_recent endpoint
+X_SEARCH_MIN_TWEETS = 10
+X_SEARCH_MAX_TWEETS = 100
 
 # Neptune constants
 NEPTUNE_ENDPOINT = (
