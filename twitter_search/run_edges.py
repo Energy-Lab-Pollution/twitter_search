@@ -13,10 +13,10 @@ if __name__ == "__main__":
         "Parameters to get users data to generate a network"
     )
     parser.add_argument(
-        "location", type=str, help="Location to read users from"
+        "--location", type=str, help="Location to read users from"
     )
     parser.add_argument(
-        "edge_type",
+        "--edge_type",
         type=str,
         help="Edge type to choose",
         choices=["retweet", "follower"],
