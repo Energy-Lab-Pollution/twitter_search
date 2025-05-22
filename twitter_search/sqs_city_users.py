@@ -612,13 +612,11 @@ if __name__ == "__main__":
     print(
         f" =========================== Before filtering ==================:\n {len(users_list)} users"
     )
-    print(users_list)
     users_list = city_users.filter_users(users_list)
     print(
         f" =========================== After filtering ==================:\n {len(users_list)} users"
     )
     print("\n")
-    print(users_list)
 
     # TODO: Insert / Check city node
 
