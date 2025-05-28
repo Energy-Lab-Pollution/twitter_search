@@ -7,6 +7,7 @@ import json
 import time
 from argparse import ArgumentParser
 from datetime import datetime, timezone
+from pathlib import Path
 
 import boto3
 import tweepy
@@ -174,7 +175,9 @@ class UserFollowers:
         num_iter = 0
         extracted_followers = 0
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
+        cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
+        cookies_dir = Path(__file__).parent.parent / cookies_dir
+        client.load_cookies(cookies_dir)
 
         while extracted_followers < follower_count:
             try:
