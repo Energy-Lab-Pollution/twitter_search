@@ -358,7 +358,9 @@ class CityUsers:
             - num_tweets (int): Determines the number of tweets to use **per query**
         """
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
+        cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
+        cookies_dir =  Path(__file__).parent.parent / cookies_dir
+        client.load_cookies(cookies_dir)
         users_list = []
         num_iter = 0
 
