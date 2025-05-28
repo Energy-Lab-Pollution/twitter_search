@@ -7,6 +7,7 @@ import json
 import time
 from argparse import ArgumentParser
 from datetime import datetime, timezone
+from pathlib import Path
 
 import boto3
 import twikit
@@ -172,8 +173,9 @@ class UserRetweeters:
             - retweeters_list (list): List with retweeters info
         """
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
-
+        cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
+        cookies_dir =  Path(__file__).parent.parent / cookies_dir
+        client.load_cookies(cookies_dir)
         retweeters_list = []
         extracted_retweeters = 0
         attempt_number = 1
