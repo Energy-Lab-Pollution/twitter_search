@@ -123,11 +123,11 @@ for char in PUNCTUATIONS:
 
 # Twikit and Network Construction Constants
 # TODO: rename to account # 1, etc
-TWIKIT_COOKIES_DIR = "twitter_search/config_utils/cookies.json"
+TWIKIT_COOKIES_DIR = "twitter_search/config_utils/ys_cookies.json"
 TWIKIT_COOKIES_DIR_2 = "twitter_search/config_utils/fdm_cookies.json"
 TWIKIT_COOKIES_DIR_3 = "twitter_search/config_utils/zm_cookies.json"
 TWIKIT_COOKIES_DIR_4 = "twitter_search/config_utils/lg_cookies.json"
-TWIKIT_COOKIES_DIR_5 = "twitter_search/config_utils/cookies_5.json"
+TWIKIT_COOKIES_DIR_5 = "twitter_search/config_utils/vj_cookies.json"
 TWIKIT_COOKIES_DICT = {
     "account_1": TWIKIT_COOKIES_DIR,
     "account_2": TWIKIT_COOKIES_DIR_2,
