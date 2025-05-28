@@ -176,9 +176,9 @@ class UserFollowers:
         extracted_followers = 0
         client = twikit.Client("en-US")
         cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
-        cookies_dir =  Path(__file__).parent.parent / cookies_dir
+        cookies_dir = Path(__file__).parent.parent / cookies_dir
         client.load_cookies(cookies_dir)
-    
+
         while extracted_followers < follower_count:
             try:
                 # try to fetch

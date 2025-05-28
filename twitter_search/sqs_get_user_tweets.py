@@ -136,7 +136,9 @@ class UserTweets:
         """
         # We need to get tweets first
         client = twikit.Client("en-US")
-        client.load_cookies(TWIKIT_COOKIES_DICT[f"account_{account_num}"])
+        cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
+        cookies_dir = Path(__file__).parent.parent / cookies_dir
+        client.load_cookies(cookies_dir)
         parsed_tweets_list = []
         num_iter = 0
         num_extracted_tweets = 0

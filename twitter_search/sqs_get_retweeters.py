@@ -174,7 +174,7 @@ class UserRetweeters:
         """
         client = twikit.Client("en-US")
         cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
-        cookies_dir =  Path(__file__).parent.parent / cookies_dir
+        cookies_dir = Path(__file__).parent.parent / cookies_dir
         client.load_cookies(cookies_dir)
         retweeters_list = []
         extracted_retweeters = 0
