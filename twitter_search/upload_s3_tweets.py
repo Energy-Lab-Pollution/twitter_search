@@ -4,17 +4,24 @@ Script to upload all pending tweets from the users in the pilot cities to S3
 from argparse import ArgumentParser
 from pathlib import Path
 from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import boto3
 import botocore
 from config_utils.constants import (
     NEPTUNE_S3_BUCKET,
     REGION_NAME,
+    NUM_WORKERS
 )
 from config_utils.util import (
     load_json
 )
 
+def _upload_one(args):
+    """
+    Put a single object in S3
+    """
+    s3_client.put_object(**args)
 
 def insert_tweets_to_s3(location, user_id, tweets_list):
     """
@@ -24,21 +31,27 @@ def insert_tweets_to_s3(location, user_id, tweets_list):
     These tweets are already filtered
     """
     if not tweets_list:
-        print(f"No tweets to upload for user {user_id}")
         return
-    for tweet in tqdm(tweets_list):
-        location = location.replace(" ", "_")
-        s3_path = f"networks/{location}/classification/{user_id}/input/tweet_{tweet['tweet_id']}.txt"
-        try:
-            s3_client.put_object(
-                Bucket=NEPTUNE_S3_BUCKET,
-                Key=s3_path,
-                Body=tweet["tweet_text"].encode("utf-8", errors="ignore"),
-            )
-        except botocore.exceptions.ClientError:
-            print(f"Unable to upload {tweet['tweet_id']} for {user_id}")
-            continue
 
+    location = location.replace(" ", "")
+    jobs = []
+    for t in tweets_list:
+        key = f"networks/{location}/classification/{user_id}/input/tweet{t['tweet_id']}.txt"
+        jobs.append({
+            "Bucket": NEPTUNE_S3_BUCKET,
+            "Key":    key,
+            "Body":   t["tweet_text"].encode("utf-8", errors="ignore"),
+        })
+
+    # Parallely uploading tweets
+    with ThreadPoolExecutor(max_workers=NUM_WORKERS) as pool:
+        futures = [pool.submit(_upload_one, job) for job in jobs]
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Uploading tweets"):
+            try:
+                future.result()
+            except Exception as e:
+                # handle/log individual upload errors
+                print("Upload failed:", e)
 
 def upload_user_tweets(location):
     """
