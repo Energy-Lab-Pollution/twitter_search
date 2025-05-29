@@ -1,27 +1,24 @@
 """
 Script to upload all pending tweets from the users in the pilot cities to S3
 """
+
 from argparse import ArgumentParser
-from pathlib import Path
-from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 
 import boto3
 import botocore
-from config_utils.constants import (
-    NEPTUNE_S3_BUCKET,
-    REGION_NAME,
-    NUM_WORKERS
-)
-from config_utils.util import (
-    load_json
-)
+from config_utils.constants import NEPTUNE_S3_BUCKET, NUM_WORKERS, REGION_NAME
+from config_utils.util import load_json
+from tqdm import tqdm
+
 
 def _upload_one(args):
     """
     Put a single object in S3
     """
     s3_client.put_object(**args)
+
 
 def insert_descriptions_to_s3(location, users_list):
     """
@@ -55,21 +52,26 @@ def insert_tweets_to_s3(location, user_id, tweets_list):
     jobs = []
     for t in tweets_list:
         key = f"networks/{location}/classification/{user_id}/input/tweet_{t['tweet_id']}.txt"
-        jobs.append({
-            "Bucket": NEPTUNE_S3_BUCKET,
-            "Key":    key,
-            "Body":   t["tweet_text"].encode("utf-8", errors="ignore"),
-        })
+        jobs.append(
+            {
+                "Bucket": NEPTUNE_S3_BUCKET,
+                "Key": key,
+                "Body": t["tweet_text"].encode("utf-8", errors="ignore"),
+            }
+        )
 
     # Parallely uploading tweets
     with ThreadPoolExecutor(max_workers=NUM_WORKERS) as pool:
         futures = [pool.submit(_upload_one, job) for job in jobs]
-        for future in tqdm(as_completed(futures), total=len(futures), desc="Uploading tweets"):
+        for future in tqdm(
+            as_completed(futures), total=len(futures), desc="Uploading tweets"
+        ):
             try:
                 future.result()
             except Exception as e:
                 # handle/log individual upload errors
                 print("Upload failed:", e)
+
 
 def upload_user_tweets(location):
     """
@@ -78,7 +80,9 @@ def upload_user_tweets(location):
     """
     # Paths setup
     location = location.lower()
-    file_path = Path(__file__).parent / "data/" / f"networks/{location}/{location}.json"
+    file_path = (
+        Path(__file__).parent / "data/" / f"networks/{location}/{location}.json"
+    )
     location_json = load_json(file_path)
 
     num_users = len(location_json)
@@ -92,8 +96,8 @@ def upload_user_tweets(location):
             print(f"Skipping {user_dict['user_id']}")
             continue
 
-        tmp_dict['user_id'] = user_dict['user_id']
-        tmp_dict['description'] = user_dict['description']
+        tmp_dict["user_id"] = user_dict["user_id"]
+        tmp_dict["description"] = user_dict["description"]
         users_list.append(tmp_dict)
 
         user_tweets = user_dict["tweets"]
@@ -101,8 +105,8 @@ def upload_user_tweets(location):
             # Remove reposts by others
             if not user_tweet["tweet_text"].startswith("RT @"):
                 original_tweets.append(user_tweet)
-        
-        insert_tweets_to_s3(location, user_dict['user_id'], original_tweets)
+
+        insert_tweets_to_s3(location, user_dict["user_id"], original_tweets)
 
     print("Inserting descriptions...")
     insert_descriptions_to_s3(location, users_list)
@@ -113,7 +117,9 @@ def upload_user_tweets(location):
 if __name__ == "__main__":
 
     parser = ArgumentParser(description="Specify params to upload tweets to S3")
-    parser.add_argument("--location", type=str, help="Location to read tweets from")
+    parser.add_argument(
+        "--location", type=str, help="Location to read tweets from"
+    )
     args = parser.parse_args()
 
     s3_client = boto3.client("s3", region_name=REGION_NAME)
