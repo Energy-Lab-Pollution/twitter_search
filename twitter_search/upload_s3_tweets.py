@@ -1,5 +1,5 @@
 """
-Script to upload all pending tweets from the users in the pilot cities
+Script to upload all pending tweets from the users in the pilot cities to S3
 """
 from argparse import ArgumentParser
 from pathlib import Path
@@ -14,9 +14,6 @@ from config_utils.constants import (
 from config_utils.util import (
     load_json
 )
-
-
-s3_client = boto3.client("s3", region_name=REGION_NAME)
 
 
 def insert_tweets_to_s3(location, user_id, tweets_list):
@@ -44,11 +41,12 @@ def insert_tweets_to_s3(location, user_id, tweets_list):
 
 def upload_user_tweets(location):
     """
-    Uploading
+    Reads user data from raw location JSON, then uploads
+    tweets to S3
     """
     # Paths setup
     location = location.lower()
-    file_path = Path(__file__).parent.parent / "data/" / f"networks/{location}"
+    file_path = Path(__file__).parent / "data/" / f"networks/{location}"
     location_json = load_json(file_path)
 
     num_users = len(location_json)
@@ -67,5 +65,15 @@ def upload_user_tweets(location):
                 original_tweets.append(user_tweet)
         
         insert_tweets_to_s3(location, user_dict['user_id'], original_tweets)
+    
+    print(f"Done with {location}")
 
-        
+
+if __name__ == "__main__":
+
+    parser = ArgumentParser(help="Specify params to upload tweets to S3")
+    parser.add_argument("--location", type=str)
+    args = parser.parse_args()
+
+    s3_client = boto3.client("s3", region_name=REGION_NAME)
+    upload_user_tweets(args.location)
