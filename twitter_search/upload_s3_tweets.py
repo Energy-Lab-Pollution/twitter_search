@@ -23,6 +23,26 @@ def _upload_one(args):
     """
     s3_client.put_object(**args)
 
+def insert_descriptions_to_s3(location, users_list):
+    """
+    Function to insert each user's description as
+    a txt file to S3
+    """
+    s3_client = boto3.client("s3", region_name=REGION_NAME)
+    for user in tqdm(users_list):
+        location = location.replace(" ", "_")
+        s3_path = f"networks/{location}/classification/{user['user_id']}/input/description.txt"
+        try:
+            s3_client.put_object(
+                Bucket=NEPTUNE_S3_BUCKET,
+                Key=s3_path,
+                Body=user["description"].encode("utf-8", errors="ignore"),
+            )
+        except botocore.exceptions.ClientError:
+            print(f"Unable to upload description for {user['user_id']}")
+            continue
+
+
 def insert_tweets_to_s3(location, user_id, tweets_list):
     """
     Function to insert each user's tweets as
@@ -64,13 +84,19 @@ def upload_user_tweets(location):
     location_json = load_json(file_path)
 
     num_users = len(location_json)
+    users_list = []
     print(f"Number of root users {num_users}")
 
     for user_dict in tqdm(location_json):
+        tmp_dict = {}
         original_tweets = []
         if "followers_count" not in user_dict:
             print(f"Skipping {user_dict['user_id']}")
             continue
+
+        tmp_dict['user_id'] = user_dict['user_id']
+        tmp_dict['description'] = user_dict['description']
+        users_list.append(tmp_dict)
 
         user_tweets = user_dict["tweets"]
         for user_tweet in user_tweets:
@@ -79,7 +105,10 @@ def upload_user_tweets(location):
                 original_tweets.append(user_tweet)
         
         insert_tweets_to_s3(location, user_dict['user_id'], original_tweets)
-    
+
+    print("Inserting descriptions...")
+    insert_descriptions_to_s3(location, users_list)
+
     print(f"Done with {location}")
 
 
@@ -90,4 +119,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     s3_client = boto3.client("s3", region_name=REGION_NAME)
+    print("Inserting tweets...")
     upload_user_tweets(args.location)
