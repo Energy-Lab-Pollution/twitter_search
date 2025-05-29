@@ -33,10 +33,10 @@ def insert_tweets_to_s3(location, user_id, tweets_list):
     if not tweets_list:
         return
 
-    location = location.replace(" ", "")
+    location = location.replace(" ", "_")
     jobs = []
     for t in tweets_list:
-        key = f"networks/{location}/classification/{user_id}/input/tweet{t['tweet_id']}.txt"
+        key = f"networks/{location}/classification/{user_id}/input/tweet_{t['tweet_id']}.txt"
         jobs.append({
             "Bucket": NEPTUNE_S3_BUCKET,
             "Key":    key,
