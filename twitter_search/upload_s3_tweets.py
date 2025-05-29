@@ -1,10 +1,9 @@
 """
 Script to upload all pending tweets from the users in the pilot cities
 """
-import datetime
-import json
 from argparse import ArgumentParser
 from pathlib import Path
+from tqdm import tqdm
 
 import boto3
 import botocore
@@ -13,21 +12,25 @@ from config_utils.constants import (
     REGION_NAME,
 )
 from config_utils.util import (
-    client_creator,
-    convert_to_iso_format,
+    load_json
 )
 
 
-def insert_tweets_to_s3(self, user_id, tweets_list):
+s3_client = boto3.client("s3", region_name=REGION_NAME)
+
+
+def insert_tweets_to_s3(location, user_id, tweets_list):
     """
     Function to insert each user's tweets as
     a txt files to S3
 
     These tweets are already filtered
     """
-    s3_client = boto3.client("s3", region_name=REGION_NAME)
+    if not tweets_list:
+        print(f"No tweets to upload for user {user_id}")
+        return
     for tweet in tweets_list:
-        s3_path = f"networks/{self.location}/classification/{user_id}/input/tweet_{tweet['tweet_id']}.txt"
+        s3_path = f"networks/{location}/classification/{user_id}/input/tweet_{tweet['tweet_id']}.txt"
         try:
             s3_client.put_object(
                 Bucket=NEPTUNE_S3_BUCKET,
@@ -37,3 +40,32 @@ def insert_tweets_to_s3(self, user_id, tweets_list):
         except botocore.exceptions.ClientError:
             print(f"Unable to upload {tweet['tweet_id']} for {user_id}")
             continue
+
+
+def upload_user_tweets(location):
+    """
+    Uploading
+    """
+    # Paths setup
+    location = location.lower()
+    file_path = Path(__file__).parent.parent / "data/" / f"networks/{location}"
+    location_json = load_json(file_path)
+
+    num_users = len(location_json)
+    print(f"Number of root users {num_users}")
+
+    for user_dict in tqdm(location_json):
+        original_tweets = []
+        if "followers_count" not in user_dict:
+            print(f"Skipping {user_dict['user_id']}")
+            continue
+
+        user_tweets = user_dict["tweets"]
+        for user_tweet in user_tweets:
+            # Remove reposts by others
+            if not user_tweet["tweet_text"].startswith("RT @"):
+                original_tweets.append(user_tweet)
+        
+        insert_tweets_to_s3(location, user_dict['user_id'], original_tweets)
+
+        
