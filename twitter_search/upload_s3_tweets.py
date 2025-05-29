@@ -26,7 +26,8 @@ def insert_tweets_to_s3(location, user_id, tweets_list):
     if not tweets_list:
         print(f"No tweets to upload for user {user_id}")
         return
-    for tweet in tweets_list:
+    for tweet in tqdm(tweets_list):
+        location = location.replace(" ", "_")
         s3_path = f"networks/{location}/classification/{user_id}/input/tweet_{tweet['tweet_id']}.txt"
         try:
             s3_client.put_object(
@@ -46,7 +47,7 @@ def upload_user_tweets(location):
     """
     # Paths setup
     location = location.lower()
-    file_path = Path(__file__).parent / "data/" / f"networks/{location}"
+    file_path = Path(__file__).parent / "data/" / f"networks/{location}/{location}.json"
     location_json = load_json(file_path)
 
     num_users = len(location_json)
@@ -71,8 +72,8 @@ def upload_user_tweets(location):
 
 if __name__ == "__main__":
 
-    parser = ArgumentParser(help="Specify params to upload tweets to S3")
-    parser.add_argument("--location", type=str)
+    parser = ArgumentParser(description="Specify params to upload tweets to S3")
+    parser.add_argument("--location", type=str, help="Location to read tweets from")
     args = parser.parse_args()
 
     s3_client = boto3.client("s3", region_name=REGION_NAME)
