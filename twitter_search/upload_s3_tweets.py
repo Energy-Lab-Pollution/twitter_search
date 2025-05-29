@@ -30,7 +30,6 @@ def insert_descriptions_to_s3(location, users_list):
     """
     s3_client = boto3.client("s3", region_name=REGION_NAME)
     for user in tqdm(users_list):
-        location = location.replace(" ", "_")
         s3_path = f"networks/{location}/classification/{user['user_id']}/input/description.txt"
         try:
             s3_client.put_object(
@@ -53,7 +52,6 @@ def insert_tweets_to_s3(location, user_id, tweets_list):
     if not tweets_list:
         return
 
-    location = location.replace(" ", "_")
     jobs = []
     for t in tweets_list:
         key = f"networks/{location}/classification/{user_id}/input/tweet_{t['tweet_id']}.txt"
