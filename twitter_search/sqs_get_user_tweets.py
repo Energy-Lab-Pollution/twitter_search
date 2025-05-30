@@ -113,14 +113,14 @@ class UserTweets:
 
         for tweet_dict in tweets_list:
             tweet_id = tweet_dict["tweet_id"]
+            timestamp = datetime.datetime.fromisoformat(tweet_dict['created_at'])
+            timestamps.append(timestamp)
             if (not tweet_dict["tweet_text"].startswith("RT @")) and (
                 tweet_dict["retweet_count"] > 0
             ):
                 if tweet_id not in unique_ids:
                     unique_ids.append(str(tweet_id))
                     new_tweets_list.append(tweet_dict)
-                    timestamp = datetime.datetime.fromisoformat(tweet_dict['created_at'])
-                    timestamps.append(timestamp)
             else:
                 continue
 
@@ -167,7 +167,7 @@ class UserTweets:
 
         # Parsing and filtering tweets
         tweets_list = self.parse_twikit_tweets(user_tweets)
-        tweets_list = self.filter_tweets(tweets_list)
+        tweets_list, last_tweeted_at = self.filter_tweets(tweets_list)
         num_extracted_tweets += len(tweets_list)
         parsed_tweets_list.extend(tweets_list)
 
@@ -199,7 +199,7 @@ class UserTweets:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
 
-        return parsed_tweets_list
+        return parsed_tweets_list, last_tweeted_at
 
     def x_get_user_tweets(self, user_id, num_tweets):
         """
@@ -237,8 +237,9 @@ class UserTweets:
                 break
 
         parsed_tweets = self.parse_x_tweets(user_tweets)
+        tweets_list, last_tweeted_at = self.filter_tweets(parsed_tweets)
 
-        return parsed_tweets
+        return tweets_list, last_tweeted_at
 
     def insert_tweets_to_s3(self, user_id, tweets_list):
         """
@@ -350,7 +351,7 @@ if __name__ == "__main__":
         )
 
         if args.extraction_type == "twikit":
-            tweets_list = asyncio.run(
+            tweets_list, last_tweeted_at = asyncio.run(
                 user_tweets.twikit_get_user_tweets(
                     user_id=root_user_id,
                     num_tweets=args.tweet_count,
