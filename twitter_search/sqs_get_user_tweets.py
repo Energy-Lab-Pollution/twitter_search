@@ -119,7 +119,7 @@ class UserTweets:
                 tweet_dict["created_at"]
             )
             timestamps.append(timestamp)
-            if (not tweet_dict["tweet_text"].startswith("RT @")):
+            if not tweet_dict["tweet_text"].startswith("RT @"):
                 self.s3_tweets.append(tweet_dict)
                 if tweet_dict["retweet_count"] > 0:
                     if tweet_id not in unique_ids:
@@ -201,7 +201,9 @@ class UserTweets:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
 
-        parsed_tweets_list, s3_tweets, last_tweeted_at = self.filter_tweets(parsed_tweets_list)
+        parsed_tweets_list, s3_tweets, last_tweeted_at = self.filter_tweets(
+            parsed_tweets_list
+        )
         return parsed_tweets_list, s3_tweets, last_tweeted_at
 
     def x_get_user_tweets(self, user_id, num_tweets):
@@ -240,7 +242,9 @@ class UserTweets:
                 break
 
         parsed_tweets = self.parse_x_tweets(user_tweets)
-        tweets_list, s3_tweets, last_tweeted_at = self.filter_tweets(parsed_tweets)
+        tweets_list, s3_tweets, last_tweeted_at = self.filter_tweets(
+            parsed_tweets
+        )
 
         return tweets_list, s3_tweets, last_tweeted_at
 
@@ -360,8 +364,10 @@ if __name__ == "__main__":
                 )
             )
         elif args.extraction_type == "X":
-            tweets_list, s3_tweets, last_tweeted_at = user_tweets.x_get_user_tweets(
-                user_id=root_user_id, num_tweets=args.tweet_count
+            tweets_list, s3_tweets, last_tweeted_at = (
+                user_tweets.x_get_user_tweets(
+                    user_id=root_user_id, num_tweets=args.tweet_count
+                )
             )
 
         print(f"Got {len(tweets_list)} with retweets")
