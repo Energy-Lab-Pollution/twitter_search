@@ -32,8 +32,10 @@ SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 class UserFollowers:
 
-    def __init__(self, location):
+    def __init__(self, location, queue_url, receipt_handle):
         self.location = location
+        self.queue_url = queue_url
+        self.receipt_handle = receipt_handle
 
     @staticmethod
     def filter_users(user_list):
@@ -191,6 +193,12 @@ class UserFollowers:
             except twikit.errors.TooManyRequests:
                 print("Followers: Too Many Requests - stopping early")
                 time.sleep(FIFTEEN_MINUTES)
+                # Change Message visibility
+                SQS_CLIENT.change_message_visibility(
+                    QueueUrl=self.queue_url,
+                    ReceiptHandle=self.receipt_handle,
+                    VisibilityTimeout=FIFTEEN_MINUTES
+                )
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request - stopping early")
                 return followers_list
