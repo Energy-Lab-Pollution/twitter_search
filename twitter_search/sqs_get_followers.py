@@ -197,7 +197,7 @@ class UserFollowers:
                 SQS_CLIENT.change_message_visibility(
                     QueueUrl=self.queue_url,
                     ReceiptHandle=self.receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES
+                    VisibilityTimeout=FIFTEEN_MINUTES,
                 )
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request - stopping early")

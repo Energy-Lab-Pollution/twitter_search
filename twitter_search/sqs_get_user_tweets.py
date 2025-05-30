@@ -113,7 +113,9 @@ class UserTweets:
 
         for tweet_dict in tweets_list:
             tweet_id = tweet_dict["tweet_id"]
-            timestamp = datetime.datetime.fromisoformat(tweet_dict['created_at'])
+            timestamp = datetime.datetime.fromisoformat(
+                tweet_dict["created_at"]
+            )
             timestamps.append(timestamp)
             if (not tweet_dict["tweet_text"].startswith("RT @")) and (
                 tweet_dict["retweet_count"] > 0
@@ -194,7 +196,7 @@ class UserTweets:
                 SQS_CLIENT.change_message_visibility(
                     QueueUrl=self.queue_url,
                     ReceiptHandle=self.receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES
+                    VisibilityTimeout=FIFTEEN_MINUTES,
                 )
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
@@ -345,9 +347,7 @@ if __name__ == "__main__":
         location = clean_data["location"]
 
         user_tweets = UserTweets(
-            location,
-            user_tweets_queue_url,
-            receipt_handle
+            location, user_tweets_queue_url, receipt_handle
         )
 
         if args.extraction_type == "twikit":
@@ -368,7 +368,7 @@ if __name__ == "__main__":
         print("Uploading tweets to S3...")
         user_tweets.insert_tweets_to_s3(root_user_id, tweets_list)
 
-        # TODO: Insert last_tweeted_at field to neptune 
+        # TODO: Insert last_tweeted_at field to neptune
 
         # Send tweets to retweeters queue
         user_tweets.send_to_queue(

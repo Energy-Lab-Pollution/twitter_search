@@ -209,7 +209,7 @@ class UserRetweeters:
                 SQS_CLIENT.change_message_visibility(
                     QueueUrl=self.queue_url,
                     ReceiptHandle=self.receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES
+                    VisibilityTimeout=FIFTEEN_MINUTES,
                 )
             except twikit.errors.BadRequest:
                 print("Retweeters: Bad Request")
@@ -374,7 +374,9 @@ if __name__ == "__main__":
             tmp_user_id = target_user_id
             # This means the user is already processed :)
 
-        user_retweeters = UserRetweeters(location, user_retweeters_queue_url, receipt_handle)
+        user_retweeters = UserRetweeters(
+            location, user_retweeters_queue_url, receipt_handle
+        )
 
         if args.extraction_type == "twikit":
             user_retweeters_list = asyncio.run(
