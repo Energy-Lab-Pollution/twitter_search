@@ -116,7 +116,7 @@ class CityUsers:
     def parse_x_users(self, user_list):
         """
         This function takes a list of user objects and
-        transforms it into a list of dictionaries
+        transforms it into a dictionary of dictionaries
 
         Parameters
         ----------
@@ -125,88 +125,55 @@ class CityUsers:
 
         Returns
         -------
-        dict_list: list
-            List of dictionaries with user data
+        user_dicts: dict
+            Dict of dictionaries with user data
         """
-        user_dicts = []
+        user_dicts = {}
         for user in user_list:
-            user_dict = {
-                "user_id": user["id"],
-                "username": user["username"],
-                "description": user["description"],
-                "profile_location": user["location"],
-                "target_location": self.location,
-                "verified": user["verified"],
-                #  datetime.datetime(2008, 6, 6, 21, 49, 51, tzinfo=datetime.timezone.utc)
-                "created_at": user["created_at"].isoformat(),
-                "processing_status": "pending",
-            }
-            for key, value in user["public_metrics"].items():
-                user_dict[key] = value
+            if user["id"] not in user_dicts:
+                user_dict = {
+                    "user_id": user["id"],
+                    "username": user["username"],
+                    "description": user["description"],
+                    "profile_location": user["location"],
+                    "target_location": self.location,
+                    "verified": user["verified"],
+                    #  datetime.datetime(2008, 6, 6, 21, 49, 51, tzinfo=datetime.timezone.utc)
+                    "created_at": user["created_at"].isoformat(),
+                    "processing_status": "pending",
+                }
+                for key, value in user["public_metrics"].items():
+                    user_dict[key] = value
 
-            user_dict["category"] = "null"
-            user_dict["treatment_arm"] = "null"
-            user_dict["retweeter_status"] = "pending"
-            user_dict["retweeter_last_processed"] = "null"
-            user_dict["follower_status"] = "pending"
-            user_dict["follower_last_processed"] = "null"
-            user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
-            user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
-            # See if location matches to add city
-            location_match = check_location(user["location"], self.location)
-            user_dict["city"] = self.location if location_match else None
-            user_dicts.append(user_dict)
+                user_dict["category"] = "null"
+                user_dict["treatment_arm"] = "null"
+                user_dict["retweeter_status"] = "pending"
+                user_dict["retweeter_last_processed"] = "null"
+                user_dict["follower_status"] = "pending"
+                user_dict["follower_last_processed"] = "null"
+                user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
+                user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
+                # See if location matches to add city
+                location_match = check_location(user["location"], self.location)
+                user_dict["city"] = self.location if location_match else None
+                # Append to master dict
+                user_dicts[user["id"]] = user_dict
 
         return user_dicts
-
-    @staticmethod
-    def filter_users(user_list):
-        """
-        Keeps users that:
-            - are unique
-            - have more than 100 followers
-            - match the location
-
-        Args:
-            - user_list (list)
-        Returns:
-            - new_user_list (list)
-        """
-        new_user_list = []
-        unique_ids = []
-
-        for user_dict in user_list:
-            user_id = user_dict["user_id"]
-            if user_id in unique_ids:
-                continue
-            elif (
-                user_dict["city"]
-                and user_dict["followers_count"]
-                > INFLUENCER_FOLLOWERS_THRESHOLD
-            ):
-                unique_ids.append(user_id)
-                new_user_list.append(user_dict)
-            else:
-                continue
-
-        return new_user_list
 
     def parse_twikit_users(self, tweets):
         """
         Parse retweeters (user objects) and put them
-        into a list of dictionaries
+        into a dict of dictionaries.
 
         Args:
         ----------
             - tweets (list): list of twikit.User objects
         Returns:
         ----------
-            - dict_list (list): list of dictionaries with users' info
+            - user_dicts (dict): Dict of dictionaries with users' info
         """
-        users_list = []
-        # TODO: Add logic to only process unique users at a global level
-        # Check user attributes in neptune (retweeter_status in progress or completed)
-        # If retweeter_status is completed / in progress - skip
+        user_dicts = {}
         if tweets:
             for tweet in tweets:
                 # if tweet.user.id
@@ -240,9 +207,11 @@ class CityUsers:
                     tweet.user.location, self.location
                 )
                 user_dict["city"] = self.location if location_match else None
-                users_list.append(user_dict)
 
-        return users_list
+                # Append to master dict
+                user_dicts[tweet.user.id] = user_dict
+
+        return user_dicts
 
     async def get_user_attributes(self, users_list, account_num):
         """
@@ -361,7 +330,7 @@ class CityUsers:
         cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
         cookies_dir = Path(__file__).parent.parent / cookies_dir
         client.load_cookies(cookies_dir)
-        users_list = []
+        users_dict = {}
         num_iter = 0
 
         for account_type, query in queries_dict.items():
@@ -384,7 +353,7 @@ class CityUsers:
                 )
                 num_extracted_tweets += len(tweets)
             parsed_users = self.parse_twikit_users(tweets)
-            users_list.extend(parsed_users)
+            users_dict = users_dict | parsed_users
 
             while num_extracted_tweets < num_tweets:
                 num_iter += 1
@@ -396,8 +365,8 @@ class CityUsers:
 
                     if next_tweets:
                         # Just getting the exactly necessary tweets - It will be more than required!
-                        next_users_list = self.parse_twikit_users(next_tweets)
-                        users_list.extend(next_users_list)
+                        next_users = self.parse_twikit_users(next_tweets)
+                        users_dict = users_dict | next_users
                         num_extracted_tweets += len(next_tweets)
                         print(
                             f"Request {num_iter}, got : {len(next_tweets)} tweets"
@@ -413,7 +382,7 @@ class CityUsers:
                     print(f"Processed {num_iter} batches")
                 # Leave process running until tweets are recollected
 
-        return users_list
+        return list(users_dict.values())
 
     def _get_x_city_users(
         self, queries_dict, num_tweets, date_since=None, date_until=None
@@ -428,7 +397,7 @@ class CityUsers:
         x_client = client_creator()
         result_count = 0
         next_token = None
-        users_list = []
+        users_dict = {}
         tweets_list = []
 
         # Gets default date range if necessary
@@ -459,8 +428,8 @@ class CityUsers:
                     break
                 result_count += response.meta["result_count"]
                 tweets_list.extend(response.data)
-                users_list.extend(response.includes["users"])
-                users_list = self.parse_x_users(users_list)
+                parsed_users = self.parse_x_users(response.includes["users"])
+                users_dict = users_dict | parsed_users
                 try:
                     next_token = response.meta["next_token"]
                 except Exception as err:
@@ -473,56 +442,89 @@ class CityUsers:
             print(f"Extracted len({tweets_list})")
             print(tweets_list)
 
-        return users_list
+        return list(users_dict.values())
 
-    def send_to_queue(self, users_list, queue_name):
+    def send_to_queue(self, user_dict, queue_name):
         """
         Sends twikit or X users to the corresponding queue
 
         Args:
-            - users_list (list)
+            - user_dict (dict)
             - queue_name (str)
         """
         queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)[
             "QueueUrl"
         ]
-        if not users_list:
-            print("No users to send to queue")
-            return
-        for user in users_list:
-            print(f"Sending user {user['user_id']}")
-            message = {
-                "user_id": user["user_id"],
-                "location": self.location,
-            }
-            try:
-                self.sqs_client.send_message(
-                    QueueUrl=queue_url,
-                    MessageBody=json.dumps(message),
-                )
-                print(f"User {user['user_id']} sent to {queue_name} queue :)")
-            except Exception as err:
-                print(
-                    f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}"
-                )
+        print(f"Sending user {user_dict['user_id']}")
+        message = {
+            "user_id": user_dict["user_id"],
+            "location": self.location,
+        }
+        try:
+            self.sqs_client.send_message(
+                QueueUrl=queue_url,
+                MessageBody=json.dumps(message),
+            )
+            print(f"User {user_dict['user_id']} sent to {queue_name} queue :)")
+        except Exception as err:
+            print(
+                f"Unable to send user {user_dict['user_id']} to  {queue_name} SQS: {err}"
+            )
 
-    def insert_descriptions_to_s3(self, users_list):
+    def insert_description_to_s3(self, user_dict):
         """
         Function to insert each user's description as
         a txt file to S3
         """
         s3_client = boto3.client("s3", region_name=REGION_NAME)
-        for user in users_list:
-            s3_path = f"networks/{self.location}/classification/{user['user_id']}/input/description.txt"
-            try:
-                s3_client.put_object(
-                    Bucket=NEPTUNE_S3_BUCKET,
-                    Key=s3_path,
-                    Body=user["description"].encode("utf-8", errors="ignore"),
-                )
-            except botocore.exceptions.ClientError:
-                print(f"Unable to upload description for {user['user_id']}")
-                continue
+        s3_path = f"networks/{self.location}/classification/{user_dict['user_id']}/input/description.txt"
+        try:
+            s3_client.put_object(
+                Bucket=NEPTUNE_S3_BUCKET,
+                Key=s3_path,
+                Body=user_dict["description"].encode("utf-8", errors="ignore"),
+            )
+        except botocore.exceptions.ClientError:
+            print(f"Unable to upload description for {user_dict['user_id']}")
+
+    def validate_root_user(self, user_dict):
+        """
+        Keeps users that:
+            - match the location
+            - have more than 100 followers
+            - do not already exist in the Graph DB
+        Args:
+            - user_dict (dict)
+        Returns:
+            - status (bool)
+        """
+        # TODO: Add DB check
+        if user_dict["city"] and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD:
+                return True
+        return False
+
+    def process_and_dispatch_users(self, users_list):
+        """
+        Validate root users, write nodes/edges to the DB and send to
+        SQS for extraction.
+
+        Args:
+        ----------
+            - users_list (list): list of user dicts
+        """
+        for user_dict in users_list:
+            print("Validating root user")
+            status = self.validate_root_user(user_dict)
+            if status:
+                # TODO: Insert / Check city node
+                # TODO: Upload user attributes to Neptune -- Neptune handler class
+                print("Inserting user description")
+                self.insert_description_to_s3(user_dict)
+                print("Sending to UserTweets Queue")
+                self.send_to_queue(user_dict, SQS_USER_TWEETS)
+                print("Sending to UserFollowers Queue")
+                self.send_to_queue(user_dict, SQS_USER_FOLLOWERS)
+                # TODO: Change "follower_status" to queued
 
 
 if __name__ == "__main__":
@@ -595,11 +597,6 @@ if __name__ == "__main__":
             )
         )
     elif args.extraction_type == "X":
-        new_query_dict, num_tweets_per_account = (
-            city_users.extract_queries_num_tweets(
-                args.tweet_count, args.extraction_type
-            )
-        )
         users_list = city_users._get_x_city_users(
             new_query_dict, num_tweets_per_account
         )
@@ -611,25 +608,4 @@ if __name__ == "__main__":
         )
         print("Got user attributes")
 
-    print(
-        f" =========================== Before filtering ==================:\n {len(users_list)} users"
-    )
-    users_list = city_users.filter_users(users_list)
-    print(
-        f" =========================== After filtering ==================:\n {len(users_list)} users"
-    )
-    print("\n")
-
-    # TODO: Insert / Check city node
-
-    # TODO: Upload user attributes to Neptune -- Neptune handler class
-
-    city_users.insert_descriptions_to_s3(users_list)
-
-    print("Sending to UserTweets Queue")
-    city_users.send_to_queue(users_list, SQS_USER_TWEETS)
-    print("Sending to UserFollowers Queue")
-    city_users.send_to_queue(users_list, SQS_USER_FOLLOWERS)
-
-    # TODO: "follower_status": pending, queued, in_progress, completed, failed
-    # here, follower_status will be set as queued
+    city_users.process_and_dispatch_users(users_list)
