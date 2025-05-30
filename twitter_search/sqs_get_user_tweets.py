@@ -34,8 +34,10 @@ SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
 class UserTweets:
-    def __init__(self, location):
+    def __init__(self, location, queue_url, receipt_handle):
         self.location = location
+        self.queue_url = queue_url
+        self.receipt_handle = receipt_handle
 
     @staticmethod
     def parse_twikit_tweets(tweets):
@@ -189,6 +191,11 @@ class UserTweets:
             except twikit.errors.TooManyRequests:
                 print("Tweets: too many requests, stopping...")
                 time.sleep(FIFTEEN_MINUTES)
+                SQS_CLIENT.change_message_visibility(
+                    QueueUrl=self.queue_url,
+                    ReceiptHandle=self.receipt_handle,
+                    VisibilityTimeout=FIFTEEN_MINUTES
+                )
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
 
@@ -336,7 +343,11 @@ if __name__ == "__main__":
         root_user_id = str(clean_data["user_id"])
         location = clean_data["location"]
 
-        user_tweets = UserTweets(location)
+        user_tweets = UserTweets(
+            location,
+            user_tweets_queue_url,
+            receipt_handle
+        )
 
         if args.extraction_type == "twikit":
             tweets_list = asyncio.run(
