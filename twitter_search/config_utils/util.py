@@ -14,8 +14,7 @@ import tweepy
 # Local imports
 from config_utils import config
 from config_utils.cities import ALIAS_DICT
-from config_utils.constants import GEOCODE_TIMEOUT, REGION_NAME
-from geopy.exc import GeocoderServiceError, GeocoderTimedOut
+from config_utils.constants import REGION_NAME
 
 
 LIST_FIELDS = ["id", "name", "description"]
@@ -180,31 +179,6 @@ def flatten_and_remove_empty(input_list):
             new_list.append(item)
 
     return new_list
-
-
-# ================== GeoLocation ======================
-
-
-def geocode_address(address, geolocator):
-    """
-    Geocodes an address using the geopy library
-    """
-    try:
-        location = geolocator.geocode(address, timeout=GEOCODE_TIMEOUT)
-
-        if location:
-            return location.latitude, location.longitude
-        else:
-            print(f"Address '{address}' could not be geocoded.")
-            return None, None
-
-    except GeocoderTimedOut:
-        print(f"Geocoding service timed out for address: '{address}'")
-        return None, None
-
-    except GeocoderServiceError as e:
-        print(f"Geocoding service error: {e}")
-        return None, None
 
 
 # ================= Tweepy utils =========================
