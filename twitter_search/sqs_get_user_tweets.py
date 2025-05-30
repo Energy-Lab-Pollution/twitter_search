@@ -107,6 +107,7 @@ class UserTweets:
         """
         new_tweets_list = []
         unique_ids = []
+        timestamps = []
 
         for tweet_dict in tweets_list:
             tweet_id = tweet_dict["tweet_id"]
@@ -116,10 +117,14 @@ class UserTweets:
                 if tweet_id not in unique_ids:
                     unique_ids.append(str(tweet_id))
                     new_tweets_list.append(tweet_dict)
+                    timestamp = datetime.datetime.fromisoformat(tweet_dict['created_at'])
+                    timestamps.append(timestamp)
             else:
                 continue
 
-        return new_tweets_list
+        last_tweeted_at = max(timestamps) if timestamps else "null"
+
+        return new_tweets_list, last_tweeted_at
 
     async def twikit_get_user_tweets(self, user_id, num_tweets, account_num):
         """
@@ -342,14 +347,16 @@ if __name__ == "__main__":
                 )
             )
         elif args.extraction_type == "X":
-            tweets_list = user_tweets.x_get_user_tweets(
+            tweets_list, last_tweeted_at = user_tweets.x_get_user_tweets(
                 user_id=root_user_id, num_tweets=args.tweet_count
             )
 
         print(f"Got {len(tweets_list)}")
-        # print(tweets_list)
+        print(f"Last tweeted at {last_tweeted_at}")
         print("Uploading tweets to S3...")
         user_tweets.insert_tweets_to_s3(root_user_id, tweets_list)
+
+        # TODO: Insert last_tweeted_at field to neptune 
 
         # Send tweets to retweeters queue
         user_tweets.send_to_queue(
