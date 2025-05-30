@@ -34,8 +34,10 @@ SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
 class UserTweets:
-    def __init__(self, location):
+    def __init__(self, location, queue_url, receipt_handle):
         self.location = location
+        self.queue_url = queue_url
+        self.receipt_handle = receipt_handle
 
     @staticmethod
     def parse_twikit_tweets(tweets):
@@ -93,8 +95,7 @@ class UserTweets:
 
         return parsed_tweets
 
-    @staticmethod
-    def filter_tweets(tweets_list):
+    def filter_tweets(self, tweets_list):
         """
         Keeps tweets that:
         - are unique
@@ -104,22 +105,32 @@ class UserTweets:
             - tweets_list (list)
         Returns:
             - new_tweets_list (list)
+            - s3_tweets (list)
+            - last_tweeted_at (timestamp)
         """
         new_tweets_list = []
+        s3_tweets = []
         unique_ids = []
+        timestamps = []
 
         for tweet_dict in tweets_list:
             tweet_id = tweet_dict["tweet_id"]
-            if (not tweet_dict["tweet_text"].startswith("RT @")) and (
-                tweet_dict["retweet_count"] > 0
-            ):
-                if tweet_id not in unique_ids:
-                    unique_ids.append(str(tweet_id))
-                    new_tweets_list.append(tweet_dict)
+            timestamp = datetime.datetime.fromisoformat(
+                tweet_dict["created_at"]
+            )
+            timestamps.append(timestamp)
+            if not tweet_dict["tweet_text"].startswith("RT @"):
+                s3_tweets.append(tweet_dict)
+                if tweet_dict["retweet_count"] > 0:
+                    if tweet_id not in unique_ids:
+                        unique_ids.append(str(tweet_id))
+                        new_tweets_list.append(tweet_dict)
             else:
                 continue
 
-        return new_tweets_list
+        last_tweeted_at = max(timestamps).isoformat() if timestamps else "null"
+
+        return new_tweets_list, s3_tweets, last_tweeted_at
 
     async def twikit_get_user_tweets(self, user_id, num_tweets, account_num):
         """
@@ -160,7 +171,6 @@ class UserTweets:
 
         # Parsing and filtering tweets
         tweets_list = self.parse_twikit_tweets(user_tweets)
-        tweets_list = self.filter_tweets(tweets_list)
         num_extracted_tweets += len(tweets_list)
         parsed_tweets_list.extend(tweets_list)
 
@@ -174,7 +184,6 @@ class UserTweets:
                 if next_tweets:
                     # Parse next tweets and filter them as well
                     next_tweets_list = self.parse_twikit_tweets(next_tweets)
-                    next_tweets_list = self.filter_tweets(next_tweets_list)
                     parsed_tweets_list.extend(next_tweets_list)
                     num_extracted_tweets += len(next_tweets_list)
                 else:
@@ -184,10 +193,18 @@ class UserTweets:
             except twikit.errors.TooManyRequests:
                 print("Tweets: too many requests, stopping...")
                 time.sleep(FIFTEEN_MINUTES)
+                SQS_CLIENT.change_message_visibility(
+                    QueueUrl=self.queue_url,
+                    ReceiptHandle=self.receipt_handle,
+                    VisibilityTimeout=FIFTEEN_MINUTES,
+                )
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
 
-        return parsed_tweets_list
+        parsed_tweets_list, s3_tweets, last_tweeted_at = self.filter_tweets(
+            parsed_tweets_list
+        )
+        return parsed_tweets_list, s3_tweets, last_tweeted_at
 
     def x_get_user_tweets(self, user_id, num_tweets):
         """
@@ -225,8 +242,11 @@ class UserTweets:
                 break
 
         parsed_tweets = self.parse_x_tweets(user_tweets)
+        tweets_list, s3_tweets, last_tweeted_at = self.filter_tweets(
+            parsed_tweets
+        )
 
-        return parsed_tweets
+        return tweets_list, s3_tweets, last_tweeted_at
 
     def insert_tweets_to_s3(self, user_id, tweets_list):
         """
@@ -331,10 +351,12 @@ if __name__ == "__main__":
         root_user_id = str(clean_data["user_id"])
         location = clean_data["location"]
 
-        user_tweets = UserTweets(location)
+        user_tweets = UserTweets(
+            location, user_tweets_queue_url, receipt_handle
+        )
 
         if args.extraction_type == "twikit":
-            tweets_list = asyncio.run(
+            tweets_list, s3_tweets, last_tweeted_at = asyncio.run(
                 user_tweets.twikit_get_user_tweets(
                     user_id=root_user_id,
                     num_tweets=args.tweet_count,
@@ -342,14 +364,18 @@ if __name__ == "__main__":
                 )
             )
         elif args.extraction_type == "X":
-            tweets_list = user_tweets.x_get_user_tweets(
-                user_id=root_user_id, num_tweets=args.tweet_count
+            tweets_list, s3_tweets, last_tweeted_at = (
+                user_tweets.x_get_user_tweets(
+                    user_id=root_user_id, num_tweets=args.tweet_count
+                )
             )
 
-        print(f"Got {len(tweets_list)}")
-        # print(tweets_list)
-        print("Uploading tweets to S3...")
-        user_tweets.insert_tweets_to_s3(root_user_id, tweets_list)
+        print(f"Got {len(tweets_list)} with retweets")
+        print(f"Last tweeted at {last_tweeted_at}")
+        print(f"Uploading {len(s3_tweets)} tweets to S3...")
+        user_tweets.insert_tweets_to_s3(root_user_id, s3_tweets)
+
+        # TODO: Insert last_tweeted_at field to neptune
 
         # Send tweets to retweeters queue
         user_tweets.send_to_queue(

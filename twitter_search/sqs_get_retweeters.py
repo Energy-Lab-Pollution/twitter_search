@@ -31,8 +31,10 @@ SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 class UserRetweeters:
 
-    def __init__(self, location):
+    def __init__(self, location, queue_url, receipt_handle):
         self.location = location
+        self.queue_url = queue_url
+        self.receipt_handle = receipt_handle
 
     @staticmethod
     def filter_users(user_list):
@@ -204,6 +206,11 @@ class UserRetweeters:
             except twikit.errors.TooManyRequests:
                 print("Retweeters: Too Many Requests")
                 time.sleep(FIFTEEN_MINUTES)
+                SQS_CLIENT.change_message_visibility(
+                    QueueUrl=self.queue_url,
+                    ReceiptHandle=self.receipt_handle,
+                    VisibilityTimeout=FIFTEEN_MINUTES,
+                )
             except twikit.errors.BadRequest:
                 print("Retweeters: Bad Request")
                 return retweeters_list
@@ -367,7 +374,9 @@ if __name__ == "__main__":
             tmp_user_id = target_user_id
             # This means the user is already processed :)
 
-        user_retweeters = UserRetweeters(location)
+        user_retweeters = UserRetweeters(
+            location, user_retweeters_queue_url, receipt_handle
+        )
 
         if args.extraction_type == "twikit":
             user_retweeters_list = asyncio.run(
