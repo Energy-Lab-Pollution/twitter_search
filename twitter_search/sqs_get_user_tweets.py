@@ -120,7 +120,7 @@ class UserTweets:
             )
             timestamps.append(timestamp)
             if not tweet_dict["tweet_text"].startswith("RT @"):
-                self.s3_tweets.append(tweet_dict)
+                s3_tweets.append(tweet_dict)
                 if tweet_dict["retweet_count"] > 0:
                     if tweet_id not in unique_ids:
                         unique_ids.append(str(tweet_id))
