@@ -1,9 +1,6 @@
 """
 Code with generative model
 """
-
-from datetime import datetime
-
 import google.generativeai as genai
 
 # Local imports

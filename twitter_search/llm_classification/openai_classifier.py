@@ -7,18 +7,15 @@ from datetime import datetime
 from openai import OpenAI
 
 # Local
-from keys import SECRET_KEY
-from constants import MODEL, PROMPT, ROLE
+from keys import OPENAI_KEY
+from constants import OPENAI_MODEL, PROMPT, ROLE
 
 # Parameters
-client = OpenAI(api_key=SECRET_KEY)
-MODEL = "gpt-4o"
-DATA_PATH = "data/"
-
+client = OpenAI(api_key=OPENAI_KEY)
 
 class GPTAgent:
     def __init__(
-        self, model=MODEL
+        self, model=OPENAI_MODEL
     ):
         self.model = model
         # Read files and get ticker mapping

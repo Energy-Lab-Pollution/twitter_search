@@ -1,3 +1,4 @@
 PROMPT=""
 ROLE=""
-MODEL=""
+OPENAI_MODEL="gpt-4o-mini"
+GEMINI_MODEL="gemini-2.0-flash"
