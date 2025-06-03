@@ -62,7 +62,7 @@ class NeptuneHandler:
 
         # Create city edge if location criteria is met
         if user_dict["city"] == user_dict["target_location"]:
-            print(f"Creating user-city edge")
+            print("Creating user-city edge")
             query += f".as('u').V('{user_dict['city']}').hasLabel('City').as('c').addE('BELONGS_TO').from('u').to('c')"
 
         # End of query
@@ -72,7 +72,7 @@ class NeptuneHandler:
 
         _ = self.run_query(query)
 
-        print(f"User node has been successfully created")
+        print("User node has been successfully created")
 
     def update_node_attributes(
         self, label: str, node_id: str, props_dict: dict
@@ -91,4 +91,4 @@ class NeptuneHandler:
 
         _ = self.run_query(query, bindings={"single": "Cardinality.single"})
 
-        print(f"Node attributes have been successfully updated")
+        print("Node attributes have been successfully updated")

@@ -14,10 +14,7 @@ import tweepy
 # Local imports
 from config_utils import config
 from config_utils.cities import ALIAS_DICT
-from config_utils.constants import GEOCODE_TIMEOUT, REGION_NAME
-
-
-# from geopy.exc import GeocoderServiceError, GeocoderTimedOut
+from config_utils.constants import REGION_NAME
 
 
 LIST_FIELDS = ["id", "name", "description"]

@@ -8,7 +8,6 @@ Last Updated: May 2025
 
 import asyncio
 import json
-import sys
 import time
 from argparse import ArgumentParser
 from datetime import datetime, timedelta, timezone
@@ -28,7 +27,6 @@ from config_utils.constants import (
     REGION_NAME,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
-    THIRTY_DAYS,
     TWEET_FIELDS,
     TWIKIT_COOKIES_DICT,
     USER_FIELDS,
