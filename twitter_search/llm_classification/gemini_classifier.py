@@ -5,17 +5,17 @@ import google.generativeai as genai
 
 # Local imports
 from keys import GEMINI_KEY
-from constants import MODEL, PROMPT
+from constants import GEMINI_MODEL, GEMINI_PROMPT
 
 # Parameters
 genai.configure(api_key=GEMINI_KEY)
 
 
 class GeminiAgent:
-    def __init__(self, model=MODEL):
+    def __init__(self, model=GEMINI_MODEL):
         self.model = model
         # Prompts
-        self.user_content = PROMPT
+        self.user_content = GEMINI_PROMPT
 
     def send_prompt(
         self,

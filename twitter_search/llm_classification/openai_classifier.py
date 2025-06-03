@@ -8,7 +8,7 @@ from openai import OpenAI
 
 # Local
 from keys import OPENAI_KEY
-from constants import OPENAI_MODEL, PROMPT, ROLE
+from constants import OPENAI_MODEL, OPENAI_INSTRUCTIONS, OPENAI_PROMPT
 
 # Parameters
 client = OpenAI(api_key=OPENAI_KEY)
@@ -20,14 +20,16 @@ class GPTAgent:
         self.model = model
         # Read files and get ticker mapping
         # Prompts
-        self.system_content = ROLE
-        self.user_content = PROMPT
+        self.system_content = OPENAI_INSTRUCTIONS
+        self.user_content = OPENAI_PROMPT
 
     # Define the prompt
-    def send_prompt(self):
+    def send_prompt(self, user_description, user_tweets):
         """
         Sends prompt to OpenAI API and returns the response
         """
+        self.user_content = self.user_content.replace("user_description", user_description)
+        self.user_content = self.user_content.replace("user_tweets", user_tweets)
 
         messages = [
             {"role": "system", "content": self.system_content},
