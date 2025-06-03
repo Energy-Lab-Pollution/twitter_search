@@ -23,8 +23,8 @@ from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
     INFLUENCER_FOLLOWERS_THRESHOLD,
-    NEPTUNE_S3_BUCKET,
     NEPTUNE_ENDPOINT,
+    NEPTUNE_S3_BUCKET,
     REGION_NAME,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
@@ -35,13 +35,13 @@ from config_utils.constants import (
     X_SEARCH_MAX_TWEETS,
     X_SEARCH_MIN_TWEETS,
 )
+from config_utils.neptune_handler import NeptuneHandler
 from config_utils.queries import QUERIES_DICT
 from config_utils.util import (
     check_location,
     client_creator,
     convert_to_iso_format,
 )
-from config_utils.neptune_handler import NeptuneHandler
 
 
 class CityUsers:
@@ -126,8 +126,12 @@ class CityUsers:
                 user_dict["retweeter_last_processed"] = "null"
                 user_dict["follower_status"] = "pending"
                 user_dict["follower_last_processed"] = "null"
-                user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
-                user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
+                user_dict["extracted_at"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
+                user_dict["last_updated"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
                 # See if location matches to add city
                 location_match = check_location(user["location"], self.location)
                 user_dict["city"] = self.location if location_match else None
@@ -161,7 +165,9 @@ class CityUsers:
                 user_dict["followers_count"] = tweet.user.followers_count
                 user_dict["following_count"] = tweet.user.following_count
                 user_dict["tweets_count"] = tweet.user.statuses_count
-                user_dict["verified"] = "true" if tweet.user.verified else "false"
+                user_dict["verified"] = (
+                    "true" if tweet.user.verified else "false"
+                )
                 user_dict["created_at"] = convert_to_iso_format(
                     tweet.user.created_at
                 )
@@ -311,12 +317,9 @@ class CityUsers:
         num_iter = 0
 
         date_range = f"since:{date_since} until:{date_until}"
-        queries_dict, num_tweets = (
-                self.extract_queries_num_tweets(
-                    tweet_count,
-                    date_range
-                )
-            )
+        queries_dict, num_tweets = self.extract_queries_num_tweets(
+            tweet_count, date_range
+        )
         print(f"Number of tweets per account: {num_tweets}")
 
         for account_type, query in queries_dict.items():
@@ -390,11 +393,8 @@ class CityUsers:
         tweets_list = []
 
         date_range = ""
-        queries_dict, num_tweets = (
-            self.extract_queries_num_tweets(
-                tweet_count,
-                date_range
-            )
+        queries_dict, num_tweets = self.extract_queries_num_tweets(
+            tweet_count, date_range
         )
 
         # validate tweet count threshold
@@ -438,7 +438,7 @@ class CityUsers:
             print(tweets_list)
 
         return list(users_dict.values())
-    
+
     @staticmethod
     def validate_x_tweet_count(tweet_count):
         """
@@ -447,10 +447,12 @@ class CityUsers:
         Args:
             - tweet_count (int)
         """
-        if (tweet_count < X_SEARCH_MIN_TWEETS) or (tweet_count > X_SEARCH_MAX_TWEETS):
+        if (tweet_count < X_SEARCH_MIN_TWEETS) or (
+            tweet_count > X_SEARCH_MAX_TWEETS
+        ):
             raise ValueError(
-                    f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}"
-                )
+                f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}"
+            )
 
     def send_to_queue(self, user_dict, queue_name):
         """
@@ -506,11 +508,11 @@ class CityUsers:
         Returns:
             - status (bool)
         """
-        user_exists = neptune_handler.user_exists(user_dict['user_id'])
+        user_exists = neptune_handler.user_exists(user_dict["user_id"])
         if (
-            not user_exists and 
-            (user_dict["city"] == user_dict["target_location"]) and 
-            user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD
+            not user_exists
+            and (user_dict["city"] == user_dict["target_location"])
+            and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD
         ):
             return True
         return False
@@ -530,7 +532,9 @@ class CityUsers:
         # Check if city node exists
         city_exists = neptune_handler.city_exists(self.location)
         if not city_exists:
-            raise ValueError("City node must exist prior to storing additional information")
+            raise ValueError(
+                "City node must exist prior to storing additional information"
+            )
 
         for user_dict in users_list:
             print("Validating root user")
@@ -538,10 +542,12 @@ class CityUsers:
             if not validation_status:
                 print("Root user validation failed. Skipping...")
                 continue
-            
+
             print(f"{user_dict['user_id']} has been validated as a root user")
-            
-            print("Creating root user node and corresponding city edge if applicable")
+
+            print(
+                "Creating root user node and corresponding city edge if applicable"
+            )
             self.neptune_handler.create_user_node(user_dict)
 
             print("Inserting user description")
@@ -550,14 +556,15 @@ class CityUsers:
             self.send_to_queue(user_dict, SQS_USER_TWEETS)
             print("Sending to UserFollowers Queue")
             self.send_to_queue(user_dict, SQS_USER_FOLLOWERS)
-            
+
             print("Updating follower_status attribute")
-            props_dict = {'follower_status': "queued"}
-            self.neptune_handler.update_node_attributes(label='User',
-                                                        node_id=user_dict['user_id'],
-                                                        props_dict=props_dict
-                                                        )
-        
+            props_dict = {"follower_status": "queued"}
+            self.neptune_handler.update_node_attributes(
+                label="User",
+                node_id=user_dict["user_id"],
+                props_dict=props_dict,
+            )
+
         # Stop Neptune client
         self.neptune_handler.stop()
 
@@ -597,15 +604,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if (not args.date_since) and args.date_until:
-        raise ValueError("date_since must be provided if date_until is specified")
+        raise ValueError(
+            "date_since must be provided if date_until is specified"
+        )
 
     if not args.date_until:
-        date_until = (datetime.now(timezone.utc) - timedelta(seconds=60)).isoformat()
+        date_until = (
+            datetime.now(timezone.utc) - timedelta(seconds=60)
+        ).isoformat()
     else:
         date_until = args.date_until
 
     if not args.date_since:
-        date_since = (datetime.now(timezone.utc) - timedelta(days=6)).isoformat()
+        date_since = (
+            datetime.now(timezone.utc) - timedelta(days=6)
+        ).isoformat()
     else:
         date_since = args.date_since
 

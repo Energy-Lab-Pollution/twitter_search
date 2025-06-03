@@ -10,8 +10,8 @@ class NeptuneHandler:
         """Initialize the Gremlin client connection."""
         self.client = client.Client(
             self.endpoint,
-            'g',
-            message_serializer=serializer.GraphSONSerializersV2d0()
+            "g",
+            message_serializer=serializer.GraphSONSerializersV2d0(),
         )
 
     def stop(self):
@@ -34,18 +34,18 @@ class NeptuneHandler:
         query = f"g.V('{user_id}').hasLabel('User').limit(1)"
         result = self.run_query(query)
         return len(result) > 0
-    
+
     def city_exists(self, city_id: str) -> bool:
         query = f"g.V('{city_id}').hasLabel('City').limit(1)"
         result = self.run_query(query)
         print("Result is:", result)
         return len(result) > 0
-    
+
     def create_user_node(self, user_dict: dict):
         user_id = user_dict.get("user_id")
         if not user_id:
             raise ValueError("Missing user ID in user_dict")
-        
+
         # Start Gremlin query with vertex ID and label
         query = f"g.addV('User').property(id, '{user_id}')"
 
@@ -61,20 +61,22 @@ class NeptuneHandler:
                 query += f".property('{key}', {value})"
 
         # Create city edge if location criteria is met
-        if user_dict['city'] == user_dict['target_location']:
+        if user_dict["city"] == user_dict["target_location"]:
             print(f"Creating user-city edge")
             query += f".as('u').V('{user_dict['city']}').hasLabel('City').as('c').addE('BELONGS_TO').from('u').to('c')"
 
         # End of query
         query += ".iterate()"
 
-        print(f'Query is: {query}')
+        print(f"Query is: {query}")
 
         _ = self.run_query(query)
-        
+
         print(f"User node has been successfully created")
 
-    def update_node_attributes(self, label: str, node_id: str, props_dict: dict):
+    def update_node_attributes(
+        self, label: str, node_id: str, props_dict: dict
+    ):
         query = f"g.V('{node_id}').hasLabel('{label}')"
         for key, value in props_dict.items():
             # Handle types
@@ -88,5 +90,5 @@ class NeptuneHandler:
         query += ".iterate()"
 
         _ = self.run_query(query, bindings={"single": "Cardinality.single"})
-        
+
         print(f"Node attributes have been successfully updated")

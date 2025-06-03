@@ -15,6 +15,8 @@ import tweepy
 from config_utils import config
 from config_utils.cities import ALIAS_DICT
 from config_utils.constants import GEOCODE_TIMEOUT, REGION_NAME
+
+
 # from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 
 
