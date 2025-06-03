@@ -8,6 +8,7 @@ Last Updated: May 2025
 
 import asyncio
 import json
+import sys
 import time
 from argparse import ArgumentParser
 from datetime import datetime, timedelta, timezone
@@ -23,6 +24,7 @@ from config_utils.constants import (
     FIFTEEN_MINUTES,
     INFLUENCER_FOLLOWERS_THRESHOLD,
     NEPTUNE_S3_BUCKET,
+    NEPTUNE_ENDPOINT,
     REGION_NAME,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
@@ -39,14 +41,16 @@ from config_utils.util import (
     client_creator,
     convert_to_iso_format,
 )
+from config_utils.neptune_handler import NeptuneHandler
 
 
 class CityUsers:
-    def __init__(self, location):
+    def __init__(self, location, neptune_handler):
         self.base_dir = Path(__file__).parent / "data/"
         self.location = location
         self.sqs_client = boto3.client("sqs", region_name="us-west-1")
-        self.language = CITIES_LANGS[self.location]
+        self.language = CITIES_LANGS.get(self.location, None)
+        self.neptune_handler = neptune_handler
 
     @staticmethod
     def get_default_date_range(date_since=None, date_until=None):
@@ -56,14 +60,13 @@ class CityUsers:
         30 days before
         """
         if not date_until:
-            date_until = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            date_until = datetime.now(timezone.utc) - timedelta(seconds=60)
         if not date_since:
-            date_since = datetime.now(timezone.utc) - timedelta(
-                days=THIRTY_DAYS
+            date_since = date_until - timedelta(
+                days=6
             )
-            date_since = date_since.strftime("%Y-%m-%d")
 
-        return date_since, date_until
+        return date_since.isoformat(), date_until.isoformat()
 
     def extract_queries_num_tweets(
         self, tweet_count, extraction_type, date_since=None, date_until=None
@@ -498,9 +501,13 @@ class CityUsers:
         Returns:
             - status (bool)
         """
-        # TODO: Add DB check
-        if user_dict["city"] and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD:
-                return True
+        user_exists = neptune_handler.user_exists(user_dict['user_id'])
+        if (
+            not user_exists and 
+            (user_dict["city"] == user_dict["target_location"]) and 
+            user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD
+        ):
+            return True
         return False
 
     def process_and_dispatch_users(self, users_list):
@@ -512,19 +519,42 @@ class CityUsers:
         ----------
             - users_list (list): list of user dicts
         """
+        # Start Neptune client
+        self.neptune_handler.start()
+
+        # Check if city node exists
+        city_exists = neptune_handler.city_exists(self.location)
+        if not city_exists:
+            raise ValueError("City node must exist prior to storing additional information")
+
         for user_dict in users_list:
             print("Validating root user")
-            status = self.validate_root_user(user_dict)
-            if status:
-                # TODO: Insert / Check city node
-                # TODO: Upload user attributes to Neptune -- Neptune handler class
-                print("Inserting user description")
-                self.insert_description_to_s3(user_dict)
-                print("Sending to UserTweets Queue")
-                self.send_to_queue(user_dict, SQS_USER_TWEETS)
-                print("Sending to UserFollowers Queue")
-                self.send_to_queue(user_dict, SQS_USER_FOLLOWERS)
-                # TODO: Change "follower_status" to queued
+            validation_status = self.validate_root_user(user_dict)
+            if not validation_status:
+                print("Root user validation failed. Skipping...")
+                continue
+            
+            print(f"{user_dict['user_id']} has been validated as a root user")
+            
+            print("Creating root user node and corresponding city edge if applicable")
+            self.neptune_handler.create_user_node(user_dict)
+
+            print("Inserting user description")
+            self.insert_description_to_s3(user_dict)
+            print("Sending to UserTweets Queue")
+            self.send_to_queue(user_dict, SQS_USER_TWEETS)
+            print("Sending to UserFollowers Queue")
+            self.send_to_queue(user_dict, SQS_USER_FOLLOWERS)
+            
+            print("Updating follower_status attribute")
+            props_dict = {'follower_status': "queued"}
+            self.neptune_handler.update_node_attributes(label='User',
+                                                        node_id=user_dict['user_id'],
+                                                        props_dict=props_dict
+                                                        )
+        
+        # Stop Neptune client
+        self.neptune_handler.stop()
 
 
 if __name__ == "__main__":
@@ -561,15 +591,16 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.extraction_type == "X" and (
-        (args.tweet_count < X_SEARCH_MIN_TWEETS)
-        or (args.tweet_count > X_SEARCH_MAX_TWEETS)
-    ):
-        raise ValueError(
-            f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}"
-        )
+    # if args.extraction_type == "X" and (
+    #     (args.tweet_count < X_SEARCH_MIN_TWEETS)
+    #     or (args.tweet_count > X_SEARCH_MAX_TWEETS)
+    # ):
+    #     raise ValueError(
+    #         f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}"
+    #     )
 
-    city_users = CityUsers(args.location)
+    neptune_handler = NeptuneHandler(NEPTUNE_ENDPOINT)
+    city_users = CityUsers(args.location, neptune_handler)
 
     # Getting dict queries and num of tweets per account
     if args.extraction_type in ["twikit", "X"]:
@@ -607,5 +638,29 @@ if __name__ == "__main__":
             city_users.get_user_attributes(users_list, args.account_num)
         )
         print("Got user attributes")
+
+    # users_list = [
+    #     {
+    #     "user_id": '00123456',
+    #     "city": 'test',
+    #     "username": "1arry1iu",
+    #     "last_tweeted_at": "2025-05-02T20:47:42+00:00",
+    #     "retweeter_status": "pending",
+    #     "retweeter_last_processed": "2025-05-02T22:13:46.742222+00:00",
+    #     "profile_location": "Chiang Mai, Thailand",
+    #     "follower_status": "pending",
+    #     "target_location": "test",
+    #     "follower_last_processed": "2025-05-02T22:13:46.742222+00:00",
+    #     "followers_count": 278,
+    #     "following_count": 80,
+    #     "tweets_count": 444,
+    #     "verified": "null",
+    #     "created_at": "2022-02-04T00:01:49+00:00",
+    #     "category": "null",
+    #     "treatment_arm": "null",
+    #     "extracted_at": "2025-05-02T22:13:11.834158+00:00",
+    #     "last_updated": "2025-05-02T22:13:11.834168+00:00",
+    #     }
+    # ]
 
     city_users.process_and_dispatch_users(users_list)
