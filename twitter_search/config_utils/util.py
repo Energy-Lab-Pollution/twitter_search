@@ -181,31 +181,6 @@ def flatten_and_remove_empty(input_list):
     return new_list
 
 
-# ================== GeoLocation ======================
-
-
-def geocode_address(address, geolocator):
-    """
-    Geocodes an address using the geopy library
-    """
-    try:
-        location = geolocator.geocode(address, timeout=GEOCODE_TIMEOUT)
-
-        if location:
-            return location.latitude, location.longitude
-        else:
-            print(f"Address '{address}' could not be geocoded.")
-            return None, None
-
-    except GeocoderTimedOut:
-        print(f"Geocoding service timed out for address: '{address}'")
-        return None, None
-
-    except GeocoderServiceError as e:
-        print(f"Geocoding service error: {e}")
-        return None, None
-
-
 # ================= Tweepy utils =========================
 
 

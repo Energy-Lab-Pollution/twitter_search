@@ -311,12 +311,6 @@ class UserFilter:
                     step 3 done"""
             )
 
-            # if self.location in self.STATE_CAPITALS:
-            #     self.determine_location_relevance()
-            #     print(f"relevant users for {self.location} tagged step 4 done")
-            # else:
-            #     print(f"Location {self.location} not found in STATE_CAPITALS")
-
             # Paste both classified and unclassified users
             self.all_users = []
             self.all_users.extend(self.classified_users)
