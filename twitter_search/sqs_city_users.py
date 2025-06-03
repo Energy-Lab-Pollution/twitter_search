@@ -22,17 +22,18 @@ from config_utils.constants import (
     EXPANSIONS,
     FIFTEEN_MINUTES,
     INFLUENCER_FOLLOWERS_THRESHOLD,
+    NEPTUNE_ENDPOINT,
     NEPTUNE_S3_BUCKET,
     REGION_NAME,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
-    THIRTY_DAYS,
     TWEET_FIELDS,
     TWIKIT_COOKIES_DICT,
     USER_FIELDS,
     X_SEARCH_MAX_TWEETS,
     X_SEARCH_MIN_TWEETS,
 )
+from config_utils.neptune_handler import NeptuneHandler
 from config_utils.queries import QUERIES_DICT
 from config_utils.util import (
     check_location,
@@ -42,32 +43,14 @@ from config_utils.util import (
 
 
 class CityUsers:
-    def __init__(self, location):
+    def __init__(self, location, neptune_handler):
         self.base_dir = Path(__file__).parent / "data/"
         self.location = location
         self.sqs_client = boto3.client("sqs", region_name="us-west-1")
-        self.language = CITIES_LANGS[self.location]
+        self.language = CITIES_LANGS.get(self.location, None)
+        self.neptune_handler = neptune_handler
 
-    @staticmethod
-    def get_default_date_range(date_since=None, date_until=None):
-        """
-        Gets a default date range where the most
-        recent date is today and the last date is
-        30 days before
-        """
-        if not date_until:
-            date_until = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        if not date_since:
-            date_since = datetime.now(timezone.utc) - timedelta(
-                days=THIRTY_DAYS
-            )
-            date_since = date_since.strftime("%Y-%m-%d")
-
-        return date_since, date_until
-
-    def extract_queries_num_tweets(
-        self, tweet_count, extraction_type, date_since=None, date_until=None
-    ):
+    def extract_queries_num_tweets(self, tweet_count, date_range):
         """
         This method gets all the queries with the appropiate aliases
         for the desired location, along with the allocated number of
@@ -77,19 +60,9 @@ class CityUsers:
         ----------
             - tweet_count (str): Total number of tweets to be distributed for each
                          account type
-            - date_since (str): Lower bound date (YYYY-MM-DD) for tweet search
-            - date_until (str): Upper bound date (YYYY-MM-DD) for tweet search
+            - date_range (str): Date range for tweet search.
         """
         queries = QUERIES_DICT[self.language]
-
-        # date_since and date_until just supported in X Enterprise
-        if extraction_type in ["twikit"]:
-            date_since, date_until = self.get_default_date_range(
-                date_since, date_until
-            )
-            date_range = f"since:{date_since} until:{date_until}"
-        else:
-            date_range = ""
 
         if self.location in LOCATION_ALIAS_DICT:
             aliases = LOCATION_ALIAS_DICT[self.location]
@@ -116,7 +89,7 @@ class CityUsers:
     def parse_x_users(self, user_list):
         """
         This function takes a list of user objects and
-        transforms it into a list of dictionaries
+        transforms it into a dictionary of dictionaries
 
         Parameters
         ----------
@@ -125,88 +98,59 @@ class CityUsers:
 
         Returns
         -------
-        dict_list: list
-            List of dictionaries with user data
+        user_dicts: dict
+            Dict of dictionaries with user data
         """
-        user_dicts = []
+        user_dicts = {}
         for user in user_list:
-            user_dict = {
-                "user_id": user["id"],
-                "username": user["username"],
-                "description": user["description"],
-                "profile_location": user["location"],
-                "target_location": self.location,
-                "verified": user["verified"],
-                #  datetime.datetime(2008, 6, 6, 21, 49, 51, tzinfo=datetime.timezone.utc)
-                "created_at": user["created_at"].isoformat(),
-                "processing_status": "pending",
-            }
-            for key, value in user["public_metrics"].items():
-                user_dict[key] = value
+            if user["id"] not in user_dicts:
+                user_dict = {
+                    "user_id": user["id"],
+                    "username": user["username"],
+                    "description": user["description"],
+                    "profile_location": user["location"],
+                    "target_location": self.location,
+                    "verified": "true" if user["verified"] else "false",
+                    #  datetime.datetime(2008, 6, 6, 21, 49, 51, tzinfo=datetime.timezone.utc)
+                    "created_at": user["created_at"].isoformat(),
+                    "processing_status": "pending",
+                }
+                for key, value in user["public_metrics"].items():
+                    user_dict[key] = value
 
-            user_dict["category"] = "null"
-            user_dict["treatment_arm"] = "null"
-            user_dict["retweeter_status"] = "pending"
-            user_dict["retweeter_last_processed"] = "null"
-            user_dict["follower_status"] = "pending"
-            user_dict["follower_last_processed"] = "null"
-            user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
-            user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
-            # See if location matches to add city
-            location_match = check_location(user["location"], self.location)
-            user_dict["city"] = self.location if location_match else None
-            user_dicts.append(user_dict)
+                user_dict["category"] = "null"
+                user_dict["treatment_arm"] = "null"
+                user_dict["retweeter_status"] = "pending"
+                user_dict["retweeter_last_processed"] = "null"
+                user_dict["follower_status"] = "pending"
+                user_dict["follower_last_processed"] = "null"
+                user_dict["extracted_at"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
+                user_dict["last_updated"] = datetime.now(
+                    timezone.utc
+                ).isoformat()
+                # See if location matches to add city
+                location_match = check_location(user["location"], self.location)
+                user_dict["city"] = self.location if location_match else None
+                # Append to master dict
+                user_dicts[user["id"]] = user_dict
 
         return user_dicts
-
-    @staticmethod
-    def filter_users(user_list):
-        """
-        Keeps users that:
-            - are unique
-            - have more than 100 followers
-            - match the location
-
-        Args:
-            - user_list (list)
-        Returns:
-            - new_user_list (list)
-        """
-        new_user_list = []
-        unique_ids = []
-
-        for user_dict in user_list:
-            user_id = user_dict["user_id"]
-            if user_id in unique_ids:
-                continue
-            elif (
-                user_dict["city"]
-                and user_dict["followers_count"]
-                > INFLUENCER_FOLLOWERS_THRESHOLD
-            ):
-                unique_ids.append(user_id)
-                new_user_list.append(user_dict)
-            else:
-                continue
-
-        return new_user_list
 
     def parse_twikit_users(self, tweets):
         """
         Parse retweeters (user objects) and put them
-        into a list of dictionaries
+        into a dict of dictionaries.
 
         Args:
         ----------
             - tweets (list): list of twikit.User objects
         Returns:
         ----------
-            - dict_list (list): list of dictionaries with users' info
+            - user_dicts (dict): Dict of dictionaries with users' info
         """
-        users_list = []
-        # TODO: Add logic to only process unique users at a global level
-        # Check user attributes in neptune (retweeter_status in progress or completed)
-        # If retweeter_status is completed / in progress - skip
+        user_dicts = {}
         if tweets:
             for tweet in tweets:
                 # if tweet.user.id
@@ -219,7 +163,9 @@ class CityUsers:
                 user_dict["followers_count"] = tweet.user.followers_count
                 user_dict["following_count"] = tweet.user.following_count
                 user_dict["tweets_count"] = tweet.user.statuses_count
-                user_dict["verified"] = tweet.user.verified
+                user_dict["verified"] = (
+                    "true" if tweet.user.verified else "false"
+                )
                 user_dict["created_at"] = convert_to_iso_format(
                     tweet.user.created_at
                 )
@@ -240,9 +186,11 @@ class CityUsers:
                     tweet.user.location, self.location
                 )
                 user_dict["city"] = self.location if location_match else None
-                users_list.append(user_dict)
 
-        return users_list
+                # Append to master dict
+                user_dicts[tweet.user.id] = user_dict
+
+        return user_dicts
 
     async def get_user_attributes(self, users_list, account_num):
         """
@@ -343,7 +291,7 @@ class CityUsers:
         return users_list
 
     async def _get_twikit_city_users(
-        self, queries_dict, num_tweets, account_num
+        self, tweet_count, date_since, date_until, account_num
     ):
         """
         Method used to search for tweets, with twikit,
@@ -354,15 +302,23 @@ class CityUsers:
         users are then parsed from such tweets.
 
         Args:
-            - queries_dict (dict): Query dictionary with keywords and location
-            - num_tweets (int): Determines the number of tweets to use **per query**
+            - tweet_count (int): Total number of tweets to extract/search
+            - date_since (str): Start date for tweet search
+            - date_until (str): End date for tweet search
+            - account_num (str): Twitter account to use for extraction
         """
         client = twikit.Client("en-US")
         cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
         cookies_dir = Path(__file__).parent.parent / cookies_dir
         client.load_cookies(cookies_dir)
-        users_list = []
+        users_dict = {}
         num_iter = 0
+
+        date_range = f"since:{date_since} until:{date_until}"
+        queries_dict, num_tweets = self.extract_queries_num_tweets(
+            tweet_count, date_range
+        )
+        print(f"Number of tweets per account: {num_tweets}")
 
         for account_type, query in queries_dict.items():
             num_extracted_tweets = 0
@@ -384,7 +340,7 @@ class CityUsers:
                 )
                 num_extracted_tweets += len(tweets)
             parsed_users = self.parse_twikit_users(tweets)
-            users_list.extend(parsed_users)
+            users_dict = users_dict | parsed_users
 
             while num_extracted_tweets < num_tweets:
                 num_iter += 1
@@ -396,8 +352,8 @@ class CityUsers:
 
                     if next_tweets:
                         # Just getting the exactly necessary tweets - It will be more than required!
-                        next_users_list = self.parse_twikit_users(next_tweets)
-                        users_list.extend(next_users_list)
+                        next_users = self.parse_twikit_users(next_tweets)
+                        users_dict = users_dict | next_users
                         num_extracted_tweets += len(next_tweets)
                         print(
                             f"Request {num_iter}, got : {len(next_tweets)} tweets"
@@ -413,28 +369,34 @@ class CityUsers:
                     print(f"Processed {num_iter} batches")
                 # Leave process running until tweets are recollected
 
-        return users_list
+        return list(users_dict.values())
 
-    def _get_x_city_users(
-        self, queries_dict, num_tweets, date_since=None, date_until=None
-    ):
+    def _get_x_city_users(self, tweet_count, date_since, date_until):
         """
         Method used to search for tweets, with the X API,
         using a given query
 
         The corresponding users are then parsed from
         such tweets.
+
+        Args:
+            - tweet_count (int): Total number of tweets to extract/search
+            - date_since (str): Start date for tweet search
+            - date_until (str): End date for tweet search
         """
         x_client = client_creator()
         result_count = 0
         next_token = None
-        users_list = []
+        users_dict = {}
         tweets_list = []
 
-        # Gets default date range if necessary
-        date_since, date_until = self.get_default_date_range(
-            date_since, date_until
+        date_range = ""
+        queries_dict, num_tweets = self.extract_queries_num_tweets(
+            tweet_count, date_range
         )
+
+        # validate tweet count threshold
+        self.validate_x_tweet_count(num_tweets)
 
         for account_type, query in queries_dict.items():
             print(query)
@@ -459,8 +421,8 @@ class CityUsers:
                     break
                 result_count += response.meta["result_count"]
                 tweets_list.extend(response.data)
-                users_list.extend(response.includes["users"])
-                users_list = self.parse_x_users(users_list)
+                parsed_users = self.parse_x_users(response.includes["users"])
+                users_dict = users_dict | parsed_users
                 try:
                     next_token = response.meta["next_token"]
                 except Exception as err:
@@ -473,56 +435,136 @@ class CityUsers:
             print(f"Extracted len({tweets_list})")
             print(tweets_list)
 
-        return users_list
+        return list(users_dict.values())
 
-    def send_to_queue(self, users_list, queue_name):
+    @staticmethod
+    def validate_x_tweet_count(tweet_count):
+        """
+        Check whether tweet count is within prescribed X API limits.
+
+        Args:
+            - tweet_count (int)
+        """
+        if (tweet_count < X_SEARCH_MIN_TWEETS) or (
+            tweet_count > X_SEARCH_MAX_TWEETS
+        ):
+            raise ValueError(
+                f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}"
+            )
+
+    def send_to_queue(self, user_dict, queue_name):
         """
         Sends twikit or X users to the corresponding queue
 
         Args:
-            - users_list (list)
+            - user_dict (dict)
             - queue_name (str)
         """
         queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)[
             "QueueUrl"
         ]
-        if not users_list:
-            print("No users to send to queue")
-            return
-        for user in users_list:
-            print(f"Sending user {user['user_id']}")
-            message = {
-                "user_id": user["user_id"],
-                "location": self.location,
-            }
-            try:
-                self.sqs_client.send_message(
-                    QueueUrl=queue_url,
-                    MessageBody=json.dumps(message),
-                )
-                print(f"User {user['user_id']} sent to {queue_name} queue :)")
-            except Exception as err:
-                print(
-                    f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}"
-                )
+        print(f"Sending user {user_dict['user_id']}")
+        message = {
+            "user_id": user_dict["user_id"],
+            "location": self.location,
+        }
+        try:
+            self.sqs_client.send_message(
+                QueueUrl=queue_url,
+                MessageBody=json.dumps(message),
+            )
+            print(f"User {user_dict['user_id']} sent to {queue_name} queue :)")
+        except Exception as err:
+            print(
+                f"Unable to send user {user_dict['user_id']} to  {queue_name} SQS: {err}"
+            )
 
-    def insert_descriptions_to_s3(self, users_list):
+    def insert_description_to_s3(self, user_dict):
         """
         Function to insert each user's description as
         a txt file to S3
         """
         s3_client = boto3.client("s3", region_name=REGION_NAME)
-        for user in users_list:
-            s3_path = f"networks/{self.location}/classification/{user['user_id']}/input/description.txt"
-            try:
-                s3_client.put_object(
-                    Bucket=NEPTUNE_S3_BUCKET,
-                    Key=s3_path,
-                    Body=user["description"].encode("utf-8", errors="ignore"),
-                )
-            except botocore.exceptions.ClientError:
-                print(f"Unable to upload description for {user['user_id']}")
+        s3_path = f"networks/{self.location}/classification/{user_dict['user_id']}/input/description.txt"
+        try:
+            s3_client.put_object(
+                Bucket=NEPTUNE_S3_BUCKET,
+                Key=s3_path,
+                Body=user_dict["description"].encode("utf-8", errors="ignore"),
+            )
+        except botocore.exceptions.ClientError:
+            print(f"Unable to upload description for {user_dict['user_id']}")
+
+    def validate_root_user(self, user_dict):
+        """
+        Keeps users that:
+            - match the location
+            - have more than 100 followers
+            - do not already exist in the Graph DB
+        Args:
+            - user_dict (dict)
+        Returns:
+            - status (bool)
+        """
+        user_exists = neptune_handler.user_exists(user_dict["user_id"])
+        if (
+            not user_exists
+            and (user_dict["city"] == user_dict["target_location"])
+            and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD
+        ):
+            return True
+        return False
+
+    def process_and_dispatch_users(self, users_list):
+        """
+        Validate root users, write nodes/edges to the DB and send to
+        SQS for extraction.
+
+        Args:
+        ----------
+            - users_list (list): list of user dicts
+        """
+        # Start Neptune client
+        self.neptune_handler.start()
+
+        # Check if city node exists
+        city_exists = neptune_handler.city_exists(self.location)
+        if not city_exists:
+            raise ValueError(
+                "City node must exist prior to storing additional information"
+            )
+
+        for user_dict in users_list:
+            print("Validating root user")
+            validation_status = self.validate_root_user(user_dict)
+            if not validation_status:
+                print("Root user validation failed. Skipping...")
                 continue
+
+            print(f"{user_dict['user_id']} has been validated as a root user")
+
+            print(
+                "Creating root user node and corresponding city edge if applicable"
+            )
+            self.neptune_handler.create_user_node(user_dict)
+
+            print("Inserting user description")
+            self.insert_description_to_s3(user_dict)
+            print("Sending to UserTweets Queue")
+            self.send_to_queue(user_dict, SQS_USER_TWEETS)
+            print("Sending to UserFollowers Queue")
+            self.send_to_queue(user_dict, SQS_USER_FOLLOWERS)
+
+            print("Updating follower_status attribute")
+            props_dict = {"follower_status": "queued"}
+            self.neptune_handler.update_node_attributes(
+                label="User",
+                node_id=user_dict["user_id"],
+                props_dict=props_dict,
+            )
+
+        # Stop Neptune client
+        self.neptune_handler.stop()
 
 
 if __name__ == "__main__":
@@ -559,49 +601,37 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.extraction_type == "X" and (
-        (args.tweet_count < X_SEARCH_MIN_TWEETS)
-        or (args.tweet_count > X_SEARCH_MAX_TWEETS)
-    ):
+    if (not args.date_since) and args.date_until:
         raise ValueError(
-            f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}"
+            "date_since must be provided if date_until is specified"
         )
 
-    city_users = CityUsers(args.location)
+    if not args.date_until:
+        date_until = (
+            datetime.now(timezone.utc) - timedelta(seconds=60)
+        ).isoformat()
+    else:
+        date_until = args.date_until
 
-    # Getting dict queries and num of tweets per account
-    if args.extraction_type in ["twikit", "X"]:
-        if args.date_since and args.date_until:
-            new_query_dict, num_tweets_per_account = (
-                city_users.extract_queries_num_tweets(
-                    args.tweet_count,
-                    args.extraction_type,
-                    args.date_since,
-                    args.date_until,
-                )
-            )
-        else:
-            new_query_dict, num_tweets_per_account = (
-                city_users.extract_queries_num_tweets(
-                    args.tweet_count, args.extraction_type
-                )
-            )
+    if not args.date_since:
+        date_since = (
+            datetime.now(timezone.utc) - timedelta(days=6)
+        ).isoformat()
+    else:
+        date_since = args.date_since
+
+    neptune_handler = NeptuneHandler(NEPTUNE_ENDPOINT)
+    city_users = CityUsers(args.location, neptune_handler)
 
     if args.extraction_type == "twikit":
-        print(f"Number of tweets per account: {num_tweets_per_account}")
         users_list = asyncio.run(
             city_users._get_twikit_city_users(
-                new_query_dict, num_tweets_per_account, args.account_num
+                args.tweet_count, date_since, date_until, args.account_num
             )
         )
     elif args.extraction_type == "X":
-        new_query_dict, num_tweets_per_account = (
-            city_users.extract_queries_num_tweets(
-                args.tweet_count, args.extraction_type
-            )
-        )
         users_list = city_users._get_x_city_users(
-            new_query_dict, num_tweets_per_account
+            args.tweet_count, date_since, date_until
         )
     elif args.extraction_type == "file":
         users_list = city_users._get_file_city_users(args.num_users)
@@ -611,25 +641,28 @@ if __name__ == "__main__":
         )
         print("Got user attributes")
 
-    print(
-        f" =========================== Before filtering ==================:\n {len(users_list)} users"
-    )
-    users_list = city_users.filter_users(users_list)
-    print(
-        f" =========================== After filtering ==================:\n {len(users_list)} users"
-    )
-    print("\n")
+    # users_list = [
+    #     {
+    #     "user_id": '00123456',
+    #     "city": 'test',
+    #     "username": "1arry1iu",
+    #     "last_tweeted_at": "2025-05-02T20:47:42+00:00",
+    #     "retweeter_status": "pending",
+    #     "retweeter_last_processed": "2025-05-02T22:13:46.742222+00:00",
+    #     "profile_location": "Chiang Mai, Thailand",
+    #     "follower_status": "pending",
+    #     "target_location": "test",
+    #     "follower_last_processed": "2025-05-02T22:13:46.742222+00:00",
+    #     "followers_count": 278,
+    #     "following_count": 80,
+    #     "tweets_count": 444,
+    #     "verified": "null",
+    #     "created_at": "2022-02-04T00:01:49+00:00",
+    #     "category": "null",
+    #     "treatment_arm": "null",
+    #     "extracted_at": "2025-05-02T22:13:11.834158+00:00",
+    #     "last_updated": "2025-05-02T22:13:11.834168+00:00",
+    #     }
+    # ]
 
-    # TODO: Insert / Check city node
-
-    # TODO: Upload user attributes to Neptune -- Neptune handler class
-
-    city_users.insert_descriptions_to_s3(users_list)
-
-    print("Sending to UserTweets Queue")
-    city_users.send_to_queue(users_list, SQS_USER_TWEETS)
-    print("Sending to UserFollowers Queue")
-    city_users.send_to_queue(users_list, SQS_USER_FOLLOWERS)
-
-    # TODO: "follower_status": pending, queued, in_progress, completed, failed
-    # here, follower_status will be set as queued
+    city_users.process_and_dispatch_users(users_list)
