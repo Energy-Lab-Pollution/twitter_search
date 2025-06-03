@@ -78,3 +78,6 @@ Return: category
 
 OPENAI_MODEL="gpt-4o-mini"
 GEMINI_MODEL="gemini-2.0-flash"
+
+NEPTUNE_S3_BUCKET = "global-rct-network-data"
+NEPTUNE_AWS_REGION = "us-east-2"

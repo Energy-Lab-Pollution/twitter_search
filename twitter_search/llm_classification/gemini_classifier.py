@@ -11,7 +11,7 @@ from constants import GEMINI_MODEL, GEMINI_PROMPT
 genai.configure(api_key=GEMINI_KEY)
 
 
-class GeminiAgent:
+class GeminiClassifier:
     def __init__(self, model=GEMINI_MODEL):
         self.model = model
         # Prompts

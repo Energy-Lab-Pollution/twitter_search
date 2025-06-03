@@ -13,7 +13,7 @@ from constants import OPENAI_MODEL, OPENAI_INSTRUCTIONS, OPENAI_PROMPT
 # Parameters
 client = OpenAI(api_key=OPENAI_KEY)
 
-class GPTAgent:
+class GPTAClassifier:
     def __init__(
         self, model=OPENAI_MODEL
     ):
