@@ -52,25 +52,7 @@ class CityUsers:
         self.language = CITIES_LANGS.get(self.location, None)
         self.neptune_handler = neptune_handler
 
-    @staticmethod
-    def get_default_date_range(date_since=None, date_until=None):
-        """
-        Gets a default date range where the most
-        recent date is today and the last date is
-        30 days before
-        """
-        if not date_until:
-            date_until = datetime.now(timezone.utc) - timedelta(seconds=60)
-        if not date_since:
-            date_since = date_until - timedelta(
-                days=6
-            )
-
-        return date_since.isoformat(), date_until.isoformat()
-
-    def extract_queries_num_tweets(
-        self, tweet_count, extraction_type, date_since=None, date_until=None
-    ):
+    def extract_queries_num_tweets(self, tweet_count, date_range):
         """
         This method gets all the queries with the appropiate aliases
         for the desired location, along with the allocated number of
@@ -80,19 +62,9 @@ class CityUsers:
         ----------
             - tweet_count (str): Total number of tweets to be distributed for each
                          account type
-            - date_since (str): Lower bound date (YYYY-MM-DD) for tweet search
-            - date_until (str): Upper bound date (YYYY-MM-DD) for tweet search
+            - date_range (str): Date range for tweet search.
         """
         queries = QUERIES_DICT[self.language]
-
-        # date_since and date_until just supported in X Enterprise
-        if extraction_type in ["twikit"]:
-            date_since, date_until = self.get_default_date_range(
-                date_since, date_until
-            )
-            date_range = f"since:{date_since} until:{date_until}"
-        else:
-            date_range = ""
 
         if self.location in LOCATION_ALIAS_DICT:
             aliases = LOCATION_ALIAS_DICT[self.location]
@@ -140,7 +112,7 @@ class CityUsers:
                     "description": user["description"],
                     "profile_location": user["location"],
                     "target_location": self.location,
-                    "verified": user["verified"],
+                    "verified": "true" if user["verified"] else "false",
                     #  datetime.datetime(2008, 6, 6, 21, 49, 51, tzinfo=datetime.timezone.utc)
                     "created_at": user["created_at"].isoformat(),
                     "processing_status": "pending",
@@ -189,7 +161,7 @@ class CityUsers:
                 user_dict["followers_count"] = tweet.user.followers_count
                 user_dict["following_count"] = tweet.user.following_count
                 user_dict["tweets_count"] = tweet.user.statuses_count
-                user_dict["verified"] = tweet.user.verified
+                user_dict["verified"] = "true" if tweet.user.verified else "false"
                 user_dict["created_at"] = convert_to_iso_format(
                     tweet.user.created_at
                 )
@@ -315,7 +287,7 @@ class CityUsers:
         return users_list
 
     async def _get_twikit_city_users(
-        self, queries_dict, num_tweets, account_num
+        self, tweet_count, date_since, date_until, account_num
     ):
         """
         Method used to search for tweets, with twikit,
@@ -326,8 +298,10 @@ class CityUsers:
         users are then parsed from such tweets.
 
         Args:
-            - queries_dict (dict): Query dictionary with keywords and location
-            - num_tweets (int): Determines the number of tweets to use **per query**
+            - tweet_count (int): Total number of tweets to extract/search
+            - date_since (str): Start date for tweet search
+            - date_until (str): End date for tweet search
+            - account_num (str): Twitter account to use for extraction
         """
         client = twikit.Client("en-US")
         cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
@@ -335,6 +309,15 @@ class CityUsers:
         client.load_cookies(cookies_dir)
         users_dict = {}
         num_iter = 0
+
+        date_range = f"since:{date_since} until:{date_until}"
+        queries_dict, num_tweets = (
+                self.extract_queries_num_tweets(
+                    tweet_count,
+                    date_range
+                )
+            )
+        print(f"Number of tweets per account: {num_tweets}")
 
         for account_type, query in queries_dict.items():
             num_extracted_tweets = 0
@@ -387,15 +370,18 @@ class CityUsers:
 
         return list(users_dict.values())
 
-    def _get_x_city_users(
-        self, queries_dict, num_tweets, date_since=None, date_until=None
-    ):
+    def _get_x_city_users(self, tweet_count, date_since, date_until):
         """
         Method used to search for tweets, with the X API,
         using a given query
 
         The corresponding users are then parsed from
         such tweets.
+
+        Args:
+            - tweet_count (int): Total number of tweets to extract/search
+            - date_since (str): Start date for tweet search
+            - date_until (str): End date for tweet search
         """
         x_client = client_creator()
         result_count = 0
@@ -403,10 +389,16 @@ class CityUsers:
         users_dict = {}
         tweets_list = []
 
-        # Gets default date range if necessary
-        date_since, date_until = self.get_default_date_range(
-            date_since, date_until
+        date_range = ""
+        queries_dict, num_tweets = (
+            self.extract_queries_num_tweets(
+                tweet_count,
+                date_range
+            )
         )
+
+        # validate tweet count threshold
+        self.validate_x_tweet_count(num_tweets)
 
         for account_type, query in queries_dict.items():
             print(query)
@@ -446,6 +438,19 @@ class CityUsers:
             print(tweets_list)
 
         return list(users_dict.values())
+    
+    @staticmethod
+    def validate_x_tweet_count(tweet_count):
+        """
+        Check whether tweet count is within prescribed X API limits.
+
+        Args:
+            - tweet_count (int)
+        """
+        if (tweet_count < X_SEARCH_MIN_TWEETS) or (tweet_count > X_SEARCH_MAX_TWEETS):
+            raise ValueError(
+                    f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}"
+                )
 
     def send_to_queue(self, user_dict, queue_name):
         """
@@ -591,45 +596,31 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # if args.extraction_type == "X" and (
-    #     (args.tweet_count < X_SEARCH_MIN_TWEETS)
-    #     or (args.tweet_count > X_SEARCH_MAX_TWEETS)
-    # ):
-    #     raise ValueError(
-    #         f"Number of tweets for X extraction should be {X_SEARCH_MIN_TWEETS}< number < {X_SEARCH_MAX_TWEETS}"
-    #     )
+    if (not args.date_since) and args.date_until:
+        raise ValueError("date_since must be provided if date_until is specified")
+
+    if not args.date_until:
+        date_until = (datetime.now(timezone.utc) - timedelta(seconds=60)).isoformat()
+    else:
+        date_until = args.date_until
+
+    if not args.date_since:
+        date_since = (datetime.now(timezone.utc) - timedelta(days=6)).isoformat()
+    else:
+        date_since = args.date_since
 
     neptune_handler = NeptuneHandler(NEPTUNE_ENDPOINT)
     city_users = CityUsers(args.location, neptune_handler)
 
-    # Getting dict queries and num of tweets per account
-    if args.extraction_type in ["twikit", "X"]:
-        if args.date_since and args.date_until:
-            new_query_dict, num_tweets_per_account = (
-                city_users.extract_queries_num_tweets(
-                    args.tweet_count,
-                    args.extraction_type,
-                    args.date_since,
-                    args.date_until,
-                )
-            )
-        else:
-            new_query_dict, num_tweets_per_account = (
-                city_users.extract_queries_num_tweets(
-                    args.tweet_count, args.extraction_type
-                )
-            )
-
     if args.extraction_type == "twikit":
-        print(f"Number of tweets per account: {num_tweets_per_account}")
         users_list = asyncio.run(
             city_users._get_twikit_city_users(
-                new_query_dict, num_tweets_per_account, args.account_num
+                args.tweet_count, date_since, date_until, args.account_num
             )
         )
     elif args.extraction_type == "X":
         users_list = city_users._get_x_city_users(
-            new_query_dict, num_tweets_per_account
+            args.tweet_count, date_since, date_until
         )
     elif args.extraction_type == "file":
         users_list = city_users._get_file_city_users(args.num_users)

@@ -68,6 +68,8 @@ class NeptuneHandler:
         # End of query
         query += ".iterate()"
 
+        print(f'Query is: {query}')
+
         _ = self.run_query(query)
         
         print(f"User node has been successfully created")

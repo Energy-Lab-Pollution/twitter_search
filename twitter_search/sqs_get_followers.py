@@ -90,7 +90,7 @@ class UserFollowers:
                 "description": user["description"],
                 "profile_location": user["location"],
                 "target_location": self.location,
-                "verified": user["verified"],
+                "verified": "true" if user["verified"] else "false",
                 "created_at": user["created_at"],
                 "processing_status": "pending",
             }
@@ -121,7 +121,7 @@ class UserFollowers:
 
         Args:
         ----------
-            - tweets (list): list of twikit.User objects
+            - users (list): list of User objects
         Returns:
         ----------
             - dict_list (list): list of dictionaries with users' info
@@ -139,7 +139,7 @@ class UserFollowers:
                 user_dict["followers_count"] = user.followers_count
                 user_dict["following_count"] = user.following_count
                 user_dict["tweets_count"] = user.statuses_count
-                user_dict["verified"] = user.verified
+                user_dict["verified"] = "true" if user.verified else "false"
                 user_dict["created_at"] = convert_to_iso_format(user.created_at)
                 user_dict["category"] = "null"
                 user_dict["treatment_arm"] = "null"

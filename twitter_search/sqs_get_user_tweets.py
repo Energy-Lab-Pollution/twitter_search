@@ -145,7 +145,6 @@ class UserTweets:
 
         # Parse first set of tweets
 
-        # TODO: Filter inside this function
         try:
             user_tweets = await client.get_user_tweets(
                 user_id, "Tweets", count=num_tweets
