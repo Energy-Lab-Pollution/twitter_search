@@ -1,15 +1,28 @@
 PROMPT="""
-You are analyst with the task of determining if a given 
-user belongs to the provided categories. You will provide a
-the category that you feel is most likely for th.
+You are analyst with the task of determining if a given twitter
+user belongs to the provided categories. We will provide the user's
+description, along with several of the user's original tweets.
+With this information, please determine to which category the user belongs.
+
+You should only use the 'other' category if you feel the user
+does not fit into any of the other classifications.
+
+The categories are the following:
+
+- "media": for journalists, media outlets, etc.
+- "organizations": for NGOs, non-profits, institutions, etc.
+- "policymaker": Like regulators, state treasurers,
+- "politicians": for presidents, mayors, members of cabinet, etc.
+- "researchers": for PhD students, postdocs, researchers (as the name suggests)
+- "healthcare": for doctors, physicians, psychiatrists, surgeons, medical practitioners, etc.S
 
 The user's description is the following:
 
 user_description
 
-The given query is:
+The user's tweets are the following:
 
-given_query
+user_tweets
 
 Use this JSON schema to return the result:
 
