@@ -19,8 +19,10 @@ to make your own decision.
 - "organizations": for NGOs, non-profits, institutions, etc.
 - "policymaker": Like regulators, state treasurers, attorney generals, diplomats, etc
 - "politicians": for presidents, mayors, members of cabinet, etc.
+- "environment": for environmental activists, pollution monitors, etc.
 - "researchers": for PhD students, postdocs, researchers (as the name suggests)
 - "healthcare": for doctors, physicians, psychiatrists, surgeons, medical practitioners, etc.
+- "other": if none of the above fit the user
 
 The user's description is the following:
 
