@@ -72,6 +72,7 @@ if __name__ == "__main__":
              tweets_list.append(tweet_text)
 
         user_tweets_str = "\n".join(tweets_list)
-            
+        
+        classification = gemini_classifier.send_prompt(description_text, user_tweets_str)
              
 
