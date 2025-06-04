@@ -53,6 +53,7 @@ def extract_text(filename):
 
 if __name__ == "__main__":
     gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
+    gpt_classifier = GPTAClassifier(model=OPENAI_MODEL)
     city = "kolkata"
     city_prefix = f"networks/{city}/classification/"
     all_user_prefixes = list_user_folders(NEPTUNE_S3_BUCKET, city_prefix)
@@ -73,6 +74,7 @@ if __name__ == "__main__":
 
         user_tweets_str = "\n".join(tweets_list)
         
-        classification = gemini_classifier.send_prompt(description_text, user_tweets_str)
-             
+        gemini_classifier.send_prompt(description_text, user_tweets_str)
+        print(gemini_classifier.content)
+        # classification = gpt_classifier.send_prompt(description_text, user_tweets_str)
 

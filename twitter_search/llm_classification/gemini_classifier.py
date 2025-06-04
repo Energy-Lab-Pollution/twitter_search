@@ -8,11 +8,9 @@ from keys import GEMINI_KEY
 from constants import GEMINI_MODEL, GEMINI_PROMPT
 
 # Parameters
-genai.configure(api_key=GEMINI_KEY)
-
-
 class GeminiClassifier:
     def __init__(self, model=GEMINI_MODEL):
+        genai.configure(api_key=GEMINI_KEY)
         self.model = model
         # Prompts
         self.user_content = GEMINI_PROMPT
