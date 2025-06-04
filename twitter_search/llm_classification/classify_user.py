@@ -4,6 +4,7 @@ Classifies a user by using their tweets and description
 
 import boto3
 import botocore
+from tqdm import tqdm
 
 # Local imports
 from gemini_classifier import GeminiClassifier
@@ -43,10 +44,7 @@ def extract_text(filename):
     """
     try:
         object = s3_client.get_object(Bucket=NEPTUNE_S3_BUCKET, Key=filename)
-        print("Getting .txt file")
         string = object["Body"].read().decode("utf-8")
-        # df = pd.read_csv(io.StringIO(csv_string))
-
     except botocore.exceptions.ClientError as error:
         print(f"Error for {filename} - {error}")
         string = ""
@@ -65,5 +63,15 @@ if __name__ == "__main__":
         user = user_prefix.split("/")[3]
 
         user_content = list_user_folders(NEPTUNE_S3_BUCKET, user_prefix, user_dir=False)
-        print(user_content)
+        print(user_content[0])
+        description_text = extract_text(f"{user_prefix}description.txt")
+        tweets_list = []
+        if len(user_content) > 1:
+         for tweet_key in tqdm(user_content[1:]):
+             tweet_text = extract_text(tweet_key)
+             tweets_list.append(tweet_text)
+
+        user_tweets_str = "\n".join(tweets_list)
+            
+             
 
