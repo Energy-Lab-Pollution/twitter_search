@@ -98,8 +98,8 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
     user_content = list_user_folders(
         NEPTUNE_S3_BUCKET, user_prefix, user_dir=False
     )
-    print(f"User id {user} - {user_content[0]}")
     description_text = extract_text(f"{user_prefix}description.txt")
+    print(f"User id {user} - {description_text}")
     if len(user_content) > 1:
         tweets_list = extract_several_files(user_content[1:])
 
@@ -114,7 +114,7 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
 if __name__ == "__main__":
     gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
     gpt_classifier = GPTAClassifier(model=OPENAI_MODEL)
-    city = "kolkata"
+    city = "guatemala"
     city_prefix = f"networks/{city}/classification/"
     all_user_prefixes = list_user_folders(NEPTUNE_S3_BUCKET, city_prefix)
     print(f"Found {len(all_user_prefixes)} user folders.")
