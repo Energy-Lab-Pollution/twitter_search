@@ -114,7 +114,7 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
 if __name__ == "__main__":
     gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
     gpt_classifier = GPTAClassifier(model=OPENAI_MODEL)
-    city = "guatemala"
+    city = "kigali"
     city_prefix = f"networks/{city}/classification/"
     all_user_prefixes = list_user_folders(NEPTUNE_S3_BUCKET, city_prefix)
     print(f"Found {len(all_user_prefixes)} user folders.")
