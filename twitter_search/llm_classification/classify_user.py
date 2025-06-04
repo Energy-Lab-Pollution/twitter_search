@@ -4,6 +4,7 @@ Classifies a user by using their tweets and description
 
 import boto3
 import botocore
+from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
 
 # Local imports
@@ -51,6 +52,23 @@ def extract_text(filename):
 
     return string
 
+def extract_several_files(file_keys, max_workers=8):
+    """
+    Reads content from an array of files by using multiprocessing
+    """
+    # Submit all jobs
+    results = []
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        # executor.map yields results in the same order as file_keys
+        for content in tqdm(
+            pool.map(extract_text, file_keys), 
+            total=len(file_keys),
+            desc="Reading from S3"
+        ):
+            results.append(content)
+    
+    return results
+
 if __name__ == "__main__":
     gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
     gpt_classifier = GPTAClassifier(model=OPENAI_MODEL)
@@ -75,6 +93,8 @@ if __name__ == "__main__":
         user_tweets_str = "\n".join(tweets_list)
         
         gemini_classifier.send_prompt(description_text, user_tweets_str)
-        print(gemini_classifier.content)
-        # classification = gpt_classifier.send_prompt(description_text, user_tweets_str)
+        gpt_classifier.send_prompt(description_text, user_tweets_str)
+
+        print(f"Gemini classification: {gemini_classifier.content}")
+        print(f"GPT Classifier: {gpt_classifier.content}")
 
