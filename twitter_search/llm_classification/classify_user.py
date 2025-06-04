@@ -98,7 +98,7 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
     user_content = list_user_folders(
         NEPTUNE_S3_BUCKET, user_prefix, user_dir=False
     )
-    print(user_content[0])
+    print(f"User id {user} - {user_content[0]}")
     description_text = extract_text(f"{user_prefix}description.txt")
     if len(user_content) > 1:
         tweets_list = extract_several_files(user_content[1:])

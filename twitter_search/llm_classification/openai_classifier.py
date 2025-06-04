@@ -1,10 +1,6 @@
 """
 Code with GPT Agent class
 """
-
-import re
-from datetime import datetime
-
 from constants import OPENAI_INSTRUCTIONS, OPENAI_MODEL, OPENAI_PROMPT
 
 # Local
