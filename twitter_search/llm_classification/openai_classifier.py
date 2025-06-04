@@ -4,19 +4,20 @@ Code with GPT Agent class
 
 import re
 from datetime import datetime
-from openai import OpenAI
+
+from constants import OPENAI_INSTRUCTIONS, OPENAI_MODEL, OPENAI_PROMPT
 
 # Local
 from keys import OPENAI_KEY
-from constants import OPENAI_MODEL, OPENAI_INSTRUCTIONS, OPENAI_PROMPT
+from openai import OpenAI
+
 
 # Parameters
 client = OpenAI(api_key=OPENAI_KEY)
 
+
 class GPTAClassifier:
-    def __init__(
-        self, model=OPENAI_MODEL
-    ):
+    def __init__(self, model=OPENAI_MODEL):
         self.model = model
         # Read files and get ticker mapping
         # Prompts
@@ -28,8 +29,12 @@ class GPTAClassifier:
         """
         Sends prompt to OpenAI API and returns the response
         """
-        self.user_content = self.user_content.replace("user_description", user_description)
-        self.user_content = self.user_content.replace("user_tweets", user_tweets)
+        self.user_content = self.user_content.replace(
+            "user_description", user_description
+        )
+        self.user_content = self.user_content.replace(
+            "user_tweets", user_tweets
+        )
 
         messages = [
             {"role": "system", "content": self.system_content},

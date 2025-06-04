@@ -5,7 +5,7 @@ description, along with several of the user's original tweets.
 With this information, please determine to which category the user belongs.
 
 Also, please give more weight to the description while performing the
-classification. The tweets are important, but the description usually 
+classification. The tweets are important, but the description usually
 reveals what the user does or is.
 
 You should only use the 'other' category if you feel the user
@@ -45,7 +45,7 @@ description, along with several of the user's original tweets.
 With this information, please determine to which category the user belongs.
 
 Also, please give more weight to the description while performing the
-classification. The tweets are important, but the description usually 
+classification. The tweets are important, but the description usually
 reveals what the user does or is.
 
 You should only use the 'other' category if you feel the user
@@ -62,7 +62,7 @@ to make your own decision.
 - "researchers": for PhD students, postdocs, researchers (as the name suggests)
 - "healthcare": for doctors, physicians, psychiatrists, surgeons, medical practitioners, etc.
 """
-OPENAI_PROMPT="""
+OPENAI_PROMPT = """
 The user's description is the following:
 
 user_description
@@ -78,8 +78,8 @@ Return: category
 """
 
 
-OPENAI_MODEL="gpt-4o-mini"
-GEMINI_MODEL="gemini-2.0-flash"
+OPENAI_MODEL = "gpt-4o-mini"
+GEMINI_MODEL = "gemini-2.0-flash"
 
 NEPTUNE_S3_BUCKET = "global-rct-network-data"
 NEPTUNE_AWS_REGION = "us-east-2"

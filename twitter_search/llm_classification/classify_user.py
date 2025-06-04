@@ -2,17 +2,25 @@
 Classifies a user by using their tweets and description
 """
 
+from concurrent.futures import ThreadPoolExecutor
+
 import boto3
 import botocore
-from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
+from constants import (
+    GEMINI_MODEL,
+    NEPTUNE_AWS_REGION,
+    NEPTUNE_S3_BUCKET,
+    OPENAI_MODEL,
+)
 
 # Local imports
 from gemini_classifier import GeminiClassifier
 from openai_classifier import GPTAClassifier
-from constants import NEPTUNE_AWS_REGION, NEPTUNE_S3_BUCKET, GEMINI_MODEL, OPENAI_MODEL
+from tqdm import tqdm
 
-s3_client = boto3.client('s3', region_name=NEPTUNE_AWS_REGION)
+
+s3_client = boto3.client("s3", region_name=NEPTUNE_AWS_REGION)
+
 
 def list_user_folders(bucket, prefix, user_dir=True):
     """
@@ -20,11 +28,7 @@ def list_user_folders(bucket, prefix, user_dir=True):
     even if there are more than 1,000.
     """
     paginator = s3_client.get_paginator("list_objects_v2")
-    pages = paginator.paginate(
-        Bucket=bucket,
-        Prefix=prefix,
-        Delimiter="/"
-    )
+    pages = paginator.paginate(Bucket=bucket, Prefix=prefix, Delimiter="/")
 
     user_dirs = []
     for page in pages:
@@ -35,9 +39,10 @@ def list_user_folders(bucket, prefix, user_dir=True):
         # Get user tweets and description
         else:
             for element in page.get("Contents", []):
-                user_dirs.append(element['Key'])
+                user_dirs.append(element["Key"])
 
     return user_dirs
+
 
 def extract_text(filename):
     """
@@ -47,7 +52,7 @@ def extract_text(filename):
         - filename (str): path to txt file in S3
 
     Returns:
-        - string (str): File content 
+        - string (str): File content
     """
     try:
         object = s3_client.get_object(Bucket=NEPTUNE_S3_BUCKET, Key=filename)
@@ -57,6 +62,7 @@ def extract_text(filename):
         string = ""
 
     return string
+
 
 def extract_several_files(file_keys, max_workers=8):
     """
@@ -73,13 +79,14 @@ def extract_several_files(file_keys, max_workers=8):
     with ThreadPoolExecutor(max_workers=max_workers) as pool:
         # executor.map yields results in the same order as file_keys
         for content in tqdm(
-            pool.map(extract_text, file_keys), 
+            pool.map(extract_text, file_keys),
             total=len(file_keys),
-            desc="Reading from S3"
+            desc="Reading from S3",
         ):
             results.append(content)
-    
+
     return results
+
 
 def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
     """
@@ -88,18 +95,21 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
         - classify them
     """
     user = user_prefix.split("/")[3]
-    user_content = list_user_folders(NEPTUNE_S3_BUCKET, user_prefix, user_dir=False)
+    user_content = list_user_folders(
+        NEPTUNE_S3_BUCKET, user_prefix, user_dir=False
+    )
     print(user_content[0])
     description_text = extract_text(f"{user_prefix}description.txt")
     if len(user_content) > 1:
         tweets_list = extract_several_files(user_content[1:])
-        
+
     user_tweets_str = "\n".join(tweets_list) if len(user_content) > 1 else ""
     gemini_classifier.send_prompt(description_text, user_tweets_str)
     gpt_classifier.send_prompt(description_text, user_tweets_str)
 
     print(f"Gemini classification: {gemini_classifier.content}")
     print(f"GPT Classifier: {gpt_classifier.content}")
+
 
 if __name__ == "__main__":
     gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
@@ -110,5 +120,6 @@ if __name__ == "__main__":
     print(f"Found {len(all_user_prefixes)} user folders.")
 
     for user_prefix in all_user_prefixes[:1]:
-        process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier)
-
+        process_and_classify_user(
+            user_prefix, gemini_classifier, gpt_classifier
+        )
