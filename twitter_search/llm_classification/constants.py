@@ -32,6 +32,9 @@ The user's tweets are the following:
 
 user_tweets
 
+Also, please briefly explain why you think this user belongs to the
+category you chose.
+
 Use this JSON schema to return the result:
 
 Category = {'category': str}
@@ -59,8 +62,10 @@ to make your own decision.
 - "organizations": for NGOs, non-profits, institutions, etc.
 - "policymaker": Like regulators, state treasurers, attorney generals, diplomats, etc
 - "politicians": for presidents, mayors, members of cabinet, etc.
+- "environment": for environmental activists, pollution monitors, etc.
 - "researchers": for PhD students, postdocs, researchers (as the name suggests)
 - "healthcare": for doctors, physicians, psychiatrists, surgeons, medical practitioners, etc.
+- "other": if none of the above fit the user
 """
 OPENAI_PROMPT = """
 The user's description is the following:
@@ -70,6 +75,9 @@ user_description
 The user's tweets are the following:
 
 user_tweets
+
+Also, please briefly explain why you think this user belongs to the
+category you chose.
 
 Use this JSON schema to return the result:
 

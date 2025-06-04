@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import boto3
 import botocore
+import random
 from constants import (
     GEMINI_MODEL,
     NEPTUNE_AWS_REGION,
@@ -110,16 +111,19 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
     print(f"Gemini classification: {gemini_classifier.content}")
     print(f"GPT Classifier: {gpt_classifier.content}")
 
+    # TODO: Adding classification result to user attributes in neptune
+
 
 if __name__ == "__main__":
     gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
     gpt_classifier = GPTAClassifier(model=OPENAI_MODEL)
-    city = "kigali"
+    city = "kanpur"
     city_prefix = f"networks/{city}/classification/"
     all_user_prefixes = list_user_folders(NEPTUNE_S3_BUCKET, city_prefix)
     print(f"Found {len(all_user_prefixes)} user folders.")
+    random_user = random.choice(all_user_prefixes)
 
-    for user_prefix in all_user_prefixes[:1]:
-        process_and_classify_user(
-            user_prefix, gemini_classifier, gpt_classifier
+    # for user_prefix in all_user_prefixes[:1]:
+    process_and_classify_user(
+            random_user, gemini_classifier, gpt_classifier
         )
