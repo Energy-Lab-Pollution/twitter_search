@@ -41,7 +41,13 @@ def list_user_folders(bucket, prefix, user_dir=True):
 
 def extract_text(filename):
     """
-    Parses a dataframe from S3
+    Extracts the content of an s3 file
+
+    Args:
+        - filename (str): path to txt file in S3
+
+    Returns:
+        - string (str): File content 
     """
     try:
         object = s3_client.get_object(Bucket=NEPTUNE_S3_BUCKET, Key=filename)
@@ -55,6 +61,12 @@ def extract_text(filename):
 def extract_several_files(file_keys, max_workers=8):
     """
     Reads content from an array of files by using multiprocessing
+
+    Args:
+        file_keys (str): list with file names in S3
+        max_workers (int): max number of workers to use
+    Returns:
+        tweets_list (list)
     """
     # Submit all jobs
     results = []
@@ -69,6 +81,26 @@ def extract_several_files(file_keys, max_workers=8):
     
     return results
 
+def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
+    """
+    Given a user's directory:
+        - get and process her description and their tweets
+        - classify them
+    """
+    user = user_prefix.split("/")[3]
+    user_content = list_user_folders(NEPTUNE_S3_BUCKET, user_prefix, user_dir=False)
+    print(user_content[0])
+    description_text = extract_text(f"{user_prefix}description.txt")
+    if len(user_content) > 1:
+        tweets_list = extract_several_files(user_content[1:])
+        
+    user_tweets_str = "\n".join(tweets_list) if len(user_content) > 1 else ""
+    gemini_classifier.send_prompt(description_text, user_tweets_str)
+    gpt_classifier.send_prompt(description_text, user_tweets_str)
+
+    print(f"Gemini classification: {gemini_classifier.content}")
+    print(f"GPT Classifier: {gpt_classifier.content}")
+
 if __name__ == "__main__":
     gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
     gpt_classifier = GPTAClassifier(model=OPENAI_MODEL)
@@ -78,23 +110,5 @@ if __name__ == "__main__":
     print(f"Found {len(all_user_prefixes)} user folders.")
 
     for user_prefix in all_user_prefixes[:1]:
-        print(user_prefix)
-        user = user_prefix.split("/")[3]
-
-        user_content = list_user_folders(NEPTUNE_S3_BUCKET, user_prefix, user_dir=False)
-        print(user_content[0])
-        description_text = extract_text(f"{user_prefix}description.txt")
-        tweets_list = []
-        if len(user_content) > 1:
-         for tweet_key in tqdm(user_content[1:]):
-             tweet_text = extract_text(tweet_key)
-             tweets_list.append(tweet_text)
-
-        user_tweets_str = "\n".join(tweets_list)
-        
-        gemini_classifier.send_prompt(description_text, user_tweets_str)
-        gpt_classifier.send_prompt(description_text, user_tweets_str)
-
-        print(f"Gemini classification: {gemini_classifier.content}")
-        print(f"GPT Classifier: {gpt_classifier.content}")
+        process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier)
 
