@@ -1,6 +1,7 @@
 """
 Code with GPT Agent class
 """
+
 from constants import OPENAI_INSTRUCTIONS, OPENAI_MODEL, OPENAI_PROMPT
 
 # Local
