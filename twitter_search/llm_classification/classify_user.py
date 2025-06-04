@@ -8,13 +8,13 @@ import botocore
 # Local imports
 from gemini_classifier import GeminiClassifier
 from openai_classifier import GPTAClassifier
-from constants import NEPTUNE_AWS_REGION, NEPTUNE_S3_BUCKET
+from constants import NEPTUNE_AWS_REGION, NEPTUNE_S3_BUCKET, GEMINI_MODEL, OPENAI_MODEL
 
 s3_client = boto3.client('s3', region_name=NEPTUNE_AWS_REGION)
 
-def list_user_folders(bucket, prefix):
+def list_user_folders(bucket, prefix, user_dir=True):
     """
-    Return a list of all “sub‐folder” prefixes under the given prefix,
+    Return a list of all 'sub-folder' prefixes under the given prefix,
     even if there are more than 1,000.
     """
     paginator = s3_client.get_paginator("list_objects_v2")
@@ -26,9 +26,14 @@ def list_user_folders(bucket, prefix):
 
     user_dirs = []
     for page in pages:
-        # page["CommonPrefixes"] could be up to 1,000 per page
-        for cp in page.get("CommonPrefixes", []):
-            user_dirs.append(cp["Prefix"])
+        if user_dir:
+            for cp in page.get("CommonPrefixes", []):
+                user_dir = f"{cp['Prefix']}input/"
+                user_dirs.append(user_dir)
+        # Get user tweets and description
+        else:
+            for element in page.get("Contents", []):
+                user_dirs.append(element['Key'])
 
     return user_dirs
 
@@ -47,3 +52,18 @@ def extract_text(filename):
         string = ""
 
     return string
+
+if __name__ == "__main__":
+    gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
+    city = "kolkata"
+    city_prefix = f"networks/{city}/classification/"
+    all_user_prefixes = list_user_folders(NEPTUNE_S3_BUCKET, city_prefix)
+    print(f"Found {len(all_user_prefixes)} user folders.")
+
+    for user_prefix in all_user_prefixes[:1]:
+        print(user_prefix)
+        user = user_prefix.split("/")[3]
+
+        user_content = list_user_folders(NEPTUNE_S3_BUCKET, user_prefix, user_dir=False)
+        print(user_content)
+
