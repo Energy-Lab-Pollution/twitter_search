@@ -18,6 +18,7 @@ BUCKET_NAME = "global-rct-users"
 REGION_NAME = "us-west-1"
 
 # SQS Constants
+SQS_USER_CLASSIFICATION = "UserClassification"
 SQS_USER_TWEETS = "UserTweets"
 SQS_USER_FOLLOWERS = "UserFollowers"
 SQS_USER_RETWEETERS = "UserRetweeters.fifo"
