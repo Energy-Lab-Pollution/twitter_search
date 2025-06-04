@@ -13,7 +13,7 @@ from openai import OpenAI
 client = OpenAI(api_key=OPENAI_KEY)
 
 
-class GPTAClassifier:
+class GPTClassifier:
     def __init__(self, model=OPENAI_MODEL):
         self.model = model
         # Read files and get ticker mapping

@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import boto3
 import botocore
 import random
-from constants import (
+from llm_classification.constants import (
     GEMINI_MODEL,
     NEPTUNE_AWS_REGION,
     NEPTUNE_S3_BUCKET,
@@ -15,8 +15,8 @@ from constants import (
 )
 
 # Local imports
-from gemini_classifier import GeminiClassifier
-from openai_classifier import GPTAClassifier
+from llm_classification.gemini_classifier import GeminiClassifier
+from llm_classification.openai_classifier import GPTClassifier
 from tqdm import tqdm
 
 
