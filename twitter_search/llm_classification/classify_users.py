@@ -23,17 +23,22 @@ from tqdm import tqdm
 s3_client = boto3.client("s3", region_name=NEPTUNE_AWS_REGION)
 
 
-def list_user_objects(bucket, prefix, user_dir=True):
+def list_user_objects(bucket, prefix, extract_tweets=True):
     """
     Return a list of all 'sub-folder' prefixes under the given prefix,
     even if there are more than 1,000.
+
+    Args:
+        - bucket (str): bucket name
+        - prefix (str): path to analyze
+        - extract_tweets (bool): determines if tweets are being extracted
     """
     paginator = s3_client.get_paginator("list_objects_v2")
     pages = paginator.paginate(Bucket=bucket, Prefix=prefix, Delimiter="/")
 
     user_dirs = []
     for page in pages:
-        if user_dir:
+        if extract_tweets:
             for cp in page.get("CommonPrefixes", []):
                 user_dir = f"{cp['Prefix']}input/"
                 user_dirs.append(user_dir)

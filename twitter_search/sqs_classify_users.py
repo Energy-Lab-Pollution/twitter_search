@@ -25,17 +25,22 @@ s3_client = boto3.client("s3", region_name=NEPTUNE_AWS_REGION)
 SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
-def list_user_objects(bucket, prefix, user_dir=True):
+def list_user_objects(bucket, prefix, extract_tweets=True):
     """
     Return a list of all 'sub-folder' prefixes under the given prefix,
     even if there are more than 1,000.
+
+    Args:
+        - bucket (str): bucket name
+        - prefix (str): path to analyze
+        - extract_tweets (bool): determines if tweets are being extracted
     """
     paginator = s3_client.get_paginator("list_objects_v2")
     pages = paginator.paginate(Bucket=bucket, Prefix=prefix, Delimiter="/")
 
     user_dirs = []
     for page in pages:
-        if user_dir:
+        if extract_tweets:
             for cp in page.get("CommonPrefixes", []):
                 user_dir = f"{cp['Prefix']}input/"
                 user_dirs.append(user_dir)
@@ -101,13 +106,13 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
     user_content = list_user_objects(
         NEPTUNE_S3_BUCKET, user_prefix, user_dir=False
     )
-    # TODO: Add error handling if desc is not available
     description_path = f"{user_prefix}description.txt"
     if description_path in user_content:
         description_text = extract_text(f"{user_prefix}description.txt")
         print(f"User id {user} - {description_text}")
     else:
         description_text = ""
+        raise Exception(f"Description should be stored for user {user}")
     
     if len(user_content) > 1:
         # Add a more robust check
