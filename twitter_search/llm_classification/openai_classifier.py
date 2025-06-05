@@ -2,10 +2,10 @@
 Code with GPT Agent class
 """
 
-from constants import OPENAI_INSTRUCTIONS, OPENAI_MODEL, OPENAI_PROMPT
+from llm_classification.constants import OPENAI_INSTRUCTIONS, OPENAI_MODEL, OPENAI_PROMPT
 
 # Local
-from keys import OPENAI_KEY
+from llm_classification.keys import OPENAI_KEY
 from openai import OpenAI
 
 

@@ -3,10 +3,10 @@ Code with generative model
 """
 
 import google.generativeai as genai
-from constants import GEMINI_MODEL, GEMINI_PROMPT
+from llm_classification.constants import GEMINI_MODEL, GEMINI_PROMPT
 
 # Local imports
-from keys import GEMINI_KEY
+from llm_classification.keys import GEMINI_KEY
 
 
 # Parameters
