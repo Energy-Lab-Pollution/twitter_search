@@ -104,9 +104,16 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
     user_content = list_user_objects(
         NEPTUNE_S3_BUCKET, user_prefix, user_dir=False
     )
-    description_text = extract_text(f"{user_prefix}description.txt")
-    print(f"User id {user} - {description_text}")
+    description_path = f"{user_prefix}description.txt"
+    if description_path in user_content:
+        description_text = extract_text(f"{user_prefix}description.txt")
+        print(f"User id {user} - {description_text}")
+    else:
+        description_text = ""
+        raise Exception(f"Description should be stored for user {user}")
+    
     if len(user_content) > 1:
+        # Add a more robust check
         tweets_list = extract_several_files(user_content[1:])
 
     user_tweets_str = "\n".join(tweets_list) if len(user_content) > 1 else ""
@@ -117,7 +124,6 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
     print(f"GPT Classifier: {gpt_classifier.content}")
 
     # TODO: Adding classification result to user attributes in neptune
-
 
 if __name__ == "__main__":
 
