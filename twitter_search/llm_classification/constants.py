@@ -16,9 +16,10 @@ of which 'professions' encompass such classifications, but feel free
 to make your own decision.
 
 - "media": for journalists, media outlets, etc.
-- "organizations": for NGOs, non-profits, institutions, etc.
+- "organizations": international organizations (World bank) etc.
+- "non-profits": NGOs, non-profits,
 - "policymaker": Like regulators, state treasurers, attorney generals, diplomats, etc
-- "politicians": for presidents, mayors, members of cabinet, etc.
+- "politicians": for presidents, mayors, members of cabinet, members of parliament, members of legislative assembly, MP, MLA etc.
 - "environment": for environmental activists, pollution monitors, etc.
 - "researchers": for PhD students, postdocs, researchers (as the name suggests)
 - "healthcare": for doctors, physicians, psychiatrists, surgeons, medical practitioners, etc.
@@ -59,9 +60,10 @@ of which 'professions' encompass such classifications, but feel free
 to make your own decision.
 
 - "media": for journalists, media outlets, etc.
-- "organizations": for NGOs, non-profits, institutions, etc.
+- "organizations": international organizations (World bank) etc.
+- "non-profits": NGOs, non-profits,
 - "policymaker": Like regulators, state treasurers, attorney generals, diplomats, etc
-- "politicians": for presidents, mayors, members of cabinet, etc.
+- "politicians": for presidents, mayors, members of cabinet, members of parliament, members of legislative assembly, MP, MLA etc.
 - "environment": for environmental activists, pollution monitors, etc.
 - "researchers": for PhD students, postdocs, researchers (as the name suggests)
 - "healthcare": for doctors, physicians, psychiatrists, surgeons, medical practitioners, etc.

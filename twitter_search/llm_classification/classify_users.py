@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import boto3
 import botocore
-from llm_classification.constants import (
+from constants import (
     GEMINI_MODEL,
     NEPTUNE_AWS_REGION,
     NEPTUNE_S3_BUCKET,
@@ -15,8 +15,8 @@ from llm_classification.constants import (
 )
 
 # Local imports
-from llm_classification.gemini_classifier import GeminiClassifier
-from llm_classification.openai_classifier import GPTClassifier
+from gemini_classifier import GeminiClassifier
+from openai_classifier import GPTClassifier
 from tqdm import tqdm
 
 
@@ -118,11 +118,11 @@ if __name__ == "__main__":
 
     gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
     gpt_classifier = GPTClassifier(model=OPENAI_MODEL)
-    city = "kanpur"
+    city = "kolkata"
     city_prefix = f"networks/{city}/classification/"
     all_user_prefixes = list_user_folders(NEPTUNE_S3_BUCKET, city_prefix)
     print(f"Found {len(all_user_prefixes)} user folders.")
     random_user = random.choice(all_user_prefixes)
 
-    # for user_prefix in all_user_prefixes[:1]:
+    # for random_user in all_user_prefixes[:1]:
     process_and_classify_user(random_user, gemini_classifier, gpt_classifier)

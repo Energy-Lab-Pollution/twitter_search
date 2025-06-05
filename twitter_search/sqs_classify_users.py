@@ -25,7 +25,7 @@ s3_client = boto3.client("s3", region_name=NEPTUNE_AWS_REGION)
 SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
 
 
-def list_user_folders(bucket, prefix, user_dir=True):
+def list_user_objects(bucket, prefix, user_dir=True):
     """
     Return a list of all 'sub-folder' prefixes under the given prefix,
     even if there are more than 1,000.
@@ -98,12 +98,14 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
         - classify them
     """
     user = user_prefix.split("/")[3]
-    user_content = list_user_folders(
+    user_content = list_user_objects(
         NEPTUNE_S3_BUCKET, user_prefix, user_dir=False
     )
+    # TODO: Add error handling if desc is not available
     description_text = extract_text(f"{user_prefix}description.txt")
     print(f"User id {user} - {description_text}")
     if len(user_content) > 1:
+        # Add a more robust check
         tweets_list = extract_several_files(user_content[1:])
 
     user_tweets_str = "\n".join(tweets_list) if len(user_content) > 1 else ""
