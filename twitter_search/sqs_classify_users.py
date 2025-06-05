@@ -3,7 +3,6 @@ Classifies a user by using their tweets and description
 """
 
 import json
-import random
 from concurrent.futures import ThreadPoolExecutor
 
 import boto3
@@ -24,7 +23,6 @@ from tqdm import tqdm
 
 s3_client = boto3.client("s3", region_name=NEPTUNE_AWS_REGION)
 SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
-
 
 
 def list_user_folders(bucket, prefix, user_dir=True):
@@ -119,9 +117,9 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
 
 
 if __name__ == "__main__":
-    user_tweets_queue_url = SQS_CLIENT.get_queue_url(QueueName=SQS_USER_CLASSIFICATION)[
-        "QueueUrl"
-    ]
+    user_tweets_queue_url = SQS_CLIENT.get_queue_url(
+        QueueName=SQS_USER_CLASSIFICATION
+    )["QueueUrl"]
 
     while True:
         # Pass Queue Name and get its URL
@@ -147,8 +145,10 @@ if __name__ == "__main__":
 
         gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
         gpt_classifier = GPTClassifier(model=OPENAI_MODEL)
-        user_prefix = f"networks/{location}/classification/{root_user_id}/input/"
+        user_prefix = (
+            f"networks/{location}/classification/{root_user_id}/input/"
+        )
 
         process_and_classify_user(
-                user_prefix, gemini_classifier, gpt_classifier
-            )
+            user_prefix, gemini_classifier, gpt_classifier
+        )

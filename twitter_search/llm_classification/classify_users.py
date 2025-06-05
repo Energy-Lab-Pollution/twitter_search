@@ -2,7 +2,6 @@
 Classifies a user by using their tweets and description
 """
 
-import json
 import random
 from concurrent.futures import ThreadPoolExecutor
 
@@ -126,6 +125,4 @@ if __name__ == "__main__":
     random_user = random.choice(all_user_prefixes)
 
     # for user_prefix in all_user_prefixes[:1]:
-    process_and_classify_user(
-            random_user, gemini_classifier, gpt_classifier
-        )
+    process_and_classify_user(random_user, gemini_classifier, gpt_classifier)
