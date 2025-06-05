@@ -2,13 +2,12 @@
 Classifies a user by using their tweets and description
 """
 
+import json
+import random
 from concurrent.futures import ThreadPoolExecutor
 
-import json
 import boto3
 import botocore
-import random
-
 from llm_classification.constants import (
     GEMINI_MODEL,
     NEPTUNE_AWS_REGION,

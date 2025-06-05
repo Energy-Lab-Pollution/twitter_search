@@ -31,7 +31,7 @@ class GeminiClassifier:
         self.user_content = self.user_content.replace(
             "user_tweets", user_tweets
         )
-        print("Sending prompt to Gemini...")
+        print(f"Sending prompt to model {GEMINI_MODEL}...")
         model = genai.GenerativeModel(self.model)
         response = model.generate_content(self.user_content)
         self.content = response.text

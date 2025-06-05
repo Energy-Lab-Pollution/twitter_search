@@ -2,20 +2,19 @@
 Classifies a user by using their tweets and description
 """
 
+import json
+import random
 from concurrent.futures import ThreadPoolExecutor
 
-import json
 import boto3
 import botocore
-import random
-
+from config_utils.constants import REGION_NAME, SQS_USER_CLASSIFICATION
 from llm_classification.constants import (
     GEMINI_MODEL,
     NEPTUNE_AWS_REGION,
     NEPTUNE_S3_BUCKET,
     OPENAI_MODEL,
 )
-from config_utils.constants import REGION_NAME, SQS_USER_CLASSIFICATION
 
 # Local imports
 from llm_classification.gemini_classifier import GeminiClassifier
@@ -148,10 +147,8 @@ if __name__ == "__main__":
 
         gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
         gpt_classifier = GPTClassifier(model=OPENAI_MODEL)
-        city = "kanpur"
-        user_prefix = f"networks/{city}/classification/{root_user_id}/input/"
+        user_prefix = f"networks/{location}/classification/{root_user_id}/input/"
 
-        # for user_prefix in all_user_prefixes[:1]:
         process_and_classify_user(
                 user_prefix, gemini_classifier, gpt_classifier
             )
