@@ -40,7 +40,7 @@ def list_user_objects(bucket, prefix, extract_tweets=True):
 
     user_dirs = []
     for page in pages:
-        if extract_tweets:
+        if not extract_tweets:
             for cp in page.get("CommonPrefixes", []):
                 user_dir = f"{cp['Prefix']}input/"
                 user_dirs.append(user_dir)
@@ -104,7 +104,7 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
     """
     user = user_prefix.split("/")[3]
     user_content = list_user_objects(
-        NEPTUNE_S3_BUCKET, user_prefix, user_dir=False
+        NEPTUNE_S3_BUCKET, user_prefix, extract_tweets=True
     )
     description_path = f"{user_prefix}description.txt"
     if description_path in user_content:
