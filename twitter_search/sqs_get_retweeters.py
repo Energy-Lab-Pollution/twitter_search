@@ -93,12 +93,11 @@ class UserRetweeters:
                 "target_location": self.location,
                 "verified": "true" if user["verified"] else "false",
                 "created_at": user["created_at"],
-                "processing_status": "pending",
             }
-            for key, value in user["public_metrics"].items():
-                user_dict[key] = value
 
-            # TODO: Adding new attributes
+            user_dict["followers_count"] = user["public_metrics"].get("followers_count", -99)
+            user_dict["following_count"] = user["public_metrics"].get("following_count", -99)
+            user_dict["tweets_count"] = user["public_metrics"].get("tweet_count", -99)
             user_dict["category"] = "null"
             user_dict["treatment_arm"] = "null"
             # Followers and retweeters status
@@ -106,6 +105,7 @@ class UserRetweeters:
             user_dict["retweeter_last_processed"] = "null"
             user_dict["follower_status"] = "pending"
             user_dict["follower_last_processed"] = "null"
+            user_dict["last_tweeted_at"] = "null"
             user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
             user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
             # See if location matches to add city
@@ -148,6 +148,7 @@ class UserRetweeters:
                 user_dict["retweeter_last_processed"] = "null"
                 user_dict["follower_status"] = "pending"
                 user_dict["follower_last_processed"] = "null"
+                user_dict["last_tweeted_at"] = "null"
                 user_dict["extracted_at"] = datetime.now(
                     timezone.utc
                 ).isoformat()
@@ -374,6 +375,19 @@ if __name__ == "__main__":
             tmp_user_id = target_user_id
             # This means the user is already processed :)
 
+
+        ## TODO: Process user only if retweeter_status is "queued" for the user
+        # Updating user attributes
+        # user_followers.neptune_handler.start()
+        # props_dict = {"follower_status": "in_progress",
+        #               "last_updated": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        #               }
+        # user_followers.neptune_handler.update_node_attributes(
+        #     label="User",
+        #     node_id=root_user_id,
+        #     props_dict=props_dict,
+        # )
+        # user_followers.neptune_handler.stop()
         user_retweeters = UserRetweeters(
             location, user_retweeters_queue_url, receipt_handle
         )

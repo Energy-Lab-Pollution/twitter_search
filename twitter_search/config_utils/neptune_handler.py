@@ -38,7 +38,6 @@ class NeptuneHandler:
     def city_exists(self, city_id: str) -> bool:
         query = f"g.V('{city_id}').hasLabel('City').limit(1)"
         result = self.run_query(query)
-        print("Result is:", result)
         return len(result) > 0
 
     def create_user_node(self, user_dict: dict):
@@ -51,7 +50,7 @@ class NeptuneHandler:
 
         # Add properties from the dictionary (skip 'id' since it's already used as vertex id)
         for key, value in user_dict.items():
-            if key == "user_id":
+            if key in ["user_id", "description"]:
                 continue
             # Handle types
             if isinstance(value, str):
@@ -62,17 +61,28 @@ class NeptuneHandler:
 
         # Create city edge if location criteria is met
         if user_dict["city"] == user_dict["target_location"]:
-            print("Creating user-city edge")
             query += f".as('u').V('{user_dict['city']}').hasLabel('City').as('c').addE('BELONGS_TO').from('u').to('c')"
 
         # End of query
         query += ".iterate()"
 
-        print(f"Query is: {query}")
-
         _ = self.run_query(query)
 
-        print("User node has been successfully created")
+    def create_follower_edge(self, source_id: str, target_id: str):
+        # Check if the FOLLOWS edge already exists
+        check_query = f"g.V('{source_id}').outE('FOLLOWS').where(inV().hasId('{target_id}')).limit(1)"
+        result = self.run_query(check_query)
+        
+        if len(result) == 0:
+            # Edge doesn't exist; create it
+            query = f"""
+                    g.V('{source_id}').hasLabel('User').as('a').
+                    V('{target_id}').hasLabel('User').as('b').
+                    addE('FOLLOWS').from('a').to('b')
+                    """
+            _ = self.run_query(query)
+        else:
+            print("FOLLOWS edge already exists")
 
     def update_node_attributes(
         self, label: str, node_id: str, props_dict: dict
@@ -90,5 +100,3 @@ class NeptuneHandler:
         query += ".iterate()"
 
         _ = self.run_query(query, bindings={"single": "Cardinality.single"})
-
-        print("Node attributes have been successfully updated")

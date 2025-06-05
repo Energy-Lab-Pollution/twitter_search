@@ -15,7 +15,7 @@ import twikit
 from config_utils.constants import (
     FIFTEEN_MINUTES,
     INFLUENCER_FOLLOWERS_THRESHOLD,
-    REGION_NAME,
+    NEPTUNE_ENDPOINT,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
@@ -25,49 +25,18 @@ from config_utils.util import (
     check_location,
     convert_to_iso_format,
 )
-
-
-SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
+from config_utils.neptune_handler import NeptuneHandler
 
 
 class UserFollowers:
-
-    def __init__(self, location, queue_url, receipt_handle):
+    def __init__(self, user_id, location, further_extraction, sqs_client, receipt_handle, neptune_handler):
+        self.user_id = user_id
         self.location = location
-        self.queue_url = queue_url
+        self.further_extraction = further_extraction
+        self.sqs_client = sqs_client
+        self.s3_client = boto3.client("s3", region_name="us-east-2")
         self.receipt_handle = receipt_handle
-
-    @staticmethod
-    def filter_users(user_list):
-        """
-        Keeps users that:
-            - are unique
-            - have more than 100 followers
-            - match the location
-
-        Args:
-            - user_list (list)
-        Returns:
-            - new_user_list (list)
-        """
-        new_user_list = []
-        unique_ids = []
-
-        for user_dict in user_list:
-            user_id = user_dict["user_id"]
-            if user_id in unique_ids:
-                continue
-            elif (
-                user_dict["city"]
-                and user_dict["followers_count"]
-                > INFLUENCER_FOLLOWERS_THRESHOLD
-            ):
-                unique_ids.append(user_id)
-                new_user_list.append(user_dict)
-            else:
-                continue
-
-        return new_user_list
+        self.neptune_handler = neptune_handler
 
     def parse_x_users(self, user_list):
         """
@@ -94,12 +63,11 @@ class UserFollowers:
                 "target_location": self.location,
                 "verified": "true" if user["verified"] else "false",
                 "created_at": user["created_at"],
-                "processing_status": "pending",
             }
-            for key, value in user["public_metrics"].items():
-                user_dict[key] = value
 
-            # TODO: Adding new attributes
+            user_dict["followers_count"] = user["public_metrics"].get("followers_count", -99)
+            user_dict["following_count"] = user["public_metrics"].get("following_count", -99)
+            user_dict["tweets_count"] = user["public_metrics"].get("tweet_count", -99)
             user_dict["category"] = "null"
             user_dict["treatment_arm"] = "null"
             # Followers and retweeters status
@@ -107,6 +75,7 @@ class UserFollowers:
             user_dict["retweeter_last_processed"] = "null"
             user_dict["follower_status"] = "pending"
             user_dict["follower_last_processed"] = "null"
+            user_dict["last_tweeted_at"] = "null"
             user_dict["extracted_at"] = datetime.now(timezone.utc).isoformat()
             user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
             # See if location matches to add city
@@ -118,20 +87,22 @@ class UserFollowers:
 
     def parse_twikit_users(self, users):
         """
-        Parse retweeters (user objects) and put them
-        into a list of dictionaries
+        Parse followers (user objects) and put them
+        into a dict of dictionaries
 
         Args:
         ----------
             - users (list): list of User objects
         Returns:
         ----------
-            - dict_list (list): list of dictionaries with users' info
+            - users_dict (dict): dict of dictionaries with users' info
         """
-        users_list = []
+        users_dict = {}
 
         if users:
             for user in users:
+                if user.id in users_dict:
+                    continue
                 user_dict = {}
                 user_dict["user_id"] = user.id
                 user_dict["username"] = user.screen_name
@@ -149,6 +120,7 @@ class UserFollowers:
                 user_dict["retweeter_last_processed"] = "null"
                 user_dict["follower_status"] = "pending"
                 user_dict["follower_last_processed"] = "null"
+                user_dict["last_tweeted_at"] = "null"
                 user_dict["extracted_at"] = datetime.now(
                     timezone.utc
                 ).isoformat()
@@ -158,22 +130,24 @@ class UserFollowers:
                 # See if location matches to add city
                 location_match = check_location(user.location, self.location)
                 user_dict["city"] = self.location if location_match else None
-                users_list.append(user_dict)
+                users_dict[user.id] = user_dict
 
-        return users_list
-
-    async def twikit_get_followers(self, user_id, follower_count, account_num):
+        return users_dict
+    
+    async def twikit_get_followers(self, follower_count, account_num):
         """
         Gets a given user's followers
 
         Args:
         ---------
-            - user_id (str): User_id of user to look for
+            - follower_count (int)
+            - account_num (int)
         Returns:
         ---------
-            - tweet_list(list): List of dicts with followers info
+            - followers_list(list): List of dicts with followers info
         """
-        followers_list = []
+        followers_dict = {}
+        queue_url = self.sqs_client.get_queue_url(QueueName=SQS_USER_FOLLOWERS)["QueueUrl"]
         num_iter = 0
         extracted_followers = 0
         client = twikit.Client("en-US")
@@ -185,29 +159,28 @@ class UserFollowers:
             try:
                 # try to fetch
                 followers = await client.get_user_followers(
-                    user_id, count=follower_count
+                    self.user_id, count=follower_count
                 )
             except twikit.errors.NotFound as error:
                 print(f"Followers: Not Found - {error}")
-                return followers_list
+                break
             except twikit.errors.TooManyRequests:
-                print("Followers: Too Many Requests - stopping early")
-                time.sleep(FIFTEEN_MINUTES)
-                # Change Message visibility
-                SQS_CLIENT.change_message_visibility(
-                    QueueUrl=self.queue_url,
+                print("Followers: Too Many Requests")
+                self.sqs_client.change_message_visibility(
+                    QueueUrl=queue_url,
                     ReceiptHandle=self.receipt_handle,
                     VisibilityTimeout=FIFTEEN_MINUTES,
                 )
+                time.sleep(FIFTEEN_MINUTES)
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request - stopping early")
-                return followers_list
+                break
             except twikit.errors.TwitterException as e:
                 print(f"Followers: Twitter Exception - {e}")
-                return followers_list
+                break
 
             parsed_followers = self.parse_twikit_users(followers)
-            followers_list.extend(parsed_followers)
+            followers_dict = followers_dict | parsed_followers
             extracted_followers += len(parsed_followers)
             num_iter += 1
             try:
@@ -219,37 +192,43 @@ class UserFollowers:
                     more_parsed_followers = self.parse_twikit_users(
                         more_followers
                     )
-                    followers_list.extend(more_parsed_followers)
+                    followers_dict = followers_dict | more_parsed_followers
                     extracted_followers += len(more_parsed_followers)
+                else:
+                    print("No more followers, moving on...")
+                    break
             # Stop here and just return what you got
             except twikit.errors.TooManyRequests:
                 print("Followers: too many requests...")
+                self.sqs_client.change_message_visibility(
+                    QueueUrl=queue_url,
+                    ReceiptHandle=self.receipt_handle,
+                    VisibilityTimeout=FIFTEEN_MINUTES,
+                )
                 time.sleep(FIFTEEN_MINUTES)
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request")
-                return followers_list
+                break
             except twikit.errors.NotFound:
                 print("Followers: Not Found")
-                return followers_list
+                break
             except twikit.errors.TwitterException as e:
                 print(f"Followers: Twitter Exception {e}")
-                return followers_list
+                break
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} follower batches, sleeping...")
                 time.sleep(1)
+        
+        return list(followers_dict.values())
 
-        # TODO: Upload users data to DynamoDB - store_data('user')
-        # TODO: Send to SQS for network processing
-        return followers_list
-
-    def x_get_followers(self, user_id, follower_count):
+    def x_get_followers(self, follower_count):
         """
-        Pull up to 1 000 followers via v1.1, convert each to a dict
+        Pull up to 1000 followers via v1.1, convert each to a dict
         shape that parse_x_users expects, then parse.
         """
         api_v1_client = api_v1_creator()
         legacy_users = tweepy.Cursor(
-            api_v1_client.get_followers, user_id=user_id, count=follower_count
+            api_v1_client.get_followers, user_id=self.user_id, count=follower_count
         ).items(follower_count)
 
         # Convert to dicts
@@ -274,42 +253,95 @@ class UserFollowers:
 
         return self.parse_x_users(normalized)
 
-    def send_to_queue(self, users_list, queue_name):
+    def send_to_queue(self, user_id, queue_name):
         """
-        Sends twikit or X users to the corresponding queue
+        Sends twikit or X user to the corresponding queue
 
         Args:
-            - users_list (list)
+            - user_id (str)
             - queue_name (str)
         """
-        queue_url = SQS_CLIENT.get_queue_url(QueueName=queue_name)["QueueUrl"]
-        if not users_list:
-            print("No users to send to queue")
-            return
-        for user in users_list:
-            print(f"Sending user {user['user_id']}")
-            message = {
-                "user_id": user["user_id"],
-                "location": self.location,
-            }
-            try:
-                self.sqs_client.send_message(
-                    QueueUrl=queue_url,
-                    MessageBody=json.dumps(message),
-                )
-                print(f"User {user['user_id']} sent to {queue_name} queue :)")
-            except Exception as err:
-                print(
-                    f"Unable to send user {user['user_id']} to  {queue_name} SQS: {err}"
-                )
+        queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)["QueueUrl"]
+
+        message = {
+            "user_id": user_id,
+            "location": self.location,
+        }
+        try:
+            self.sqs_client.send_message(
+                QueueUrl=queue_url,
+                MessageBody=json.dumps(message),
+            )
+        except Exception as err:
+            print(
+                f"Unable to send user {user_id} to  {queue_name} SQS: {err}"
+            )
+
+    def process_and_dispatch_followers(self, followers_list):
+        """
+        Process followers and save it to Neptune/SQS accordingly.
+
+        Args:
+        ----------
+            - followers_list (list): List of user dicts
+        """
+        # Start Neptune client
+        self.neptune_handler.start()
+
+        existing_users_counter = 0
+        root_users_counter = 0
+
+        for follower_dict in followers_list:
+            if self.neptune_handler.user_exists(follower_dict["user_id"]):
+                existing_users_counter += 1
+            else:
+                self.neptune_handler.create_user_node(follower_dict)
+                if (
+                    self.further_extraction and
+                    (follower_dict['city'] == follower_dict["target_location"]) and
+                    (follower_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD)
+                ):
+                    root_users_counter += 1
+                    self.send_to_queue(follower_dict['user_id'], SQS_USER_TWEETS)
+                    self.send_to_queue(follower_dict['user_id'], SQS_USER_FOLLOWERS)
+                    props_dict = {"follower_status": "queued",
+                                  "last_updated": datetime.now(timezone.utc).isoformat()
+                                  }
+                    self.neptune_handler.update_node_attributes(
+                        label="User",
+                        node_id=follower_dict['user_id'],
+                        props_dict=props_dict,
+                    )
+
+            self.neptune_handler.create_follower_edge(follower_dict['user_id'], self.user_id)
+
+        props_dict = {}
+        if len(followers_list) == 0:
+            print("No followers collected. Marking status as FAILED.")
+            props_dict['follower_status'] = "failed"
+        else:
+            props_dict['follower_status'] = "completed"
+        props_dict['follower_last_processed'] = datetime.now(timezone.utc).isoformat()
+        props_dict['last_updated'] = props_dict['follower_last_processed']
+        self.neptune_handler.update_node_attributes(
+            label="User",
+            node_id=self.user_id,
+            props_dict=props_dict,
+        )
+
+        # Stop Neptune client
+        self.neptune_handler.stop()
+
+        print(f"### Root users identified: {root_users_counter}, Existing users: {existing_users_counter} ###")
+
 
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        "Parameters to get users data to generate a network"
+        "Parameters to get followers data to generate a network"
     )
     parser.add_argument(
-        "--num_followers", type=int, help="Number of tweets to get"
+        "--num_followers", type=int, help="Number of followers to get"
     )
     parser.add_argument(
         "--extraction_type",
@@ -325,20 +357,24 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--further_extraction",
-        type=str,
-        choices=["True", "False"],
-        help="Decide if we will get retweeters and followers for extracted users",
-    )
+        action="store_true",
+        help="Enable further extraction of retweeters and followers",
+    )   
 
+    print("Parsing arguments")
+    print()
     args = parser.parse_args()
-    further_extraction = True if args.further_extraction is True else False
-    user_followers_queue_url = SQS_CLIENT.get_queue_url(
+
+    sqs_client = boto3.client("sqs", region_name="us-west-1")
+    user_followers_queue_url = sqs_client.get_queue_url(
         QueueName=SQS_USER_FOLLOWERS
     )["QueueUrl"]
 
+    user_counter = 0
+
     while True:
         # Pass Queue Name and get its URL
-        response = SQS_CLIENT.receive_message(
+        response = sqs_client.receive_message(
             QueueUrl=user_followers_queue_url,
             MaxNumberOfMessages=1,
             WaitTimeSeconds=10,
@@ -351,19 +387,30 @@ if __name__ == "__main__":
         except KeyError:
             # Empty queue
             print("Empty queue")
+            user_counter = 0
             continue
 
         # Getting information from body message
-        print(clean_data)
         root_user_id = str(clean_data["user_id"])
         location = clean_data["location"]
+        user_counter += 1
 
-        user_followers = UserFollowers(location)
+        print(f'Beginning followers extraction for User {user_counter} with ID {root_user_id}')
+
+        neptune_handler = NeptuneHandler(NEPTUNE_ENDPOINT)
+        user_followers = UserFollowers(
+            user_id=root_user_id, 
+            location=location, 
+            further_extraction=args.further_extraction,
+            sqs_client=sqs_client, 
+            receipt_handle=receipt_handle, 
+            neptune_handler=neptune_handler
+        )
 
         if args.extraction_type == "twikit":
+            print("Initiating twikit extraction...")
             followers_list = asyncio.run(
                 user_followers.twikit_get_followers(
-                    user_id=root_user_id,
                     follower_count=args.num_followers,
                     account_num=args.account_num,
                 )
@@ -373,26 +420,19 @@ if __name__ == "__main__":
                 "X API Followers endpoint is only supported for Enterprise"
             )
             # followers_list = user_followers.x_get_followers(
-            #     user_id=root_user_id, follower_count=args.num_followers
+            #     follower_count=args.num_followers
             # )
 
-        print(f"Got {len(followers_list)} for {root_user_id} before filtering")
-        followers_list = user_followers.filter_users(followers_list)
-        print(f"Got {len(followers_list)} for {root_user_id} after filtering")
+        print(f"### Total Followers extracted: {len(followers_list)} ###")
 
-        # TODO: Check if users exist on neptune
-
-        # Send users to ser tweets queue
-        if further_extraction:
-            print("Getting followers' information...")
-            user_followers.send_to_queue(
-                followers_list, user_id=root_user_id, queue_name=SQS_USER_TWEETS
-            )
-
-        # TODO: "follower_status": pending, queued, in_progress, "completed", "failed
+        print("Processing and dispatching followers...")
+        user_followers.process_and_dispatch_followers(followers_list)
 
         # Delete root user message from queue so it is not picked up again
-        SQS_CLIENT.delete_message(
+        print("Deleting user message from queue")
+        sqs_client.delete_message(
             QueueUrl=user_followers_queue_url,
             ReceiptHandle=receipt_handle,
         )
+
+        print()
