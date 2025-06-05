@@ -15,7 +15,6 @@ from llm_classification.constants import (
     NEPTUNE_S3_BUCKET,
     OPENAI_MODEL,
 )
-from config_utils.constants import REGION_NAME, SQS_USER_CLASSIFICATION
 
 # Local imports
 from llm_classification.gemini_classifier import GeminiClassifier
@@ -24,8 +23,6 @@ from tqdm import tqdm
 
 
 s3_client = boto3.client("s3", region_name=NEPTUNE_AWS_REGION)
-SQS_CLIENT = boto3.client("sqs", region_name=REGION_NAME)
-
 
 
 def list_user_folders(bucket, prefix, user_dir=True):
@@ -120,38 +117,16 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
 
 
 if __name__ == "__main__":
-    user_tweets_queue_url = SQS_CLIENT.get_queue_url(QueueName=SQS_USER_CLASSIFICATION)[
-        "QueueUrl"
-    ]
 
-    while True:
-        # Pass Queue Name and get its URL
-        response = SQS_CLIENT.receive_message(
-            QueueUrl=user_tweets_queue_url,
-            MaxNumberOfMessages=1,
-            WaitTimeSeconds=10,
+    gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
+    gpt_classifier = GPTClassifier(model=OPENAI_MODEL)
+    city = "kanpur"
+    city_prefix = f"networks/{city}/classification/"
+    all_user_prefixes = list_user_folders(NEPTUNE_S3_BUCKET, city_prefix)
+    print(f"Found {len(all_user_prefixes)} user folders.")
+    random_user = random.choice(all_user_prefixes)
+
+    # for user_prefix in all_user_prefixes[:1]:
+    process_and_classify_user(
+            random_user, gemini_classifier, gpt_classifier
         )
-        try:
-            message = response["Messages"][0]
-            receipt_handle = message["ReceiptHandle"]
-            clean_data = json.loads(message["Body"])
-
-        except KeyError:
-            # Empty queue
-            print("Empty queue")
-            continue
-
-        # Getting information from body message
-        print(clean_data)
-        root_user_id = str(clean_data["user_id"])
-        location = clean_data["location"]
-
-        gemini_classifier = GeminiClassifier(model=GEMINI_MODEL)
-        gpt_classifier = GPTClassifier(model=OPENAI_MODEL)
-        city = "kanpur"
-        user_prefix = f"networks/{city}/classification/{root_user_id}/input/"
-
-        # for user_prefix in all_user_prefixes[:1]:
-        process_and_classify_user(
-                user_prefix, gemini_classifier, gpt_classifier
-            )
