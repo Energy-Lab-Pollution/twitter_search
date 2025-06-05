@@ -102,8 +102,13 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
         NEPTUNE_S3_BUCKET, user_prefix, user_dir=False
     )
     # TODO: Add error handling if desc is not available
-    description_text = extract_text(f"{user_prefix}description.txt")
-    print(f"User id {user} - {description_text}")
+    description_path = f"{user_prefix}description.txt"
+    if description_path in user_content:
+        description_text = extract_text(f"{user_prefix}description.txt")
+        print(f"User id {user} - {description_text}")
+    else:
+        description_text = ""
+    
     if len(user_content) > 1:
         # Add a more robust check
         tweets_list = extract_several_files(user_content[1:])

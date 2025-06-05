@@ -23,7 +23,7 @@ from tqdm import tqdm
 s3_client = boto3.client("s3", region_name=NEPTUNE_AWS_REGION)
 
 
-def list_user_folders(bucket, prefix, user_dir=True):
+def list_user_objects(bucket, prefix, user_dir=True):
     """
     Return a list of all 'sub-folder' prefixes under the given prefix,
     even if there are more than 1,000.
@@ -96,7 +96,7 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
         - classify them
     """
     user = user_prefix.split("/")[3]
-    user_content = list_user_folders(
+    user_content = list_user_objects(
         NEPTUNE_S3_BUCKET, user_prefix, user_dir=False
     )
     description_text = extract_text(f"{user_prefix}description.txt")
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     gpt_classifier = GPTClassifier(model=OPENAI_MODEL)
     city = "kolkata"
     city_prefix = f"networks/{city}/classification/"
-    all_user_prefixes = list_user_folders(NEPTUNE_S3_BUCKET, city_prefix)
+    all_user_prefixes = list_user_objects(NEPTUNE_S3_BUCKET, city_prefix)
     print(f"Found {len(all_user_prefixes)} user folders.")
     random_user = random.choice(all_user_prefixes)
 
