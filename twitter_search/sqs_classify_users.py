@@ -114,7 +114,7 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
     else:
         description_text = ""
         raise Exception(f"Description should be stored for user {user}")
-    
+
     if len(user_content) > 1:
         # Add a more robust check
         tweets_list = extract_several_files(user_content)
