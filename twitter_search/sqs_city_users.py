@@ -520,13 +520,20 @@ class CityUsers:
         Returns:
             - status (bool)
         """
-        user_exists = self.neptune_handler.user_exists(user_dict["user_id"])
-        if (
-            not user_exists
-            and (user_dict["city"] == user_dict["target_location"])
-            and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD
-        ):
-            return True
+        self.user_exists = self.neptune_handler.user_exists(user_dict["user_id"])
+        user_pending = self.neptune_handler.user_pending_both(user_dict["user_id"])
+        if self.user_exists:
+            if user_pending:
+                # User exists and is pending - lets process them
+                return True
+        else:
+            if (
+                (user_dict["city"] == user_dict["target_location"])
+                and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD
+            ):
+                # User doesnt exist, matches location and has more than the threshold of followers
+                return True
+        
         return False
 
     def process_and_dispatch_users(self, users_list):
@@ -557,7 +564,9 @@ class CityUsers:
             if not validation_status:
                 continue
             root_user_counter += 1
-            self.neptune_handler.create_user_node(user_dict)
+            if not self.user_exists:
+                # Just insert them if they dont exist
+                self.neptune_handler.create_user_node(user_dict)
             self.insert_description_to_s3(user_dict)
             s3_counter += 1
             self.send_to_queue(user_dict["user_id"], SQS_USER_TWEETS)
