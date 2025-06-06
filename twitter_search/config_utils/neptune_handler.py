@@ -72,7 +72,7 @@ class NeptuneHandler:
         # Check if the FOLLOWS edge already exists
         check_query = f"g.V('{source_id}').outE('FOLLOWS').where(inV().hasId('{target_id}')).limit(1)"
         result = self.run_query(check_query)
-        
+
         if len(result) == 0:
             # Edge doesn't exist; create it
             query = f"""
@@ -84,7 +84,9 @@ class NeptuneHandler:
         else:
             print("FOLLOWS edge already exists")
 
-    def create_retweeter_edge(self, source_id: str, target_id: str, tweet_id: str):
+    def create_retweeter_edge(
+        self, source_id: str, target_id: str, tweet_id: str
+    ):
         # Check if RETWEETED edge already exists
         check_query = f"""
         g.V('{source_id}').outE('RETWEETED').where(inV().hasId('{target_id}')).
@@ -111,12 +113,16 @@ class NeptuneHandler:
         # Edge exists — extract tweet_ids and weight
         edge_info = result[0]
         print(f"Edge exists with info: {edge_info}")
-        existing_tweet_ids = edge_info['tweet_ids']
-        edge_id = edge_info['id']
-        current_weight = int(edge_info['weight'])
+        existing_tweet_ids = edge_info["tweet_ids"]
+        edge_id = edge_info["id"]
+        current_weight = int(edge_info["weight"])
 
         # Convert string of tweet_ids to list
-        tweet_id_list = [existing_tweet_ids] if ';' not in existing_tweet_ids else existing_tweet_ids.split(';')
+        tweet_id_list = (
+            [existing_tweet_ids]
+            if ";" not in existing_tweet_ids
+            else existing_tweet_ids.split(";")
+        )
 
         if tweet_id in tweet_id_list:
             print("Tweet ID already recorded in RETWEETED edge.")
@@ -150,17 +156,20 @@ class NeptuneHandler:
 
         _ = self.run_query(query, bindings={"single": "Cardinality.single"})
 
-    def extract_node_attribute(self, label: str, node_id: str, attribute_name: str):
+    def extract_node_attribute(
+        self, label: str, node_id: str, attribute_name: str
+    ):
         """
         Extracts the value of a specific attribute from a node given its label and ID.
         Returns None if the node or attribute does not exist.
         """
-        query = f"g.V('{node_id}').hasLabel('{label}').values('{attribute_name}')"
+        query = (
+            f"g.V('{node_id}').hasLabel('{label}').values('{attribute_name}')"
+        )
         result = self.run_query(query)
         if not result:
-            return None 
+            return None
         elif len(result) == 1:
             return result[0]
         else:
             raise ValueError("Multiple values cannot be returned")
-

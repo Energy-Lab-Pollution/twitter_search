@@ -20,16 +20,24 @@ from config_utils.constants import (
     SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
 )
+from config_utils.neptune_handler import NeptuneHandler
 from config_utils.util import (
     api_v1_creator,
     check_location,
     convert_to_iso_format,
 )
-from config_utils.neptune_handler import NeptuneHandler
 
 
 class UserFollowers:
-    def __init__(self, user_id, location, further_extraction, sqs_client, receipt_handle, neptune_handler):
+    def __init__(
+        self,
+        user_id,
+        location,
+        further_extraction,
+        sqs_client,
+        receipt_handle,
+        neptune_handler,
+    ):
         self.user_id = user_id
         self.location = location
         self.further_extraction = further_extraction
@@ -64,9 +72,15 @@ class UserFollowers:
                 "created_at": user["created_at"],
             }
 
-            user_dict["followers_count"] = user["public_metrics"].get("followers_count", -99)
-            user_dict["following_count"] = user["public_metrics"].get("following_count", -99)
-            user_dict["tweets_count"] = user["public_metrics"].get("tweet_count", -99)
+            user_dict["followers_count"] = user["public_metrics"].get(
+                "followers_count", -99
+            )
+            user_dict["following_count"] = user["public_metrics"].get(
+                "following_count", -99
+            )
+            user_dict["tweets_count"] = user["public_metrics"].get(
+                "tweet_count", -99
+            )
             user_dict["category"] = "null"
             user_dict["treatment_arm"] = "null"
             # Followers and retweeters status
@@ -132,7 +146,7 @@ class UserFollowers:
                 users_dict[user.id] = user_dict
 
         return users_dict
-    
+
     async def twikit_get_followers(self, follower_count, account_num):
         """
         Gets a given user's followers
@@ -146,7 +160,9 @@ class UserFollowers:
             - followers_list(list): List of dicts with followers info
         """
         followers_dict = {}
-        queue_url = self.sqs_client.get_queue_url(QueueName=SQS_USER_FOLLOWERS)["QueueUrl"]
+        queue_url = self.sqs_client.get_queue_url(QueueName=SQS_USER_FOLLOWERS)[
+            "QueueUrl"
+        ]
         num_iter = 0
         extracted_followers = 0
         client = twikit.Client("en-US")
@@ -190,7 +206,7 @@ class UserFollowers:
                 continue
 
         if not flag:
-            print(f'No followers extracted despite 3 retry attempts')
+            print("No followers extracted despite 3 retry attempts")
             return []
 
         while extracted_followers < follower_count:
@@ -230,7 +246,7 @@ class UserFollowers:
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} follower batches, sleeping...")
                 time.sleep(1)
-        
+
         return list(followers_dict.values())
 
     def x_get_followers(self, follower_count):
@@ -240,7 +256,9 @@ class UserFollowers:
         """
         api_v1_client = api_v1_creator()
         legacy_users = tweepy.Cursor(
-            api_v1_client.get_followers, user_id=self.user_id, count=follower_count
+            api_v1_client.get_followers,
+            user_id=self.user_id,
+            count=follower_count,
         ).items(follower_count)
 
         # Convert to dicts
@@ -273,7 +291,9 @@ class UserFollowers:
             - user_id (str)
             - queue_name (str)
         """
-        queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)["QueueUrl"]
+        queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)[
+            "QueueUrl"
+        ]
 
         message = {
             "user_id": user_id,
@@ -285,9 +305,7 @@ class UserFollowers:
                 MessageBody=json.dumps(message),
             )
         except Exception as err:
-            print(
-                f"Unable to send user {user_id} to  {queue_name} SQS: {err}"
-            )
+            print(f"Unable to send user {user_id} to  {queue_name} SQS: {err}")
 
     def process_and_dispatch_followers(self, followers_list):
         """
@@ -309,28 +327,43 @@ class UserFollowers:
             else:
                 self.neptune_handler.create_user_node(follower_dict)
                 if (
-                    self.further_extraction and
-                    (follower_dict['city'] == follower_dict["target_location"]) and
-                    (follower_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD)
+                    self.further_extraction
+                    and (
+                        follower_dict["city"]
+                        == follower_dict["target_location"]
+                    )
+                    and (
+                        follower_dict["followers_count"]
+                        > INFLUENCER_FOLLOWERS_THRESHOLD
+                    )
                 ):
                     root_users_counter += 1
-                    self.send_to_queue(follower_dict['user_id'], SQS_USER_TWEETS)
-                    self.send_to_queue(follower_dict['user_id'], SQS_USER_FOLLOWERS)
-                    props_dict = {"follower_status": "queued",
-                                  "last_updated": datetime.now(timezone.utc).isoformat()
-                                  }
+                    self.send_to_queue(
+                        follower_dict["user_id"], SQS_USER_TWEETS
+                    )
+                    self.send_to_queue(
+                        follower_dict["user_id"], SQS_USER_FOLLOWERS
+                    )
+                    props_dict = {
+                        "follower_status": "queued",
+                        "last_updated": datetime.now(timezone.utc).isoformat(),
+                    }
                     self.neptune_handler.update_node_attributes(
                         label="User",
-                        node_id=follower_dict['user_id'],
+                        node_id=follower_dict["user_id"],
                         props_dict=props_dict,
                     )
 
-            self.neptune_handler.create_follower_edge(follower_dict['user_id'], self.user_id)
+            self.neptune_handler.create_follower_edge(
+                follower_dict["user_id"], self.user_id
+            )
 
         props_dict = {}
-        props_dict['follower_status'] = "completed"
-        props_dict['follower_last_processed'] = datetime.now(timezone.utc).isoformat()
-        props_dict['last_updated'] = props_dict['follower_last_processed']
+        props_dict["follower_status"] = "completed"
+        props_dict["follower_last_processed"] = datetime.now(
+            timezone.utc
+        ).isoformat()
+        props_dict["last_updated"] = props_dict["follower_last_processed"]
         self.neptune_handler.update_node_attributes(
             label="User",
             node_id=self.user_id,
@@ -340,8 +373,9 @@ class UserFollowers:
         # Stop Neptune client
         self.neptune_handler.stop()
 
-        print(f"### Root users identified: {root_users_counter}, Existing users: {existing_users_counter} ###")
-
+        print(
+            f"### Root users identified: {root_users_counter}, Existing users: {existing_users_counter} ###"
+        )
 
 
 if __name__ == "__main__":
@@ -366,7 +400,7 @@ if __name__ == "__main__":
         "--further_extraction",
         action="store_true",
         help="Enable further extraction of retweeters and followers",
-    )   
+    )
 
     print("Parsing arguments...")
     print()
@@ -403,15 +437,17 @@ if __name__ == "__main__":
         user_counter += 1
 
         print()
-        print(f'Beginning followers extraction for User {user_counter} with ID {root_user_id}')
+        print(
+            f"Beginning followers extraction for User {user_counter} with ID {root_user_id}"
+        )
 
         user_followers = UserFollowers(
-            user_id=root_user_id, 
-            location=location, 
+            user_id=root_user_id,
+            location=location,
             further_extraction=args.further_extraction,
-            sqs_client=sqs_client, 
-            receipt_handle=receipt_handle, 
-            neptune_handler=neptune_handler
+            sqs_client=sqs_client,
+            receipt_handle=receipt_handle,
+            neptune_handler=neptune_handler,
         )
 
         if args.extraction_type == "twikit":
@@ -434,10 +470,13 @@ if __name__ == "__main__":
 
         if len(followers_list) == 0:
             print("Follower extraction FAILED. Moving on to the next user.\n")
-            props_dict = {"follower_status": "failed",
-                          "follower_last_processed": datetime.now(timezone.utc).isoformat()
-                          }
-            props_dict['last_updated'] = props_dict['follower_last_processed']
+            props_dict = {
+                "follower_status": "failed",
+                "follower_last_processed": datetime.now(
+                    timezone.utc
+                ).isoformat(),
+            }
+            props_dict["last_updated"] = props_dict["follower_last_processed"]
             neptune_handler.start()
             neptune_handler.update_node_attributes(
                 label="User",

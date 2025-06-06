@@ -114,9 +114,15 @@ class CityUsers:
                     "created_at": user["created_at"].isoformat(),
                 }
 
-                user_dict["followers_count"] = user["public_metrics"].get("followers_count", -99)
-                user_dict["following_count"] = user["public_metrics"].get("following_count", -99)
-                user_dict["tweets_count"] = user["public_metrics"].get("tweet_count", -99)
+                user_dict["followers_count"] = user["public_metrics"].get(
+                    "followers_count", -99
+                )
+                user_dict["following_count"] = user["public_metrics"].get(
+                    "following_count", -99
+                )
+                user_dict["tweets_count"] = user["public_metrics"].get(
+                    "tweet_count", -99
+                )
                 user_dict["category"] = "null"
                 user_dict["treatment_arm"] = "null"
                 user_dict["retweeter_status"] = "pending"
@@ -349,9 +355,9 @@ class CityUsers:
                 except Exception as e:
                     print(f"Tweet extraction failed: {e}")
                     continue
-            
+
             if not flag:
-                print(f'No tweets extracted for account type: {account_type}')
+                print(f"No tweets extracted for account type: {account_type}")
                 continue
 
             while num_extracted_tweets < num_tweets:
@@ -486,9 +492,7 @@ class CityUsers:
                 MessageBody=json.dumps(message),
             )
         except Exception as err:
-            print(
-                f"Unable to send user {user_id} to {queue_name} SQS: {err}"
-            )
+            print(f"Unable to send user {user_id} to {queue_name} SQS: {err}")
 
     def insert_description_to_s3(self, user_dict):
         """
@@ -543,7 +547,7 @@ class CityUsers:
             raise ValueError(
                 "City node must exist prior to storing additional information"
             )
-        
+
         root_user_counter = 0
         s3_counter = 0
 
@@ -556,14 +560,15 @@ class CityUsers:
             self.neptune_handler.create_user_node(user_dict)
             self.insert_description_to_s3(user_dict)
             s3_counter += 1
-            self.send_to_queue(user_dict['user_id'], SQS_USER_TWEETS)
-            self.send_to_queue(user_dict['user_id'], SQS_USER_FOLLOWERS)
-            props_dict = {"follower_status": "queued",
-                          "last_updated": datetime.now(timezone.utc).isoformat()
-                          }
+            self.send_to_queue(user_dict["user_id"], SQS_USER_TWEETS)
+            self.send_to_queue(user_dict["user_id"], SQS_USER_FOLLOWERS)
+            props_dict = {
+                "follower_status": "queued",
+                "last_updated": datetime.now(timezone.utc).isoformat(),
+            }
             self.neptune_handler.update_node_attributes(
                 label="User",
-                node_id=user_dict['user_id'],
+                node_id=user_dict["user_id"],
                 props_dict=props_dict,
             )
 
@@ -571,8 +576,9 @@ class CityUsers:
         self.neptune_handler.stop()
 
         print()
-        print(f"### Root users extracted: {root_user_counter}, S3 insertions: {s3_counter} ###")
-
+        print(
+            f"### Root users extracted: {root_user_counter}, S3 insertions: {s3_counter} ###"
+        )
 
 
 if __name__ == "__main__":

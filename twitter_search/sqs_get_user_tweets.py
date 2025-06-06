@@ -18,21 +18,23 @@ import botocore
 import twikit
 from config_utils.constants import (
     FIFTEEN_MINUTES,
-    NEPTUNE_S3_BUCKET,
     NEPTUNE_ENDPOINT,
+    NEPTUNE_S3_BUCKET,
     SQS_USER_RETWEETERS,
     SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
 )
+from config_utils.neptune_handler import NeptuneHandler
 from config_utils.util import (
     client_creator,
     convert_to_iso_format,
 )
-from config_utils.neptune_handler import NeptuneHandler
 
 
 class UserTweets:
-    def __init__(self, user_id, location, sqs_client, receipt_handle, neptune_handler):
+    def __init__(
+        self, user_id, location, sqs_client, receipt_handle, neptune_handler
+    ):
         self.user_id = user_id
         self.location = location
         self.sqs_client = sqs_client
@@ -89,9 +91,7 @@ class UserTweets:
                 "tweet_id": tweet.id,
                 "tweet_text": tweet.text,
                 "created_at": created,
-                "retweet_count": tweet.public_metrics.get(
-                    "retweet_count", 0
-                ),
+                "retweet_count": tweet.public_metrics.get("retweet_count", 0),
                 "favorite_count": tweet.public_metrics.get("like_count", 0),
             }
             parsed_tweets_dict[tweet.id] = tweet_dict
@@ -116,7 +116,9 @@ class UserTweets:
         cookies_dir = TWIKIT_COOKIES_DICT[f"account_{account_num}"]
         cookies_dir = Path(__file__).parent.parent / cookies_dir
         client.load_cookies(cookies_dir)
-        queue_url = self.sqs_client.get_queue_url(QueueName=SQS_USER_TWEETS)["QueueUrl"]
+        queue_url = self.sqs_client.get_queue_url(QueueName=SQS_USER_TWEETS)[
+            "QueueUrl"
+        ]
         parsed_tweets_dict = {}
         num_iter = 0
         num_extracted_tweets = 0
@@ -151,7 +153,7 @@ class UserTweets:
                 continue
 
         if not flag:
-            print(f'No tweets extracted despite 3 retry attempts')
+            print("No tweets extracted despite 3 retry attempts")
             return []
 
         while num_extracted_tweets < num_tweets:
@@ -249,7 +251,9 @@ class UserTweets:
             - tweet_id (str): The tweet id
             - queue_name (str): Queue Name
         """
-        queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)["QueueUrl"]
+        queue_url = self.sqs_client.get_queue_url(QueueName=queue_name)[
+            "QueueUrl"
+        ]
         # TODO: Modify group
         message = {
             "tweet_id": tweet_id,
@@ -294,8 +298,7 @@ class UserTweets:
                 if tweet_dict["retweet_count"] > 0:
                     filtered_tweet_counter += 1
                     self.send_to_queue(
-                        tweet_dict['tweet_id'],
-                        queue_name=SQS_USER_RETWEETERS
+                        tweet_dict["tweet_id"], queue_name=SQS_USER_RETWEETERS
                     )
 
         last_tweeted_at = max(timestamps).isoformat() if timestamps else "null"
@@ -303,12 +306,16 @@ class UserTweets:
         # Updating user attributes
         props_dict = {}
         if filtered_tweet_counter > 0:
-            props_dict['retweeter_status'] = "queued"
+            props_dict["retweeter_status"] = "queued"
         else:
-            props_dict['retweeter_status'] = "completed"
-            props_dict['retweeter_last_processed'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-        props_dict['last_tweeted_at'] = last_tweeted_at
-        props_dict['last_updated'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            props_dict["retweeter_status"] = "completed"
+            props_dict["retweeter_last_processed"] = datetime.datetime.now(
+                datetime.timezone.utc
+            ).isoformat()
+        props_dict["last_tweeted_at"] = last_tweeted_at
+        props_dict["last_updated"] = datetime.datetime.now(
+            datetime.timezone.utc
+        ).isoformat()
         self.neptune_handler.update_node_attributes(
             label="User",
             node_id=self.user_id,
@@ -318,8 +325,9 @@ class UserTweets:
         # Stop Neptune client
         self.neptune_handler.stop()
 
-        print(f"### Original tweets: {s3_counter}, Tweets with retweets: {filtered_tweet_counter} ###")
-
+        print(
+            f"### Original tweets: {s3_counter}, Tweets with retweets: {filtered_tweet_counter} ###"
+        )
 
 
 if __name__ == "__main__":
@@ -376,7 +384,9 @@ if __name__ == "__main__":
         user_counter += 1
 
         print()
-        print(f'Beginning tweet extraction for User {user_counter} with ID {root_user_id}')
+        print(
+            f"Beginning tweet extraction for User {user_counter} with ID {root_user_id}"
+        )
 
         user_tweets = UserTweets(
             root_user_id, location, sqs_client, receipt_handle, neptune_handler
@@ -392,10 +402,8 @@ if __name__ == "__main__":
             )
         elif args.extraction_type == "X":
             print("Initiating X API extraction...")
-            tweets_list = (
-                user_tweets.x_get_user_tweets(
-                    num_tweets=args.tweet_count
-                )
+            tweets_list = user_tweets.x_get_user_tweets(
+                num_tweets=args.tweet_count
             )
 
         print(f"### Total tweets extracted: {len(tweets_list)} ###")
