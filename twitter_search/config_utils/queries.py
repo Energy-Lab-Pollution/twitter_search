@@ -23,11 +23,10 @@ QUERIES_EN = {
     "environment": """(location) ((air pollution) OR pollution OR (poor air)
                     OR asthma OR polluted OR (pollution control board)
                     OR smog OR (air quality)) -is:retweet""",
-    "healthcare": """(location) ((MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist
-                        OR pediatrician OR nurse OR (healthcare professional) OR (medical expert) OR therapist
-                        OR clinician OR specialist OR pharmacist OR pulmonologist OR (medical practitioner)
-                        OR (medical doctor) OR (resident physician))
-                        -is:retweet""",
+    "healthcare": """(location) (MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist 
+                                OR pediatrician OR nurse OR "healthcare professional" OR "medical expert" 
+                                OR therapist OR clinician OR specialist OR pharmacist OR "medical practitioner" 
+                                OR "medical doctor" OR "resident physician") -is:retweet""",
 }
 
 
@@ -86,7 +85,7 @@ QUERIES_FR = {
     "environment": """location ((pollution de l'air) OR pollution OR (santé publique)
                 OR (air de mauvaise qualité) OR asthme OR pollué OR (commission de contrôle de la pollution)
                 OR smog OR (qualité de l'air)) -is:retweet""",
-    "healthcare": """((MD OR médecin OR docteur OR docteure OR chirurgien OR chirurgienne OR cardiologue
+    "healthcare": """location ((MD OR médecin OR docteur OR docteure OR chirurgien OR chirurgienne OR cardiologue
                 OR pneumologue OR pédiatre OR infirmier OR infirmière OR (professionnel de santé) OR thérapeute
                 OR clinicien OR clinicienne OR spécialiste OR pharmacien OR pharmacie OR (praticien médical)
                 OR (médecin résident))

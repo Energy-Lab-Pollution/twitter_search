@@ -35,6 +35,18 @@ class NeptuneHandler:
         result = self.run_query(query)
         return len(result) > 0
 
+    def user_pending_both(self, user_id: str) -> bool:
+        # Look for a User vertex whose retweeter_status AND follower_status are both "pending"
+        query = (
+            f"g.V('{user_id}')"
+            f".hasLabel('User')"
+            f".has('retweeter_status', 'pending')"
+            f".has('follower_status', 'pending')"
+            f".limit(1)"
+        )
+        result = self.run_query(query)
+        return len(result) > 0
+
     def city_exists(self, city_id: str) -> bool:
         query = f"g.V('{city_id}').hasLabel('City').limit(1)"
         result = self.run_query(query)
