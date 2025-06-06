@@ -130,14 +130,14 @@ def process_and_classify_user(user_prefix, gemini_classifier, gpt_classifier):
 
 
 if __name__ == "__main__":
-    user_tweets_queue_url = SQS_CLIENT.get_queue_url(
+    user_classification_queue_url = SQS_CLIENT.get_queue_url(
         QueueName=SQS_USER_CLASSIFICATION
     )["QueueUrl"]
 
     while True:
         # Pass Queue Name and get its URL
         response = SQS_CLIENT.receive_message(
-            QueueUrl=user_tweets_queue_url,
+            QueueUrl=user_classification_queue_url,
             MaxNumberOfMessages=1,
             WaitTimeSeconds=10,
         )
@@ -164,4 +164,9 @@ if __name__ == "__main__":
 
         process_and_classify_user(
             user_prefix, gemini_classifier, gpt_classifier
+        )
+
+        SQS_CLIENT.delete_message(
+            QueueUrl=user_classification_queue_url,
+            ReceiptHandle=receipt_handle,
         )
