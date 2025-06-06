@@ -9,7 +9,6 @@ Last Updated: May 2025
 import asyncio
 import json
 import time
-import sys
 from argparse import ArgumentParser
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -25,7 +24,6 @@ from config_utils.constants import (
     INFLUENCER_FOLLOWERS_THRESHOLD,
     NEPTUNE_ENDPOINT,
     NEPTUNE_S3_BUCKET,
-    REGION_NAME,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
     TWEET_FIELDS,
@@ -317,7 +315,6 @@ class CityUsers:
         cookies_dir = Path(__file__).parent.parent / cookies_dir
         client.load_cookies(cookies_dir)
         users_dict = {}
-        num_iter = 0
 
         date_range = f"since:{date_since} until:{date_until}"
         queries_dict, num_tweets = self.extract_queries_num_tweets(
@@ -327,28 +324,37 @@ class CityUsers:
 
         for account_type, query in queries_dict.items():
             num_extracted_tweets = 0
+            num_iter = 0
             print()
             print(
                 f" =============== PROCESSING: {account_type} ======================"
             )
-            try:
-                tweets = await client.search_tweet(
-                    query, "Latest", count=num_tweets
-                )
-                print(f"First request, got : {len(tweets)} tweets")
-                num_extracted_tweets += len(tweets)
-            except twikit.errors.TooManyRequests:
-                print("Tweets: Too Many Requests...")
-                time.sleep(FIFTEEN_MINUTES)
-                tweets = await client.search_tweet(
-                    query, "Latest", count=num_tweets
-                )
-                num_extracted_tweets += len(tweets)
-            parsed_users = self.parse_twikit_users(tweets)
-            users_dict = users_dict | parsed_users
+            flag = False
+            for _ in range(3):
+                try:
+                    tweets = await client.search_tweet(
+                        query, "Latest", count=num_tweets
+                    )
+                    print(f"First request, got : {len(tweets)} tweets")
+                    flag = True
+                    num_extracted_tweets += len(tweets)
+                    parsed_users = self.parse_twikit_users(tweets)
+                    users_dict = users_dict | parsed_users
+                    num_iter += 1
+                    break
+                except twikit.errors.TooManyRequests:
+                    print("Tweets: Too Many Requests...")
+                    time.sleep(FIFTEEN_MINUTES)
+                    continue
+                except Exception as e:
+                    print(f"Tweet extraction failed: {e}")
+                    continue
+            
+            if not flag:
+                print(f'No tweets extracted for account type: {account_type}')
+                continue
 
             while num_extracted_tweets < num_tweets:
-                num_iter += 1
                 try:
                     if num_iter == 1:
                         next_tweets = await tweets.next()
@@ -360,6 +366,7 @@ class CityUsers:
                         next_users = self.parse_twikit_users(next_tweets)
                         users_dict = users_dict | next_users
                         num_extracted_tweets += len(next_tweets)
+                        num_iter += 1
                         print(
                             f"Request {num_iter}, got : {len(next_tweets)} tweets"
                         )
@@ -369,9 +376,9 @@ class CityUsers:
                 except twikit.errors.TooManyRequests:
                     print("Tweets: too many requests, sleeping...")
                     time.sleep(FIFTEEN_MINUTES)
+                    continue
                 if num_iter % 5 == 0:
                     print(f"Processed {num_iter} batches")
-                # Leave process running until tweets are recollected
 
             print(f"Extracted {num_extracted_tweets} tweets for {account_type}")
 
@@ -600,7 +607,8 @@ if __name__ == "__main__":
         help="Upper bound date to get the tweets",
     )
 
-    print("Parsing arguments")
+    print("Parsing arguments...")
+    print()
     args = parser.parse_args()
 
     if (not args.date_since) and args.date_until:
@@ -623,6 +631,7 @@ if __name__ == "__main__":
         date_since = args.date_since
 
     print(f"date_since: {date_since}, date_until: {date_until}")
+    print()
 
     neptune_handler = NeptuneHandler(NEPTUNE_ENDPOINT)
     city_users = CityUsers(args.location, neptune_handler)

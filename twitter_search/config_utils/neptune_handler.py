@@ -84,6 +84,55 @@ class NeptuneHandler:
         else:
             print("FOLLOWS edge already exists")
 
+    def create_retweeter_edge(self, source_id: str, target_id: str, tweet_id: str):
+        # Check if RETWEETED edge already exists
+        check_query = f"""
+        g.V('{source_id}').outE('RETWEETED').where(inV().hasId('{target_id}')).
+        project('id', 'tweet_ids', 'weight').
+            by(id).
+            by(values('tweet_ids')).
+            by(values('weight'))
+        """
+        result = self.run_query(check_query)
+
+        if len(result) == 0:
+            # Edge doesn't exist; create it
+            print("Edge doesn't exist -- Creating it...")
+            create_query = f"""
+            g.V('{source_id}').hasLabel('User').as('a').
+              V('{target_id}').hasLabel('User').as('b').
+              addE('RETWEETED').from('a').to('b').
+              property('weight', 1).
+              property('tweet_ids', '{tweet_id}')
+            """
+            _ = self.run_query(create_query)
+            return
+
+        # Edge exists — extract tweet_ids and weight
+        edge_info = result[0]
+        print(f"Edge exists with info: {edge_info}")
+        existing_tweet_ids = edge_info['tweet_ids']
+        edge_id = edge_info['id']
+        current_weight = int(edge_info['weight'])
+
+        # Convert string of tweet_ids to list
+        tweet_id_list = [existing_tweet_ids] if ';' not in existing_tweet_ids else existing_tweet_ids.split(';')
+
+        if tweet_id in tweet_id_list:
+            print("Tweet ID already recorded in RETWEETED edge.")
+            return
+
+        # Update edge: increment weight and append tweet_id
+        print("Appending new tweet ID info to edge")
+        tweet_id_list.append(tweet_id)
+        updated_tweet_ids_str = ";".join(tweet_id_list)
+        update_query = f"""
+            g.E('{edge_id}').
+            property('weight', {current_weight + 1}).
+            property('tweet_ids', '{updated_tweet_ids_str}')
+        """
+        _ = self.run_query(update_query)
+
     def update_node_attributes(
         self, label: str, node_id: str, props_dict: dict
     ):
@@ -100,3 +149,18 @@ class NeptuneHandler:
         query += ".iterate()"
 
         _ = self.run_query(query, bindings={"single": "Cardinality.single"})
+
+    def extract_node_attribute(self, label: str, node_id: str, attribute_name: str):
+        """
+        Extracts the value of a specific attribute from a node given its label and ID.
+        Returns None if the node or attribute does not exist.
+        """
+        query = f"g.V('{node_id}').hasLabel('{label}').values('{attribute_name}')"
+        result = self.run_query(query)
+        if not result:
+            return None 
+        elif len(result) == 1:
+            return result[0]
+        else:
+            raise ValueError("Multiple values cannot be returned")
+

@@ -121,30 +121,40 @@ class UserTweets:
         num_iter = 0
         num_extracted_tweets = 0
 
-        # Parse first set of tweets
-        try:
-            user_tweets = await client.get_user_tweets(
-                self.user_id, "Tweets", count=num_tweets
-            )
-        except twikit.errors.TooManyRequests:
-            print("User Tweets: Too Many Requests...")
-            self.sqs_client.change_message_visibility(
-                QueueUrl=queue_url,
-                ReceiptHandle=self.receipt_handle,
-                VisibilityTimeout=FIFTEEN_MINUTES,
-            )
-            time.sleep(FIFTEEN_MINUTES)
-            user_tweets = await client.get_user_tweets(
-                self.user_id, "Tweets", count=num_tweets
-            )
+        flag = False
+        for _ in range(3):
+            # Parse first set of tweets
+            try:
+                user_tweets = await client.get_user_tweets(
+                    self.user_id, "Tweets", count=num_tweets
+                )
+                if not user_tweets:
+                    return []
+                flag = True
+                # Parsing and filtering tweets
+                tweets_dict = self.parse_twikit_tweets(user_tweets)
+                num_extracted_tweets += len(tweets_dict)
+                parsed_tweets_dict = parsed_tweets_dict | tweets_dict
+                num_iter += 1
+                break
+            except twikit.errors.TooManyRequests:
+                print("User Tweets: Too Many Requests...")
+                self.sqs_client.change_message_visibility(
+                    QueueUrl=queue_url,
+                    ReceiptHandle=self.receipt_handle,
+                    VisibilityTimeout=FIFTEEN_MINUTES,
+                )
+                time.sleep(FIFTEEN_MINUTES)
+                continue
+            except Exception as e:
+                print(f"Tweet extraction failed: {e}")
+                continue
 
-        # Parsing and filtering tweets
-        tweets_dict = self.parse_twikit_tweets(user_tweets)
-        num_extracted_tweets += len(tweets_dict)
-        parsed_tweets_dict = parsed_tweets_dict | tweets_dict
+        if not flag:
+            print(f'No tweets extracted despite 3 retry attempts')
+            return []
 
         while num_extracted_tweets < num_tweets:
-            num_iter += 1
             try:
                 if num_iter == 1:
                     next_tweets = await user_tweets.next()
@@ -155,6 +165,7 @@ class UserTweets:
                     next_tweets_dict = self.parse_twikit_tweets(next_tweets)
                     parsed_tweets_dict = parsed_tweets_dict | next_tweets_dict
                     num_extracted_tweets += len(next_tweets_dict)
+                    num_iter += 1
                 else:
                     print("No more tweets, moving on...")
                     break
@@ -167,6 +178,7 @@ class UserTweets:
                     VisibilityTimeout=FIFTEEN_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
+                continue
 
             if num_iter % 5 == 0:
                 print(f"Processed {num_iter} user tweets batches")
@@ -329,13 +341,15 @@ if __name__ == "__main__":
         help="Account number to use with twikit",
     )
 
-    print("Parsing arguments")
+    print("Parsing arguments...")
+    print()
     args = parser.parse_args()
 
     sqs_client = boto3.client("sqs", region_name="us-west-1")
     user_tweets_queue_url = sqs_client.get_queue_url(QueueName=SQS_USER_TWEETS)[
         "QueueUrl"
     ]
+    neptune_handler = NeptuneHandler(NEPTUNE_ENDPOINT)
 
     user_counter = 0
 
@@ -354,7 +368,6 @@ if __name__ == "__main__":
         except KeyError:
             # Empty queue
             print("Empty queue")
-            user_counter = 0
             continue
 
         # Getting information from body message
@@ -365,7 +378,6 @@ if __name__ == "__main__":
         print()
         print(f'Beginning tweet extraction for User {user_counter} with ID {root_user_id}')
 
-        neptune_handler = NeptuneHandler(NEPTUNE_ENDPOINT)
         user_tweets = UserTweets(
             root_user_id, location, sqs_client, receipt_handle, neptune_handler
         )
@@ -387,6 +399,10 @@ if __name__ == "__main__":
             )
 
         print(f"### Total tweets extracted: {len(tweets_list)} ###")
+
+        if len(tweets_list) == 0:
+            print("Tweet extraction FAILED. Moving on to the next user.")
+            continue
 
         print("Processing and dispatching tweets...")
         user_tweets.process_and_dispatch_tweets(tweets_list)

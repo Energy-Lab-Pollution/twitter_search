@@ -34,7 +34,6 @@ class UserFollowers:
         self.location = location
         self.further_extraction = further_extraction
         self.sqs_client = sqs_client
-        self.s3_client = boto3.client("s3", region_name="us-east-2")
         self.receipt_handle = receipt_handle
         self.neptune_handler = neptune_handler
 
@@ -155,15 +154,25 @@ class UserFollowers:
         cookies_dir = Path(__file__).parent.parent / cookies_dir
         client.load_cookies(cookies_dir)
 
-        while extracted_followers < follower_count:
+        flag = False
+        for _ in range(3):
             try:
                 # try to fetch
                 followers = await client.get_user_followers(
                     self.user_id, count=follower_count
                 )
+                if not followers:
+                    print("API call was successful but no output extracted")
+                    return []
+                flag = True
+                parsed_followers = self.parse_twikit_users(followers)
+                followers_dict = followers_dict | parsed_followers
+                extracted_followers += len(parsed_followers)
+                num_iter += 1
+                break
             except twikit.errors.NotFound as error:
                 print(f"Followers: Not Found - {error}")
-                break
+                continue
             except twikit.errors.TooManyRequests:
                 print("Followers: Too Many Requests")
                 self.sqs_client.change_message_visibility(
@@ -172,17 +181,19 @@ class UserFollowers:
                     VisibilityTimeout=FIFTEEN_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
+                continue
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request - stopping early")
-                break
+                continue
             except twikit.errors.TwitterException as e:
                 print(f"Followers: Twitter Exception - {e}")
-                break
+                continue
 
-            parsed_followers = self.parse_twikit_users(followers)
-            followers_dict = followers_dict | parsed_followers
-            extracted_followers += len(parsed_followers)
-            num_iter += 1
+        if not flag:
+            print(f'No followers extracted despite 3 retry attempts')
+            return []
+
+        while extracted_followers < follower_count:
             try:
                 if num_iter == 1:
                     more_followers = await followers.next()
@@ -194,10 +205,10 @@ class UserFollowers:
                     )
                     followers_dict = followers_dict | more_parsed_followers
                     extracted_followers += len(more_parsed_followers)
+                    num_iter += 1
                 else:
                     print("No more followers, moving on...")
                     break
-            # Stop here and just return what you got
             except twikit.errors.TooManyRequests:
                 print("Followers: too many requests...")
                 self.sqs_client.change_message_visibility(
@@ -206,6 +217,7 @@ class UserFollowers:
                     VisibilityTimeout=FIFTEEN_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
+                continue
             except twikit.errors.BadRequest:
                 print("Followers: Bad Request")
                 break
@@ -316,11 +328,7 @@ class UserFollowers:
             self.neptune_handler.create_follower_edge(follower_dict['user_id'], self.user_id)
 
         props_dict = {}
-        if len(followers_list) == 0:
-            print("No followers collected. Marking status as FAILED.")
-            props_dict['follower_status'] = "failed"
-        else:
-            props_dict['follower_status'] = "completed"
+        props_dict['follower_status'] = "completed"
         props_dict['follower_last_processed'] = datetime.now(timezone.utc).isoformat()
         props_dict['last_updated'] = props_dict['follower_last_processed']
         self.neptune_handler.update_node_attributes(
@@ -354,14 +362,13 @@ if __name__ == "__main__":
         type=int,
         help="Account number to use with twikit",
     )
-
     parser.add_argument(
         "--further_extraction",
         action="store_true",
         help="Enable further extraction of retweeters and followers",
     )   
 
-    print("Parsing arguments")
+    print("Parsing arguments...")
     print()
     args = parser.parse_args()
 
@@ -369,6 +376,7 @@ if __name__ == "__main__":
     user_followers_queue_url = sqs_client.get_queue_url(
         QueueName=SQS_USER_FOLLOWERS
     )["QueueUrl"]
+    neptune_handler = NeptuneHandler(NEPTUNE_ENDPOINT)
 
     user_counter = 0
 
@@ -387,7 +395,6 @@ if __name__ == "__main__":
         except KeyError:
             # Empty queue
             print("Empty queue")
-            user_counter = 0
             continue
 
         # Getting information from body message
@@ -395,9 +402,9 @@ if __name__ == "__main__":
         location = clean_data["location"]
         user_counter += 1
 
+        print()
         print(f'Beginning followers extraction for User {user_counter} with ID {root_user_id}')
 
-        neptune_handler = NeptuneHandler(NEPTUNE_ENDPOINT)
         user_followers = UserFollowers(
             user_id=root_user_id, 
             location=location, 
@@ -425,6 +432,21 @@ if __name__ == "__main__":
 
         print(f"### Total Followers extracted: {len(followers_list)} ###")
 
+        if len(followers_list) == 0:
+            print("Follower extraction FAILED. Moving on to the next user.\n")
+            props_dict = {"follower_status": "failed",
+                          "follower_last_processed": datetime.now(timezone.utc).isoformat()
+                          }
+            props_dict['last_updated'] = props_dict['follower_last_processed']
+            neptune_handler.start()
+            neptune_handler.update_node_attributes(
+                label="User",
+                node_id=root_user_id,
+                props_dict=props_dict,
+            )
+            neptune_handler.stop()
+            continue
+
         print("Processing and dispatching followers...")
         user_followers.process_and_dispatch_followers(followers_list)
 
@@ -434,5 +456,3 @@ if __name__ == "__main__":
             QueueUrl=user_followers_queue_url,
             ReceiptHandle=receipt_handle,
         )
-
-        print()
