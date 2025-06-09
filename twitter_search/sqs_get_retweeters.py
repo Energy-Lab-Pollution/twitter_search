@@ -19,6 +19,7 @@ from config_utils.constants import (
     SQS_USER_RETWEETERS,
     SQS_USER_TWEETS,
     TWIKIT_COOKIES_DICT,
+    TWENTYFIVE_MINUTES,
 )
 from config_utils.neptune_handler import NeptuneHandler
 from config_utils.util import (
@@ -187,7 +188,7 @@ class UserRetweeters:
                 self.sqs_client.change_message_visibility(
                     QueueUrl=queue_url,
                     ReceiptHandle=receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES,
+                    VisibilityTimeout=TWENTYFIVE_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
                 continue
@@ -220,7 +221,7 @@ class UserRetweeters:
                 self.sqs_client.change_message_visibility(
                     QueueUrl=queue_url,
                     ReceiptHandle=receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES,
+                    VisibilityTimeout=TWENTYFIVE_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
                 continue
@@ -475,7 +476,7 @@ if __name__ == "__main__":
             if not retweeter_status:
                 raise ValueError("retweeter_status cannot return NULL value")
 
-            if retweeter_status != "queued":
+            if retweeter_status == "pending":
                 print(
                     f"Target user {target_user_id} not ready for retweeter extraction"
                 )

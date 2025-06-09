@@ -18,6 +18,7 @@ from config_utils.constants import (
     NEPTUNE_ENDPOINT,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
+    TWENTYFIVE_MINUTES,
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.neptune_handler import NeptuneHandler
@@ -194,7 +195,7 @@ class UserFollowers:
                 self.sqs_client.change_message_visibility(
                     QueueUrl=queue_url,
                     ReceiptHandle=self.receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES,
+                    VisibilityTimeout=TWENTYFIVE_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
                 continue
