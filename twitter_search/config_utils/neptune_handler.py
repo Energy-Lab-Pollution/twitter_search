@@ -85,8 +85,6 @@ class NeptuneHandler:
         # End of query
         query += ".iterate()"
 
-        print(f"\n[DEBUG] Final Gremlin query:\n{query}\n")
-
         _ = self.run_query(query)
 
     def create_follower_edge(self, source_id: str, target_id: str):
