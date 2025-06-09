@@ -409,10 +409,6 @@ if __name__ == "__main__":
 
         print(f"### Total tweets extracted: {len(tweets_list)} ###")
 
-        if len(tweets_list) == 0:
-            print("Tweet extraction FAILED. Moving on to the next user.")
-            continue
-
         print("Processing and dispatching tweets...")
         user_tweets.process_and_dispatch_tweets(tweets_list)
 
