@@ -18,6 +18,7 @@ from config_utils.constants import (
     SQS_USER_FOLLOWERS,
     SQS_USER_RETWEETERS,
     SQS_USER_TWEETS,
+    TWENTYFIVE_MINUTES,
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.neptune_handler import NeptuneHandler
@@ -86,7 +87,7 @@ class UserRetweeters:
             user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
             # See if location matches to add city
             location_match = check_location(user["location"], self.location)
-            user_dict["city"] = self.location if location_match else None
+            user_dict["city"] = self.location if location_match else "null"
             user_dicts.append(user_dict)
 
         return user_dicts
@@ -135,7 +136,7 @@ class UserRetweeters:
                 ).isoformat()
                 # See if location matches to add city
                 location_match = check_location(user.location, self.location)
-                user_dict["city"] = self.location if location_match else None
+                user_dict["city"] = self.location if location_match else "null"
                 users_dict[user.id] = user_dict
 
         return users_dict
@@ -187,7 +188,7 @@ class UserRetweeters:
                 self.sqs_client.change_message_visibility(
                     QueueUrl=queue_url,
                     ReceiptHandle=receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES,
+                    VisibilityTimeout=TWENTYFIVE_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
                 continue
@@ -220,7 +221,7 @@ class UserRetweeters:
                 self.sqs_client.change_message_visibility(
                     QueueUrl=queue_url,
                     ReceiptHandle=receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES,
+                    VisibilityTimeout=TWENTYFIVE_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
                 continue
@@ -329,6 +330,7 @@ class UserRetweeters:
                         retweeter_dict["followers_count"]
                         > INFLUENCER_FOLLOWERS_THRESHOLD
                     )
+                    and (retweeter_dict["tweets_count"] > 0)
                 ):
                     root_users_counter += 1
                     self.send_to_queue(
@@ -475,7 +477,7 @@ if __name__ == "__main__":
             if not retweeter_status:
                 raise ValueError("retweeter_status cannot return NULL value")
 
-            if retweeter_status != "queued":
+            if retweeter_status == "pending":
                 print(
                     f"Target user {target_user_id} not ready for retweeter extraction"
                 )

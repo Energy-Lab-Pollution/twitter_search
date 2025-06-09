@@ -22,6 +22,7 @@ from config_utils.constants import (
     NEPTUNE_S3_BUCKET,
     SQS_USER_RETWEETERS,
     SQS_USER_TWEETS,
+    TWENTYFIVE_MINUTES,
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.neptune_handler import NeptuneHandler
@@ -144,7 +145,7 @@ class UserTweets:
                 self.sqs_client.change_message_visibility(
                     QueueUrl=queue_url,
                     ReceiptHandle=self.receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES,
+                    VisibilityTimeout=TWENTYFIVE_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
                 continue
@@ -177,7 +178,7 @@ class UserTweets:
                 self.sqs_client.change_message_visibility(
                     QueueUrl=queue_url,
                     ReceiptHandle=self.receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES,
+                    VisibilityTimeout=TWENTYFIVE_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
                 continue
@@ -407,10 +408,6 @@ if __name__ == "__main__":
             )
 
         print(f"### Total tweets extracted: {len(tweets_list)} ###")
-
-        if len(tweets_list) == 0:
-            print("Tweet extraction FAILED. Moving on to the next user.")
-            continue
 
         print("Processing and dispatching tweets...")
         user_tweets.process_and_dispatch_tweets(tweets_list)

@@ -138,7 +138,7 @@ class CityUsers:
                 ).isoformat()
                 # See if location matches to add city
                 location_match = check_location(user["location"], self.location)
-                user_dict["city"] = self.location if location_match else None
+                user_dict["city"] = self.location if location_match else "null"
                 # Append to master dict
                 user_dicts[user["id"]] = user_dict
 
@@ -193,7 +193,7 @@ class CityUsers:
                 location_match = check_location(
                     tweet.user.location, self.location
                 )
-                user_dict["city"] = self.location if location_match else None
+                user_dict["city"] = self.location if location_match else "null"
 
                 # Append to master dict
                 user_dicts[tweet.user.id] = user_dict
@@ -525,6 +525,7 @@ class CityUsers:
             not user_exists
             and (user_dict["city"] == user_dict["target_location"])
             and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD
+            and user_dict["tweets_count"] > 0
         ):
             return True
         return False

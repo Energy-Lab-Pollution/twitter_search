@@ -18,6 +18,7 @@ from config_utils.constants import (
     NEPTUNE_ENDPOINT,
     SQS_USER_FOLLOWERS,
     SQS_USER_TWEETS,
+    TWENTYFIVE_MINUTES,
     TWIKIT_COOKIES_DICT,
 )
 from config_utils.neptune_handler import NeptuneHandler
@@ -44,6 +45,7 @@ class UserFollowers:
         self.sqs_client = sqs_client
         self.receipt_handle = receipt_handle
         self.neptune_handler = neptune_handler
+        self.protected_account = False
 
     def parse_x_users(self, user_list):
         """
@@ -93,7 +95,7 @@ class UserFollowers:
             user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
             # See if location matches to add city
             location_match = check_location(user["location"], self.location)
-            user_dict["city"] = self.location if location_match else None
+            user_dict["city"] = self.location if location_match else "null"
             user_dicts.append(user_dict)
 
         return user_dicts
@@ -142,7 +144,7 @@ class UserFollowers:
                 ).isoformat()
                 # See if location matches to add city
                 location_match = check_location(user.location, self.location)
-                user_dict["city"] = self.location if location_match else None
+                user_dict["city"] = self.location if location_match else "null"
                 users_dict[user.id] = user_dict
 
         return users_dict
@@ -178,6 +180,7 @@ class UserFollowers:
                     self.user_id, count=follower_count
                 )
                 if not followers:
+                    self.protected_account = True
                     print("API call was successful but no output extracted")
                     return []
                 flag = True
@@ -194,7 +197,7 @@ class UserFollowers:
                 self.sqs_client.change_message_visibility(
                     QueueUrl=queue_url,
                     ReceiptHandle=self.receipt_handle,
-                    VisibilityTimeout=FIFTEEN_MINUTES,
+                    VisibilityTimeout=TWENTYFIVE_MINUTES,
                 )
                 time.sleep(FIFTEEN_MINUTES)
                 continue
@@ -336,6 +339,7 @@ class UserFollowers:
                         follower_dict["followers_count"]
                         > INFLUENCER_FOLLOWERS_THRESHOLD
                     )
+                    and (follower_dict["tweets_count"] > 0)
                 ):
                     root_users_counter += 1
                     self.send_to_queue(
@@ -468,7 +472,9 @@ if __name__ == "__main__":
 
         print(f"### Total Followers extracted: {len(followers_list)} ###")
 
-        if len(followers_list) == 0:
+        if (len(followers_list) == 0) and (
+            not user_followers.protected_account
+        ):
             print("Follower extraction FAILED. Moving on to the next user.\n")
             props_dict = {
                 "follower_status": "failed",
