@@ -95,7 +95,7 @@ class UserFollowers:
             user_dict["last_updated"] = datetime.now(timezone.utc).isoformat()
             # See if location matches to add city
             location_match = check_location(user["location"], self.location)
-            user_dict["city"] = self.location if location_match else None
+            user_dict["city"] = self.location if location_match else "null"
             user_dicts.append(user_dict)
 
         return user_dicts
@@ -144,7 +144,7 @@ class UserFollowers:
                 ).isoformat()
                 # See if location matches to add city
                 location_match = check_location(user.location, self.location)
-                user_dict["city"] = self.location if location_match else None
+                user_dict["city"] = self.location if location_match else "null"
                 users_dict[user.id] = user_dict
 
         return users_dict

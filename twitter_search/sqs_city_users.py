@@ -138,7 +138,7 @@ class CityUsers:
                 ).isoformat()
                 # See if location matches to add city
                 location_match = check_location(user["location"], self.location)
-                user_dict["city"] = self.location if location_match else None
+                user_dict["city"] = self.location if location_match else "null"
                 # Append to master dict
                 user_dicts[user["id"]] = user_dict
 
@@ -193,7 +193,7 @@ class CityUsers:
                 location_match = check_location(
                     tweet.user.location, self.location
                 )
-                user_dict["city"] = self.location if location_match else None
+                user_dict["city"] = self.location if location_match else "null"
 
                 # Append to master dict
                 user_dicts[tweet.user.id] = user_dict
