@@ -1,4 +1,6 @@
 import json
+import random
+import time
 from gremlin_python.driver import client, serializer
 
 
@@ -29,8 +31,13 @@ class NeptuneHandler:
             result = result_set.all().result()
             return result
         except Exception as e:
-            raise RuntimeError(f"Query failed: {e}")
-
+            if "ConcurrentModificationException" in str(e):
+                wait = random.uniform(1.5, 2.5)
+                print(f"[RETRY] Conflict detected. Retrying in {wait:.2f} seconds...")
+                time.sleep(wait)
+            else:
+                raise RuntimeError(f"Query failed: {e}")
+    
     def user_exists(self, user_id: str) -> bool:
         query = f"g.V('{user_id}').hasLabel('User').limit(1)"
         result = self.run_query(query)
