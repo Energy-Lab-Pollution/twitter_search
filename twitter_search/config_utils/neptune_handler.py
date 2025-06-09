@@ -70,6 +70,7 @@ class NeptuneHandler:
             # Handle types
             elif isinstance(value, str):
                 safe_value = json.dumps(value)[1:-1]
+                safe_value = safe_value.replace("'", "\\'")  # additionally escape single quotes for Gremlin
                 query += f".property('{key}', '{safe_value}')"
             elif isinstance(value, (int, float)):
                 query += f".property('{key}', {value})"
