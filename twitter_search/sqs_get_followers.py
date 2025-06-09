@@ -172,6 +172,7 @@ class UserFollowers:
         client.load_cookies(cookies_dir)
 
         flag = False
+        self.protected_account = False
         for _ in range(3):
             try:
                 # try to fetch
@@ -179,6 +180,7 @@ class UserFollowers:
                     self.user_id, count=follower_count
                 )
                 if not followers:
+                    self.protected_account = True
                     print("API call was successful but no output extracted")
                     return []
                 flag = True
@@ -473,7 +475,7 @@ if __name__ == "__main__":
 
         print(f"### Total Followers extracted: {len(followers_list)} ###")
 
-        if len(followers_list) == 0:
+        if (len(followers_list) == 0) and (not user_followers.protected_account):
             print("Follower extraction FAILED. Moving on to the next user.\n")
             props_dict = {
                 "follower_status": "failed",
