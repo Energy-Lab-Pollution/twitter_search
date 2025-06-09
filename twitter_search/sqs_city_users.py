@@ -525,6 +525,7 @@ class CityUsers:
             not user_exists
             and (user_dict["city"] == user_dict["target_location"])
             and user_dict["followers_count"] > INFLUENCER_FOLLOWERS_THRESHOLD
+            and user_dict["tweets_count"] > 0
         ):
             return True
         return False
