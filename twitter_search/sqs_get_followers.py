@@ -339,10 +339,7 @@ class UserFollowers:
                         follower_dict["followers_count"]
                         > INFLUENCER_FOLLOWERS_THRESHOLD
                     )
-                    and (
-                        follower_dict['tweets_count']
-                        > 0
-                    )
+                    and (follower_dict["tweets_count"] > 0)
                 ):
                     root_users_counter += 1
                     self.send_to_queue(
@@ -475,7 +472,9 @@ if __name__ == "__main__":
 
         print(f"### Total Followers extracted: {len(followers_list)} ###")
 
-        if (len(followers_list) == 0) and (not user_followers.protected_account):
+        if (len(followers_list) == 0) and (
+            not user_followers.protected_account
+        ):
             print("Follower extraction FAILED. Moving on to the next user.\n")
             props_dict = {
                 "follower_status": "failed",

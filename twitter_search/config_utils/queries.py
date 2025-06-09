@@ -23,9 +23,9 @@ QUERIES_EN = {
     "environment": """(location) ((air pollution) OR pollution OR (poor air)
                     OR asthma OR polluted OR (pollution control board)
                     OR smog OR (air quality)) -is:retweet""",
-    "healthcare": """(location) (MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist 
-                                OR pediatrician OR nurse OR "healthcare professional" OR "medical expert" 
-                                OR therapist OR clinician OR specialist OR pharmacist OR "medical practitioner" 
+    "healthcare": """(location) (MD OR doctor OR physician OR surgeon OR cardiologist OR pulmonologist
+                                OR pediatrician OR nurse OR "healthcare professional" OR "medical expert"
+                                OR therapist OR clinician OR specialist OR pharmacist OR "medical practitioner"
                                 OR "medical doctor" OR "resident physician") -is:retweet""",
 }
 

@@ -1,6 +1,7 @@
 import json
 import random
 import time
+
 from gremlin_python.driver import client, serializer
 
 
@@ -33,11 +34,13 @@ class NeptuneHandler:
         except Exception as e:
             if "ConcurrentModificationException" in str(e):
                 wait = random.uniform(1.5, 2.5)
-                print(f"[RETRY] Conflict detected. Retrying in {wait:.2f} seconds...")
+                print(
+                    f"[RETRY] Conflict detected. Retrying in {wait:.2f} seconds..."
+                )
                 time.sleep(wait)
             else:
                 raise RuntimeError(f"Query failed: {e}")
-    
+
     def user_exists(self, user_id: str) -> bool:
         query = f"g.V('{user_id}').hasLabel('User').limit(1)"
         result = self.run_query(query)
@@ -67,12 +70,14 @@ class NeptuneHandler:
 
         # Start Gremlin query with vertex ID and label
         query = f"g.addV('User').property(id, '{user_id}')"
-        
+
         # Add properties from the dictionary (skip 'id' since it's already used as vertex id)
         for key, value in user_dict.items():
             if key in ["user_id", "description"]:
                 continue
-            if value is None or (isinstance(value, str) and value.strip() == ""):
+            if value is None or (
+                isinstance(value, str) and value.strip() == ""
+            ):
                 safe_value = "null"
             # Handle types
             elif isinstance(value, str):

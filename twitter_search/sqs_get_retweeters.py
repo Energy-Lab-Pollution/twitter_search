@@ -18,8 +18,8 @@ from config_utils.constants import (
     SQS_USER_FOLLOWERS,
     SQS_USER_RETWEETERS,
     SQS_USER_TWEETS,
-    TWIKIT_COOKIES_DICT,
     TWENTYFIVE_MINUTES,
+    TWIKIT_COOKIES_DICT,
 )
 from config_utils.neptune_handler import NeptuneHandler
 from config_utils.util import (
@@ -330,10 +330,7 @@ class UserRetweeters:
                         retweeter_dict["followers_count"]
                         > INFLUENCER_FOLLOWERS_THRESHOLD
                     )
-                    and (
-                        retweeter_dict["tweets_count"]
-                        > 0
-                    )
+                    and (retweeter_dict["tweets_count"] > 0)
                 ):
                     root_users_counter += 1
                     self.send_to_queue(
