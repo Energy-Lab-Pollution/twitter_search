@@ -65,8 +65,10 @@ class NeptuneHandler:
         for key, value in user_dict.items():
             if key in ["user_id", "description"]:
                 continue
+            if value is None or (isinstance(value, str) and value.strip() == ""):
+                safe_value = "null"
             # Handle types
-            if isinstance(value, str):
+            elif isinstance(value, str):
                 safe_value = json.dumps(value)[1:-1]
                 query += f".property('{key}', '{safe_value}')"
             elif isinstance(value, (int, float)):
