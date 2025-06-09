@@ -67,6 +67,7 @@ class NeptuneHandler:
             # Handle types
             if isinstance(value, str):
                 safe_value = value.replace("'", "\\'").replace('"', '\\"')
+                safe_value = safe_value.replace("\\", "\\\\")
                 query += f".property('{key}', '{safe_value}')"
             elif isinstance(value, (int, float)):
                 query += f".property('{key}', {value})"
@@ -76,7 +77,7 @@ class NeptuneHandler:
             query += f".as('u').V('{user_dict['city']}').hasLabel('City').as('c').addE('BELONGS_TO').from('u').to('c')"
 
         # End of query
-        query += ".iterate()"
+        # query += ".iterate()"
 
         _ = self.run_query(query)
 
