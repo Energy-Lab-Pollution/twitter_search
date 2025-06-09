@@ -330,6 +330,10 @@ class UserRetweeters:
                         retweeter_dict["followers_count"]
                         > INFLUENCER_FOLLOWERS_THRESHOLD
                     )
+                    and (
+                        retweeter_dict["tweets_count"]
+                        > 0
+                    )
                 ):
                     root_users_counter += 1
                     self.send_to_queue(
