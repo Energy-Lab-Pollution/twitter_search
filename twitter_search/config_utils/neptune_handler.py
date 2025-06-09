@@ -1,3 +1,4 @@
+import json
 from gremlin_python.driver import client, serializer
 
 
@@ -66,8 +67,7 @@ class NeptuneHandler:
                 continue
             # Handle types
             if isinstance(value, str):
-                safe_value = value.replace("'", "\\'").replace('"', '\\"')
-                safe_value = safe_value.replace("\\", "\\\\")
+                safe_value = json.dumps(value)[1:-1]
                 query += f".property('{key}', '{safe_value}')"
             elif isinstance(value, (int, float)):
                 query += f".property('{key}', {value})"
