@@ -59,14 +59,14 @@ class NeptuneHandler:
 
         # Start Gremlin query with vertex ID and label
         query = f"g.addV('User').property(id, '{user_id}')"
-
+        
         # Add properties from the dictionary (skip 'id' since it's already used as vertex id)
         for key, value in user_dict.items():
             if key in ["user_id", "description"]:
                 continue
             # Handle types
             if isinstance(value, str):
-                safe_value = value.replace("'", "\\'")
+                safe_value = value.replace("'", "\\'").replace('"', '\\"')
                 query += f".property('{key}', '{safe_value}')"
             elif isinstance(value, (int, float)):
                 query += f".property('{key}', {value})"
