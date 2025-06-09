@@ -77,7 +77,9 @@ class NeptuneHandler:
             query += f".as('u').V('{user_dict['city']}').hasLabel('City').as('c').addE('BELONGS_TO').from('u').to('c')"
 
         # End of query
-        # query += ".iterate()"
+        query += ".iterate()"
+
+        print(f"\n[DEBUG] Final Gremlin query:\n{query}\n")
 
         _ = self.run_query(query)
 
