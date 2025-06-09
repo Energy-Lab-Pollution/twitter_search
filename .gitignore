@@ -178,6 +178,7 @@ cython_debug/
 # Model results
 finetuning_results/
 examples/
+supervisor_logs/
 
 # Twikit results and cookies
 cookies.json
