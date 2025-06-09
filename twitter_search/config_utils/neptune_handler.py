@@ -63,18 +63,19 @@ class NeptuneHandler:
         for key, value in user_dict.items():
             if key in ["user_id", "description"]:
                 continue
-            if value is None or (
-                isinstance(value, str) and value.strip() == ""
-            ):
-                safe_value = "null"
             # Handle types
-            elif isinstance(value, str):
-                # Make string as json compliant - ignore outer quptes
-                safe_value = json.dumps(value)[1:-1]
-                # additionally escape single quotes for Gremlin
-                safe_value = safe_value.replace("'", "\\'")
+            if isinstance(value, str):
+                if value is None or (value.strip() == ""):
+                    safe_value = "null"
+                else:
+                    # Make string as json compliant - ignore outer quotes
+                    safe_value = json.dumps(value)[1:-1]
+                    # additionally escape single quotes for Gremlin
+                    safe_value = safe_value.replace("'", "\\'")
                 query += f".property('{key}', '{safe_value}')"
             elif isinstance(value, (int, float)):
+                if value is None:
+                    value = -99
                 query += f".property('{key}', {value})"
 
         # Create city edge if location criteria is met
