@@ -45,6 +45,7 @@ class UserFollowers:
         self.sqs_client = sqs_client
         self.receipt_handle = receipt_handle
         self.neptune_handler = neptune_handler
+        self.protected_account = False
 
     def parse_x_users(self, user_list):
         """
@@ -172,7 +173,6 @@ class UserFollowers:
         client.load_cookies(cookies_dir)
 
         flag = False
-        self.protected_account = False
         for _ in range(3):
             try:
                 # try to fetch
